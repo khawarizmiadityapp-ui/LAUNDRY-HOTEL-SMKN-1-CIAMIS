@@ -143,7 +143,7 @@
                         Menampilkan {{ $transactions->firstItem() ?? 0 }} sampai {{ $transactions->lastItem() ?? 0 }} dari {{ $transactions->total() }} transaksi
                     </div>
                     <div>
-                        {{ $transactions->appends(request()->query())->links() }}
+                        {{ $transactions->appends(request()->query())->onEachSide(1)->links('vendor.pagination.custom') }}
                     </div>
                 </div>
             </div>

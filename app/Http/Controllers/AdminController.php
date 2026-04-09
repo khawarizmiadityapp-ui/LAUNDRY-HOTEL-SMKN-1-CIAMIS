@@ -49,7 +49,7 @@ class AdminController extends Controller
         // Fitur Search
         if ($request->has('search')) {
             $query->where('customer_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('transaction_code', 'like', '%' . $request->search . '%');
+                  ->orWhere('transaksi_code', 'like', '%' . $request->search . '%');
         }
 
         // Fitur Filter Status
@@ -75,6 +75,7 @@ class AdminController extends Controller
             'customer_phone' => 'required|string',
             'service_type' => 'required|in:regular,express',
             'weight' => 'required|numeric|min:0.1',
+            'payment_method' => 'required|in:cash,dana,qris',
             'notes' => 'nullable|string',
         ]);
 
@@ -88,7 +89,7 @@ class AdminController extends Controller
         $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
         Transaksi::create([
-            'transaction_code' => $transactionCode,
+            'transaksi_code' => $transactionCode,
             'user_id' => auth()->id(), // Petugas yang input
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
@@ -98,6 +99,7 @@ class AdminController extends Controller
             'total_price' => $totalPrice,
             'status' => 'diterima',
             'payment_status' => 'belum_bayar',
+            'payment_method' => $request->payment_method,
             'notes' => $request->notes,
         ]);
 

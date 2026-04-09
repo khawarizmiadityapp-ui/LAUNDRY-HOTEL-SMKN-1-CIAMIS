@@ -80,7 +80,7 @@
         </button>
 
         {{-- Export --}}
-        <a href="{{ route('pengeluaran.export') }}"
+        <a href="{{ route('admin.pengeluaran.export') }}"
             class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-500 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-card">
             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -90,7 +90,7 @@
     </div>
 
     {{-- Tambah Baru --}}
-    <a href="{{ route('pengeluaran.create') }}"
+    <a href="{{ route('admin.pengeluaran.create') }}"
         class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -101,7 +101,7 @@
 
 {{-- ===== FILTER PANEL (hidden by default) ===== --}}
 <div id="filterPanel" class="hidden bg-white border border-gray-200 rounded-2xl shadow-card p-5 mb-5">
-    <form method="GET" action="{{ route('pengeluaran.index') }}" class="flex flex-wrap gap-4 items-end">
+    <form method="GET" action="{{ route('admin.pengeluaran.index') }}" class="flex flex-wrap gap-4 items-end">
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Kategori</label>
             <select name="kategori" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-200 bg-white">
@@ -132,7 +132,7 @@
         </div>
         <div class="flex gap-2 mt-auto">
             <button type="submit" class="px-4 py-2.5 text-sm font-600 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition">Terapkan</button>
-            <a href="{{ route('pengeluaran.index') }}" class="px-4 py-2.5 text-sm font-600 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
+            <a href="{{ route('admin.pengeluaran.index') }}" class="px-4 py-2.5 text-sm font-600 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
         </div>
     </form>
 </div>
@@ -159,7 +159,7 @@
 
                     {{-- ID Transaksi --}}
                     <td class="px-6 py-4">
-                        <a href="{{ route('pengeluaran.show', $item) }}"
+                        <a href="{{ route('admin.pengeluaran.show', $item) }}"
                            class="text-brand-600 font-600 hover:text-brand-700 hover:underline transition">#{{ $item->id_transaksi }}</a>
                     </td>
 
@@ -210,7 +210,7 @@
                             </svg>
                         </button>
                         <div class="dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1">
-                            <a href="{{ route('pengeluaran.show', $item) }}"
+                            <a href="{{ route('admin.pengeluaran.show', $item) }}"
                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -218,7 +218,7 @@
                                 </svg>
                                 Detail
                             </a>
-                            <a href="{{ route('pengeluaran.edit', $item) }}"
+                            <a href="{{ route('admin.pengeluaran.edit', $item) }}"
                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -226,7 +226,7 @@
                                 Edit
                             </a>
                             <div class="my-1 border-t border-gray-100"></div>
-                            <form method="POST" action="{{ route('pengeluaran.destroy', $item) }}"
+                            <form method="POST" action="{{ route('admin.pengeluaran.destroy', $item) }}"
                                   onsubmit="return confirm('Yakin ingin menghapus pengeluaran ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit"
@@ -247,7 +247,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                         <p class="font-500">Belum ada data pengeluaran</p>
-                        <a href="{{ route('pengeluaran.create') }}" class="text-brand-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
+                        <a href="{{ route('admin.pengeluaran.create') }}" class="text-brand-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
                     </td>
                 </tr>
                 @endforelse

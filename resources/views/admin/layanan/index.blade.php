@@ -5,7 +5,7 @@
 {{-- ============================================================
      PAGE HEADER
 ============================================================ --}}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+<div x-data="{}" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
         <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Manajemen Layanan</h1>
         <p class="text-sm text-slate-500 mt-0.5">Kelola daftar harga dan jenis jasa pembersihan pakaian.</p>
@@ -79,7 +79,7 @@
 ============================================================ --}}
 @php $aktivTab = request('kategori', 'semua'); @endphp
 
-<div class="flex items-center gap-2 mb-5">
+<div id="kategori-tabs" class="flex items-center gap-2 mb-5">
     @foreach ([
         ['key' => 'semua',   'label' => 'Semua'],
         ['key' => 'kiloan',  'label' => 'Cuci Kiloan'],
@@ -166,7 +166,7 @@
                 @endif
 
                 {{-- Toggle Switch --}}
-                <button @click="toggleStatus({{ $layanan->id }})"
+                <button @click="toggleStatus({{ $layanan->id }}, $data)"
                         :class="aktif ? 'bg-brand-600' : 'bg-slate-200'"
                         :disabled="loading"
                         class="relative inline-flex items-center w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/30 cursor-pointer">
@@ -198,18 +198,34 @@
             <span class="text-xs text-slate-400 font-medium">{{ $layanan->satuan }}</span>
         </div>
 
-        {{-- Edit Button --}}
-        <button @click="$dispatch('open-modal', { name: 'edit-layanan', data: {{ json_encode(['id' => $layanan->id, 'nama' => $layanan->nama, 'harga' => $layanan->harga, 'estimasi' => $layanan->estimasi, 'badge' => $layanan->badge]) }} })"
-                class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold
-                       text-slate-600 bg-slate-50 border border-slate-200
-                       hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200
-                       active:scale-95 transition-all duration-150">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit Harga
-        </button>
+        <div class="flex gap-2">
+            {{-- Edit Button --}}
+            <button @click="$dispatch('open-modal', { name: 'edit-layanan', data: {{ json_encode(['id' => $layanan->id, 'nama' => $layanan->nama, 'harga' => $layanan->harga, 'estimasi' => $layanan->estimasi, 'badge' => $layanan->badge]) }} })"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold
+                           text-slate-600 bg-slate-50 border border-slate-200
+                           hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200
+                           active:scale-95 transition-all duration-150">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Harga
+            </button>
+
+            {{-- Delete Button --}}
+            <form action="{{ route('admin.layanan.destroy', $layanan) }}" method="POST" 
+                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus layanan ini?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="p-2 rounded-xl text-rose-500 bg-rose-50 border border-rose-100
+                               hover:bg-rose-500 hover:text-white transition-all duration-150">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </form>
+        </div>
 
     </div>
 
@@ -243,11 +259,12 @@
             atau "Perawatan Kulit" untuk memperluas jangkauan bisnis Anda.
         </p>
     </div>
-    <button class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:scale-95
+    <a href="#kategori-tabs" 
+       class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:scale-95
                    text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-brand-600/20
                    transition-all whitespace-nowrap">
         Konfigurasi Kategori
-    </button>
+    </a>
 </div>
 {{-- ============================================================
      MODAL: TAMBAH LAYANAN
@@ -266,7 +283,7 @@
     function toggleStatus(id) {
         const components = document.querySelectorAll(`[data-layanan-id="${id}"]`);
 
-        fetch(`/layanan/${id}/toggle-status`, {
+        fetch(`/admin/layanan/${id}/toggle-status`, {
             method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': CSRF,
@@ -287,8 +304,9 @@
 
 {{-- Tambahan: Daftarkan fungsi toggleStatus ke window agar Alpine dapat mengaksesnya --}}
 <script>
-    window.toggleStatus = function(id) {
-        fetch(`/layanan/${id}/toggle-status`, {
+    window.toggleStatus = function(id, component) {
+        component.loading = true;
+        fetch(`/admin/layanan/${id}/toggle-status`, {
             method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': CSRF,
@@ -297,7 +315,20 @@
             },
         })
         .then(r => r.json())
-        .catch(console.error);
+        .then(data => {
+            if (data.success) {
+                component.aktif = data.status;
+            } else {
+                throw new Error('Gagal memperbarui status');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Gagal mengubah status layanan');
+        })
+        .finally(() => {
+            component.loading = false;
+        });
     };
 </script>
 

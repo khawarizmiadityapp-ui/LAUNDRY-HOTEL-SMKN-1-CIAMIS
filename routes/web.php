@@ -14,14 +14,24 @@ use App\Http\Controllers\PengeluaranController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
-use App\Models\Petugas;
-use App\models\Layanan;
+use App\Models\Layanan;
 use App\Models\Pengeluaran;
+use App\Http\Controllers\LandingController;
 
+// Public UI Routes
+Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::get('/track', [LandingController::class, 'trackStatus'])->name('track.status');
+Route::get('/pesan', [LandingController::class, 'booking'])->name('order.booking');
+// Protected booking submission
+Route::post('/pesan', [LandingController::class, 'storeBooking'])->name('order.store-booking')->middleware('auth');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Customer Auth
+Route::get('/customer/login', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'loginView'])->name('customer.login');
+Route::post('/customer/login', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'login'])->name('customer.login.post');
+Route::get('/customer/register', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'registerView'])->name('customer.register');
+Route::post('/customer/register', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'register'])->name('customer.register.post');
+Route::post('/customer/logout', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])->name('customer.logout');
+
 // Public Routes
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

@@ -42,7 +42,7 @@
             </button>
         </div>
 
-        <form method="POST" :action="'/layanan/' + layanan.id" class="px-6 py-5 space-y-4">
+        <form method="POST" :action="`{{ url('/admin/layanan') }}/${layanan.id}`" class="px-6 py-5 space-y-4">
             @csrf
             @method('PUT')
 

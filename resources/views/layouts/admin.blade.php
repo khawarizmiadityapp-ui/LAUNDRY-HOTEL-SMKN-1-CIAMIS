@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') — Bening Laundry</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Google Fonts: Syne (display) + DM Sans (body) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,6 +62,10 @@
 
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <script>
+        const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    </script>
 
     <style>
         body { font-family: 'DM Sans', sans-serif; }
@@ -127,18 +132,21 @@
             </button>
 
             <!-- Search -->
-            <div class="relative flex-1 max-w-md">
+            <form action="{{ url()->current() }}" method="GET" class="relative flex-1 max-w-md">
+                @foreach (request()->except('search') as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
                 <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z"/>
                     </svg>
                 </span>
-                <input type="text"
+                <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Search transactions, customers..."
                        class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl
                               focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400
                               placeholder:text-slate-400 transition">
-            </div>
+            </form>
 
             <div class="flex items-center gap-3 ml-auto">
                 <!-- Notification Bell -->

@@ -24,6 +24,7 @@
             <th class="px-6 py-3 text-left">Berat</th>
             <th class="px-6 py-3 text-left">Status</th>
             <th class="px-6 py-3 text-left">Pembayaran</th>
+            <th class="px-6 py-3 text-left">Metode</th>
             <th class="px-6 py-3 text-left">Total</th>
             <th class="px-6 py-3 text-right">Aksi</th>
         </tr>
@@ -60,12 +61,16 @@
                 </span>
             </td>
 
-            <!-- Pembayaran -->
             <td class="px-6 py-4">
                 <span class="px-2 py-1 text-xs rounded 
                     {{ $trx->payment_status == 'lunas' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
                     {{ $trx->payment_status == 'lunas' ? 'Lunas' : 'Belum Lunas' }}
                 </span>
+            </td>
+ 
+            <!-- Metode -->
+            <td class="px-6 py-4 uppercase font-bold text-xs">
+                {{ $trx->payment_method ?? 'Cash' }}
             </td>
 
             <!-- Total -->
@@ -128,6 +133,12 @@
             <input name="weight" type="number" step="0.1" placeholder="Berat"
                 class="w-full border p-2 mb-3 rounded">
 
+            <select name="payment_method" class="w-full border p-2 mb-3 rounded">
+                <option value="cash">Cash</option>
+                <option value="dana">Dana</option>
+                <option value="qris">QRIS</option>
+            </select>
+ 
             <textarea name="notes" placeholder="Catatan"
                 class="w-full border p-2 mb-3 rounded"></textarea>
 

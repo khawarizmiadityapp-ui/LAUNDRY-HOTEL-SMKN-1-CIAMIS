@@ -210,7 +210,7 @@
     {{-- Pagination --}}
     @if($customers->hasPages())
     <div class="px-6 py-4 border-t border-slate-100">
-        {{ $customers->links('pagination::tailwind') }}
+        {{ $customers->onEachSide(1)->links('vendor.pagination.custom') }}
     </div>
     @endif
 

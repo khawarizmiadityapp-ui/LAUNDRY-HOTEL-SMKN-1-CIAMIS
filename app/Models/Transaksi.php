@@ -19,6 +19,7 @@ class Transaksi extends Model
         'total_price',
         'status', 
         'payment_status', 
+        'payment_method',
         'notes'
     ];
 

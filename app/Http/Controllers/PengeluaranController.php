@@ -84,7 +84,7 @@ class PengeluaranController extends Controller
 
         Pengeluaran::create($validated);
 
-        return redirect()->route('pengeluaran.index')
+        return redirect()->route('admin.pengeluaran.index')
                          ->with('success', 'Pengeluaran berhasil ditambahkan.');
     }
 

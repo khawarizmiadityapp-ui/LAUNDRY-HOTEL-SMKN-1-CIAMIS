@@ -1,11 +1,122 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+
+/* ============================================================
+   BASE: Typography & Global Reset
+   ============================================================ */
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        scroll-behavior: smooth;
+    }
+
+    /* Focus ring global yang konsisten */
+    :focus-visible {
+        @apply outline-none ring-2 ring-sky-400 ring-offset-2;
+    }
+
+    /* Scrollbar halus untuk sidebar */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-slate-200 rounded-full;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-300;
+    }
+}
+
+/* ============================================================
+   COMPONENTS: Reusable UI classes
+   ============================================================ */
+@layer components {
+
+    /* --- Tombol utama --- */
+    .btn-primary {
+        @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white
+               bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600
+               shadow-sm shadow-sky-200 transition-all duration-150
+               focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2;
+    }
+
+    /* --- Tombol sekunder --- */
+    .btn-secondary {
+        @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600
+               bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300
+               transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-300;
+    }
+
+    /* --- Card base --- */
+    .card {
+        @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
+    }
+
+    /* --- Input base --- */
+    .form-input {
+        @apply w-full text-sm text-slate-700 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5
+               placeholder-slate-400 outline-none
+               hover:border-slate-300 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400
+               transition-all duration-150;
+    }
+
+    /* --- Tabel header --- */
+    .th {
+        @apply text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-4 py-3 whitespace-nowrap;
+    }
+
+    /* --- Tabel cell --- */
+    .td {
+        @apply px-4 py-3.5 text-xs text-slate-600;
+    }
+
+    /* --- Section header divider --- */
+    .section-label {
+        @apply px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400;
+    }
+}
+
+/* ============================================================
+   UTILITIES: Custom helpers
+   ============================================================ */
+@layer utilities {
+
+    /* Alpine.js: sembunyikan sebelum Alpine load untuk mencegah flicker */
+    [x-cloak] { display: none !important; }
+
+    /* Truncate text dengan line clamp */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Skeleton loading */
+    .skeleton {
+        @apply animate-pulse bg-slate-100 rounded-lg;
+    }
+
+    /* Gradient text */
+    .text-gradient-sky {
+        @apply bg-gradient-to-r from-sky-600 to-cyan-500 bg-clip-text text-transparent;
+    }
+}
+
+/* ============================================================
+   CUSTOM: Pagination Laravel Override (Tailwind pagination)
+   ============================================================ */
+nav[aria-label="pagination"] {
+    @apply flex items-center justify-between;
+}
+
+/* Override pagination default agar match design sistem */
+nav[aria-label="pagination"] span[aria-current="page"] > span {
+    @apply bg-sky-500 border-sky-500 text-white;
 }

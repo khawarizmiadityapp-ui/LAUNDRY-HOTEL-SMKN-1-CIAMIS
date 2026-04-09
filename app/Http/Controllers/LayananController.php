@@ -20,6 +20,11 @@ class LayananController extends Controller
             $query->where('kategori', $request->kategori);
         }
 
+        // Fitur Search
+        if ($request->filled('search')) {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
         $layanans = $query->orderBy('kategori')->orderBy('nama')->get();
 
         // Statistik
@@ -53,7 +58,7 @@ class LayananController extends Controller
 
         Layanan::create($validated);
 
-        return redirect()->route('layanan.index')
+        return redirect()->route('admin.layanan.index')
             ->with('success', 'Layanan berhasil ditambahkan.');
     }
 
@@ -80,7 +85,7 @@ class LayananController extends Controller
             ]);
         }
 
-        return redirect()->route('layanan.index')
+        return redirect()->route('admin.layanan.index')
             ->with('success', 'Layanan berhasil diperbarui.');
     }
 
@@ -105,7 +110,7 @@ class LayananController extends Controller
     {
         $layanan->delete();
 
-        return redirect()->route('layanan.index')
+        return redirect()->route('admin.layanan.index')
             ->with('success', 'Layanan berhasil dihapus.');
     }
 }
