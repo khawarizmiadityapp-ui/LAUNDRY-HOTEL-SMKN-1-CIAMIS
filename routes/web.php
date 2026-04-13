@@ -11,6 +11,8 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PengeluaranController;
+use App\Http\Controllers\OTPController;
+use App\Http\Controllers\InventoryController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
@@ -38,13 +40,33 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Password Reset Routes (Opsional)
-// Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
+Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
+// OTP Routes
+Route::post('/send-otp', [OTPController::class, 'sendOTP'])->name('send.otp');
+
+Route::get('/otp', function () {return view('auth.otp');})->name('otp.form');
+
+Route::post('/verify-otp', [OTPController::class, 'verifyOTP'])->name('verify.otp');
+
+Route::get('/reset-password', function () {return view('auth.reset_password');})->name('reset.password');
+
+Route::post('/update-password', function (Illuminate\Http\Request $request) {
+    $request->validate([
+        'password' => 'required|confirmed|min:6'
+    ]);
+
+    $user = \App\Models\User::where('email', $request->email)->first();
+    $user->password = bcrypt($request->password);
+    $user->save();
+
+    return redirect('/login')->with('success', 'Password berhasil diubah!');})->name('update.password');
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
-Route::group([],function () {
+Route::group(['middleware' => ['auth']],function () {
     
     // Dashboard
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/petugas', [PetugasController::class, 'dashboard'])->middleware(['auth'])->name('petugas.dashboard');
     
     // Transaksi
     Route::get('/admin/transaksi', [AdminController::class, 'transactions'])->name('admin.transactions.index');
@@ -93,13 +115,32 @@ Route::group([],function () {
 
     // Pengeluaran
     Route::prefix('admin/pengeluaran')->name('admin.pengeluaran.')->group(function () {
-    Route::get('/', [PengeluaranController::class, 'index'])->name('index');
-    Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
-    Route::post('/', [PengeluaranController::class, 'store'])->name('store');
-    Route::get('/{pengeluaran}', [PengeluaranController::class, 'show'])->name('show');
-    Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
-    Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->name('update');
-    Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->name('destroy');
-    Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
+        Route::get('/', [PengeluaranController::class, 'index'])->name('index');
+        Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
+        Route::post('/', [PengeluaranController::class, 'store'])->name('store');
+        Route::get('/{pengeluaran}', [PengeluaranController::class, 'show'])->name('show');
+        Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
+        Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->name('update');
+        Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->name('destroy');
+        Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
+    });
+
+    // Inventory
+    Route::prefix('admin/inventory')->name('admin.inventory.')->group(function () {
+        Route::get('/', [InventoryController::class, 'index'])->name('index');
+        Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->name('update');
+    });
+
+// ================= PETUGAS =================
+Route::prefix('petugas')->name('petugas_piket.')->middleware(['auth'])->group(function () {
+
+    Route::get('/', [PetugasController::class, 'dashboard'])->name('dashboard');
+    Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
+    Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
+    Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
+    Route::get('/delivery', [PetugasController::class, 'delivery'])->name('delivery.index');
+    Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
+    Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');
+    Route::get('/history', [PetugasController::class, 'history'])->name('history.index');
 });
 });

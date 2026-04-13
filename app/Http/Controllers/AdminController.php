@@ -16,6 +16,10 @@ class AdminController extends Controller
     // 1. Dashboard Utama (Statistik)
     public function dashboard()
     {
+        if (auth()->user()->role !== 'admin') {
+        abort(403, 'Akses ditolak');
+        }
+
         $today = Carbon::today();
         
         // Statistik Ringkasan
@@ -220,7 +224,7 @@ class AdminController extends Controller
 
     public function destroyTransaction($id)
     {
-        Transaction::findOrFail($id)->delete();
+        Transaksi::findOrFail($id)->delete();
 
         return back()->with('success', 'Data berhasil dihapus!');
     }

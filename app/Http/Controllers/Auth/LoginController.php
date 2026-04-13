@@ -23,9 +23,20 @@ class LoginController extends Controller
     ]);
 
     if (Auth::attempt($credentials)) {
-        $request->session()->forget('url.intended'); // Hapus URL yang disimpan sebelumnya
-        return redirect()->route('admin.dashboard');
-    }
+            $request->session()->regenerate(); // security
+
+            $user = Auth::user();
+
+            // 🔥 CEK ROLE
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->role === 'staff') {
+                return redirect()->route('petugas_piket.dashboard');
+            }
+
+            // fallback
+            return redirect('/');
+            }
 
     return back()->withErrors([
         'email' => 'Email atau password salah.',

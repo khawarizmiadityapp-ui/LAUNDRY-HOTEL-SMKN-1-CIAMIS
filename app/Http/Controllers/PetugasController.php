@@ -3,11 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Petugas;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class PetugasController extends Controller
 {
+    // Dashboard untuk Petugas Piket
+    public function dashboard()
+    {
+        if (auth()->user()->role !== 'staff') {
+            abort(403, 'Akses ditolak');
+        }
+
+        return view('petugas_piket.dashboard');
+    }
     // Menampilkan halaman Blade
     public function index()
     {
@@ -66,4 +76,59 @@ class PetugasController extends Controller
         $petugas->delete();
         return response()->json(['message' => 'Petugas berhasil dihapus']);
     }
+
+    // Halaman Washing
+    public function washing()
+    {
+        $transactions = Transaksi::whereIn('status', ['diterima', 'disortir', 'dicuci'])->get();
+        return view('petugas_piket.washing.index', compact('transactions'));
+    }
+
+    // Halaman Setrika
+    public function setrika()
+    {
+        $transactions = Transaksi::whereIn('status', ['dikeringkan', 'disetrika'])->get();
+        return view('petugas_piket.setrika.index', compact('transactions'));
+    }
+
+    // Halaman Packing
+    public function packing()
+    {
+        $transactions = Transaksi::whereIn('status', ['dipacking'])->get();
+        return view('petugas_piket.packing.index', compact('transactions'));
+    }
+
+    // Halaman Delivery
+    public function delivery()
+    {
+        $transactions = Transaksi::whereIn('status', ['selesai'])->get();
+        return view('petugas_piket.delivery.index', compact('transactions'));
+    }
+
+    // Update status transaksi via Operations Hub
+    public function updateTaskStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:diterima,disortir,dicuci,dikeringkan,disetrika,dipacking,selesai,diambil'
+        ]);
+
+        $transaksi = Transaksi::findOrFail($id);
+        $transaksi->status = $request->status;
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Status transaksi berhasil diperbarui.');
+    }
+
+    // Halaman Inventory
+    public function inventory()
+    {
+        return view('petugas_piket.inventory.index');
+    }
+
+    // Halaman History
+    public function history()
+    {
+        return view('petugas_piket.history.index');
+    }
+
 }
