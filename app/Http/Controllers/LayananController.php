@@ -49,6 +49,7 @@ class LayananController extends Controller
             'nama'     => 'required|string|max:100',
             'kategori' => ['required', Rule::in(['kiloan', 'satuan'])],
             'harga'    => 'required|numeric|min:0',
+            'satuan'   => 'required|string|max:20',
             'estimasi' => 'nullable|string|max:100',
             'badge'    => 'nullable|string|max:50',
             'icon'     => 'nullable|string|max:50',
@@ -56,7 +57,21 @@ class LayananController extends Controller
 
         $validated['status'] = true;
 
-        Layanan::create($validated);
+        $layanan = Layanan::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil ditambahkan.',
+                'layanan' => [
+                    'id'       => $layanan->id,
+                    'nama'     => $layanan->nama,
+                    'kategori' => $layanan->kategori,
+                    'harga'    => (float) $layanan->harga,
+                    'satuan'   => $layanan->satuan,
+                ]
+            ], 201);
+        }
 
         return redirect()->route('admin.layanan.index')
             ->with('success', 'Layanan berhasil ditambahkan.');
@@ -69,9 +84,12 @@ class LayananController extends Controller
     {
         $validated = $request->validate([
             'nama'     => 'sometimes|string|max:100',
+            'kategori' => ['sometimes', Rule::in(['kiloan', 'satuan'])],
             'harga'    => 'sometimes|numeric|min:0',
+            'satuan'   => 'sometimes|string|max:20',
             'estimasi' => 'nullable|string|max:100',
             'badge'    => 'nullable|string|max:50',
+            'icon'     => 'nullable|string|max:50',
             'status'   => 'sometimes|boolean',
         ]);
 
@@ -81,7 +99,13 @@ class LayananController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Layanan berhasil diperbarui.',
-                'layanan' => $layanan->fresh(),
+                'layanan' => [
+                    'id'       => $layanan->id,
+                    'nama'     => $layanan->nama,
+                    'kategori' => $layanan->kategori,
+                    'harga'    => (float) $layanan->harga,
+                    'satuan'   => $layanan->satuan,
+                ]
             ]);
         }
 

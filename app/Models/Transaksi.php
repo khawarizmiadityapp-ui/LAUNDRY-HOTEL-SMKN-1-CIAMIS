@@ -11,6 +11,7 @@ class Transaksi extends Model
     protected $fillable = [
         'transaksi_code',
         'user_id', 
+        'customer_id',
         'customer_name', 
         'customer_phone',
         'service_type', 
@@ -27,5 +28,17 @@ class Transaksi extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke Customer
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    // Relasi ke Detail (multi-layanan)
+    public function details()
+    {
+        return $this->hasMany(TransaksiDetail::class);
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\PosController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
@@ -23,16 +24,6 @@ use App\Http\Controllers\LandingController;
 // Public UI Routes
 Route::get('/', [LandingController::class, 'index'])->name('home');
 Route::get('/track', [LandingController::class, 'trackStatus'])->name('track.status');
-Route::get('/pesan', [LandingController::class, 'booking'])->name('order.booking');
-// Protected booking submission
-Route::post('/pesan', [LandingController::class, 'storeBooking'])->name('order.store-booking')->middleware('auth');
-
-// Customer Auth
-Route::get('/customer/login', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'loginView'])->name('customer.login');
-Route::post('/customer/login', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'login'])->name('customer.login.post');
-Route::get('/customer/register', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'registerView'])->name('customer.register');
-Route::post('/customer/register', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'register'])->name('customer.register.post');
-Route::post('/customer/logout', [\App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 // Public Routes
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
@@ -67,6 +58,14 @@ Route::group(['middleware' => ['auth']],function () {
     // Dashboard
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/petugas', [PetugasController::class, 'dashboard'])->middleware(['auth'])->name('petugas.dashboard');
+    
+    // ================= POS (Pesanan Baru) =================
+    Route::get('/admin/pos', [PosController::class, 'index'])->name('admin.pos.index');
+    Route::get('/petugas/customer-service', [PosController::class, 'index'])->name('petugas.pos.index');
+    Route::get('/pos/customer/search', [PosController::class, 'searchCustomer'])->name('pos.customer.search');
+    Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->name('pos.customer.store');
+    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.order.store');
+    Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
     
     // Transaksi
     Route::get('/admin/transaksi', [AdminController::class, 'transactions'])->name('admin.transactions.index');

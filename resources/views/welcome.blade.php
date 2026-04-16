@@ -43,41 +43,20 @@
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             {{-- Logo --}}
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-200/50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                    </svg>
-                </div>
-                <div>
+            <a href="/" class="flex items-center gap-3 group">
+                <img src="{{ asset('images/logobening.jpeg') }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300">
+                <div class="hidden sm:block">
                     <p class="text-sm font-900 text-slate-800 font-black tracking-tight uppercase">Bening</p>
                     <p class="text-[10px] text-sky-600 font-bold uppercase tracking-widest">Laundry Services</p>
                 </div>
-            </div>
+            </a>
 
             {{-- Nav Links --}}
             <div class="hidden md:flex items-center gap-8">
                 <a href="#tracking" class="text-xs font-semibold text-slate-600 hover:text-sky-500 transition-colors uppercase tracking-wider">Lacak Order</a>
                 <a href="#services" class="text-xs font-semibold text-slate-600 hover:text-sky-500 transition-colors uppercase tracking-wider">Layanan</a>
                 
-                @auth
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 bg-sky-50 text-sky-600 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-sky-100 transition-colors">
-                            Halo, {{ strtok(Auth::user()->name, ' ') }}
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden" x-cloak>
-                            <form action="{{ route('customer.logout') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="w-full text-left px-4 py-3 text-xs font-bold text-red-500 hover:bg-red-50 transition-colors uppercase tracking-widest flex items-center gap-2">
-                                    Keluar Akun
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @else
-                    <a href="{{ route('customer.login') }}" class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">Masuk / Daftar</a>
-                @endauth
+                {{-- Customer Auth removed --}}
             </div>
 
             {{-- Mobile Button --}}
@@ -90,7 +69,7 @@
     </nav>
 
     {{-- ===================== HERO SECTION ===================== --}}
-    <section class="relative pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
+    <section class="relative pt-16 pb-12 md:pt-24 md:pb-20 overflow-hidden">
 
         @if(Session::has('success'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50 mb-8 mt-4">
@@ -118,19 +97,15 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center md:text-left md:flex items-center gap-12">
                 <div class="flex-1 space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 text-sky-600 rounded-full text-[11px] font-bold uppercase tracking-widest border border-sky-100">
-                        <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
-                        Premium Laundry Experience
-                    </div>
                     <h1 class="text-4xl md:text-6xl font-800 text-slate-900 font-extrabold tracking-tight leading-[1.1]">
                         Pakaian Bersih, <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400 uppercase">Bening & Wangi.</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400 uppercase">Cepat & Rapih.</span>
                     </h1>
                     <p class="text-base text-slate-500 max-w-lg leading-relaxed">
                         Nikmati layanan laundry premium dengan standar kebersihan tertinggi. Kami pastikan setiap helai pakaian Anda kembali bersih, rapi, dan sejuk dipandang.
                     </p>
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                        <a href="{{ route('order.booking') }}" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-xl shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all">Pesan Layanan</a>
+                        <a href="https://wa.me/628123456789?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-xl shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all">Pesan Layanan</a>
                         <a href="#tracking" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">Lacak Cucian</a>
                     </div>
                 </div>
@@ -146,16 +121,12 @@
                             </svg>
                          </div>
                     </div>
-                    {{-- Floating Stats --}}
-                    <div class="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl shadow-xl border border-slate-50 flex items-center gap-4">
-                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                    {{-- Floating Checkmark --}}
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 flex items-center justify-center">
+                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                             </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">Pengerjaan</p>
-                            <p class="text-lg font-bold text-slate-800">Cepat & Rapih</p>
                         </div>
                     </div>
                 </div>
@@ -247,11 +218,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20">
                 <div class="space-y-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                            </svg>
-                        </div>
+                        <img src="{{ asset('images/logobening.jpeg') }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain bg-white rounded-xl shadow-lg">
                         <p class="text-xl font-800 font-extrabold tracking-tight">Bening<span class="text-sky-500"> Laundry</span></p>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed max-w-xs">

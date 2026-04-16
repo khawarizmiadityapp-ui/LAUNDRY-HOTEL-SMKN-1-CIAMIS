@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Customer;
+use App\Models\Layanan;
+use App\Models\Transaksi;
+use App\Models\TransaksiDetail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class PosController extends Controller
+{
+    /**
+     * Display the POS interface.
+     */
+    public function index()
+    {
+        $layanans  = Layanan::aktif()->orderBy('kategori')->orderBy('nama')->get();
+        $kategoris = Layanan::aktif()->distinct()->pluck('kategori');
+
+        // Pre-format data for Alpine.js (avoid arrow functions in Blade @json)
+        $layanansJson = $layanans->map(function ($l) {
+            return [
+                'id'       => $l->id,
+                'nama'     => $l->nama,
+                'kategori' => $l->kategori,
+                'harga'    => (float) $l->harga,
+                'satuan'   => $l->satuan,
+            ];
+        });
+
+        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson'));
+    }
+
+    /**
+     * AJAX: Search customers by name or phone.
+     */
+    public function searchCustomer(Request $request)
+    {
+        $q = $request->get('q', '');
+
+        $customers = Customer::where('nama', 'like', "%{$q}%")
+            ->orWhere('no_hp', 'like', "%{$q}%")
+            ->limit(10)
+            ->get(['id', 'nama', 'no_hp', 'alamat']);
+
+        return response()->json($customers);
+    }
+
+    /**
+     * AJAX: Quick-add a new customer.
+     */
+    public function storeCustomer(Request $request)
+    {
+        $request->validate([
+            'nama'  => 'required|string|max:100',
+            'no_hp' => 'required|string|max:20',
+            'alamat' => 'nullable|string|max:255',
+        ]);
+
+        $customer = Customer::create($request->only(['nama', 'no_hp', 'alamat']));
+
+        return response()->json($customer, 201);
+    }
+
+    /**
+     * Process a POS order (multi-service).
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'customer_id'      => 'required|exists:customers,id',
+            'items'            => 'required|array|min:1',
+            'items.*.layanan_id' => 'required|exists:layanans,id',
+            'items.*.qty'      => 'required|numeric|min:0.1',
+            'payment_method'   => 'required|in:tunai,qris,transfer',
+            'payment_status'   => 'required|in:lunas,belum_bayar',
+            'notes'            => 'nullable|string',
+        ]);
+
+        $customer = Customer::findOrFail($request->customer_id);
+
+        // Calculate totals
+        $subtotal = 0;
+        $detailsData = [];
+
+        foreach ($request->items as $item) {
+            $layanan  = Layanan::findOrFail($item['layanan_id']);
+            $qty      = (float) $item['qty'];
+            $price    = (float) $layanan->harga;
+            $itemSub  = $qty * $price;
+            $subtotal += $itemSub;
+
+            $detailsData[] = [
+                'layanan_id' => $layanan->id,
+                'qty'        => $qty,
+                'price'      => $price,
+                'subtotal'   => $itemSub,
+            ];
+        }
+
+        $totalPrice = $subtotal;
+
+        // Transaction code
+        $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+
+        DB::transaction(function () use (
+            $transactionCode, $customer, $request, $subtotal, $totalPrice, $detailsData
+        ) {
+            $transaksi = Transaksi::create([
+                'transaksi_code' => $transactionCode,
+                'user_id'        => auth()->id(),
+                'customer_id'    => $customer->id,
+                'customer_name'  => $customer->nama,
+                'customer_phone' => $customer->no_hp ?? '-',
+                'service_type'   => 'regular',
+                'weight'         => collect($detailsData)->sum('qty'),
+                'price_per_kg'   => 0,
+                'total_price'    => $totalPrice,
+                'status'         => 'diterima',
+                'payment_status' => $request->payment_status,
+                'payment_method' => $request->payment_method,
+                'notes'          => $request->notes,
+            ]);
+
+            foreach ($detailsData as $detail) {
+                $transaksi->details()->create($detail);
+            }
+        });
+
+        $transaksi = Transaksi::where('transaksi_code', $transactionCode)->first();
+
+        return redirect()->route('pos.nota', $transaksi->id)
+            ->with('success', 'Pesanan berhasil dibuat!');
+    }
+
+    /**
+     * Print receipt / nota.
+     */
+    public function nota($id)
+    {
+        $transaksi = Transaksi::with(['details.layanan', 'customer', 'user'])->findOrFail($id);
+        $subtotal  = $transaksi->details->sum('subtotal');
+        $totalTagihan  = $transaksi->total_price;
+
+        return view('pos.nota', compact('transaksi', 'subtotal', 'totalTagihan'));
+    }
+}
