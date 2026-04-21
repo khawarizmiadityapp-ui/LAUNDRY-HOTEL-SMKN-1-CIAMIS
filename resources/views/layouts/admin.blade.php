@@ -6,10 +6,10 @@
     <title>@yield('title', 'Dashboard') — Bening Laundry</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- Google Fonts: Syne (display) + DM Sans (body) --}}
+    {{-- Google Fonts: Plus Jakarta Sans --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     {{-- Tailwind CSS CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,8 +19,7 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        display: ['Syne', 'sans-serif'],
-                        body: ['DM Sans', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
                     },
                     colors: {
                         brand: {
@@ -68,8 +67,8 @@
     </script>
 
     <style>
-        body { font-family: 'DM Sans', sans-serif; }
-        h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
 
         /* Scrollbar styling */
         ::-webkit-scrollbar { width: 5px; height: 5px; }

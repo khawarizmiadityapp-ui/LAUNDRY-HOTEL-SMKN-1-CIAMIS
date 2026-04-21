@@ -41,7 +41,12 @@
         <p class="font-display text-2xl font-700 text-gray-900 tracking-tight mb-3">{{ rupiah($sisaAnggaran) }}</p>
         {{-- Progress bar --}}
         <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            @php $pct = round(($sisaAnggaran / $targetAnggaran) * 100); @endphp
+            @php
+                $target = $targetAnggaran ?? 0;
+                $nilai = $sisaAnggaran ?? 0;
+
+                $pct = $target > 0 ? round(($nilai / $target) * 100) : 0;
+            @endphp
             <div class="progress-bar-inner h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full"
                  style="width: {{ $pct }}%"></div>
         </div>

@@ -38,15 +38,6 @@
                 <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-user-cog text-purple-600 text-xl"></i></div>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-gray-500 text-sm">Shift Berjalan</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1">Pagi</p>
-                </div>
-                <div class="bg-amber-100 p-3 rounded-xl"><i class="fas fa-clock text-amber-600 text-xl"></i></div>
-            </div>
-        </div>
     </div>
 
     {{-- Filter Kategori & Search (search sudah di header, tapi kita sinkronkan) --}}
@@ -55,7 +46,6 @@
             <button @click="activeFilter = 'Semua'; currentPage = 1" :class="activeFilter === 'Semua' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Semua</button>
             <button @click="activeFilter = 'Admin'; currentPage = 1" :class="activeFilter === 'Admin' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Admin</button>
             <button @click="activeFilter = 'Operasional'; currentPage = 1" :class="activeFilter === 'Operasional' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Operasional</button>
-            <button @click="activeFilter = 'Kurir'; currentPage = 1" :class="activeFilter === 'Kurir' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Kurir</button>
         </div>
         <div class="relative w-64">
             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>

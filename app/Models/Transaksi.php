@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Customer;
+use App\Models\TransaksiDetail;
 
 class Transaksi extends Model
 {
@@ -11,8 +14,7 @@ class Transaksi extends Model
     protected $fillable = [
         'transaksi_code',
         'user_id', 
-        'customer_id',
-        'customer_name', 
+        'customer_id', 
         'customer_phone',
         'service_type', 
         'weight', 

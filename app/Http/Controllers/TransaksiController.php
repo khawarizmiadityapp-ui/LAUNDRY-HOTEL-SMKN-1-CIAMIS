@@ -4,16 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TransactionsExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransaksiController extends Controller
 {
     public function store(Request $request)
 {
+    $request->validate([
+    'customer_name' => 'required',
+    'customer_phone' => 'required',
+    'service_type' => 'required',
+    'weight' => 'required|numeric'
+    ]);
+
     $price = $request->service_type == 'express' ? 7000 : 5000;
 
     Transaksi::create([
         'transaksi_code' => 'TRX-' . time(),
-        'user_id' => 1, // sementara (nanti bisa pakai auth)
+        'user_id' => auth()->id(), 
         'customer_name' => $request->customer_name,
         'customer_phone' => $request->customer_phone,
         'service_type' => $request->service_type,
@@ -27,5 +37,19 @@ class TransaksiController extends Controller
 
     return back();
 }
+
+    public function exportExcel()
+    {
+        return Excel::download(new TransactionsExport, 'laporan-keuangan.xlsx');
+    }
+
+    public function exportPdf()
+    {
+    $data = Transaksi::all();
+
+    $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data'))->setPaper('a4', 'landscape');
+
+    return $pdf->download('laporan-keuangan.pdf');
+    }
 
 }

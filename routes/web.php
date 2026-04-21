@@ -14,6 +14,9 @@ use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReportController;
+use App\Exports\TransactionsExport;
+use App\Http\Controllers\LaporanController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
@@ -98,7 +101,11 @@ Route::group(['middleware' => ['auth']],function () {
     Route::get('/admin/petugas', [PetugasController::class, 'index'])->name('admin.petugas.index');
     
     // Laporan
-    Route::get('/admin/laporan_keuangan', function () {return view('admin.laporan_keuangan.index');})->name('admin.laporan_keuangan.index');
+    Route::get('/admin/laporan_keuangan', [LaporanController::class, 'index'])->name('admin.laporan_keuangan.index');
+    
+    // Export Laporan
+    Route::get('/export-transaksi', [TransaksiController::class, 'exportExcel'])->name('export.transaksi.excel');
+    Route::get('/export-transaksi-pdf', [TransaksiController::class, 'exportPdf'])->name('export.transaksi.pdf');
     
     // Harga
     Route::get('/admin/prices', [AdminController::class, 'prices'])->name('admin.prices');

@@ -23,37 +23,19 @@
 </style>
 @endpush
 
-@section('sticky_topbar')
-<!-- TOPBAR -->
-<header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-3.5 flex items-center gap-4 flex-shrink-0 shadow-sm">
-    <div class="flex-1">
-        <h2 class="text-lg font-bold text-slate-800">Delivery Panel</h2>
-    </div>
-    <div class="flex-[2] max-w-md">
-        <div class="relative">
-            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-            </svg>
-            <input type="text" placeholder="Cari rute, kurir, atau paket..."
-                   class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-700 placeholder-gray-400 outline-none focus:bg-white focus:border-orange-300 transition-all">
-        </div>
-    </div>
-    <div class="flex-1 flex items-center justify-end gap-2">
-        <button class="relative w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
-            </svg>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"></span>
-        </button>
-    </div>
-</header>
-@endsection
+
 
 @section('content')
 <div class="flex flex-col gap-6">
     <div class="flex gap-5">
         <!-- LEFT / CENTER -->
         <div class="flex-1 space-y-5 min-w-0">
+                <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">delivery</h1>
+                <p class="text-slate-500 mt-1">Daftar pesanan yang siap untuk antar dan jemput</p>
+            </div>
+        </div>
             <!-- STAT CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Card 1 -->
@@ -146,30 +128,7 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div class="w-72 flex-shrink-0 hidden lg:block space-y-4">
-             <div class="bg-white rounded-2xl border border-gray-100 p-4 fade-in fade-in-4 shadow-sm">
-                <h2 class="text-sm font-bold text-gray-800 mb-4">Tim Kurir Aktif</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">BS</div>
-                        <div class="flex-1">
-                            <p class="text-xs font-bold text-gray-800">Budi Santoso</p>
-                            <p class="text-[10px] text-gray-400">Rute A</p>
-                        </div>
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">SA</div>
-                        <div class="flex-1">
-                            <p class="text-xs font-bold text-gray-800">Siti Aminah</p>
-                            <p class="text-[10px] text-gray-400">Rute B</p>
-                        </div>
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    </div>
-                </div>
-             </div>
-        </div>
+
     </div>
 </div>
 @endsection

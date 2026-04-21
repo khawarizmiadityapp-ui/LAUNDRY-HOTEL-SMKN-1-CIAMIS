@@ -1,4 +1,4 @@
-{{--resources/views/admin/pengeluaran/index.blade.php--}}
+{{--resources/views/admin/laporan_keuangan/index.blade.php--}}
 @extends('layouts.admin')
 
 @section('title', 'Laporan Keuangan - Bening Laundry')
@@ -11,15 +11,24 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Laporan Keuangan</h1>
             <p class="text-gray-500 mt-1">Analisis komprehensif arus kas dan performa bisnis laundry.</p>
         </div>
+        <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" class="flex flex-wrap items-center gap-3">
         <div class="flex flex-wrap items-center gap-3">
             <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                <button class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white shadow-sm transition">Bulanan</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Tahunan</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Custom</button>
+                <button name="filter" value="bulanan"
+                class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white shadow-sm transition,{{ $filter == 'bulanan' ? 'bg-blue-500 text-white' : '' }}
+                ">Bulanan</button>
+                <button name="filter" value="tahunan"
+                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Tahunan</button>
+                <button name="filter" value="custom"
+                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Custom</button>
             </div>
-            <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
+            <a href="{{ route('export.transaksi.excel') }}" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </a>
+            <a href="{{ route('export.transaksi.pdf') }}"
+             class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
                 <i class="fas fa-file-pdf"></i> Export PDF
-            </button>
+            </a>
         </div>
     </div>
 
@@ -30,8 +39,8 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pemasukan</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp 42.500.000</p>
-                    <span class="inline-flex items-center text-sm text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-up mr-1 text-xs"></i> +12.5% vs bulan lalu</span>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pemasukan, 0, ',', '.') }}</p>
+                    <span class="inline-flex items-center text-sm text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-up mr-1 text-xs"></i>{{ number_format($pemasukan - $pengeluaran, 0, ',', '.') }}% vs bulan lalu</span>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl">
                     <i class="fas fa-wallet text-blue-600 text-xl"></i>
@@ -43,8 +52,8 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pengeluaran</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp 18.250.000</p>
-                    <span class="inline-flex items-center text-sm text-red-600 bg-red-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-down mr-1 text-xs"></i> -4.2% efisiensi biaya</span>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</p>
+                    <span class="inline-flex items-center text-sm text-red-600 bg-red-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-down mr-1 text-xs"></i> {{ number_format($pengeluaran - $pemasukan, 0, ',', '.') }}% efisiensi biaya</span>
                 </div>
                 <div class="bg-red-100 p-3 rounded-xl">
                     <i class="fas fa-receipt text-red-600 text-xl"></i>
@@ -56,8 +65,8 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-blue-100 text-sm font-medium">Laba Bersih</p>
-                    <p class="text-3xl font-bold mt-1">Rp 24.250.000</p>
-                    <span class="inline-flex items-center text-sm bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full mt-2"><i class="fas fa-chart-line mr-1"></i> profit +18%</span>
+                    <p class="text-3xl font-bold mt-1">Rp {{ number_format($laba, 0, ',', '.') }}</p>
+                    <span class="inline-flex items-center text-sm bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full mt-2"><i class="fas fa-chart-line mr-1"></i> profit {{ number_format($persenLaba, 2) }}%</span>
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
                     <i class="fas fa-chart-pie text-white text-xl"></i>
@@ -80,7 +89,7 @@
                     </select>
                 </div>
             </div>
-            <canvas id="trendChart" height="250"></canvas>
+            <canvas id="trendChart"></canvas>
         </div>
 
         <!-- Distribusi Pengeluaran + Insight -->
@@ -92,7 +101,7 @@
                     <!-- Operasional & Gaji 45% -->
                     <div>
                         <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">Operasional & Gaji</span>
+                            <span class="font-medium text-gray-700">Operasional</span>
                             <span class="text-gray-600">45%</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2.5">
@@ -210,11 +219,11 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                labels: @json($months),
                 datasets: [
                     {
                         label: 'Pendapatan',
-                        data: [38000000, 39500000, 40200000, 41000000, 41800000, 42500000],
+                        data: @json($dataMasuk),
                         borderColor: '#2563eb',
                         backgroundColor: 'rgba(37, 99, 235, 0.05)',
                         borderWidth: 3,
@@ -227,7 +236,7 @@
                     },
                     {
                         label: 'Pengeluaran',
-                        data: [17800000, 17900000, 18000000, 18100000, 18150000, 18250000],
+                        data: @json($dataKeluar),
                         borderColor: '#f97316',
                         backgroundColor: 'rgba(249, 115, 22, 0.02)',
                         borderWidth: 3,

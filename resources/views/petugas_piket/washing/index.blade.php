@@ -113,18 +113,6 @@ tailwind.config = {
             </div>
           </div>
 
-          <!-- Card 3: Eco -->
-          <div class="card bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl p-6 shadow-sm flex flex-col items-center justify-center text-center gap-3 text-white animate-fadeUp d3">
-            <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 0 0-8.862 12.872M12.75 3.031a9 9 0 0 1 6.69 14.036m0 0-.177-.529A2.249 2.249 0 0 0 17.128 15H16.5l-.324-.324a1.453 1.453 0 0 0-2.328.377l-.036.073a1.586 1.586 0 0 1-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643"/>
-              </svg>
-            </div>
-            <div>
-              <div class="font-bold text-base leading-tight">Mode Hemat Air Aktif</div>
-              <div class="text-green-100 text-sm mt-1">Menghemat 450L hari ini</div>
-            </div>
-          </div>
 
         </div>
 
@@ -239,71 +227,7 @@ tailwind.config = {
                 </div>
               </div>
             </div>
-
-          </div>
-        </div>
-      </div><!-- /left -->
-
-      <!-- ── RIGHT SIDEBAR ── -->
-      <div class="w-64 shrink-0 space-y-4 animate-fadeUp d4">
-
-        <!-- Tim Bertugas -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <div class="text-sm font-bold text-slate-800 mb-4">Tim Bertugas</div>
-          <div class="space-y-3.5">
-
-            <!-- Andi Wijaya -->
-            <div class="flex items-center gap-3">
-              <div class="relative shrink-0">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">AW</div>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white bg-emerald-400"></span>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-700 leading-tight">Andi Wijaya</div>
-                <div class="text-xs text-slate-400">Shift Pagi (Lead)</div>
-              </div>
-            </div>
-
-            <!-- Sari Rahayu -->
-            <div class="flex items-center gap-3">
-              <div class="relative shrink-0">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold">SR</div>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white bg-emerald-400"></span>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-700 leading-tight">Sari Rahayu</div>
-                <div class="text-xs text-slate-400">Operator Mesin</div>
-              </div>
-            </div>
-
-            <!-- Dodi Kurnia -->
-            <div class="flex items-center gap-3">
-              <div class="relative shrink-0">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">DK</div>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white bg-orange-400"></span>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-700 leading-tight">Dodi Kurnia</div>
-                <div class="text-xs text-slate-400">Istirahat</div>
-              </div>
-            </div>
-
-            <!-- Maya Putri -->
-            <div class="flex items-center gap-3">
-              <div class="relative shrink-0">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-xs font-bold">MP</div>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white bg-emerald-400"></span>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-700 leading-tight">Maya Putri</div>
-                <div class="text-xs text-slate-400">Operator Mesin</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Tips Card -->
+                    <!-- Tips Card -->
         <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 text-white shadow-md animate-fadeUp d5">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
@@ -317,6 +241,12 @@ tailwind.config = {
             Suhu air diatur ke 40°C untuk mesin #01 &amp; #04 guna menghemat energi tanpa mengurangi kualitas kebersihan bahan katun.
           </p>
         </div>
+
+          </div>
+        </div>
+      </div><!-- /left -->
+
+
 
       </div><!-- /right -->
 

@@ -32,17 +32,7 @@
                         <p class="text-xs text-gray-400 mt-2">↑ 12% dari kemarin</p>
                     </div>
                 </div>
-                <!-- Card 2 -->
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-amber-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-500 text-sm">Transaksi Belum Lunas</p>
-                            <p class="text-2xl font-bold mt-1">{{ $transaksiBelumLunas }} Pesanan</p>
-                        </div>
-                        <i class="fas fa-hourglass-half text-amber-500 text-2xl"></i>
-                    </div>
-                    <p class="text-red-500 text-sm mt-3 flex items-center gap-1"><i class="fas fa-clock"></i> Menunggu konfirmasi</p>
-                </div>
+
                 <!-- Card 3 -->
                 <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
                     <div class="flex justify-between items-start">
