@@ -53,6 +53,9 @@ class LayananController extends Controller
             'estimasi' => 'nullable|string|max:100',
             'badge'    => 'nullable|string|max:50',
             'icon'     => 'nullable|string|max:50',
+            'needs_washing' => 'sometimes|boolean',
+            'needs_ironing' => 'sometimes|boolean',
+            'needs_packing' => 'sometimes|boolean',
         ]);
 
         $validated['status'] = true;
@@ -91,6 +94,9 @@ class LayananController extends Controller
             'badge'    => 'nullable|string|max:50',
             'icon'     => 'nullable|string|max:50',
             'status'   => 'sometimes|boolean',
+            'needs_washing' => 'sometimes|boolean',
+            'needs_ironing' => 'sometimes|boolean',
+            'needs_packing' => 'sometimes|boolean',
         ]);
 
         $layanan->update($validated);

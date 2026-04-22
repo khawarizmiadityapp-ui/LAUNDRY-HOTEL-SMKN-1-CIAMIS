@@ -144,9 +144,11 @@ Route::prefix('petugas')->name('petugas_piket.')->middleware(['auth'])->group(fu
     Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
     Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
     Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
-    Route::get('/delivery', [PetugasController::class, 'delivery'])->name('delivery.index');
+
     Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
+    Route::post('/tasks/{id}/complete', [PetugasController::class, 'completeTask'])->name('tasks.complete');
     Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');
+    Route::post('/inventory/{id}/adjust', [PetugasController::class, 'adjustInventory'])->name('inventory.adjust');
     Route::get('/history', [PetugasController::class, 'history'])->name('history.index');
 });
 });

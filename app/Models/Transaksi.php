@@ -15,6 +15,7 @@ class Transaksi extends Model
         'transaksi_code',
         'user_id', 
         'customer_id', 
+        'customer_name',
         'customer_phone',
         'service_type', 
         'weight', 
@@ -42,5 +43,11 @@ class Transaksi extends Model
     public function details()
     {
         return $this->hasMany(TransaksiDetail::class);
+    }
+
+    // Relasi ke Tracking Tasks
+    public function tasks()
+    {
+        return $this->hasMany(LaundryTask::class);
     }
 }

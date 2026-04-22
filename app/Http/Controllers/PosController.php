@@ -27,6 +27,9 @@ class PosController extends Controller
                 'kategori' => $l->kategori,
                 'harga'    => (float) $l->harga,
                 'satuan'   => $l->satuan,
+                'needs_washing' => (bool) $l->needs_washing,
+                'needs_ironing' => (bool) $l->needs_ironing,
+                'needs_packing' => (bool) $l->needs_packing,
             ];
         });
 
@@ -126,6 +129,25 @@ class PosController extends Controller
 
             foreach ($detailsData as $detail) {
                 $transaksi->details()->create($detail);
+            }
+
+            // Inisialisasi Tracking Tasks secara Dinamis
+            $items = collect($request->items)->map(function($item) {
+                return Layanan::find($item['layanan_id']);
+            });
+
+            $needsWashing = $items->filter(fn($l) => $l && ($l->needs_washing === null || $l->needs_washing == true))->isNotEmpty();
+            $needsIroning = $items->filter(fn($l) => $l && ($l->needs_ironing === null || $l->needs_ironing == true))->isNotEmpty();
+            $needsPacking = $items->filter(fn($l) => $l && ($l->needs_packing === null || $l->needs_packing == true))->isNotEmpty();
+
+            if ($needsWashing) {
+                $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
+            }
+            if ($needsIroning) {
+                $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
+            }
+            if ($needsPacking) {
+                $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
             }
         });
 

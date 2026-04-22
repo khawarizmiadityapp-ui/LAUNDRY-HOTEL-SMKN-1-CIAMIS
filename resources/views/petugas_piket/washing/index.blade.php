@@ -81,39 +81,60 @@ tailwind.config = {
       <!-- Left main -->
       <div class="flex-1 min-w-0 space-y-6">
 
-        <!-- ── STAT CARDS ── -->
-        <div class="grid grid-cols-3 gap-5">
-
-          <!-- Card 1: Capacity -->
-          <div class="card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-fadeUp d1">
-            <div class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest mb-4">Kapasitas Muatan</div>
-            <div class="text-5xl font-extrabold text-blue-600 mb-1">85%</div>
-            <div class="text-sm text-slate-500 mb-4">Optimal: Tingkat efisiensi tinggi</div>
-            <div class="w-full bg-slate-100 rounded-full h-2">
-              <div class="progress bg-blue-500 h-2 rounded-full" style="width:85%"></div>
-            </div>
+        <!-- ── TRANSACTION QUEUE ── -->
+        <div class="animate-fadeUp d2">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-800">Antrean Cucian</h2>
+            <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-[11px] font-bold uppercase tracking-wider">
+              {{ count($transactions) }} Pesanan Menunggu
+            </span>
           </div>
 
-          <!-- Card 2: Weight -->
-          <div class="card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-fadeUp d2">
-            <div class="flex items-start justify-between mb-4">
-              <div class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest">Total Diproses Hari Ini</div>
-              <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
-                </svg>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @forelse($transactions as $trx)
+            <div class="card bg-white rounded-2xl p-5 shadow-sm border border-gray-100 animate-fadeUp">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <div class="text-xs font-bold text-blue-600 uppercase tracking-tight mb-1">#{{ $trx->transaksi_code }}</div>
+                  <h3 class="font-bold text-slate-800">{{ $trx->customer_name }}</h3>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] font-medium text-slate-400 uppercase">Masuk</div>
+                  <div class="text-xs font-bold text-slate-600">{{ $trx->created_at->diffForHumans() }}</div>
+                </div>
               </div>
+
+              <div class="space-y-2 mb-5">
+                @foreach($trx->details as $detail)
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-slate-500">{{ $detail->layanan->nama ?? 'Layanan' }}</span>
+                  <span class="font-bold text-slate-700">{{ $detail->qty }} {{ $detail->layanan->satuan ?? 'kg' }}</span>
+                </div>
+                @endforeach
+              </div>
+
+              <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST">
+                @csrf
+                <input type="hidden" name="stage" value="washing">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white text-sm font-bold py-3 rounded-xl transition-all shadow-md active:scale-[0.98]">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                  </svg>
+                  Selesai Cuci
+                </button>
+              </form>
             </div>
-            <div class="text-4xl font-extrabold text-slate-800 mb-2">1,240 <span class="text-xl font-bold text-slate-500">kg</span></div>
-            <div class="flex items-center gap-1 text-sm text-emerald-600 font-semibold">
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/>
-              </svg>
-              +12% dari kemarin
+            @empty
+            <div class="col-span-full py-12 flex flex-col items-center justify-center bg-white rounded-2xl border-2 border-dashed border-slate-200">
+               <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                  <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                  </svg>
+               </div>
+               <p class="text-slate-400 font-medium">Belum ada antrean cucian</p>
             </div>
+            @endforelse
           </div>
-
-
         </div>
 
         <!-- ── MACHINE STATUS ── -->

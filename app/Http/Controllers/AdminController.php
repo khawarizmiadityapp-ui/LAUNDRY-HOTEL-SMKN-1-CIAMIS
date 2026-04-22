@@ -9,6 +9,7 @@ use App\Models\ServicePrice;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Pengeluaran;
 
 
 class AdminController extends Controller
@@ -17,32 +18,59 @@ class AdminController extends Controller
     public function dashboard()
     {
         if (auth()->user()->role !== 'admin') {
-        abort(403, 'Akses ditolak');
+            abort(403, 'Akses ditolak');
         }
 
         $today = Carbon::today();
+        $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
         
         // Statistik Ringkasan
         $stats = [
+            'total_orders' => Transaksi::count(), // Semua transaksi terdaftar
             'orders_today' => Transaksi::whereDate('created_at', $today)->count(),
-            'processing' => Transaksi::whereIn('status', ['dicuci', 'disortir', 'dikeringkan', 'disetrika'])->count(),
+            'processing' => Transaksi::whereIn('status', ['diterima', 'disortir', 'dicuci', 'dikeringkan', 'disetrika', 'dipacking'])->count(),
             'completed' => Transaksi::where('status', 'selesai')->count(),
-            'income_today' => Transaksi::whereDate('created_at', $today)
-                                ->where('payment_status', 'lunas')
-                                ->sum('total_price'),
-            'income_month' => Transaksi::whereMonth('created_at', $today->month)
-                                ->whereYear('created_at', $today->year)
-                                ->where('payment_status', 'lunas')
-                                ->sum('total_price'),
+            'total_income' => Transaksi::where('payment_status', 'lunas')->sum('total_price'),
+            'total_expense' => \App\Models\Pengeluaran::sum('nominal'),
         ];
 
-        // Transaksi Terbaru (Limit 5)
-        $recentTransactions = Transaksi::with('user')
+        // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
+        $incomeData = Transaksi::select(
+                DB::raw('DATE(created_at) as date'), 
+                DB::raw('SUM(total_price) as total')
+            )
+            ->where('payment_status', 'lunas')
+            ->where('created_at', '>=', $sevenDaysAgo)
+            ->groupBy('date')
+            ->get()
+            ->pluck('total', 'date');
+
+        $expenseData = \App\Models\Pengeluaran::select(
+                DB::raw('DATE(tanggal) as date'), 
+                DB::raw('SUM(nominal) as total')
+            )
+            ->where('tanggal', '>=', $sevenDaysAgo)
+            ->groupBy('date')
+            ->get()
+            ->pluck('total', 'date');
+
+        // Format chart data for JS
+        $chartData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $label = Carbon::now()->subDays($i)->format('D');
+            $chartData['labels'][] = $label;
+            $chartData['income'][] = $incomeData->get($date, 0);
+            $chartData['expense'][] = $expenseData->get($date, 0);
+        }
+
+        // Transaksi Terbaru (Limit 10)
+        $recentTransactions = Transaksi::with(['user', 'details.layanan'])
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentTransactions'));
+        return view('admin.dashboard', compact('stats', 'recentTransactions', 'chartData'));
     }
 
     // 2. Manajemen Transaksi (Index & Search)

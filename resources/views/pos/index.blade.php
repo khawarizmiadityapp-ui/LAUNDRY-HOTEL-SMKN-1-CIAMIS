@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas_piket')
 
 @section('title', 'Buat Pesanan')
 
@@ -102,7 +102,7 @@
 @endpush
 
 @section('content')
-<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-5 -mx-5 lg:-mx-7 -my-5 lg:-my-7 min-h-[calc(100vh-64px)]">
+<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-0 -mx-5 lg:-mx-8 -my-8 h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-hidden">
 
     {{-- ═══════════ LEFT: Service Grid ═══════════ --}}
     <div class="flex-1 p-5 lg:p-7 overflow-y-auto">
@@ -498,6 +498,23 @@
                         </template>
                     </div>
                 </div>
+                <div>
+                    <label class="text-sm font-medium text-slate-700 mb-2 block">Alur Kerja (Workflow) <span class="text-rose-400">*</span></label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                            <input type="checkbox" x-model="serviceForm.needs_washing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
+                            <span class="text-xs font-medium text-slate-700">Mencuci</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                            <input type="checkbox" x-model="serviceForm.needs_ironing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
+                            <span class="text-xs font-medium text-slate-700">Setrika</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                            <input type="checkbox" x-model="serviceForm.needs_packing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
+                            <span class="text-xs font-medium text-slate-700">Packing</span>
+                        </label>
+                    </div>
+                </div>
             </div>
             <div class="px-6 py-4 border-t border-slate-100 flex gap-3 justify-end">
                 <button @click="showServiceModal = false"
@@ -542,7 +559,7 @@ function posApp() {
         // Service management state
         showServiceModal: false,
         savingService: false,
-        serviceForm: { id: null, nama: '', kategori: 'kiloan', harga: '', satuan: '/kg', estimasi: '', icon: 'bolt' },
+        serviceForm: { id: null, nama: '', kategori: 'kiloan', harga: '', satuan: '/kg', estimasi: '', icon: 'bolt', needs_washing: true, needs_ironing: true, needs_packing: true },
 
         init() {
             const d = new Date();
@@ -698,7 +715,7 @@ function posApp() {
 
         // Service Management Methods
         openAddServiceModal() {
-            this.serviceForm = { id: null, nama: '', kategori: 'kiloan', harga: '', satuan: '/kg', estimasi: '', icon: 'bolt' };
+            this.serviceForm = { id: null, nama: '', kategori: 'kiloan', harga: '', satuan: '/kg', estimasi: '', icon: 'bolt', needs_washing: true, needs_ironing: true, needs_packing: true };
             this.showServiceModal = true;
         },
 
@@ -710,7 +727,10 @@ function posApp() {
                 harga: layanan.harga,
                 satuan: layanan.satuan,
                 estimasi: layanan.estimasi || '',
-                icon: layanan.icon || 'bolt'
+                icon: layanan.icon || 'bolt',
+                needs_washing: !!layanan.needs_washing,
+                needs_ironing: !!layanan.needs_ironing,
+                needs_packing: !!layanan.needs_packing,
             };
             this.showServiceModal = true;
         },

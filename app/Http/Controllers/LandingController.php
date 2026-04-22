@@ -27,7 +27,9 @@ class LandingController extends Controller
             'nota_number' => 'required|string|max:50',
         ]);
 
-        $order = Transaksi::where('transaksi_code', $request->nota_number)->first();
+        $order = Transaksi::with(['tasks.petugas', 'details.layanan'])
+            ->where('transaksi_code', $request->nota_number)
+            ->first();
 
         // Beberapa notasi lama mungkin menggunakan huruf kecil, atau jika database schema berbeda
         if (!$order) {

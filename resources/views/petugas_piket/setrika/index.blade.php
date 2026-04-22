@@ -36,10 +36,10 @@
                         <p class="text-sm font-bold text-slate-700 capitalize">{{ $trx->status }}</p>
                     </div>
                     
-                    <form action="{{ route('petugas_piket.tasks.updateStatus', $trx->id) }}" method="POST">
+                    <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST">
                         @csrf
                         {{-- Mark as ready for packing --}}
-                        <input type="hidden" name="status" value="dipacking">
+                        <input type="hidden" name="stage" value="ironing">
                         <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                             Selesai Setrika

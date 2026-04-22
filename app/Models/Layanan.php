@@ -17,11 +17,17 @@ class Layanan extends Model
         'status',
         'badge',
         'icon',
+        'needs_washing',
+        'needs_ironing',
+        'needs_packing',
     ];
 
     protected $casts = [
         'status' => 'boolean',
         'harga'  => 'decimal:2',
+        'needs_washing' => 'boolean',
+        'needs_ironing' => 'boolean',
+        'needs_packing' => 'boolean',
     ];
 
     // Scope: hanya yang aktif

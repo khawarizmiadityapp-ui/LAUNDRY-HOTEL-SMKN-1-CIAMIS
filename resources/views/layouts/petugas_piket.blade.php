@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard petugas_piket') - beninglaundry</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @stack('styles')
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
 
@@ -97,10 +100,29 @@
         @yield('sticky_topbar')
 
         <div class="p-4 md:p-8 space-y-6 max-w-screen-xl mx-auto">
-        <div class="p-6">
-            {{-- INI YANG DIGANTI-GANTI --}}
-            @yield('content')
-        </div>
+            @if(session('notification_link'))
+            <div class="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl shadow-indigo-200 animate-bounce transition-all">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg leading-tight uppercase tracking-tight">Kirim Notifikasi Progress!</p>
+                            <p class="text-indigo-100 text-sm">Tahap pekerjaan telah selesai diperbarui. Beri tahu pelanggan lewat WhatsApp sekarang.</p>
+                        </div>
+                    </div>
+                    <a href="{{ session('notification_link') }}" target="_blank" class="px-6 py-2.5 bg-white text-indigo-600 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-lg whitespace-nowrap">
+                        Notifikasi via WA
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            <div class="p-6">
+                {{-- INI YANG DIGANTI-GANTI --}}
+                @yield('content')
+            </div>
 
 {{-- ======================================================
      FLOATING ACTION BUTTON
@@ -125,6 +147,8 @@
         overlay.classList.toggle('hidden', !isHidden);
     }
 </script>
+
+@stack('scripts')
 
 </body>
 </html>
