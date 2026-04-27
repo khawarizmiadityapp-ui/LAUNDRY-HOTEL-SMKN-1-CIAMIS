@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PosController extends Controller
 {
@@ -105,6 +106,19 @@ class PosController extends Controller
 
         $totalPrice = $subtotal;
 
+        $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+        $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_price');
+
+        if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'items' => 'Pesanan melebihi batas pemasukan bulanan. Sisa kuota pemasukan bulan ini: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
+                ]);
+        }
+
         // Transaction code
         $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
@@ -113,7 +127,7 @@ class PosController extends Controller
         ) {
             $transaksi = Transaksi::create([
                 'transaksi_code' => $transactionCode,
-                'user_id'        => auth()->id(),
+                'user_id'        => Auth::id(),
                 'customer_id'    => $customer->id,
                 'customer_name'  => $customer->nama,
                 'customer_phone' => $customer->no_hp ?? '-',
@@ -141,13 +155,13 @@ class PosController extends Controller
             $needsPacking = $items->filter(fn($l) => $l && ($l->needs_packing === null || $l->needs_packing == true))->isNotEmpty();
 
             if ($needsWashing) {
-                $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['task_type' => 'washing', 'status' => 'pending']);
             }
             if ($needsIroning) {
-                $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['task_type' => 'ironing', 'status' => 'pending']);
             }
             if ($needsPacking) {
-                $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['task_type' => 'packing', 'status' => 'pending']);
             }
         });
 

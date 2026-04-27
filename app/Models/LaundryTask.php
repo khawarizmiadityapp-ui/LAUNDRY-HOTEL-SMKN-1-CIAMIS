@@ -8,17 +8,27 @@ class LaundryTask extends Model
 {
     protected $fillable = [
         'transaksi_id',
-        'stage',
+        'task_type',
         'petugas_id',
         'status',
-        'started_at',
-        'completed_at'
+        'completed_at',
+        'notes'
     ];
 
     protected $casts = [
-        'started_at' => 'datetime',
         'completed_at' => 'datetime'
     ];
+
+    // Backward compatibility: existing views/controllers may still reference $task->stage.
+    public function getStageAttribute()
+    {
+        return $this->task_type;
+    }
+
+    public function setStageAttribute($value)
+    {
+        $this->attributes['task_type'] = $value;
+    }
 
     public function transaksi()
     {

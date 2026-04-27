@@ -57,11 +57,11 @@ Route::post('/update-password', function (Illuminate\Http\Request $request) {
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
 Route::group(['middleware' => ['auth']],function () {
-    
+
     // Dashboard
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/petugas', [PetugasController::class, 'dashboard'])->middleware(['auth'])->name('petugas.dashboard');
-    
+
     // ================= POS (Pesanan Baru) =================
     Route::get('/admin/pos', [PosController::class, 'index'])->name('admin.pos.index');
     Route::get('/petugas/customer-service', [PosController::class, 'index'])->name('petugas.pos.index');
@@ -69,7 +69,7 @@ Route::group(['middleware' => ['auth']],function () {
     Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->name('pos.customer.store');
     Route::post('/pos/order', [PosController::class, 'store'])->name('pos.order.store');
     Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
-    
+
     // Transaksi
     Route::get('/admin/transaksi', [AdminController::class, 'transactions'])->name('admin.transactions.index');
     Route::post('/admin/transaksi', [AdminController::class, 'storeTransaction'])->name('admin.transactions.store');
@@ -99,18 +99,18 @@ Route::group(['middleware' => ['auth']],function () {
 
     //petugas
     Route::get('/admin/petugas', [PetugasController::class, 'index'])->name('admin.petugas.index');
-    
+
     // Laporan
     Route::get('/admin/laporan_keuangan', [LaporanController::class, 'index'])->name('admin.laporan_keuangan.index');
-    
+
     // Export Laporan
     Route::get('/export-transaksi', [TransaksiController::class, 'exportExcel'])->name('export.transaksi.excel');
     Route::get('/export-transaksi-pdf', [TransaksiController::class, 'exportPdf'])->name('export.transaksi.pdf');
-    
+
     // Harga
     Route::get('/admin/prices', [AdminController::class, 'prices'])->name('admin.prices');
     Route::post('/admin/prices', [AdminController::class, 'updatePrices'])->name('admin.prices.update');
-    
+
     // Users
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
@@ -135,6 +135,8 @@ Route::group(['middleware' => ['auth']],function () {
     Route::prefix('admin/inventory')->name('admin.inventory.')->group(function () {
         Route::get('/', [InventoryController::class, 'index'])->name('index');
         Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->name('update');
+        Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->name('request.approve');
+        Route::post('/request/{id}/reject', [InventoryController::class, 'rejectAdjustment'])->name('request.reject');
     });
 
 // ================= PETUGAS =================

@@ -12,6 +12,7 @@
             </span>
             <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Manajemen Inventaris</h1>
             <p class="text-slate-500 mt-1 max-w-lg">Pantau stok bahan cuci, pewangi, dan perlengkapan lainnya secara real-time.</p>
+            <p class="text-xs text-amber-600 mt-2">Setiap perubahan stok dari petugas akan masuk sebagai permintaan dan wajib konfirmasi admin/guru piket.</p>
         </div>
         <div class="flex items-center gap-3">
             <div class="px-4 py-2 bg-white border border-slate-100 rounded-xl shadow-sm">
@@ -82,6 +83,7 @@
                 <div class="mt-5 pt-5 border-t border-slate-50 flex items-center justify-between">
                     <form action="{{ route('petugas_piket.inventory.adjust', $item->id) }}" method="POST" class="flex items-center gap-2">
                         @csrf
+                        <input type="hidden" name="reason" value="Penyesuaian stok oleh petugas {{ auth()->user()->name }}">
                         <button type="submit" name="adjustment" value="-1" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all flex items-center justify-center font-bold"> - </button>
                         <span class="text-sm font-bold text-slate-700 min-w-[20px] text-center">{{ $item->quantity }}</span>
                         <button type="submit" name="adjustment" value="1" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex items-center justify-center font-bold"> + </button>

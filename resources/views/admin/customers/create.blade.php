@@ -25,7 +25,7 @@
             </div>
             <div>
                 <label for="no_hp" class="block text-sm font-semibold text-slate-700 mb-1.5">No. Telepon (WA)</label>
-                <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp') }}" required
+                <input type="tel" id="no_hp" name="no_hp" @input="no_hp = no_hp.replace(/[^0-9]/g, '')" value="{{ old('no_hp') }}" inputmode="numeric" required
                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none">
             </div>
         </div>

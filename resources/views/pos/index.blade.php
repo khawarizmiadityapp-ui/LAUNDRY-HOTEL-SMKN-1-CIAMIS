@@ -347,7 +347,7 @@
                 <button @click="paymentStatus = 'belum_bayar'"
                         :class="paymentStatus === 'belum_bayar' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-white text-slate-500 border-slate-200'"
                         class="flex-1 py-2 text-sm font-medium border rounded-xl transition">
-                    Deposit
+                    belum bayar
                 </button>
                 <button @click="paymentStatus = 'lunas'"
                         :class="paymentStatus === 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-white text-slate-500 border-slate-200'"
@@ -406,7 +406,7 @@
                 </div>
                 <div>
                     <label class="text-sm font-medium text-slate-700 mb-1 block">Nomor HP <span class="text-rose-400">*</span></label>
-                    <input type="text" x-model="newCustomer.no_hp" placeholder="Contoh: 08123xxx"
+                    <input type="tel" x-model="newCustomer.no_hp" @input="newCustomer.no_hp = newCustomer.no_hp.replace(/[^0-9]/g, '')" placeholder="Contoh: 08123xxx" inputmode="numeric"
                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 placeholder:text-slate-300">
                 </div>
                 <div>

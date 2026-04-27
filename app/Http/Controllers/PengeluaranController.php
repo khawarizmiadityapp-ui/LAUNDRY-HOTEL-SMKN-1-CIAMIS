@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pengeluaran;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class PengeluaranController extends Controller
 {
@@ -47,7 +48,7 @@ class PengeluaranController extends Controller
         ];
 
         // Daftar kategori unik untuk filter
-        $kategoriList = Pengeluaran::distinct()->orderBy('kategori')->pluck('kategori');
+        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
 
         return view('admin.pengeluaran.index', compact(
             'pengeluarans',
@@ -63,7 +64,7 @@ class PengeluaranController extends Controller
     public function create()
     {
         $idTransaksi  = Pengeluaran::generateIdTransaksi();
-        $kategoriList = Pengeluaran::distinct()->orderBy('kategori')->pluck('kategori');
+        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
 
         return view('admin.pengeluaran.create', compact('idTransaksi', 'kategoriList'));
     }
@@ -73,14 +74,19 @@ class PengeluaranController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:255',
-            'kategori'   => 'required|string|max:100',
+            'kategori'   => 'required|in:' . implode(',', Pengeluaran::KATEGORI_DIIZINKAN),
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
             'status'     => 'required|in:lunas,pending,urgent',
+            'bon_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         $validated['id_transaksi'] = Pengeluaran::generateIdTransaksi();
+
+        if ($request->hasFile('bon_file')) {
+            $validated['bon_file'] = $request->file('bon_file')->store('bon-pengeluaran', 'public');
+        }
 
         Pengeluaran::create($validated);
 
@@ -97,7 +103,7 @@ class PengeluaranController extends Controller
     // ─── EDIT ───────────────────────────────────────────────────────────
     public function edit(Pengeluaran $pengeluaran)
     {
-        $kategoriList = Pengeluaran::distinct()->orderBy('kategori')->pluck('kategori');
+        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
         return view('admin.pengeluaran.edit', compact('pengeluaran', 'kategoriList'));
     }
 
@@ -106,12 +112,20 @@ class PengeluaranController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:255',
-            'kategori'   => 'required|string|max:100',
+            'kategori'   => 'required|in:' . implode(',', Pengeluaran::KATEGORI_DIIZINKAN),
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
             'status'     => 'required|in:lunas,pending,urgent',
+            'bon_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
+
+        if ($request->hasFile('bon_file')) {
+            if ($pengeluaran->bon_file) {
+                Storage::disk('public')->delete($pengeluaran->bon_file);
+            }
+            $validated['bon_file'] = $request->file('bon_file')->store('bon-pengeluaran', 'public');
+        }
 
         $pengeluaran->update($validated);
 
@@ -122,6 +136,10 @@ class PengeluaranController extends Controller
     // ─── DESTROY ────────────────────────────────────────────────────────
     public function destroy(Pengeluaran $pengeluaran)
     {
+        if ($pengeluaran->bon_file) {
+            Storage::disk('public')->delete($pengeluaran->bon_file);
+        }
+
         $pengeluaran->delete();
 
         return redirect()->route('admin.pengeluaran.index')

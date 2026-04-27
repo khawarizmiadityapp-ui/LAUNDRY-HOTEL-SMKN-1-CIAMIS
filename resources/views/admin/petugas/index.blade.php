@@ -198,31 +198,19 @@
 
 <script>
     function petugasManager() {
+        const initialPetugas = @json($petugasData ?? []);
+
         return {
             petugasList: [],
             activeFilter: 'Semua',
             searchQuery: '',
             currentPage: 1,
             perPage: 5,
-            modalMode: null // 'add' | 'detail' | 'edit'
-            selectedPetugas: null
-            newPetugas: { nama: '', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' },
-            
+            modalMode: null, // 'add' | 'detail' | 'edit'
+            selectedPetugas: null,
+
             async initData() {
-                this.petugasList = [
-                    { id: 1, nama: 'Ahmad Subarjo', idPetugas: 'STF-0012', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' },
-                    { id: 2, nama: 'Rina Wijaya', idPetugas: 'STF-0019', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' },
-                    { id: 3, nama: 'Siti Aminah', idPetugas: 'STF-0045', role: 'Admin', status: 'Aktif', shift: '16:00 - 00:00' },
-                    { id: 4, nama: 'Dedi Kurniawan', idPetugas: 'STF-0078', role: 'Admin', status: 'Aktif', shift: '08:00 - 16:00' },
-                    { id: 5, nama: 'Budi Santoso', idPetugas: 'STF-0021', role: 'Operasional', status: 'Off Duty', shift: 'Shift Bergantian' },
-                    { id: 6, nama: 'Andi Kuriawan', idPetugas: 'STF-0091', role: 'Kurir', status: 'Aktif', shift: '07:00 - 15:00' },
-                    { id: 7, nama: 'Lina Marlina', idPetugas: 'STF-0102', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' },
-                    { id: 8, nama: 'Rudi Hermawan', idPetugas: 'STF-0113', role: 'Admin', status: 'Off Duty', shift: '16:00 - 00:00' },
-                    { id: 9, nama: 'Tono Wibowo', idPetugas: 'STF-0124', role: 'Kurir', status: 'Aktif', shift: '07:00 - 15:00' },
-                    { id: 10, nama: 'Mega Sari', idPetugas: 'STF-0135', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' },
-                    { id: 11, nama: 'Bagus Prasetyo', idPetugas: 'STF-0146', role: 'Kurir', status: 'Off Duty', shift: '07:00 - 15:00' },
-                    { id: 12, nama: 'Cindy Aulia', idPetugas: 'STF-0157', role: 'Admin', status: 'Aktif', shift: '16:00 - 00:00' }
-                ];
+                this.petugasList = Array.isArray(initialPetugas) ? initialPetugas : [];
             },
 
             get filteredData() {
@@ -243,26 +231,26 @@
             prevPage() { if (this.currentPage > 1) this.currentPage--; },
             nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
 
-            openAddModal() { 
-                this.selectedPetugas = { nama: '', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' }; 
+            openAddModal() {
+                this.selectedPetugas = { nama: '', role: 'Operasional', status: 'Aktif', shift: '08:00 - 16:00' };
                 this.modalMode = 'add';
             },
             saveNewPetugas() {
                 const newId = Math.max(...this.petugasList.map(p => p.id), 0) + 1;
                 const newIdPetugas = 'STF-' + String(1000 + newId).slice(-4);
-                this.petugasList.push({ id: newId, ...this.newPetugas, idPetugas: newIdPetugas });
-                this.modalMode = null;
+                this.petugasList.push({ id: newId, ...this.selectedPetugas, idPetugas: newIdPetugas });
+                this.closeModal();
                 alert('Petugas berhasil ditambahkan!');
             },
-            editPetugas(petugas) { 
+            editPetugas(petugas) {
                 this.selectedPetugas = { ...petugas };
                 this.modalMode = 'edit';
             },
-            detailPetugas(petugas) { 
+            detailPetugas(petugas) {
                 this.selectedPetugas = petugas ;
                 this.modalMode = 'detail';
             },
-            closeModals() {closeModal() {
+            closeModal() {
                 this.modalMode = null;
                 this.selectedPetugas = null;
             },

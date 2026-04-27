@@ -282,6 +282,25 @@
             justify-content: center;
             margin-top: 8px;
         }
+
+        .wet-stamp {
+            margin-top: 1rem;
+            margin-left: auto;
+            width: 124px;
+            height: 124px;
+            border: 3px dashed rgba(30, 64, 175, 0.5);
+            border-radius: 999px;
+            color: rgba(30, 64, 175, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.66rem;
+            font-weight: 800;
+            line-height: 1.35;
+            letter-spacing: 0.05em;
+            transform: rotate(-12deg);
+        }
     </style>
 </head>
 <body>
@@ -416,6 +435,12 @@
                 <span class="badge badge-info" style="text-transform:uppercase;">
                     {{ $transaksi->payment_method }}
                 </span>
+            </div>
+
+            <div class="wet-stamp">
+                BENING LAUNDRY<br>
+                CAP BASAH<br>
+                {{ now()->format('d/m/Y') }}
             </div>
 
             @if($transaksi->notes)

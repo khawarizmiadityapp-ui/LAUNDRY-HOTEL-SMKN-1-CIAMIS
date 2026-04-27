@@ -4,15 +4,39 @@ namespace App\Http\Controllers;
 
 use App\Models\Petugas;
 use App\Models\Transaksi;
+use App\Models\InventoryAdjustmentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PetugasController extends Controller
 {
+    private function ensureStaffDivisionAccess(array $allowedDivisions): void
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'Akses ditolak');
+        }
+
+        if ($user->role === 'admin') {
+            return;
+        }
+
+        if ($user->role !== 'staff') {
+            abort(403, 'Akses ditolak');
+        }
+
+        $division = strtolower((string) $user->division);
+        if (!in_array($division, $allowedDivisions, true)) {
+            abort(403, 'Akun Anda tidak memiliki akses ke modul ini.');
+        }
+    }
+
     // Dashboard untuk Petugas Piket
     public function dashboard()
     {
-        if (auth()->user()->role !== 'staff') {
+        if (Auth::user()->role !== 'staff') {
             abort(403, 'Akses ditolak');
         }
 
@@ -21,13 +45,28 @@ class PetugasController extends Controller
     // Menampilkan halaman Blade
     public function index()
     {
-        return view('admin.petugas.index');
+        $petugas = Petugas::orderBy('nama')->get();
+
+        $petugasData = $petugas->map(function (Petugas $item) {
+            return [
+                'id' => $item->id,
+                'nama' => $item->nama,
+                'idPetugas' => $item->id_petugas,
+                'role' => $item->role,
+                'status' => $item->status,
+                'shift' => $item->shift,
+            ];
+        })->values();
+
+        return view('admin.petugas.index', [
+            'petugasData' => $petugasData,
+        ]);
     }
 
     // API: ambil semua data petugas
     public function apiIndex()
     {
-        $petugas = Petugas::all();
+        $petugas = Petugas::orderBy('nama')->get();
         return response()->json($petugas);
     }
 
@@ -45,7 +84,17 @@ class PetugasController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $petugas = Petugas::create($request->only(['nama', 'role', 'status', 'shift']));
+        $nextId = ((int) Petugas::max('id')) + 1;
+        $idPetugas = 'STF-' . str_pad((string) $nextId, 4, '0', STR_PAD_LEFT);
+
+        $petugas = Petugas::create([
+            'nama' => $request->nama,
+            'id_petugas' => $idPetugas,
+            'role' => $request->role,
+            'status' => $request->status,
+            'shift' => $request->shift,
+        ]);
+
         return response()->json($petugas, 201);
     }
 
@@ -80,10 +129,12 @@ class PetugasController extends Controller
     // Halaman Washing
     public function washing()
     {
+        $this->ensureStaffDivisionAccess(['washing']);
+
         // Ambil transaksi yang memiliki task 'washing' dengan status 'pending'
-        $transactions = Transaksi::whereHas('tasks', function($q) {
-            $q->where('stage', 'washing')->where('status', 'pending');
-        })->with(['tasks', 'details.layanan'])->get();
+        $transactions = Transaksi::whereHas('pos', function($q) {
+            $q->where('task_type', 'washing')->where('status', 'pending');
+        })->with(['pos', 'details.layanan'])->get();
 
         return view('petugas_piket.washing.index', compact('transactions'));
     }
@@ -91,18 +142,20 @@ class PetugasController extends Controller
     // Halaman Setrika
     public function setrika()
     {
-        $transactions = Transaksi::whereHas('tasks', function($q) {
-            $q->where('stage', 'ironing')->where('status', 'pending');
+        $this->ensureStaffDivisionAccess(['ironing', 'setrika']);
+
+        $transactions = Transaksi::whereHas('pos', function($q) {
+            $q->where('task_type', 'ironing')->where('status', 'pending');
         })
         ->where(function($query) {
-            $query->whereDoesntHave('tasks', function($q) {
-                $q->where('stage', 'washing');
+            $query->whereDoesntHave('pos', function($q) {
+                $q->where('task_type', 'washing');
             })
-            ->orWhereHas('tasks', function($q) {
-                $q->where('stage', 'washing')->where('status', 'completed');
+            ->orWhereHas('pos', function($q) {
+                $q->where('task_type', 'washing')->where('status', 'completed');
             });
         })
-        ->with(['tasks', 'details.layanan'])->get();
+        ->with(['pos', 'details.layanan'])->get();
 
         return view('petugas_piket.setrika.index', compact('transactions'));
     }
@@ -110,18 +163,20 @@ class PetugasController extends Controller
     // Halaman Packing
     public function packing()
     {
-        $transactions = Transaksi::whereHas('tasks', function($q) {
-            $q->where('stage', 'packing')->where('status', 'pending');
+        $this->ensureStaffDivisionAccess(['packing']);
+
+        $transactions = Transaksi::whereHas('pos', function($q) {
+            $q->where('task_type', 'packing')->where('status', 'pending');
         })
         ->where(function($query) {
-            $query->whereDoesntHave('tasks', function($q) {
-                $q->where('stage', 'ironing');
+            $query->whereDoesntHave('pos', function($q) {
+                $q->where('task_type', 'ironing');
             })
-            ->orWhereHas('tasks', function($q) {
-                $q->where('stage', 'ironing')->where('status', 'completed');
+            ->orWhereHas('pos', function($q) {
+                $q->where('task_type', 'ironing')->where('status', 'completed');
             });
         })
-        ->with(['tasks', 'details.layanan'])->get();
+        ->with(['pos', 'details.layanan'])->get();
 
         return view('petugas_piket.packing.index', compact('transactions'));
     }
@@ -138,14 +193,14 @@ class PetugasController extends Controller
 
         $transaksi = Transaksi::findOrFail($transaksiId);
         $stage = $request->stage;
-        
+
         // Cari task yang sesuai
-        $task = $transaksi->tasks()->where('stage', $stage)->first();
-        
+        $task = $transaksi->tasks()->where('task_type', $stage)->first();
+
         if ($task) {
             $task->update([
                 'status' => 'completed',
-                'petugas_id' => auth()->id(),
+                'petugas_id' => Auth::id(),
                 'completed_at' => now(),
             ]);
 
@@ -205,6 +260,8 @@ class PetugasController extends Controller
     // Halaman Inventory
     public function inventory()
     {
+        $this->ensureStaffDivisionAccess(['inventory']);
+
         $inventory = \App\Models\Inventory::all()->groupBy('category');
         return view('petugas_piket.inventory.index', compact('inventory'));
     }
@@ -212,13 +269,32 @@ class PetugasController extends Controller
     // Update stok inventory dari portal petugas
     public function adjustInventory(Request $request, $id)
     {
+        $this->ensureStaffDivisionAccess(['inventory']);
+
+        $request->validate([
+            'adjustment' => 'required|integer|not_in:0',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
         $item = \App\Models\Inventory::findOrFail($id);
         $adjustment = (int) $request->adjustment;
-        
-        $item->quantity = max(0, $item->quantity + $adjustment);
-        $item->save();
 
-        return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
+        if (Auth::user()->role === 'admin') {
+            $item->quantity = max(0, $item->quantity + $adjustment);
+            $item->save();
+
+            return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
+        }
+
+        InventoryAdjustmentRequest::create([
+            'inventory_id' => $item->id,
+            'requested_by' => Auth::id(),
+            'adjustment' => $adjustment,
+            'reason' => $request->reason,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->back()->with('success', "Permintaan perubahan stok {$item->name} dikirim ke admin/guru piket untuk konfirmasi.");
     }
 
     // Halaman History

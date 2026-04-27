@@ -58,26 +58,21 @@
                 Menampilkan {{ $customers->firstItem() }}–{{ $customers->lastItem() }} dari {{ number_format($customers->total()) }} customer
             </p>
         </div>
-        <div class="flex items-center gap-2">
-            {{-- Filter --}}
-            <button class="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl
-                           text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all duration-200">
-                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
-                </svg>
-                Filter
+        <form method="GET" action="{{ route('admin.customers.index') }}" class="flex items-center gap-2">
+            <input type="text"
+                   name="search"
+                   value="{{ $search ?? '' }}"
+                   placeholder="Cari nama customer..."
+                   class="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-200">
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all duration-200">
+                Cari
             </button>
-            {{-- Export --}}
-            <button class="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl
-                           text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all duration-200">
-                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Export
-            </button>
-        </div>
+            @if(!empty($search))
+                <a href="{{ route('admin.customers.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all duration-200">
+                    Reset
+                </a>
+            @endif
+        </form>
     </div>
 
     {{-- Table --}}

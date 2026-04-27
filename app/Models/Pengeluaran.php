@@ -9,6 +9,12 @@ class Pengeluaran extends Model
 {
     use HasFactory;
 
+    public const KATEGORI_DIIZINKAN = [
+        'Operasional',
+        'Bahan Kimia & Sabun',
+        'Listrik & Air',
+    ];
+
     protected $table = 'pengeluarans';
 
     protected $fillable = [
@@ -19,6 +25,7 @@ class Pengeluaran extends Model
         'tanggal',
         'nominal',
         'status',
+        'bon_file',
     ];
 
     protected $casts = [

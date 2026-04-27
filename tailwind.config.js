@@ -1,7 +1,7 @@
 // tailwind.config.js
 // Tailwind CSS v3.4+ config untuk LaundryPro
 
-import defaultTheme from 'tailwindcss/defaultTheme'
+
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -15,7 +15,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+                sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui'],
             },
 
             // Warna custom untuk badge dan aksen laundry

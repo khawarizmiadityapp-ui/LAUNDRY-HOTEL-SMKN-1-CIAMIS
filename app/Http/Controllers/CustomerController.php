@@ -12,10 +12,19 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
+        $search = trim((string) $request->get('search', ''));
+
         $customers = Customer::withCount('transaksis as total_order')
             ->withMax('transaksis as terakhir_transaksi', 'created_at')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('no_hp', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $stats = [
             'total_customer'  => Customer::count(),
@@ -24,7 +33,7 @@ class CustomerController extends Controller
             })->count(),
         ];
 
-        return view('admin.customers.index', compact('customers', 'stats'));
+        return view('admin.customers.index', compact('customers', 'stats', 'search'));
     }
 
     /**

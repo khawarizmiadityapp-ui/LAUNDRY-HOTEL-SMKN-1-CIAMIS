@@ -16,7 +16,7 @@ class LoginController extends Controller
 
     // Memproses login
     public function login(Request $request)
-    {   
+    {
     $credentials = $request->validate([
         'email' => ['required', 'email'],
         'password' => ['required'],
@@ -31,7 +31,16 @@ class LoginController extends Controller
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role === 'staff') {
-                return redirect()->route('petugas_piket.dashboard');
+                $division = strtolower((string) $user->division);
+
+                return match ($division) {
+                    'washing' => redirect()->route('petugas_piket.washing.index'),
+                    'ironing', 'setrika' => redirect()->route('petugas_piket.setrika.index'),
+                    'packing' => redirect()->route('petugas_piket.packing.index'),
+                    'customer_service' => redirect()->route('petugas.pos.index'),
+                    'inventory' => redirect()->route('petugas_piket.inventory.index'),
+                    default => redirect()->route('petugas_piket.dashboard'),
+                };
             }
 
             // fallback

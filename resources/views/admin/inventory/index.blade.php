@@ -31,6 +31,40 @@
         </p>
     </div>
 
+    @if(isset($pendingRequests) && $pendingRequests->isNotEmpty())
+    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-amber-800 uppercase tracking-wider">Permintaan Konfirmasi Stok</h2>
+            <span class="text-xs font-semibold text-amber-700">{{ $pendingRequests->count() }} pending</span>
+        </div>
+        <div class="space-y-3">
+            @foreach($pendingRequests as $requestItem)
+            <div class="bg-white border border-amber-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">{{ $requestItem->inventory->name ?? 'Item' }}
+                        <span class="text-xs text-slate-500">({{ $requestItem->adjustment > 0 ? '+' : '' }}{{ $requestItem->adjustment }})</span>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">Diminta oleh: {{ $requestItem->requester->name ?? '-' }} • {{ $requestItem->created_at->diffForHumans() }}</p>
+                    @if($requestItem->reason)
+                        <p class="text-xs text-slate-500">Alasan: {{ $requestItem->reason }}</p>
+                    @endif
+                </div>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('admin.inventory.request.approve', $requestItem->id) }}">
+                        @csrf
+                        <button type="submit" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Setujui</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.inventory.request.reject', $requestItem->id) }}">
+                        @csrf
+                        <button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 text-white text-xs font-semibold">Tolak</button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- 3-column grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
@@ -231,7 +265,7 @@ function updateQty(id, type) {
         if (data.success) {
             const el = document.getElementById('qty' + id);
             const elDisp = document.getElementById('qty-disp-' + id);
-            
+
             if (el) {
                 if (el.classList.contains('font-mono')) {
                     el.innerText = String(data.qty).padStart(2, '0');

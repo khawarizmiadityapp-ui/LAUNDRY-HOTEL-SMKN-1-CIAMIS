@@ -154,6 +154,7 @@
                     <th class="text-left px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Kategori</th>
                     <th class="text-left px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Tanggal</th>
                     <th class="text-right px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Nominal</th>
+                    <th class="text-left px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Bon</th>
                     <th class="text-center px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Status</th>
                     <th class="text-center px-6 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -189,6 +190,15 @@
                     {{-- Nominal --}}
                     <td class="px-4 py-4 text-right font-600 text-gray-800 tabular-nums">
                         {{ rupiah($item->nominal) }}
+                    </td>
+
+                    {{-- Bon --}}
+                    <td class="px-4 py-4">
+                        @if($item->bon_file)
+                            <a href="{{ asset('storage/' . $item->bon_file) }}" target="_blank" class="text-xs font-600 text-brand-600 hover:underline">Lihat Bon</a>
+                        @else
+                            <span class="text-xs text-gray-400">-</span>
+                        @endif
                     </td>
 
                     {{-- Status --}}
@@ -247,7 +257,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-16 text-gray-400">
+                    <td colspan="8" class="text-center py-16 text-gray-400">
                         <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>

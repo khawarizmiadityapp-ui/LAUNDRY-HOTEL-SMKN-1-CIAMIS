@@ -10,10 +10,12 @@ class Petugas extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nama', 'role', 'no_hp', 'email', 'password'
+        'nama',
+        'id_petugas',
+        'role',
+        'status',
+        'shift',
     ];
-
-    protected $hidden = ['password'];
 
     public function transaksis()
     {

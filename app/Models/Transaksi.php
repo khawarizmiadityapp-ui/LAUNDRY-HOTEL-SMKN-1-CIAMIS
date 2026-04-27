@@ -13,16 +13,16 @@ class Transaksi extends Model
 
     protected $fillable = [
         'transaksi_code',
-        'user_id', 
-        'customer_id', 
+        'user_id',
+        'customer_id',
         'customer_name',
         'customer_phone',
-        'service_type', 
-        'weight', 
-        'price_per_kg', 
+        'service_type',
+        'weight',
+        'price_per_kg',
         'total_price',
-        'status', 
-        'payment_status', 
+        'status',
+        'payment_status',
         'payment_method',
         'notes'
     ];
@@ -46,6 +46,12 @@ class Transaksi extends Model
     }
 
     // Relasi ke Tracking Tasks
+    public function pos()
+    {
+        return $this->hasMany(LaundryTask::class);
+    }
+
+    // Alias relasi untuk kompatibilitas pemanggilan tasks()
     public function tasks()
     {
         return $this->hasMany(LaundryTask::class);

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Inventory;
+use App\Models\InventoryAdjustmentRequest;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
@@ -16,13 +18,19 @@ class InventoryController extends Controller
 
         $totalItems = Inventory::sum('quantity');
         $lowStock = Inventory::where('quantity', '<', 20)->count();
+        $pendingRequests = InventoryAdjustmentRequest::with(['inventory', 'requester'])
+            ->where('status', 'pending')
+            ->latest()
+            ->take(10)
+            ->get();
 
         return view('admin.inventory.index', compact(
             'detergents',
             'fragrances',
             'hangers',
             'totalItems',
-            'lowStock'
+            'lowStock',
+            'pendingRequests'
         ));
     }
 
@@ -47,5 +55,35 @@ class InventoryController extends Controller
             'success' => true,
             'qty' => $item->quantity
         ]);
+    }
+
+    public function approveAdjustment($id)
+    {
+        $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->findOrFail($id);
+        $item = Inventory::findOrFail($requestAdjust->inventory_id);
+
+        $item->quantity = max(0, $item->quantity + $requestAdjust->adjustment);
+        $item->save();
+
+        $requestAdjust->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Permintaan stok disetujui dan stok sudah diperbarui.');
+    }
+
+    public function rejectAdjustment($id)
+    {
+        $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->findOrFail($id);
+
+        $requestAdjust->update([
+            'status' => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Permintaan stok ditolak.');
     }
 }

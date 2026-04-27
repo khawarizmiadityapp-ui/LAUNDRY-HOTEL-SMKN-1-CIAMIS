@@ -14,13 +14,15 @@
         <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" class="flex flex-wrap items-center gap-3">
         <div class="flex flex-wrap items-center gap-3">
             <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                <button name="filter" value="bulanan"
-                class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white shadow-sm transition,{{ $filter == 'bulanan' ? 'bg-blue-500 text-white' : '' }}
+                <button type="submit" name="filter" value="bulanan"
+                class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white shadow-sm transition {{ $filter == 'bulanan' ? 'bg-blue-500 text-white' : '' }}
                 ">Bulanan</button>
-                <button name="filter" value="tahunan"
-                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Tahunan</button>
-                <button name="filter" value="custom"
-                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Custom</button>
+                <button type="submit" name="filter" value="tahunan"
+                class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : '' }}"
+                >Tahunan</button>
+                <button type="submit" name="filter" value="custom"
+                class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : '' }}"
+                >Custom</button>
             </div>
             <a href="{{ route('export.transaksi.excel') }}" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
                 <i class="fas fa-file-excel"></i> Export Excel
@@ -30,6 +32,7 @@
                 <i class="fas fa-file-pdf"></i> Export PDF
             </a>
         </div>
+        </form>
     </div>
 
     <!-- Statistik Cards (3) -->
@@ -72,6 +75,22 @@
                     <i class="fas fa-chart-pie text-white text-xl"></i>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Target Pemasukan Bulanan -->
+    <div class="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+            <div>
+                <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Bulan Ini</h3>
+                <p class="text-sm text-gray-500">Target: Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} • Realisasi: Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                {{ number_format($persenTargetBulanIni, 2) }}%
+            </span>
+        </div>
+        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-500' : 'bg-blue-600' }}" style="width: {{ min(100, $persenTargetBulanIni) }}%"></div>
         </div>
     </div>
 
@@ -153,6 +172,35 @@
             </div>
         </div>
     </div>
+
+            <table class="min-w-full bg-white border mt-6">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 border">Bulan</th>
+                    <th class="px-4 py-2 border">Tahun</th>
+                    <th class="px-4 py-2 border">Pemasukan</th>
+                    <th class="px-4 py-2 border">Pengeluaran</th>
+                    <th class="px-4 py-2 border">Laba</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($laporanBulanan as $data)
+                <tr>
+                    <td class="border px-4 py-2">{{ $data['bulan'] }}</td>
+                    <td class="border px-4 py-2">{{ $data['tahun'] }}</td>
+                    <td class="border px-4 py-2 text-green-600">
+                        Rp {{ number_format($data['pemasukan'],0,',','.') }}
+                    </td>
+                    <td class="border px-4 py-2 text-red-600">
+                        Rp {{ number_format($data['pengeluaran'],0,',','.') }}
+                    </td>
+                    <td class="border px-4 py-2 font-bold">
+                        Rp {{ number_format($data['laba'],0,',','.') }}
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
 
     <!-- Detail Transaksi Terbaru -->
     <div class="bg-white rounded-2xl shadow-md p-5">

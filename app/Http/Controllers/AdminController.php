@@ -9,6 +9,7 @@ use App\Models\ServicePrice;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Pengeluaran;
 
 
@@ -17,13 +18,13 @@ class AdminController extends Controller
     // 1. Dashboard Utama (Statistik)
     public function dashboard()
     {
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             abort(403, 'Akses ditolak');
         }
 
         $today = Carbon::today();
         $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
-        
+
         // Statistik Ringkasan
         $stats = [
             'total_orders' => Transaksi::count(), // Semua transaksi terdaftar
@@ -36,7 +37,7 @@ class AdminController extends Controller
 
         // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
         $incomeData = Transaksi::select(
-                DB::raw('DATE(created_at) as date'), 
+                DB::raw('DATE(created_at) as date'),
                 DB::raw('SUM(total_price) as total')
             )
             ->where('payment_status', 'lunas')
@@ -46,7 +47,7 @@ class AdminController extends Controller
             ->pluck('total', 'date');
 
         $expenseData = \App\Models\Pengeluaran::select(
-                DB::raw('DATE(tanggal) as date'), 
+                DB::raw('DATE(tanggal) as date'),
                 DB::raw('SUM(nominal) as total')
             )
             ->where('tanggal', '>=', $sevenDaysAgo)
@@ -114,15 +115,26 @@ class AdminController extends Controller
         // Ambil Harga dari Database
         $price = ServicePrice::where('service_type', $request->service_type)->first();
         $pricePerKg = $price ? $price->price_per_kg : 6000; // Fallback harga
-        
+
         $totalPrice = $request->weight * $pricePerKg;
+
+        $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+        $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_price');
+
+        if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
+            return redirect()->back()->withErrors([
+                'weight' => 'Transaksi melebihi batas pemasukan bulanan. Sisa kuota: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
+            ])->withInput();
+        }
 
         // Generate Kode Transaksi Unik
         $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
         Transaksi::create([
             'transaksi_code' => $transactionCode,
-            'user_id' => auth()->id(), // Petugas yang input
+            'user_id' => Auth::id(), // Petugas yang input
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'service_type' => $request->service_type,
@@ -172,7 +184,7 @@ class AdminController extends Controller
     public function reports(Request $request)
     {
         $today = Carbon::today();
-        
+
         // Filter Tanggal (Opsional)
         $startDate = $request->start_date ?? $today->copy()->startOfMonth();
         $endDate = $request->end_date ?? $today;
@@ -188,7 +200,7 @@ class AdminController extends Controller
 
         // Data untuk Chart (Pendapatan 7 hari terakhir)
         $chartData = Transaksi::select(
-                DB::raw('DATE(created_at) as date'), 
+                DB::raw('DATE(created_at) as date'),
                 DB::raw('SUM(total_price) as total')
             )
             ->where('payment_status', 'lunas')
@@ -238,6 +250,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
             'role' => 'required|in:admin,staff',
+            'division' => 'nullable|required_if:role,staff|in:washing,ironing,packing,customer_service,inventory',
         ]);
 
         User::create([
@@ -245,6 +258,7 @@ class AdminController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'role' => $request->role,
+            'division' => $request->role === 'staff' ? $request->division : null,
         ]);
 
         return redirect()->back()->with('success', 'Pengguna berhasil ditambahkan!');

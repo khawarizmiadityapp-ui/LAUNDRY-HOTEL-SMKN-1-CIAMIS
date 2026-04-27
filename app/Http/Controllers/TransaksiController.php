@@ -20,16 +20,28 @@ class TransaksiController extends Controller
     ]);
 
     $price = $request->service_type == 'express' ? 7000 : 5000;
+    $totalPrice = $request->weight * $price;
+
+    $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+    $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->sum('total_price');
+
+    if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
+        return back()->withErrors([
+            'weight' => 'Transaksi melebihi batas pemasukan bulanan. Sisa kuota: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
+        ])->withInput();
+    }
 
     Transaksi::create([
         'transaksi_code' => 'TRX-' . time(),
-        'user_id' => auth()->id(), 
+        'user_id' => auth()->id(),
         'customer_name' => $request->customer_name,
         'customer_phone' => $request->customer_phone,
         'service_type' => $request->service_type,
         'weight' => $request->weight,
         'price_per_kg' => $price,
-        'total_price' => $request->weight * $price,
+        'total_price' => $totalPrice,
         'status' => 'diterima',
         'payment_status' => 'belum_lunas',
         'notes' => $request->notes
