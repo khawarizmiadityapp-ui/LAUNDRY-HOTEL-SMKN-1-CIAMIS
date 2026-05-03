@@ -20,6 +20,12 @@ class PosController extends Controller
         $layanans  = Layanan::aktif()->orderBy('kategori')->orderBy('nama')->get();
         $kategoris = Layanan::aktif()->distinct()->pluck('kategori');
 
+        // Fetch transactions ready for pickup (status 'selesai')
+        $readyToPickup = Transaksi::where('status', 'selesai')
+            ->with(['details.layanan'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
         // Pre-format data for Alpine.js (avoid arrow functions in Blade @json)
         $layanansJson = $layanans->map(function ($l) {
             return [
@@ -34,7 +40,7 @@ class PosController extends Controller
             ];
         });
 
-        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson'));
+        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup'));
     }
 
     /**
@@ -155,13 +161,13 @@ class PosController extends Controller
             $needsPacking = $items->filter(fn($l) => $l && ($l->needs_packing === null || $l->needs_packing == true))->isNotEmpty();
 
             if ($needsWashing) {
-                $transaksi->tasks()->create(['task_type' => 'washing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
             }
             if ($needsIroning) {
-                $transaksi->tasks()->create(['task_type' => 'ironing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
             }
             if ($needsPacking) {
-                $transaksi->tasks()->create(['task_type' => 'packing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
             }
         });
 
@@ -181,5 +187,24 @@ class PosController extends Controller
         $totalTagihan  = $transaksi->total_price;
 
         return view('pos.nota', compact('transaksi', 'subtotal', 'totalTagihan'));
+    }
+
+    /**
+     * Mark transaction as picked up.
+     */
+    public function pickup(Request $request, $id)
+    {
+        $transaksi = Transaksi::findOrFail($id);
+        
+        if ($transaksi->status !== 'selesai') {
+            return back()->with('error', 'Pesanan belum selesai diproses.');
+        }
+
+        $transaksi->update([
+            'status' => 'diambil',
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success', "Pesanan #{$transaksi->transaksi_code} berhasil ditandai sebagai sudah diambil.");
     }
 }

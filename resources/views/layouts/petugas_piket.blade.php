@@ -146,6 +146,15 @@
         sidebar.classList.toggle('-translate-x-full', !isHidden);
         overlay.classList.toggle('hidden', !isHidden);
     }
+
+    // Otomatis buka link WA jika ada
+    @if(session('notification_link'))
+        window.onload = function() {
+            setTimeout(function() {
+                window.location.href = "{!! session('notification_link') !!}";
+            }, 1000);
+        };
+    @endif
 </script>
 
 @stack('scripts')

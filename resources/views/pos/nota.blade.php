@@ -458,5 +458,28 @@
         </div>
     </div>
 
+    {{-- Automation Script --}}
+    @if(session('success'))
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                // 1. Ambil link WA
+                const waLink = document.querySelector('a[href^="https://wa.me/"]');
+                
+                // 2. Trigger Print (Ini akan menahan eksekusi JS sampai dialog print ditutup/selesai)
+                window.print();
+
+                // 3. Setelah dialog print selesai, alihkan halaman ini langsung ke WhatsApp
+                // Menggunakan window.location.href mencegah terblokirnya popup oleh browser
+                if (waLink) {
+                    setTimeout(function() {
+                        window.location.href = waLink.href;
+                    }, 500);
+                }
+            }, 500);
+        };
+    </script>
+    @endif
+
 </body>
 </html>

@@ -77,7 +77,7 @@ class AdminController extends Controller
     // 2. Manajemen Transaksi (Index & Search)
     public function transactions(Request $request)
     {
-        $query = Transaksi::with('user');
+        $query = Transaksi::with(['user', 'details.layanan']);
 
         // Fitur Search
         if ($request->has('search')) {
@@ -108,7 +108,7 @@ class AdminController extends Controller
             'customer_phone' => 'required|string',
             'service_type' => 'required|in:regular,express',
             'weight' => 'required|numeric|min:0.1',
-            'payment_method' => 'required|in:cash,dana,qris',
+            'payment_method' => 'required|in:tunai,qris,transfer,cash,dana',
             'notes' => 'nullable|string',
         ]);
 
@@ -178,6 +178,43 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
+    }
+
+    // 5b. Update Keseluruhan Transaksi
+    public function updateTransaction(Request $request, $id)
+    {
+        $transaction = Transaksi::findOrFail($id);
+
+        $request->validate([
+            'customer_name'  => 'required|string|max:255',
+            'customer_phone' => 'required|string',
+            'weight'         => 'required|numeric|min:0.1',
+            'payment_status' => 'required|in:lunas,belum_bayar',
+            'payment_method' => 'required|in:tunai,qris,transfer,cash,dana',
+            'status'         => 'required|in:diterima,disortir,dicuci,dikeringkan,disetrika,dipacking,selesai,diambil',
+            'notes'          => 'nullable|string',
+        ]);
+
+        // Kalkulasi ulang total_price berdasarkan weight * price_per_kg
+        // Jika price_per_kg 0 (berarti pesanan dari POS / multi layanan), total_price jangan diubah otomatis oleh weight.
+        $totalPrice = $transaction->total_price;
+        if ($transaction->price_per_kg > 0) {
+            $totalPrice = $request->weight * $transaction->price_per_kg;
+        }
+
+        $transaction->update([
+            'customer_name'  => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'weight'         => $request->weight,
+            'total_price'    => $totalPrice,
+            'payment_status' => $request->payment_status,
+            'payment_method' => $request->payment_method,
+            'status'         => $request->status,
+            'notes'          => $request->notes,
+            'updated_at'     => now()
+        ]);
+
+        return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
     }
 
     // 6. Laporan Keuangan

@@ -40,7 +40,27 @@ class PetugasController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        return view('petugas_piket.dashboard');
+        $user = Auth::user();
+        $division = strtolower((string) $user->division);
+
+        // Fetch dynamic stats based on division
+        $pendingTasks = 0;
+        $completedToday = 0;
+        
+        if (in_array($division, ['washing', 'ironing', 'setrika', 'packing'])) {
+            $taskStage = $division === 'setrika' ? 'ironing' : $division;
+
+            $pendingTasks = \App\Models\LaundryTask::where('stage', $taskStage)
+                ->where('status', 'pending')
+                ->count();
+
+            $completedToday = \App\Models\LaundryTask::where('stage', $taskStage)
+                ->where('status', 'completed')
+                ->whereDate('completed_at', \Carbon\Carbon::today())
+                ->count();
+        }
+
+        return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division'));
     }
     // Menampilkan halaman Blade
     public function index()
@@ -132,9 +152,9 @@ class PetugasController extends Controller
         $this->ensureStaffDivisionAccess(['washing']);
 
         // Ambil transaksi yang memiliki task 'washing' dengan status 'pending'
-        $transactions = Transaksi::whereHas('pos', function($q) {
-            $q->where('task_type', 'washing')->where('status', 'pending');
-        })->with(['pos', 'details.layanan'])->get();
+        $transactions = Transaksi::whereHas('tasks', function ($q) {
+            $q->where('stage', 'washing')->where('status', 'pending');
+        })->with(['details.layanan'])->get();
 
         return view('petugas_piket.washing.index', compact('transactions'));
     }
@@ -144,18 +164,16 @@ class PetugasController extends Controller
     {
         $this->ensureStaffDivisionAccess(['ironing', 'setrika']);
 
-        $transactions = Transaksi::whereHas('pos', function($q) {
-            $q->where('task_type', 'ironing')->where('status', 'pending');
-        })
-        ->where(function($query) {
-            $query->whereDoesntHave('pos', function($q) {
-                $q->where('task_type', 'washing');
-            })
-            ->orWhereHas('pos', function($q) {
-                $q->where('task_type', 'washing')->where('status', 'completed');
+        $transactions = Transaksi::whereHas('tasks', function ($q) {
+            $q->where('stage', 'ironing')->where('status', 'pending');
+        })->whereHas('tasks', function ($q) {
+            $q->where(function ($q) {
+                $q->where('stage', 'washing');
+            })->orWhere(function ($q) {
+                $q->where('stage', 'washing')->where('status', 'completed');
             });
         })
-        ->with(['pos', 'details.layanan'])->get();
+        ->with(['details.layanan'])->get();
 
         return view('petugas_piket.setrika.index', compact('transactions'));
     }
@@ -165,18 +183,16 @@ class PetugasController extends Controller
     {
         $this->ensureStaffDivisionAccess(['packing']);
 
-        $transactions = Transaksi::whereHas('pos', function($q) {
-            $q->where('task_type', 'packing')->where('status', 'pending');
-        })
-        ->where(function($query) {
-            $query->whereDoesntHave('pos', function($q) {
-                $q->where('task_type', 'ironing');
-            })
-            ->orWhereHas('pos', function($q) {
-                $q->where('task_type', 'ironing')->where('status', 'completed');
+        $transactions = Transaksi::whereHas('tasks', function ($q) {
+            $q->where('stage', 'packing')->where('status', 'pending');
+        })->whereHas('tasks', function ($q) {
+            $q->where(function ($q) {
+                $q->where('stage', 'ironing');
+            })->orWhere(function ($q) {
+                $q->where('stage', 'ironing')->where('status', 'completed');
             });
         })
-        ->with(['pos', 'details.layanan'])->get();
+        ->with(['details.layanan'])->get();
 
         return view('petugas_piket.packing.index', compact('transactions'));
     }
@@ -188,19 +204,21 @@ class PetugasController extends Controller
     public function completeTask(Request $request, $transaksiId)
     {
         $request->validate([
-            'stage' => 'required|in:washing,ironing,packing'
+            'stage' => 'required|in:washing,ironing,packing',
+            'petugas_name' => 'nullable|string|max:255'
         ]);
 
         $transaksi = Transaksi::findOrFail($transaksiId);
         $stage = $request->stage;
 
         // Cari task yang sesuai
-        $task = $transaksi->tasks()->where('task_type', $stage)->first();
+        $task = $transaksi->tasks()->where('stage', $stage)->first();
 
         if ($task) {
             $task->update([
                 'status' => 'completed',
                 'petugas_id' => Auth::id(),
+                'petugas_name' => $request->petugas_name,
                 'completed_at' => now(),
             ]);
 
@@ -300,7 +318,27 @@ class PetugasController extends Controller
     // Halaman History
     public function history()
     {
-        return view('petugas_piket.history.index');
+        $user = Auth::user();
+        if ($user->role !== 'staff') {
+            abort(403, 'Akses ditolak');
+        }
+
+        $division = strtolower((string) $user->division);
+        // Only fetch history if the user belongs to a specific processing division
+        if (in_array($division, ['washing', 'ironing', 'setrika', 'packing'])) {
+            $taskStage = $division === 'setrika' ? 'ironing' : $division;
+
+            $completedTasks = \App\Models\LaundryTask::where('stage', $taskStage)
+                ->where('status', 'completed')
+                ->with(['transaksi'])
+                ->orderBy('completed_at', 'desc')
+                ->paginate(15);
+        } else {
+            // Default empty if they don't have a valid division
+            $completedTasks = collect();
+        }
+
+        return view('petugas_piket.history.index', compact('completedTasks', 'division'));
     }
 
 }

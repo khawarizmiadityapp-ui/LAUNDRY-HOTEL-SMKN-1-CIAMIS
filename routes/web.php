@@ -69,12 +69,14 @@ Route::group(['middleware' => ['auth']],function () {
     Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->name('pos.customer.store');
     Route::post('/pos/order', [PosController::class, 'store'])->name('pos.order.store');
     Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
+    Route::post('/transaksi/{id}/pickup', [PosController::class, 'pickup'])->name('pos.pickup');
 
     // Transaksi
     Route::get('/admin/transaksi', [AdminController::class, 'transactions'])->name('admin.transactions.index');
     Route::post('/admin/transaksi', [AdminController::class, 'storeTransaction'])->name('admin.transactions.store');
     Route::patch('/admin/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.transactions.status');
     Route::patch('/admin/transaksi/{id}/payment', [AdminController::class, 'updatePayment'])->name('admin.transactions.payment');
+    Route::put('/admin/transaksi/{id}', [AdminController::class, 'updateTransaction'])->name('admin.transactions.update');
     Route::delete('/admin/transaksi/{id}', [AdminController::class, 'destroyTransaction'])
     ->name('admin.transactions.destroy');
 

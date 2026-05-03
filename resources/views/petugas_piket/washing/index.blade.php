@@ -1,282 +1,102 @@
 @extends('layouts.petugas_piket')
 @section('title', 'Washing')
 @section('content')
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { sans: ['Plus Jakarta Sans','sans-serif'] },
-      keyframes: {
-        fadeUp: { '0%':{ opacity:'0', transform:'translateY(12px)' }, '100%':{ opacity:'1', transform:'translateY(0)' } },
-        pulse2: { '0%,100%':{ opacity:'1' }, '50%':{ opacity:'.45' } }
-      },
-      animation: {
-        fadeUp:   'fadeUp .45s ease both',
-        pulse2:   'pulse2 2.2s ease-in-out infinite',
-      }
-    }
-  }
-}
-</script>
-<style>
-  *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
-  .card { transition: box-shadow .2s, transform .2s; }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.07); }
-  .sidebar-link { transition: all .16s ease; }
-  .progress { transition: width 1.1s cubic-bezier(.4,0,.2,1); }
-  ::-webkit-scrollbar { width:4px }
-  ::-webkit-scrollbar-track { background:#f1f5f9 }
-  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px }
 
-  /* Stagger animation delays */
-  .d1 { animation-delay: .05s }
-  .d2 { animation-delay: .12s }
-  .d3 { animation-delay: .19s }
-  .d4 { animation-delay: .26s }
-  .d5 { animation-delay: .33s }
-  .d6 { animation-delay: .40s }
-  .d7 { animation-delay: .47s }
-</style>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased">
-
-<div class="flex h-screen overflow-hidden">
-
-<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
-@include('petugas_piket.sidebar')
-
-<!-- ═══════════════════════════════ MAIN AREA ═══════════════════════════════ -->
-<div class="flex-1 flex flex-col overflow-hidden">
-
-
-
-  <!-- ── CONTENT ── -->
-  <main class="flex-1 overflow-y-auto p-8">
-
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 animate-fadeUp d1">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Operasi Pencucian</h1>
-        <p class="text-sm text-slate-500 mt-1">Dashboard real-time departemen pencucian hari ini.</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-white border border-gray-200 rounded-xl px-3.5 py-2 shadow-sm">
-          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
-          </svg>
-          24 Mei 2024
-        </div>
-        <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm transition-colors">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-          </svg>
-          Tambah Antrean
-        </button>
-      </div>
+<div class="p-6 max-w-5xl mx-auto animate-fade-in">
+    {{-- Header --}}
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Operasi Pencucian</h1>
+        <p class="text-slate-500 mt-1">Selesaikan tugas pencucian yang berada di antrean.</p>
     </div>
 
-    <!-- Two-column layout -->
-    <div class="flex gap-6 items-start">
-
-      <!-- Left main -->
-      <div class="flex-1 min-w-0 space-y-6">
-
-        <!-- ── TRANSACTION QUEUE ── -->
-        <div class="animate-fadeUp d2">
-          <div class="flex items-center justify-between mb-4">
+    {{-- Main Content --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
             <h2 class="text-lg font-bold text-slate-800">Antrean Cucian</h2>
-            <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-[11px] font-bold uppercase tracking-wider">
-              {{ count($transactions) }} Pesanan Menunggu
+            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                {{ count($transactions) }} Menunggu
             </span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @forelse($transactions as $trx)
-            <div class="card bg-white rounded-2xl p-5 shadow-sm border border-gray-100 animate-fadeUp">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <div class="text-xs font-bold text-blue-600 uppercase tracking-tight mb-1">#{{ $trx->transaksi_code }}</div>
-                  <h3 class="font-bold text-slate-800">{{ $trx->customer_name }}</h3>
-                </div>
-                <div class="text-right">
-                  <div class="text-[10px] font-medium text-slate-400 uppercase">Masuk</div>
-                  <div class="text-xs font-bold text-slate-600">{{ $trx->created_at->diffForHumans() }}</div>
-                </div>
-              </div>
-
-              <div class="space-y-2 mb-5">
-                @foreach($trx->details as $detail)
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-slate-500">{{ $detail->layanan->nama ?? 'Layanan' }}</span>
-                  <span class="font-bold text-slate-700">{{ $detail->qty }} {{ $detail->layanan->satuan ?? 'kg' }}</span>
-                </div>
-                @endforeach
-              </div>
-
-              <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="stage" value="washing">
-                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white text-sm font-bold py-3 rounded-xl transition-all shadow-md active:scale-[0.98]">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                  </svg>
-                  Selesai Cuci
-                </button>
-              </form>
-            </div>
-            @empty
-            <div class="col-span-full py-12 flex flex-col items-center justify-center bg-white rounded-2xl border-2 border-dashed border-slate-200">
-               <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                  <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
-                  </svg>
-               </div>
-               <p class="text-slate-400 font-medium">Belum ada antrean cucian</p>
-            </div>
-            @endforelse
-          </div>
         </div>
 
-        <!-- ── MACHINE STATUS ── -->
-        <div>
-          <div class="flex items-center gap-3 mb-4">
-            <h2 class="text-base font-bold text-slate-800">Status Mesin Cuci</h2>
-            <span class="text-[11px] font-bold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg uppercase tracking-wide">12 Unit Total</span>
-          </div>
+        <div class="p-6">
+            @if(count($transactions) > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @foreach($transactions as $trx)
+                        <div class="border border-slate-200 rounded-2xl p-5 hover:shadow-md transition-shadow duration-300 relative bg-white">
+                            {{-- Header Card --}}
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg mb-2">
+                                        #{{ $trx->transaksi_code }}
+                                    </span>
+                                    <h3 class="font-bold text-lg text-slate-800 leading-tight">{{ $trx->customer_name }}</h3>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-0.5">Masuk</span>
+                                    <span class="text-xs font-bold text-slate-600">{{ $trx->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
 
-          <div class="grid grid-cols-2 gap-4">
+                            {{-- Service List --}}
+                            <div class="mb-6 bg-slate-50 rounded-xl p-4">
+                                <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Detail Layanan</h4>
+                                <ul class="space-y-2">
+                                    @foreach($trx->details as $detail)
+                                        <li class="flex items-center justify-between text-sm">
+                                            <span class="text-slate-600 font-medium">{{ $detail->layanan->nama ?? 'Layanan' }}</span>
+                                            <span class="font-bold text-slate-800">{{ $detail->qty }} {{ $detail->layanan->satuan ?? 'kg' }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
 
-            <!-- Mesin #01 – AKTIF -->
-            <div class="card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500 p-5 animate-fadeUp d4">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <div class="font-bold text-slate-800 text-sm">Mesin #01</div>
-                  <div class="text-xs text-slate-400 mt-0.5">Industrial Series X-500</div>
-                </div>
-                <span class="text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700">• Aktif</span>
-              </div>
-              <div class="flex items-baseline gap-2 mb-3">
-                <span class="text-2xl font-extrabold text-slate-800">45</span>
-                <span class="text-sm text-slate-500">menit tersisa</span>
-                <span class="ml-auto text-xs text-slate-400 font-medium">Siklus: Heavy Cotton</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2 mb-4">
-                <div class="progress bg-blue-500 h-2 rounded-full" style="width:55%"></div>
-              </div>
-              <div class="flex gap-2">
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-blue-600">Pencucian</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-blue-500"></div>
-                </div>
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Pembilasan</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-slate-100"></div>
-                </div>
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Pengeringan</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-slate-100"></div>
-                </div>
-              </div>
-            </div>
+                            {{-- Action Form --}}
+                            <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST" class="mt-auto">
+                                @csrf
+                                <input type="hidden" name="stage" value="washing">
+                                
+                                <div class="mb-4">
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Petugas Piket</label>
+                                    <input type="text" name="petugas_name" placeholder="Masukkan nama Anda..." required
+                                           class="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors">
+                                </div>
 
-            <!-- Mesin #02 – IDLE -->
-            <div class="card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-slate-200 p-5 animate-fadeUp d5">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <div class="font-bold text-slate-800 text-sm">Mesin #02</div>
-                  <div class="text-xs text-slate-400 mt-0.5">Industrial Series X-500</div>
+                                <button type="submit" 
+                                        class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm shadow-blue-200 active:scale-[0.98]">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                                    </svg>
+                                    Konfirmasi Selesai Cuci
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
                 </div>
-                <span class="text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500">Idle</span>
-              </div>
-              <div class="flex flex-col items-center justify-center py-6 gap-3">
-                <button class="w-12 h-12 rounded-full bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition-colors">
-                  <svg class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <span class="text-sm text-slate-400">Siap untuk muatan baru</span>
-              </div>
-            </div>
-
-            <!-- Mesin #03 – PEMELIHARAAN -->
-            <div class="card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-orange-400 p-5 animate-fadeUp d6">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <div class="font-bold text-slate-800 text-sm">Mesin #03</div>
-                  <div class="text-xs text-slate-400 mt-0.5">Heavy Duty Turbo</div>
+            @else
+                <div class="py-16 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                        <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Tidak ada antrean cucian</h3>
+                    <p class="text-slate-500 text-sm">Semua pakaian telah selesai dicuci. Kerja bagus!</p>
                 </div>
-                <span class="text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg bg-orange-100 text-orange-600">Pemeliharaan</span>
-              </div>
-              <div class="flex items-start gap-2.5 mt-2 bg-orange-50 rounded-xl p-3.5">
-                <svg class="w-4 h-4 text-orange-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"/>
-                </svg>
-                <div>
-                  <div class="text-sm font-semibold text-orange-700">Penggantian filter terjadwal.</div>
-                  <div class="text-xs text-orange-500 mt-0.5">Estimasi selesai: 14:00 WIB</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mesin #04 – AKTIF -->
-            <div class="card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500 p-5 animate-fadeUp d7">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <div class="font-bold text-slate-800 text-sm">Mesin #04</div>
-                  <div class="text-xs text-slate-400 mt-0.5">Industrial Series X-500</div>
-                </div>
-                <span class="text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700">• Aktif</span>
-              </div>
-              <div class="flex items-baseline gap-2 mb-3">
-                <span class="text-2xl font-extrabold text-slate-800">12</span>
-                <span class="text-sm text-slate-500">menit tersisa</span>
-                <span class="ml-auto text-xs text-slate-400 font-medium">Siklus: Delicates</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2 mb-4">
-                <div class="progress bg-blue-500 h-2 rounded-full" style="width:82%"></div>
-              </div>
-              <div class="flex gap-2">
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-blue-400">Selesai</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-blue-300"></div>
-                </div>
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-blue-400">Selesai</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-blue-300"></div>
-                </div>
-                <div class="flex-1 text-center">
-                  <div class="text-[10px] font-bold uppercase tracking-wide text-blue-600">Pengeringan</div>
-                  <div class="mt-1.5 h-1 rounded-full bg-blue-500"></div>
-                </div>
-              </div>
-            </div>
-                    <!-- Tips Card -->
-        <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 text-white shadow-md animate-fadeUp d5">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
-              </svg>
-            </div>
-            <div class="font-bold text-sm">Tips Efisiensi Hari Ini</div>
-          </div>
-          <p class="text-blue-100 text-xs leading-relaxed">
-            Suhu air diatur ke 40°C untuk mesin #01 &amp; #04 guna menghemat energi tanpa mengurangi kualitas kebersihan bahan katun.
-          </p>
+            @endif
         </div>
+    </div>
+</div>
 
-          </div>
-        </div>
-      </div><!-- /left -->
-
-
-
-      </div><!-- /right -->
-
-    </div><!-- /two-col -->
-
-  </main>
-</div><!-- /main area -->
-
-</div><!-- /flex wrapper -->
-
-</body>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+        sidebar.classList.toggle('-translate-x-full', !isHidden);
+        overlay.classList.toggle('hidden', !isHidden);
+    }
+</script>
+@endpush

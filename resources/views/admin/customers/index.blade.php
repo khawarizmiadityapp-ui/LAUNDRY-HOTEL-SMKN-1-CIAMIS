@@ -86,7 +86,7 @@
                     <th class="text-left px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Terakhir Transaksi</th>
                     <th class="text-left px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Order</th>
                     <th class="text-left px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                    <th class="text-left px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aksi</th>
+                    <th class="text-right px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -145,30 +145,48 @@
                         </span>
                     </td>
                     {{-- Aksi --}}
-                    <td class="px-4 py-4">
-                        <div class="flex items-center gap-1.5">
-                            <a href="{{ route('admin.customers.edit', $customer->id) }}"
-                               class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50
-                                      hover:bg-brand-50 text-slate-400 hover:text-brand-600 transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5
-                                             m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    <td class="px-6 py-4 text-right">
+                        <div class="relative inline-block text-left" x-data="{ open: false }" @click.away="open = false">
+                            <button @click="open = !open" 
+                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
+                                           hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
                                 </svg>
-                            </a>
-                            <form action="{{ route('admin.customers.destroy', $customer->id) }}" method="POST"
-                                  onsubmit="return confirm('Hapus customer ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50
-                                               hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5
-                                                 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5"
+                                 style="display: none;">
+                                
+                                <a href="{{ route('admin.customers.edit', $customer->id) }}" 
+                                   class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
-                                </button>
-                            </form>
+                                    Edit
+                                </a>
+
+                                <div class="h-px bg-slate-50 my-1"></div>
+
+                                <form action="{{ route('admin.customers.destroy', $customer->id) }}" method="POST"
+                                      onsubmit="return confirm('Hapus customer ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" 
+                                            class="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
+                                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </td>
                 </tr>

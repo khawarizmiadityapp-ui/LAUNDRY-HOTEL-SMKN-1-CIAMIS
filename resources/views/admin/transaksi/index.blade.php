@@ -46,7 +46,15 @@
 
             <!-- Layanan -->
             <td class="px-6 py-4 capitalize">
-                {{ $trx->service_type }}
+                @if(isset($trx->details) && $trx->details->count() > 0)
+                    <ul class="text-xs list-disc pl-3 text-slate-600">
+                    @foreach($trx->details as $detail)
+                        <li>{{ $detail->layanan->nama ?? 'Layanan' }} ({{ $detail->qty }}x)</li>
+                    @endforeach
+                    </ul>
+                @else
+                    {{ $trx->service_type }}
+                @endif
             </td>
 
             <!-- Berat -->
@@ -133,14 +141,14 @@
             <input name="weight" type="number" step="0.1" placeholder="Berat"
                 class="w-full border p-2 mb-3 rounded">
 
-            <select name="payment_method" class="w-full border p-2 mb-3 rounded">
-                <option value="cash">Cash</option>
-                <option value="dana">Dana</option>
+            <select name="payment_method" class="w-full border p-2 mb-3 rounded text-sm text-slate-700">
+                <option value="tunai">Tunai</option>
                 <option value="qris">QRIS</option>
+                <option value="transfer">Transfer</option>
             </select>
  
-            <textarea name="notes" placeholder="Catatan"
-                class="w-full border p-2 mb-3 rounded"></textarea>
+            <textarea name="notes" placeholder="Catatan" rows="2"
+                class="w-full border p-2 mb-3 rounded text-sm text-slate-700"></textarea>
 
             <!-- BUTTON -->
             <div class="flex justify-end gap-2 mt-4">
@@ -161,20 +169,81 @@
 
 
 <!-- MODAL EDIT -->
-<div id="modalEdit" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-    <div class="bg-white p-6 rounded-xl w-96">
-        <h2 class="font-bold mb-4">Edit Transaksi</h2>
+<div id="modalEdit" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] overflow-y-auto">
+    <div class="bg-white p-6 rounded-xl w-full max-w-md my-8 shadow-xl">
+        <h2 class="font-bold text-lg mb-4 text-slate-800">Edit Transaksi</h2>
 
         <form id="editForm" method="POST">
             @csrf
             @method('PUT')
 
-            <input id="edit_customer" name="customer_name" class="w-full border p-2 mb-3 rounded">
-            <input id="edit_weight" name="weight" class="w-full border p-2 mb-3 rounded">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Nama Pelanggan</label>
+                    <input id="edit_customer" name="customer_name" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
+                </div>
+                
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase">No HP</label>
+                    <input id="edit_phone" name="customer_phone" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
+                </div>
 
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="toggleModal('modalEdit')">Batal</button>
-                <button class="bg-blue-600 text-white px-3 py-2 rounded">Update</button>
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Berat (kg)</label>
+                    <input id="edit_weight" name="weight" type="number" step="0.1" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
+                    <p class="text-[10px] text-slate-400 mt-1">Catatan: Jika transaksi berasal dari POS, perubahan berat ini tidak akan mengubah total harga.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Status Pesanan</label>
+                        <select id="edit_status" name="status" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700">
+                            <option value="diterima">Diterima</option>
+                            <option value="disortir">Disortir</option>
+                            <option value="dicuci">Dicuci</option>
+                            <option value="dikeringkan">Dikeringkan</option>
+                            <option value="disetrika">Disetrika</option>
+                            <option value="dipacking">Dipacking</option>
+                            <option value="selesai">Selesai</option>
+                            <option value="diambil">Diambil</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Pembayaran</label>
+                        <select id="edit_payment_status" name="payment_status" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700">
+                            <option value="belum_bayar">Belum Lunas</option>
+                            <option value="lunas">Lunas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Metode Pembayaran</label>
+                    <select id="edit_payment_method" name="payment_method" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700">
+                        <option value="tunai">Tunai</option>
+                        <option value="qris">QRIS</option>
+                        <option value="transfer">Transfer</option>
+                        <option value="cash">Cash (Lama)</option>
+                        <option value="dana">Dana (Lama)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Catatan</label>
+                    <textarea id="edit_notes" name="notes" rows="2" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700"></textarea>
+                </div>
+
+                <div id="edit_services_container" class="hidden bg-slate-50 p-3 rounded border border-slate-100">
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Layanan yang Dipesan</label>
+                    <ul id="edit_services_list" class="text-sm text-slate-700 list-disc pl-4 mt-1">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button type="button" onclick="toggleModal('modalEdit')" class="px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded font-medium transition">Batal</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition shadow-md">Update Transaksi</button>
             </div>
         </form>
     </div>
@@ -192,12 +261,33 @@ function toggleDropdown(btn){
 }
 
 function openEditModal(data){
-    toggleModal('modalEdit')
+    toggleModal('modalEdit');
 
-    document.getElementById('edit_customer').value = data.customer_name
-    document.getElementById('edit_weight').value = data.weight
+    document.getElementById('edit_customer').value = data.customer_name || '';
+    document.getElementById('edit_phone').value = data.customer_phone || '';
+    document.getElementById('edit_weight').value = data.weight || '0';
+    document.getElementById('edit_status').value = data.status || 'diterima';
+    document.getElementById('edit_payment_status').value = data.payment_status || 'belum_bayar';
+    document.getElementById('edit_payment_method').value = data.payment_method || 'tunai';
+    document.getElementById('edit_notes').value = data.notes || '';
 
-    document.getElementById('editForm').action = `/transactions/${data.id}`
+    let servicesContainer = document.getElementById('edit_services_container');
+    let servicesList = document.getElementById('edit_services_list');
+    servicesList.innerHTML = '';
+
+    if (data.details && data.details.length > 0) {
+        servicesContainer.classList.remove('hidden');
+        data.details.forEach(detail => {
+            let li = document.createElement('li');
+            let namaLayanan = detail.layanan ? detail.layanan.nama : 'Layanan';
+            li.textContent = `${namaLayanan} (${detail.qty}x)`;
+            servicesList.appendChild(li);
+        });
+    } else {
+        servicesContainer.classList.add('hidden');
+    }
+
+    document.getElementById('editForm').action = `/admin/transaksi/${data.id}`;
 }
 </script>
 

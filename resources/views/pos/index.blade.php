@@ -110,8 +110,22 @@
         {{-- Header --}}
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-xl font-display font-bold text-slate-900">Buat Pesanan</h1>
-                <p class="text-sm text-slate-400 mt-0.5">Pilih layanan untuk customer</p>
+                <div class="flex items-center gap-3">
+                    <button @click="viewMode = 'order'" 
+                            :class="viewMode === 'order' ? 'text-slate-900 border-b-2 border-brand-500' : 'text-slate-400'"
+                            class="text-xl font-display font-bold pb-1 transition-all">
+                        Buat Pesanan
+                    </button>
+                    <button @click="viewMode = 'pickup'" 
+                            :class="viewMode === 'pickup' ? 'text-slate-900 border-b-2 border-brand-500' : 'text-slate-400'"
+                            class="text-xl font-display font-bold pb-1 transition-all flex items-center gap-2">
+                        Siap Diambil
+                        @if(count($readyToPickup) > 0)
+                        <span class="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ count($readyToPickup) }}</span>
+                        @endif
+                    </button>
+                </div>
+                <p class="text-sm text-slate-400 mt-0.5" x-text="viewMode === 'order' ? 'Pilih layanan untuk customer' : 'Daftar cucian yang sudah selesai packing'"></p>
             </div>
             <div class="flex items-center gap-4">
                 @if(auth()->user()->role === 'admin')
@@ -130,8 +144,10 @@
             </div>
         </div>
 
-        {{-- Customer Search --}}
-        <div class="bg-white rounded-2xl border border-slate-100 p-4 mb-5 shadow-card relative">
+        {{-- Content based on View Mode --}}
+        <div x-show="viewMode === 'order'" x-transition>
+            {{-- Customer Search --}}
+            <div class="bg-white rounded-2xl border border-slate-100 p-4 mb-5 shadow-card relative">
             <div class="flex items-center gap-3">
                 <div class="flex-1 relative">
                     <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -253,9 +269,63 @@
             </div>
             @endforeach
         </div>
-    </div>
+        </div>
 
-    {{-- ═══════════ RIGHT: Order Summary Panel ═══════════ --}}
+        {{-- Pickup Mode --}}
+        <div x-show="viewMode === 'pickup'" x-transition x-cloak>
+            <div class="space-y-4">
+                @forelse($readyToPickup as $trx)
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                            {{ strtoupper(substr($trx->customer_name, 0, 1)) }}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-slate-900">{{ $trx->customer_name }}</h3>
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full uppercase">{{ $trx->transaksi_code }}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $trx->customer_phone }} • {{ count($trx->details) }} Item</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                @foreach($trx->details as $det)
+                                <span class="text-[10px] bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md font-medium">{{ $det->layanan->nama }} ({{ $det->qty }}{{ $det->layanan->satuan }})</span>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 self-end sm:self-auto">
+                        <div class="text-right mr-2 hidden sm:block">
+                            <p class="text-xs text-slate-400">Total Tagihan</p>
+                            <p class="text-sm font-bold text-brand-600">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</p>
+                            <span class="text-[10px] font-bold {{ $trx->payment_status === 'lunas' ? 'text-emerald-500' : 'text-rose-500' }} uppercase">
+                                {{ $trx->payment_status === 'lunas' ? 'LUNAS' : 'BELUM BAYAR' }}
+                            </span>
+                        </div>
+                        
+                        <form action="{{ route('pos.pickup', $trx->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" 
+                                    onclick="return confirm('Konfirmasi pengambilan cucian untuk {{ $trx->customer_name }}?')"
+                                    class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Ambil Cucian
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @empty
+                <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl py-12 px-4 text-center">
+                    <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                    </div>
+                    <h3 class="text-slate-900 font-bold">Tidak ada cucian siap diambil</h3>
+                    <p class="text-sm text-slate-400 mt-1">Cucian yang sudah selesai di-packing akan muncul di sini.</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
     <div class="w-full lg:w-[380px] bg-white border-l border-slate-100 flex flex-col order-panel shrink-0">
 
         {{-- Cart Header --}}
@@ -552,6 +622,7 @@ function posApp() {
         paymentMethod: 'tunai',
         paymentStatus: 'belum_bayar',
         notes: '',
+        viewMode: 'order', // 'order' or 'pickup'
         submitting: false,
         currentDate: '',
         newCustomer: { nama: '', no_hp: '', alamat: '' },
@@ -675,40 +746,32 @@ function posApp() {
             };
 
             try {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '{{ route("pos.order.store") }}';
-
-                const csrf = document.createElement('input');
-                csrf.type = 'hidden';
-                csrf.name = '_token';
-                csrf.value = document.querySelector('meta[name="csrf-token"]').content;
-                form.appendChild(csrf);
-
-                // Flatten payload into form fields
-                const addField = (name, value) => {
-                    const el = document.createElement('input');
-                    el.type = 'hidden';
-                    el.name = name;
-                    el.value = value;
-                    form.appendChild(el);
-                };
-
-                addField('customer_id', payload.customer_id);
-                addField('payment_method', payload.payment_method);
-                addField('payment_status', payload.payment_status);
-                addField('notes', payload.notes || '');
-
-                payload.items.forEach((item, i) => {
-                    addField(`items[${i}][layanan_id]`, item.layanan_id);
-                    addField(`items[${i}][qty]`, item.qty);
+                const res = await fetch('{{ route("pos.order.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
                 });
 
-                document.body.appendChild(form);
-                form.submit();
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Server response:', errorText);
+                    throw new Error('Server returned ' + res.status);
+                }
+
+                // Jika sukses, Laravel akan mengembalikan response JSON yang berisi redirect url
+                // Tapi PosController@store saat ini mengembalikan `redirect()->route('pos.nota')`
+                // Fetch secara default akan mengikuti redirect (res.redirected === true)
+                // dan mengembalikan isi HTML dari pos.nota.
+                // Untuk amannya, kita paksa window location ke URL dari response tersebut:
+                window.location.href = res.url;
+                
             } catch (e) {
                 this.submitting = false;
-                alert('Terjadi kesalahan saat memproses pesanan.');
+                alert('Terjadi kesalahan pada server. Cek console browser untuk detailnya.');
                 console.error(e);
             }
         },
