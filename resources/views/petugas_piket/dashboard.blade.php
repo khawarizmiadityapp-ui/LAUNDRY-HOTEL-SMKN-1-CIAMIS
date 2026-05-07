@@ -63,12 +63,18 @@
     </div>
     
     {{-- Quick Action --}}
+    @php
+        $validDivisions = ['washing' => 'washing', 'ironing' => 'setrika', 'setrika' => 'setrika', 'packing' => 'packing'];
+        $routeName = isset($validDivisions[$division]) ? 'petugas_piket.' . $validDivisions[$division] . '.index' : null;
+    @endphp
+
+    @if($routeName)
     <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
         <div class="text-white">
             <h3 class="text-xl font-bold mb-1">Siap untuk mulai bekerja?</h3>
             <p class="text-blue-100 text-sm">Masuk ke halaman antrean untuk melihat daftar pekerjaan Anda.</p>
         </div>
-        <a href="{{ route('petugas_piket.' . ($division === 'setrika' ? 'setrika' : $division) . '.index') }}" 
+        <a href="{{ route($routeName) }}" 
            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap shadow-sm">
             Lihat Antrean
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -76,6 +82,14 @@
             </svg>
         </a>
     </div>
+    @else
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="text-white">
+            <h3 class="text-xl font-bold mb-1">Selamat Bertugas!</h3>
+            <p class="text-blue-100 text-sm">Pastikan untuk mengecek tugas Anda melalui menu di samping.</p>
+        </div>
+    </div>
+    @endif
 
 </div>
 

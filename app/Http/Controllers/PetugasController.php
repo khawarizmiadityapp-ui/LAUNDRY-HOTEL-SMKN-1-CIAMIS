@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Petugas;
 use App\Models\Transaksi;
 use App\Models\InventoryAdjustmentRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PetugasController extends Controller
 {
@@ -46,7 +48,7 @@ class PetugasController extends Controller
         // Fetch dynamic stats based on division
         $pendingTasks = 0;
         $completedToday = 0;
-        
+
         if (in_array($division, ['washing', 'ironing', 'setrika', 'packing'])) {
             $taskStage = $division === 'setrika' ? 'ironing' : $division;
 
@@ -65,16 +67,32 @@ class PetugasController extends Controller
     // Menampilkan halaman Blade
     public function index()
     {
-        $petugas = Petugas::orderBy('nama')->get();
+        $onlineStaff = Cache::get('online_staff_users', []);
+        $lastAllowed = now()->subMinutes((int) config('session.lifetime', 120))->timestamp;
 
-        $petugasData = $petugas->map(function (Petugas $item) {
+        $onlineIds = collect($onlineStaff)
+            ->filter(static fn ($lastSeen) => (int) $lastSeen >= $lastAllowed)
+            ->keys()
+            ->map(static fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        $petugasUsers = User::query()
+            ->where('role', 'staff')
+            ->whereIn('id', $onlineIds)
+            ->orderBy('name')
+            ->get(['id', 'name', 'division']);
+
+        $petugasData = $petugasUsers->map(function (User $item) {
+            $divisionLabel = $item->division ? ucwords(str_replace('_', ' ', $item->division)) : '-';
+
             return [
                 'id' => $item->id,
-                'nama' => $item->nama,
-                'idPetugas' => $item->id_petugas,
-                'role' => $item->role,
-                'status' => $item->status,
-                'shift' => $item->shift,
+                'nama' => $item->name,
+                'idPetugas' => 'USR-' . str_pad((string) $item->id, 4, '0', STR_PAD_LEFT),
+                'role' => 'Operasional',
+                'status' => 'Aktif',
+                'shift' => $divisionLabel,
             ];
         })->values();
 
