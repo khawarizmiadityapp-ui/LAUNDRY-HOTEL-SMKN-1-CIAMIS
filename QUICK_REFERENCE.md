@@ -1,5 +1,34 @@
 # Quick Reference & Troubleshooting Guide
 
+## 🎉 NEW: Dynamic Sidebar System (v3.0)
+
+Sidebar sekarang **100% dinamis**! Tidak ada lagi hardcoded menu di Blade.
+
+### Quick Start
+```bash
+# 1. Refresh autoload
+composer dump-autoload
+php artisan config:clear
+
+# 2. Test helpers
+php artisan tinker
+get_user_menus('petugas');
+```
+
+### Usage in Blade
+```blade
+@php
+    $menus = get_user_menus('petugas');
+@endphp
+```
+
+### Add New Menu
+Edit `config/sidebar.php` → Done!
+
+**📚 Full Docs**: `DYNAMIC_SIDEBAR_GUIDE.md`
+
+---
+
 ## 📋 File yang Telah Diupdate/Dibuat
 
 ### 1. **Sidebar Component (Main File)**

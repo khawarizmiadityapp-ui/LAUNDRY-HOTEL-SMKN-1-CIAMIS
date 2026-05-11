@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Pengeluaran;
 
 
@@ -112,42 +113,65 @@ class AdminController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Ambil Harga dari Database
-        $price = ServicePrice::where('service_type', $request->service_type)->first();
-        $pricePerKg = $price ? $price->price_per_kg : 6000; // Fallback harga
+        DB::beginTransaction();
 
-        $totalPrice = $request->weight * $pricePerKg;
+        try {
+            // Ambil Harga dari Database
+            $price = ServicePrice::where('service_type', $request->service_type)->first();
+            $pricePerKg = $price ? $price->price_per_kg : 6000; // Fallback harga
 
-        $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
-        $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->sum('total_price');
+            $totalPrice = $request->weight * $pricePerKg;
 
-        if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
-            return redirect()->back()->withErrors([
-                'weight' => 'Transaksi melebihi batas pemasukan bulanan. Sisa kuota: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
-            ])->withInput();
+            $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+            $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total_price');
+
+            if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
+                DB::rollBack();
+                return redirect()->back()->withErrors([
+                    'weight' => 'Transaksi melebihi batas pemasukan bulanan. Sisa kuota: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
+                ])->withInput();
+            }
+
+            // Generate Kode Transaksi Unik
+            $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+
+            Transaksi::create([
+                'transaksi_code' => $transactionCode,
+                'user_id' => Auth::id(), // Petugas yang input
+                'customer_name' => $request->customer_name,
+                'customer_phone' => $request->customer_phone,
+                'service_type' => $request->service_type,
+                'weight' => $request->weight,
+                'price_per_kg' => $pricePerKg,
+                'total_price' => $totalPrice,
+                'status' => 'diterima',
+                'payment_status' => 'belum_bayar',
+                'payment_method' => $request->payment_method,
+                'notes' => $request->notes,
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Admin Transaction Creation Failed', [
+                'operation' => 'admin.storeTransaction',
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'input' => $request->except(['_token']),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal membuat transaksi. Silakan coba lagi atau hubungi administrator.');
         }
-
-        // Generate Kode Transaksi Unik
-        $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
-
-        Transaksi::create([
-            'transaksi_code' => $transactionCode,
-            'user_id' => Auth::id(), // Petugas yang input
-            'customer_name' => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-            'service_type' => $request->service_type,
-            'weight' => $request->weight,
-            'price_per_kg' => $pricePerKg,
-            'total_price' => $totalPrice,
-            'status' => 'diterima',
-            'payment_status' => 'belum_bayar',
-            'payment_method' => $request->payment_method,
-            'notes' => $request->notes,
-        ]);
-
-        return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
     }
 
     // 4. Update Status Proses (Timeline)
@@ -157,34 +181,58 @@ class AdminController extends Controller
             'status' => 'required|in:diterima,disortir,dicuci,dikeringkan,disetrika,dipacking,selesai,diambil'
         ]);
 
-        $transaction = Transaksi::findOrFail($id);
-        $transaction->update([
-            'status' => $request->status,
-            'updated_at' => now()
-        ]);
+        try {
+            $transaction = Transaksi::findOrFail($id);
+            $transaction->update([
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
 
-        // Opsional: Tambahkan log history status jika punya tabel history
-        // TransactionStatusHistory::create([...]);
+            // Opsional: Tambahkan log history status jika punya tabel history
+            // TransactionStatusHistory::create([...]);
 
-        return redirect()->back()->with('success', 'Status berhasil diperbarui!');
+            return redirect()->back()->with('success', 'Status berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            \Log::error('Update Status Failed', [
+                'operation' => 'admin.updateStatus',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $id,
+                'status' => $request->status ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal memperbarui status. Silakan coba lagi.');
+        }
     }
 
     // 5. Update Pembayaran
     public function updatePayment(Request $request, $id)
     {
-        $transaction = Transaksi::findOrFail($id);
-        $transaction->update([
-            'payment_status' => $request->payment_status // lunas / belum_bayar
-        ]);
+        try {
+            $transaction = Transaksi::findOrFail($id);
+            $transaction->update([
+                'payment_status' => $request->payment_status // lunas / belum_bayar
+            ]);
 
-        return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
+            return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
+
+        } catch (\Exception $e) {
+            \Log::error('Update Payment Failed', [
+                'operation' => 'admin.updatePayment',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $id,
+                'payment_status' => $request->payment_status ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal memperbarui status pembayaran. Silakan coba lagi.');
+        }
     }
 
     // 5b. Update Keseluruhan Transaksi
     public function updateTransaction(Request $request, $id)
     {
-        $transaction = Transaksi::findOrFail($id);
-
         $request->validate([
             'customer_name'  => 'required|string|max:255',
             'customer_phone' => 'required|string',
@@ -195,26 +243,45 @@ class AdminController extends Controller
             'notes'          => 'nullable|string',
         ]);
 
-        // Kalkulasi ulang total_price berdasarkan weight * price_per_kg
-        // Jika price_per_kg 0 (berarti pesanan dari POS / multi layanan), total_price jangan diubah otomatis oleh weight.
-        $totalPrice = $transaction->total_price;
-        if ($transaction->price_per_kg > 0) {
-            $totalPrice = $request->weight * $transaction->price_per_kg;
+        try {
+            $transaction = Transaksi::findOrFail($id);
+
+            // Kalkulasi ulang total_price berdasarkan weight * price_per_kg
+            // Jika price_per_kg 0 (berarti pesanan dari POS / multi layanan), total_price jangan diubah otomatis oleh weight.
+            $totalPrice = $transaction->total_price;
+            if ($transaction->price_per_kg > 0) {
+                $totalPrice = $request->weight * $transaction->price_per_kg;
+            }
+
+            $transaction->update([
+                'customer_name'  => $request->customer_name,
+                'customer_phone' => $request->customer_phone,
+                'weight'         => $request->weight,
+                'total_price'    => $totalPrice,
+                'payment_status' => $request->payment_status,
+                'payment_method' => $request->payment_method,
+                'status'         => $request->status,
+                'notes'          => $request->notes,
+                'updated_at'     => now()
+            ]);
+
+            return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            \Log::error('Update Transaction Failed', [
+                'operation' => 'admin.updateTransaction',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $id,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'input' => $request->except(['_token']),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui transaksi. Silakan coba lagi atau hubungi administrator.');
         }
-
-        $transaction->update([
-            'customer_name'  => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-            'weight'         => $request->weight,
-            'total_price'    => $totalPrice,
-            'payment_status' => $request->payment_status,
-            'payment_method' => $request->payment_method,
-            'status'         => $request->status,
-            'notes'          => $request->notes,
-            'updated_at'     => now()
-        ]);
-
-        return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
     }
 
     // 6. Laporan Keuangan
@@ -264,13 +331,31 @@ class AdminController extends Controller
             'prices.*.price_per_kg' => 'required|numeric|min:0',
         ]);
 
-        foreach ($request->prices as $priceData) {
-            ServicePrice::where('id', $priceData['id'])->update([
-                'price_per_kg' => $priceData['price_per_kg']
-            ]);
-        }
+        DB::beginTransaction();
 
-        return redirect()->back()->with('success', 'Harga berhasil diperbarui!');
+        try {
+            foreach ($request->prices as $priceData) {
+                ServicePrice::where('id', $priceData['id'])->update([
+                    'price_per_kg' => $priceData['price_per_kg']
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Harga berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Update Prices Failed', [
+                'operation' => 'admin.updatePrices',
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'input' => $request->except(['_token']),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal memperbarui harga. Silakan coba lagi.');
+        }
     }
 
     // 8. Manajemen Pengguna (Admin & Petugas)
@@ -290,22 +375,49 @@ class AdminController extends Controller
             'division' => 'nullable|required_if:role,staff|in:washing,ironing,packing,customer_service,inventory',
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-            'division' => $request->role === 'staff' ? $request->division : null,
-        ]);
+        try {
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'role' => $request->role,
+                'division' => $request->role === 'staff' ? $request->division : null,
+            ]);
 
-        return redirect()->back()->with('success', 'Pengguna berhasil ditambahkan!');
+            return redirect()->back()->with('success', 'Pengguna berhasil ditambahkan!');
+
+        } catch (\Exception $e) {
+            \Log::error('Create User Failed', [
+                'operation' => 'admin.storeUser',
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'input' => $request->except(['_token', 'password']),
+            ]);
+
+            return redirect()->back()
+                ->withInput($request->except('password'))
+                ->with('error', 'Gagal menambahkan pengguna. Silakan coba lagi.');
+        }
     }
 
     public function destroyTransaction($id)
     {
-        Transaksi::findOrFail($id)->delete();
+        try {
+            $transaksi = Transaksi::findOrFail($id);
+            $transaksi->delete();
 
-        return back()->with('success', 'Data berhasil dihapus!');
+            return back()->with('success', 'Data berhasil dihapus!');
+
+        } catch (\Exception $e) {
+            \Log::error('Delete Transaction Failed', [
+                'operation' => 'admin.destroyTransaction',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Gagal menghapus data. Silakan coba lagi.');
+        }
     }
 
 }

@@ -9,6 +9,7 @@ use App\Models\TransaksiDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PosController extends Controller
 {
@@ -69,9 +70,23 @@ class PosController extends Controller
             'alamat' => 'nullable|string|max:255',
         ]);
 
-        $customer = Customer::create($request->only(['nama', 'no_hp', 'alamat']));
+        try {
+            $customer = Customer::create($request->only(['nama', 'no_hp', 'alamat']));
 
-        return response()->json($customer, 201);
+            return response()->json($customer, 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Customer Creation Failed', [
+                'operation' => 'pos.storeCustomer',
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'input' => $request->except(['_token']),
+            ]);
+
+            return response()->json([
+                'error' => 'Gagal membuat customer. Silakan coba lagi.'
+            ], 500);
+        }
     }
 
     /**
@@ -89,48 +104,48 @@ class PosController extends Controller
             'notes'            => 'nullable|string',
         ]);
 
-        $customer = Customer::findOrFail($request->customer_id);
+        try {
+            $customer = Customer::findOrFail($request->customer_id);
 
-        // Calculate totals
-        $subtotal = 0;
-        $detailsData = [];
+            // Calculate totals
+            $subtotal = 0;
+            $detailsData = [];
 
-        foreach ($request->items as $item) {
-            $layanan  = Layanan::findOrFail($item['layanan_id']);
-            $qty      = (float) $item['qty'];
-            $price    = (float) $layanan->harga;
-            $itemSub  = $qty * $price;
-            $subtotal += $itemSub;
+            foreach ($request->items as $item) {
+                $layanan  = Layanan::findOrFail($item['layanan_id']);
+                $qty      = (float) $item['qty'];
+                $price    = (float) $layanan->harga;
+                $itemSub  = $qty * $price;
+                $subtotal += $itemSub;
 
-            $detailsData[] = [
-                'layanan_id' => $layanan->id,
-                'qty'        => $qty,
-                'price'      => $price,
-                'subtotal'   => $itemSub,
-            ];
-        }
+                $detailsData[] = [
+                    'layanan_id' => $layanan->id,
+                    'qty'        => $qty,
+                    'price'      => $price,
+                    'subtotal'   => $itemSub,
+                ];
+            }
 
-        $totalPrice = $subtotal;
+            $totalPrice = $subtotal;
 
-        $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
-        $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->sum('total_price');
+            $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+            $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total_price');
 
-        if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'items' => 'Pesanan melebihi batas pemasukan bulanan. Sisa kuota pemasukan bulan ini: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
-                ]);
-        }
+            if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'items' => 'Pesanan melebihi batas pemasukan bulanan. Sisa kuota pemasukan bulan ini: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
+                    ]);
+            }
 
-        // Transaction code
-        $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+            // Transaction code
+            $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
-        DB::transaction(function () use (
-            $transactionCode, $customer, $request, $subtotal, $totalPrice, $detailsData
-        ) {
+            DB::beginTransaction();
+            
             $transaksi = Transaksi::create([
                 'transaksi_code' => $transactionCode,
                 'user_id'        => Auth::id(),
@@ -169,12 +184,29 @@ class PosController extends Controller
             if ($needsPacking) {
                 $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
             }
-        });
 
-        $transaksi = Transaksi::where('transaksi_code', $transactionCode)->first();
+            DB::commit();
 
-        return redirect()->route('pos.nota', $transaksi->id)
-            ->with('success', 'Pesanan berhasil dibuat!');
+            return redirect()->route('pos.nota', $transaksi->id)
+                ->with('success', 'Pesanan berhasil dibuat!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('POS Order Creation Failed', [
+                'operation' => 'pos.store',
+                'user_id' => Auth::id(),
+                'customer_id' => $request->customer_id ?? null,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'input' => $request->except(['_token']),
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.');
+        }
     }
 
     /**
@@ -194,17 +226,29 @@ class PosController extends Controller
      */
     public function pickup(Request $request, $id)
     {
-        $transaksi = Transaksi::findOrFail($id);
-        
-        if ($transaksi->status !== 'selesai') {
-            return back()->with('error', 'Pesanan belum selesai diproses.');
+        try {
+            $transaksi = Transaksi::findOrFail($id);
+            
+            if ($transaksi->status !== 'selesai') {
+                return back()->with('error', 'Pesanan belum selesai diproses.');
+            }
+
+            $transaksi->update([
+                'status' => 'diambil',
+                'updated_at' => now(),
+            ]);
+
+            return back()->with('success', "Pesanan #{$transaksi->transaksi_code} berhasil ditandai sebagai sudah diambil.");
+
+        } catch (\Exception $e) {
+            \Log::error('Pickup Update Failed', [
+                'operation' => 'pos.pickup',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Gagal memperbarui status pickup. Silakan coba lagi.');
         }
-
-        $transaksi->update([
-            'status' => 'diambil',
-            'updated_at' => now(),
-        ]);
-
-        return back()->with('success', "Pesanan #{$transaksi->transaksi_code} berhasil ditandai sebagai sudah diambil.");
     }
 }

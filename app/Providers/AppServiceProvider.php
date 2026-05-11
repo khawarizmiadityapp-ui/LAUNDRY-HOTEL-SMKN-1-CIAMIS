@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
             $currentRole = strtolower((string) optional(Auth::user())->role);
             $isAdminLike = str_contains($currentRole, 'admin');
 
-            $sidebarMenus = collect(config('sidebar.menus', []))
+            $sidebarMenus = collect(config('sidebar.admin_menus', []))
                 ->filter(function (array $menu) use ($currentRole, $isAdminLike) {
                     $roles = collect($menu['roles'] ?? [])
                         ->map(static fn ($role) => strtolower((string) $role))
@@ -67,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Defensive fallback: if role filtering removed all menus, show full menu set (safe default)
             if ($sidebarMenus->isEmpty()) {
-                $sidebarMenus = collect(config('sidebar.menus', []))
+                $sidebarMenus = collect(config('sidebar.admin_menus', []))
                     ->map(function (array $menu) {
                         $routeName = (string) ($menu['route'] ?? '');
                         $activePatterns = $menu['active'] ?? [$routeName];

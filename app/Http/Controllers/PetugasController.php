@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class PetugasController extends Controller
 {
@@ -38,11 +39,13 @@ class PetugasController extends Controller
     // Dashboard untuk Petugas Piket
     public function dashboard()
     {
-        if (Auth::user()->role !== 'staff') {
-            abort(403, 'Akses ditolak');
+        $user = Auth::user();
+        
+        // ✅ FIX: Allow both admin and staff
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
         }
 
-        $user = Auth::user();
         $division = strtolower((string) $user->division);
 
         // Fetch dynamic stats based on division
@@ -226,13 +229,20 @@ class PetugasController extends Controller
             'petugas_name' => 'nullable|string|max:255'
         ]);
 
-        $transaksi = Transaksi::findOrFail($transaksiId);
-        $stage = $request->stage;
+        DB::beginTransaction();
+        
+        try {
+            $transaksi = Transaksi::findOrFail($transaksiId);
+            $stage = $request->stage;
 
-        // Cari task yang sesuai
-        $task = $transaksi->tasks()->where('stage', $stage)->first();
+            // Cari task yang sesuai
+            $task = $transaksi->tasks()->where('stage', $stage)->first();
 
-        if ($task) {
+            if (!$task) {
+                DB::rollBack();
+                return redirect()->back()->with('error', "Tugas tidak ditemukan.");
+            }
+
             $task->update([
                 'status' => 'completed',
                 'petugas_id' => Auth::id(),
@@ -243,16 +253,22 @@ class PetugasController extends Controller
             // Auto-deduct Inventory if stage is washing
             if ($stage === 'washing') {
                 // Deduct 1 unit of detergent
-                \App\Models\Inventory::where('category', 'detergent')
+                $detergent = \App\Models\Inventory::where('category', 'detergent')
                     ->where('quantity', '>', 0)
-                    ->first()
-                    ?->decrement('quantity', 1);
+                    ->first();
+                
+                if ($detergent) {
+                    $detergent->decrement('quantity', 1);
+                }
 
                 // Deduct 1 unit of fragrance
-                \App\Models\Inventory::where('category', 'fragrance')
+                $fragrance = \App\Models\Inventory::where('category', 'fragrance')
                     ->where('quantity', '>', 0)
-                    ->first()
-                    ?->decrement('quantity', 1);
+                    ->first();
+                
+                if ($fragrance) {
+                    $fragrance->decrement('quantity', 1);
+                }
             }
 
             // Update overall transaction status
@@ -266,6 +282,8 @@ class PetugasController extends Controller
                 $transaksi->update(['status' => $statusMap[$stage]]);
             }
 
+            DB::commit();
+
             // Generate WhatsApp Notification Link
             $phone = preg_replace('/^0/', '62', $transaksi->customer_phone);
             $msg = "Halo " . $transaksi->customer_name . ", pesanan Anda #" . $transaksi->transaksi_code . " saat ini telah selesai pada tahap " . ucfirst($stage) . ". \n\nCek progress lengkapnya di: " . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
@@ -274,9 +292,22 @@ class PetugasController extends Controller
             session()->flash('notification_link', $waLink);
 
             return redirect()->back()->with('success', 'Tugas ' . ucfirst($stage) . ' berhasil diselesaikan!');
-        }
 
-        return redirect()->back()->with('error', "Tugas tidak ditemukan.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Complete Task Failed', [
+                'operation' => 'petugas.completeTask',
+                'user_id' => Auth::id(),
+                'transaksi_id' => $transaksiId,
+                'stage' => $request->stage ?? null,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal menyelesaikan tugas. Silakan coba lagi atau hubungi administrator.');
+        }
     }
 
     // Update status transaksi via Operations Hub (Lama - Masih dipertahankan untuk kompatibilitas jika perlu)
@@ -312,38 +343,60 @@ class PetugasController extends Controller
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $item = \App\Models\Inventory::findOrFail($id);
-        $adjustment = (int) $request->adjustment;
+        try {
+            $item = \App\Models\Inventory::findOrFail($id);
+            $adjustment = (int) $request->adjustment;
 
-        if (Auth::user()->role === 'admin') {
-            $item->quantity = max(0, $item->quantity + $adjustment);
-            $item->save();
+            if (Auth::user()->role === 'admin') {
+                $item->quantity = max(0, $item->quantity + $adjustment);
+                $item->save();
 
-            return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
+                return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
+            }
+
+            InventoryAdjustmentRequest::create([
+                'inventory_id' => $item->id,
+                'requested_by' => Auth::id(),
+                'adjustment' => $adjustment,
+                'reason' => $request->reason,
+                'status' => 'pending',
+            ]);
+
+            return redirect()->back()->with('success', "Permintaan perubahan stok {$item->name} dikirim ke admin/guru piket untuk konfirmasi.");
+
+        } catch (\Exception $e) {
+            \Log::error('Inventory Adjustment Failed', [
+                'operation' => 'petugas.adjustInventory',
+                'user_id' => Auth::id(),
+                'inventory_id' => $id,
+                'adjustment' => $request->adjustment ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal memperbarui stok. Silakan coba lagi.');
         }
-
-        InventoryAdjustmentRequest::create([
-            'inventory_id' => $item->id,
-            'requested_by' => Auth::id(),
-            'adjustment' => $adjustment,
-            'reason' => $request->reason,
-            'status' => 'pending',
-        ]);
-
-        return redirect()->back()->with('success', "Permintaan perubahan stok {$item->name} dikirim ke admin/guru piket untuk konfirmasi.");
     }
 
     // Halaman History
     public function history()
     {
         $user = Auth::user();
-        if ($user->role !== 'staff') {
-            abort(403, 'Akses ditolak');
+        
+        // ✅ FIX: Allow both admin and staff
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
         }
 
         $division = strtolower((string) $user->division);
-        // Only fetch history if the user belongs to a specific processing division
-        if (in_array($division, ['washing', 'ironing', 'setrika', 'packing'])) {
+        
+        // ✅ FIX: Admin can see all history
+        if ($user->role === 'admin') {
+            $completedTasks = \App\Models\LaundryTask::where('status', 'completed')
+                ->with(['transaksi'])
+                ->orderBy('completed_at', 'desc')
+                ->paginate(15);
+        } elseif (in_array($division, ['washing', 'ironing', 'setrika', 'packing'])) {
+            // Staff only see their division's history
             $taskStage = $division === 'setrika' ? 'ironing' : $division;
 
             $completedTasks = \App\Models\LaundryTask::where('stage', $taskStage)
