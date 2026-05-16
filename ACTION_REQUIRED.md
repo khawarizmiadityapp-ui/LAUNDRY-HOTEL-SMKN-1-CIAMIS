@@ -34,7 +34,7 @@
 ## ⚠️ PENDING ISSUES
 
 ### 1. 🔴 Sidebar Menu Redirect Bug (NEEDS INVESTIGATION)
-**Issue**: Pas klik menu washing/cs/dll di sidebar petugas, malah redirect ke dashboard admin
+**Issue**: Pas klik menu washing/cs/dll di sidebar petugas, malah redirect ke dashboard admin {saat  ini masih belum sepenuhnya}
 
 **Possible Causes**:
 1. User role = `admin` (bukan `staff`)
