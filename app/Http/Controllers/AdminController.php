@@ -19,8 +19,22 @@ class AdminController extends Controller
     // 1. Dashboard Utama (Statistik)
     public function dashboard()
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak');
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+        
+        if ($user->role !== 'admin') {
+            // Log for debugging
+            Log::warning('Unauthorized dashboard access attempt', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_role' => $user->role,
+                'expected_role' => 'admin',
+            ]);
+            
+            abort(403, 'Akses ditolak. Halaman ini hanya untuk Administrator. Role Anda: ' . ($user->role ?? 'unknown'));
         }
 
         $today = Carbon::today();
