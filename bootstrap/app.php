@@ -1,5 +1,10 @@
 <?php
 
+$dbPath = dirname(__DIR__) . '/database/database.sqlite';
+if (!file_exists($dbPath) || filesize($dbPath) < 100) {
+    @file_put_contents($dbPath, '');
+}
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;

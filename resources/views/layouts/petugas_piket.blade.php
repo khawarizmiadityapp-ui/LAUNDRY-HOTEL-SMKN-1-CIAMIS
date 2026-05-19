@@ -155,6 +155,42 @@
             }, 1000);
         };
     @endif
+
+    // Sinkronisasi dan persistence nama petugas piket menggunakan localStorage
+    document.addEventListener('DOMContentLoaded', function () {
+        const petugasInputs = document.querySelectorAll('[name="petugas_name"]');
+        if (petugasInputs.length === 0) return;
+
+        // Ambil nama tersimpan dari localStorage
+        const savedName = localStorage.getItem('petugas_piket_name');
+
+        // Pre-fill semua input jika ada nama tersimpan
+        if (savedName) {
+            petugasInputs.forEach(input => {
+                input.value = savedName;
+            });
+        }
+
+        // Daftarkan listener untuk mendeteksi perubahan input dan sinkronisasikan
+        petugasInputs.forEach(input => {
+            const syncEvent = function (e) {
+                const newName = e.target.value;
+                
+                // Simpan ke localStorage
+                localStorage.setItem('petugas_piket_name', newName);
+
+                // Sinkronkan ke seluruh input dengan name="petugas_name" di halaman yang sama
+                petugasInputs.forEach(otherInput => {
+                    if (otherInput !== e.target) {
+                        otherInput.value = newName;
+                    }
+                });
+            };
+
+            input.addEventListener('input', syncEvent);
+            input.addEventListener('change', syncEvent);
+        });
+    });
 </script>
 
 @stack('scripts')

@@ -56,8 +56,13 @@
                                 
                                 <div class="mb-4">
                                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Petugas Piket</label>
-                                    <input type="text" name="petugas_name" placeholder="Masukkan nama Anda..." required
-                                           class="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors">
+                                    <select name="petugas_name" required
+                                            class="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white">
+                                        <option value="">-- Pilih Nama Anda --</option>
+                                        @foreach($petugasList as $p)
+                                            <option value="{{ $p->nama }}">{{ $p->nama }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <button type="submit" 

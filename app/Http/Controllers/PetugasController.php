@@ -70,32 +70,35 @@ class PetugasController extends Controller
     // Menampilkan halaman Blade
     public function index()
     {
-        $onlineStaff = Cache::get('online_staff_users', []);
-        $lastAllowed = now()->subMinutes((int) config('session.lifetime', 120))->timestamp;
+        $petugasList = Petugas::orderBy('nama')->get();
 
-        $onlineIds = collect($onlineStaff)
-            ->filter(static fn ($lastSeen) => (int) $lastSeen >= $lastAllowed)
-            ->keys()
-            ->map(static fn ($id) => (int) $id)
-            ->values()
-            ->all();
-
-        $petugasUsers = User::query()
-            ->where('role', 'staff')
-            ->whereIn('id', $onlineIds)
-            ->orderBy('name')
-            ->get(['id', 'name', 'division']);
-
-        $petugasData = $petugasUsers->map(function (User $item) {
-            $divisionLabel = $item->division ? ucwords(str_replace('_', ' ', $item->division)) : '-';
+        $petugasData = $petugasList->map(function (Petugas $item) {
+            $completedWashing = \App\Models\LaundryTask::where('stage', 'washing')
+                ->where('status', 'completed')
+                ->where('petugas_name', $item->nama)
+                ->count();
+                
+            $completedIroning = \App\Models\LaundryTask::where('stage', 'ironing')
+                ->where('status', 'completed')
+                ->where('petugas_name', $item->nama)
+                ->count();
+                
+            $completedPacking = \App\Models\LaundryTask::where('stage', 'packing')
+                ->where('status', 'completed')
+                ->where('petugas_name', $item->nama)
+                ->count();
 
             return [
                 'id' => $item->id,
-                'nama' => $item->name,
-                'idPetugas' => 'USR-' . str_pad((string) $item->id, 4, '0', STR_PAD_LEFT),
-                'role' => 'Operasional',
-                'status' => 'Aktif',
-                'shift' => $divisionLabel,
+                'nama' => $item->nama,
+                'idPetugas' => $item->id_petugas,
+                'role' => $item->role,
+                'status' => $item->status,
+                'shift' => $item->shift,
+                'completed_washing' => $completedWashing,
+                'completed_ironing' => $completedIroning,
+                'completed_packing' => $completedPacking,
+                'total_completed' => $completedWashing + $completedIroning + $completedPacking,
             ];
         })->values();
 
@@ -118,7 +121,6 @@ class PetugasController extends Controller
             'nama' => 'required|string|max:255',
             'role' => 'required|in:Admin,Operasional,Kurir',
             'status' => 'required|in:Aktif,Off Duty',
-            'shift' => 'required|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -133,7 +135,7 @@ class PetugasController extends Controller
             'id_petugas' => $idPetugas,
             'role' => $request->role,
             'status' => $request->status,
-            'shift' => $request->shift,
+            'shift' => '-',
         ]);
 
         return response()->json($petugas, 201);
@@ -148,14 +150,13 @@ class PetugasController extends Controller
             'nama' => 'sometimes|string|max:255',
             'role' => 'sometimes|in:Admin,Operasional,Kurir',
             'status' => 'sometimes|in:Aktif,Off Duty',
-            'shift' => 'sometimes|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $petugas->update($request->only(['nama', 'role', 'status', 'shift']));
+        $petugas->update($request->only(['nama', 'role', 'status']));
         return response()->json($petugas);
     }
 
@@ -177,7 +178,9 @@ class PetugasController extends Controller
             $q->where('stage', 'washing')->where('status', 'pending');
         })->with(['details.layanan'])->get();
 
-        return view('petugas_piket.washing.index', compact('transactions'));
+        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+
+        return view('petugas_piket.washing.index', compact('transactions', 'petugasList'));
     }
 
     // Halaman Setrika
@@ -196,7 +199,9 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        return view('petugas_piket.setrika.index', compact('transactions'));
+        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+
+        return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
     }
 
     // Halaman Packing
@@ -215,7 +220,9 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        return view('petugas_piket.packing.index', compact('transactions'));
+        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+
+        return view('petugas_piket.packing.index', compact('transactions', 'petugasList'));
     }
 
 

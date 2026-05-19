@@ -251,6 +251,8 @@ class AdminController extends Controller
             'customer_name'  => 'required|string|max:255',
             'customer_phone' => 'required|string',
             'weight'         => 'required|numeric|min:0.1',
+            'service_type'   => 'required|in:regular,express',
+            'total_price'    => 'required|numeric|min:0',
             'payment_status' => 'required|in:lunas,belum_bayar',
             'payment_method' => 'required|in:tunai,qris,transfer,cash,dana',
             'status'         => 'required|in:diterima,disortir,dicuci,dikeringkan,disetrika,dipacking,selesai,diambil',
@@ -260,18 +262,22 @@ class AdminController extends Controller
         try {
             $transaction = Transaksi::findOrFail($id);
 
-            // Kalkulasi ulang total_price berdasarkan weight * price_per_kg
-            // Jika price_per_kg 0 (berarti pesanan dari POS / multi layanan), total_price jangan diubah otomatis oleh weight.
-            $totalPrice = $transaction->total_price;
-            if ($transaction->price_per_kg > 0) {
-                $totalPrice = $request->weight * $transaction->price_per_kg;
+            // Ambil harga per kg untuk tipe layanan yang baru/dipilih
+            $price = ServicePrice::where('service_type', $request->service_type)->first();
+            $pricePerKg = $price ? $price->price_per_kg : 6000;
+
+            // Jika transaksi asal dari POS (multi detail), biarkan price_per_kg tetap 0
+            if ($transaction->price_per_kg == 0) {
+                $pricePerKg = 0;
             }
 
             $transaction->update([
                 'customer_name'  => $request->customer_name,
                 'customer_phone' => $request->customer_phone,
                 'weight'         => $request->weight,
-                'total_price'    => $totalPrice,
+                'service_type'   => $request->service_type,
+                'price_per_kg'   => $pricePerKg,
+                'total_price'    => $request->total_price,
                 'payment_status' => $request->payment_status,
                 'payment_method' => $request->payment_method,
                 'status'         => $request->status,
