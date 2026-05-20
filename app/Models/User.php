@@ -29,4 +29,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all transactions created by this user
+     */
+    public function transaksis()
+    {
+        return $this->hasMany(Transaksi::class);
+    }
+
+    /**
+     * Get all laundry tasks assigned to this user (as petugas)
+     */
+    public function laundryTasks()
+    {
+        return $this->hasMany(LaundryTask::class, 'petugas_id');
+    }
 }

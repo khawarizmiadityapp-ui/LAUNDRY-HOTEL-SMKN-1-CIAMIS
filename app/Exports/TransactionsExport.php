@@ -10,7 +10,7 @@ class TransactionsExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return Transaksi::all();
+        return Transaksi::with(['user', 'customer', 'details.layanan'])->get();
     }
 
     public function headings(): array

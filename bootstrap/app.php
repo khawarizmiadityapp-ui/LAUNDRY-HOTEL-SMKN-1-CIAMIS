@@ -21,6 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
     })
+    ->withSchedule(function ($schedule): void {
+        // Automated Backups - Daily at 2 AM
+        $schedule->command('backup:clean')->daily()->at('01:00');
+        $schedule->command('backup:run')->daily()->at('02:00');
+        
+        // Monitor backup health - Daily at 3 AM
+        $schedule->command('backup:monitor')->daily()->at('03:00');
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

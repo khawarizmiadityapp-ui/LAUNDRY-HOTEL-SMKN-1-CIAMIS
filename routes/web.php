@@ -56,106 +56,118 @@ Route::post('/update-password', function (Illuminate\Http\Request $request) {
     return redirect('/login')->with('success', 'Password berhasil diubah!');})->name('update.password');
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
-Route::group(['middleware' => ['auth']],function () {
+Route::group(['middleware' => ['auth']], function () {
 
-    // Dashboard
-    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/petugas', [PetugasController::class, 'dashboard'])->middleware(['auth'])->name('petugas.dashboard');
-
-    // ================= POS (Pesanan Baru) =================
-    Route::get('/admin/pos', [PosController::class, 'index'])->name('admin.pos.index');
-    Route::get('/petugas/customer-service', [PosController::class, 'index'])->name('petugas.pos.index');
-    Route::get('/pos/customer/search', [PosController::class, 'searchCustomer'])->name('pos.customer.search');
-    Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->name('pos.customer.store')->middleware('throttle:60,1');
-    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.order.store')->middleware('throttle:60,1');
-    Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
-    Route::post('/transaksi/{id}/pickup', [PosController::class, 'pickup'])->name('pos.pickup')->middleware('throttle:60,1');
-
-    // Transaksi
-    Route::get('/admin/transaksi', [AdminController::class, 'transactions'])->name('admin.transactions.index');
-    Route::post('/admin/transaksi', [AdminController::class, 'storeTransaction'])->name('admin.transactions.store');
-    Route::patch('/admin/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.transactions.status');
-    Route::patch('/admin/transaksi/{id}/payment', [AdminController::class, 'updatePayment'])->name('admin.transactions.payment');
-    Route::put('/admin/transaksi/{id}', [AdminController::class, 'updateTransaction'])->name('admin.transactions.update');
-    Route::delete('/admin/transaksi/{id}', [AdminController::class, 'destroyTransaction'])
-    ->name('admin.transactions.destroy');
-
-    // Customer
-    Route::get('/admin/customers', [CustomerController::class, 'index'])->name('admin.customers.index');
-    Route::get('/admin/customers/create', [CustomerController::class, 'create'])->name('admin.customers.create');
-    Route::post('/admin/customers', [CustomerController::class, 'store'])->name('admin.customers.store');
-    Route::get('/admin/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
-    Route::patch('/admin/customers/{id}', [CustomerController::class, 'update'])->name('admin.customers.update');
-    Route::delete('/admin/customers/{id}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
-
-    // Layanan
-    Route::prefix('admin')->name('admin.')->group(function () {
-
-    // Layanan resource routes
-    Route::resource('layanan', LayananController::class)->except(['show', 'create', 'edit']);
-
-    // AJAX toggle status
-    Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])
-        ->name('layanan.toggle-status');
+    // ================= ADMIN ROUTES (Protected) =================
+    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        
+        // Dashboard
+        Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // POS (Pesanan Baru)
+        Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+        
+        // Transaksi Management
+        Route::prefix('transaksi')->name('transactions.')->group(function () {
+            Route::get('/', [AdminController::class, 'transactions'])->name('index');
+            Route::post('/', [AdminController::class, 'storeTransaction'])->middleware('throttle:30,1')->name('store');
+            Route::put('/{id}', [AdminController::class, 'updateTransaction'])->middleware('throttle:30,1')->name('update');
+            Route::patch('/{id}/status', [AdminController::class, 'updateStatus'])->middleware('throttle:60,1')->name('status');
+            Route::patch('/{id}/payment', [AdminController::class, 'updatePayment'])->middleware('throttle:60,1')->name('payment');
+            Route::delete('/{id}', [AdminController::class, 'destroyTransaction'])->middleware('throttle:20,1')->name('destroy');
+        });
+        
+        // Customer Management
+        Route::prefix('customers')->name('customers.')->group(function () {
+            Route::get('/', [CustomerController::class, 'index'])->name('index');
+            Route::get('/create', [CustomerController::class, 'create'])->name('create');
+            Route::post('/', [CustomerController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/{id}/edit', [CustomerController::class, 'edit'])->name('edit');
+            Route::patch('/{id}', [CustomerController::class, 'update'])->middleware('throttle:30,1')->name('update');
+            Route::delete('/{id}', [CustomerController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
+        });
+        
+        // Layanan Management
+        Route::resource('layanan', LayananController::class)->except(['show', 'create', 'edit'])->middleware('throttle:30,1');
+        Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])->middleware('throttle:60,1')->name('layanan.toggle-status');
+        
+        // Petugas Management
+        Route::prefix('petugas')->name('petugas.')->group(function () {
+            Route::get('/', [PetugasController::class, 'index'])->name('index');
+            Route::post('/', [PetugasController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::put('/{id}', [PetugasController::class, 'update'])->middleware('throttle:30,1')->name('update');
+            Route::delete('/{id}', [PetugasController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
+        });
+        
+        // Laporan Keuangan
+        Route::get('/laporan_keuangan', [LaporanController::class, 'index'])->name('laporan_keuangan.index');
+        
+        // Prices Management
+        Route::get('/prices', [AdminController::class, 'prices'])->name('prices');
+        Route::post('/prices', [AdminController::class, 'updatePrices'])->middleware('throttle:20,1')->name('prices.update');
+        
+        // User Management
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::post('/users', [AdminController::class, 'storeUser'])->middleware('throttle:20,1')->name('users.store');
+        
+        // Pembayaran
+        Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+            Route::get('/', [PembayaranController::class, 'index'])->name('index');
+            Route::get('/create', [PembayaranController::class, 'create'])->name('create');
+        });
+        
+        // Pengeluaran
+        Route::prefix('pengeluaran')->name('pengeluaran.')->group(function () {
+            Route::get('/', [PengeluaranController::class, 'index'])->name('index');
+            Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
+            Route::post('/', [PengeluaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/{pengeluaran}', [PengeluaranController::class, 'show'])->name('show');
+            Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
+            Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->middleware('throttle:30,1')->name('update');
+            Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
+            Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
+        });
+        
+        // Inventory
+        Route::prefix('inventory')->name('inventory.')->group(function () {
+            Route::get('/', [InventoryController::class, 'index'])->name('index');
+            Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->middleware('throttle:30,1')->name('update');
+            Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->middleware('throttle:30,1')->name('request.approve');
+            Route::post('/request/{id}/reject', [InventoryController::class, 'rejectAdjustment'])->middleware('throttle:30,1')->name('request.reject');
+        });
     });
 
-    //petugas
-    Route::get('/admin/petugas', [PetugasController::class, 'index'])->name('admin.petugas.index');
-    Route::post('/admin/petugas', [PetugasController::class, 'store'])->name('admin.petugas.store');
-    Route::put('/admin/petugas/{id}', [PetugasController::class, 'update'])->name('admin.petugas.update');
-    Route::delete('/admin/petugas/{id}', [PetugasController::class, 'destroy'])->name('admin.petugas.destroy');
-
-    // Laporan
-    Route::get('/admin/laporan_keuangan', [LaporanController::class, 'index'])->name('admin.laporan_keuangan.index');
-
-    // Export Laporan
-    Route::get('/export-transaksi', [TransaksiController::class, 'exportExcel'])->name('export.transaksi.excel');
-    Route::get('/export-transaksi-pdf', [TransaksiController::class, 'exportPdf'])->name('export.transaksi.pdf');
-
-    // Harga
-    Route::get('/admin/prices', [AdminController::class, 'prices'])->name('admin.prices');
-    Route::post('/admin/prices', [AdminController::class, 'updatePrices'])->name('admin.prices.update');
-
-    // Users
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
-
-    //pembayaran
-    Route::get('/admin/pembayaran', [PembayaranController::class, 'index'])->name('admin.pembayaran.index');
-    Route::get('/admin/pembayaran/create', [PembayaranController::class, 'create'])->name('admin.pembayaran.create');
-
-    // Pengeluaran
-    Route::prefix('admin/pengeluaran')->name('admin.pengeluaran.')->group(function () {
-        Route::get('/', [PengeluaranController::class, 'index'])->name('index');
-        Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
-        Route::post('/', [PengeluaranController::class, 'store'])->name('store');
-        Route::get('/{pengeluaran}', [PengeluaranController::class, 'show'])->name('show');
-        Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
-        Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->name('update');
-        Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->name('destroy');
-        Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
+    // ================= SHARED ROUTES (Admin + Staff) =================
+    
+    // POS Routes (Accessible by Admin + CS Staff)
+    Route::middleware(['throttle:100,1'])->group(function () {
+        Route::get('/petugas/customer-service', [PosController::class, 'index'])->name('petugas.pos.index');
+        Route::get('/pos/customer/search', [PosController::class, 'searchCustomer'])->name('pos.customer.search');
+        Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->middleware('throttle:60,1')->name('pos.customer.store');
+        Route::post('/pos/order', [PosController::class, 'store'])->middleware('throttle:60,1')->name('pos.order.store');
+        Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
+        Route::post('/transaksi/{id}/pickup', [PosController::class, 'pickup'])->middleware('throttle:60,1')->name('pos.pickup');
+    });
+    
+    // Export Routes (Admin + Staff with permission)
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::get('/export-transaksi', [TransaksiController::class, 'exportExcel'])->name('export.transaksi.excel');
+        Route::get('/export-transaksi-pdf', [TransaksiController::class, 'exportPdf'])->name('export.transaksi.pdf');
     });
 
-    // Inventory
-    Route::prefix('admin/inventory')->name('admin.inventory.')->group(function () {
-        Route::get('/', [InventoryController::class, 'index'])->name('index');
-        Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->name('update');
-        Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->name('request.approve');
-        Route::post('/request/{id}/reject', [InventoryController::class, 'rejectAdjustment'])->name('request.reject');
+    // ================= PETUGAS/STAFF ROUTES =================
+    Route::prefix('petugas')->name('petugas_piket.')->middleware(['throttle:100,1'])->group(function () {
+        Route::get('/', [PetugasController::class, 'dashboard'])->name('dashboard');
+        Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
+        Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
+        Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
+        
+        Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->middleware('throttle:60,1')->name('tasks.updateStatus');
+        Route::post('/tasks/{id}/complete', [PetugasController::class, 'completeTask'])->middleware('throttle:60,1')->name('tasks.complete');
+        
+        Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');
+        Route::post('/inventory/{id}/adjust', [PetugasController::class, 'adjustInventory'])->middleware('throttle:30,1')->name('inventory.adjust');
+        
+        Route::get('/history', [PetugasController::class, 'history'])->name('history.index');
     });
-
-// ================= PETUGAS =================
-Route::prefix('petugas')->name('petugas_piket.')->middleware(['auth'])->group(function () {
-
-    Route::get('/', [PetugasController::class, 'dashboard'])->name('dashboard');
-    Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
-    Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
-    Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
-
-    Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
-    Route::post('/tasks/{id}/complete', [PetugasController::class, 'completeTask'])->name('tasks.complete');
-    Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');
-    Route::post('/inventory/{id}/adjust', [PetugasController::class, 'adjustInventory'])->name('inventory.adjust');
-    Route::get('/history', [PetugasController::class, 'history'])->name('history.index');
-});
 });

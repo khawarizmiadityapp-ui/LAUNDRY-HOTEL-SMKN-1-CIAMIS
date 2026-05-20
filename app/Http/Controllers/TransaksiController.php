@@ -57,7 +57,7 @@ class TransaksiController extends Controller
 
     public function exportPdf()
     {
-    $data = Transaksi::all();
+    $data = Transaksi::with(['user', 'customer', 'details.layanan'])->get();
 
     $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data'))->setPaper('a4', 'landscape');
 

@@ -53,4 +53,12 @@ class Layanan extends Model
     {
         return $this->kategori === 'kiloan' ? '/kg' : '/pcs';
     }
+
+    /**
+     * Get all transaksi details using this layanan
+     */
+    public function transaksiDetails()
+    {
+        return $this->hasMany(TransaksiDetail::class);
+    }
 }

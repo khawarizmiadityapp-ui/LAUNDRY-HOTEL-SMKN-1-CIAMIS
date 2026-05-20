@@ -227,7 +227,7 @@ class PosController extends Controller
     public function pickup(Request $request, $id)
     {
         try {
-            $transaksi = Transaksi::findOrFail($id);
+            $transaksi = Transaksi::with(['details.layanan', 'customer'])->findOrFail($id);
             
             if ($transaksi->status !== 'selesai') {
                 return back()->with('error', 'Pesanan belum selesai diproses.');

@@ -239,7 +239,7 @@ class PetugasController extends Controller
         DB::beginTransaction();
         
         try {
-            $transaksi = Transaksi::findOrFail($transaksiId);
+            $transaksi = Transaksi::with(['details.layanan', 'tasks'])->findOrFail($transaksiId);
             $stage = $request->stage;
 
             // Cari task yang sesuai
@@ -324,7 +324,7 @@ class PetugasController extends Controller
             'status' => 'required|in:diterima,disortir,dicuci,dikeringkan,disetrika,dipacking,selesai,diambil'
         ]);
 
-        $transaksi = Transaksi::findOrFail($id);
+        $transaksi = Transaksi::with(['tasks'])->findOrFail($id);
         $transaksi->status = $request->status;
         $transaksi->save();
 

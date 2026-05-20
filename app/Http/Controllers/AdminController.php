@@ -196,7 +196,7 @@ class AdminController extends Controller
         ]);
 
         try {
-            $transaction = Transaksi::findOrFail($id);
+            $transaction = Transaksi::with(['details.layanan', 'tasks'])->findOrFail($id);
             $transaction->update([
                 'status' => $request->status,
                 'updated_at' => now()
@@ -224,7 +224,7 @@ class AdminController extends Controller
     public function updatePayment(Request $request, $id)
     {
         try {
-            $transaction = Transaksi::findOrFail($id);
+            $transaction = Transaksi::with(['customer'])->findOrFail($id);
             $transaction->update([
                 'payment_status' => $request->payment_status // lunas / belum_bayar
             ]);
@@ -260,7 +260,7 @@ class AdminController extends Controller
         ]);
 
         try {
-            $transaction = Transaksi::findOrFail($id);
+            $transaction = Transaksi::with(['details.layanan'])->findOrFail($id);
 
             // Ambil harga per kg untuk tipe layanan yang baru/dipilih
             $price = ServicePrice::where('service_type', $request->service_type)->first();
@@ -423,7 +423,7 @@ class AdminController extends Controller
     public function destroyTransaction($id)
     {
         try {
-            $transaksi = Transaksi::findOrFail($id);
+            $transaksi = Transaksi::with(['details', 'tasks'])->findOrFail($id);
             $transaksi->delete();
 
             return back()->with('success', 'Data berhasil dihapus!');
