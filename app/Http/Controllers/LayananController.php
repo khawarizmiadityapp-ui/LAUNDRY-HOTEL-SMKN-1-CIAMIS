@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Requests\StoreLayananRequest;
+use App\Http\Requests\UpdateLayananRequest;
 
 class LayananController extends Controller
 {
@@ -43,24 +46,17 @@ class LayananController extends Controller
     /**
      * Simpan layanan baru.
      */
-    public function store(Request $request)
+    public function store(StoreLayananRequest $request)
     {
-        $validated = $request->validate([
-            'nama'     => 'required|string|max:100',
-            'kategori' => ['required', Rule::in(['kiloan', 'satuan'])],
-            'harga'    => 'required|numeric|min:0',
-            'satuan'   => 'required|string|max:20',
-            'estimasi' => 'nullable|string|max:100',
-            'badge'    => 'nullable|string|max:50',
-            'icon'     => 'nullable|string|max:50',
-            'needs_washing' => 'sometimes|boolean',
-            'needs_ironing' => 'sometimes|boolean',
-            'needs_packing' => 'sometimes|boolean',
-        ]);
-
+        // Validation already handled by FormRequest
+        $validated = $request->validated();
         $validated['status'] = true;
 
         $layanan = Layanan::create($validated);
+        
+        // Clear layanan cache when new service is created
+        Cache::forget('layanan_list');
+        Cache::forget('layanan_aktif');
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -83,23 +79,16 @@ class LayananController extends Controller
     /**
      * Update harga atau status layanan.
      */
-    public function update(Request $request, Layanan $layanan)
+    public function update(UpdateLayananRequest $request, Layanan $layanan)
     {
-        $validated = $request->validate([
-            'nama'     => 'sometimes|string|max:100',
-            'kategori' => ['sometimes', Rule::in(['kiloan', 'satuan'])],
-            'harga'    => 'sometimes|numeric|min:0',
-            'satuan'   => 'sometimes|string|max:20',
-            'estimasi' => 'nullable|string|max:100',
-            'badge'    => 'nullable|string|max:50',
-            'icon'     => 'nullable|string|max:50',
-            'status'   => 'sometimes|boolean',
-            'needs_washing' => 'sometimes|boolean',
-            'needs_ironing' => 'sometimes|boolean',
-            'needs_packing' => 'sometimes|boolean',
-        ]);
+        // Validation already handled by FormRequest
+        $validated = $request->validated();
 
         $layanan->update($validated);
+        
+        // Clear layanan cache when service is updated
+        Cache::forget('layanan_list');
+        Cache::forget('layanan_aktif');
 
         if ($request->expectsJson()) {
             return response()->json([

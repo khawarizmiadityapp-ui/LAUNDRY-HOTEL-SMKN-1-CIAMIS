@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
 
 
@@ -37,54 +38,64 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Administrator. Role Anda: ' . ($user->role ?? 'unknown'));
         }
 
-        $today = Carbon::today();
-        $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
+        // Cache dashboard statistics for 5 minutes
+        $stats = Cache::remember('dashboard_stats', 300, function () {
+            $today = Carbon::today();
+            
+            return [
+                'total_orders' => Transaksi::count(),
+                'orders_today' => Transaksi::whereDate('created_at', $today)->count(),
+                'processing' => Transaksi::whereIn('status', ['diterima', 'disortir', 'dicuci', 'dikeringkan', 'disetrika', 'dipacking'])->count(),
+                'completed' => Transaksi::where('status', 'selesai')->count(),
+                'total_income' => Transaksi::where('payment_status', 'lunas')->sum('total_price'),
+                'total_expense' => Pengeluaran::sum('nominal'),
+            ];
+        });
 
-        // Statistik Ringkasan
-        $stats = [
-            'total_orders' => Transaksi::count(), // Semua transaksi terdaftar
-            'orders_today' => Transaksi::whereDate('created_at', $today)->count(),
-            'processing' => Transaksi::whereIn('status', ['diterima', 'disortir', 'dicuci', 'dikeringkan', 'disetrika', 'dipacking'])->count(),
-            'completed' => Transaksi::where('status', 'selesai')->count(),
-            'total_income' => Transaksi::where('payment_status', 'lunas')->sum('total_price'),
-            'total_expense' => \App\Models\Pengeluaran::sum('nominal'),
-        ];
+        // Cache chart data for 5 minutes
+        $chartData = Cache::remember('dashboard_chart_data', 300, function () {
+            $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
+            
+            // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
+            $incomeData = Transaksi::select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('SUM(total_price) as total')
+                )
+                ->where('payment_status', 'lunas')
+                ->where('created_at', '>=', $sevenDaysAgo)
+                ->groupBy('date')
+                ->get()
+                ->pluck('total', 'date');
 
-        // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
-        $incomeData = Transaksi::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_price) as total')
-            )
-            ->where('payment_status', 'lunas')
-            ->where('created_at', '>=', $sevenDaysAgo)
-            ->groupBy('date')
-            ->get()
-            ->pluck('total', 'date');
+            $expenseData = Pengeluaran::select(
+                    DB::raw('DATE(tanggal) as date'),
+                    DB::raw('SUM(nominal) as total')
+                )
+                ->where('tanggal', '>=', $sevenDaysAgo)
+                ->groupBy('date')
+                ->get()
+                ->pluck('total', 'date');
 
-        $expenseData = \App\Models\Pengeluaran::select(
-                DB::raw('DATE(tanggal) as date'),
-                DB::raw('SUM(nominal) as total')
-            )
-            ->where('tanggal', '>=', $sevenDaysAgo)
-            ->groupBy('date')
-            ->get()
-            ->pluck('total', 'date');
+            // Format chart data for JS
+            $data = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i)->format('Y-m-d');
+                $label = Carbon::now()->subDays($i)->format('D');
+                $data['labels'][] = $label;
+                $data['income'][] = $incomeData->get($date, 0);
+                $data['expense'][] = $expenseData->get($date, 0);
+            }
+            
+            return $data;
+        });
 
-        // Format chart data for JS
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $label = Carbon::now()->subDays($i)->format('D');
-            $chartData['labels'][] = $label;
-            $chartData['income'][] = $incomeData->get($date, 0);
-            $chartData['expense'][] = $expenseData->get($date, 0);
-        }
-
-        // Transaksi Terbaru (Limit 10)
-        $recentTransactions = Transaksi::with(['user', 'details.layanan'])
-            ->latest()
-            ->take(10)
-            ->get();
+        // Cache recent transactions for 2 minutes
+        $recentTransactions = Cache::remember('dashboard_recent_transactions', 120, function () {
+            return Transaksi::with(['user', 'details.layanan'])
+                ->latest()
+                ->take(10)
+                ->get();
+        });
 
         return view('admin.dashboard', compact('stats', 'recentTransactions', 'chartData'));
     }
@@ -167,6 +178,11 @@ class AdminController extends Controller
             ]);
 
             DB::commit();
+            
+            // Clear dashboard cache when new transaction is created
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
 
@@ -201,6 +217,10 @@ class AdminController extends Controller
                 'status' => $request->status,
                 'updated_at' => now()
             ]);
+            
+            // Clear dashboard cache when status is updated
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_recent_transactions');
 
             // Opsional: Tambahkan log history status jika punya tabel history
             // TransactionStatusHistory::create([...]);
@@ -228,6 +248,11 @@ class AdminController extends Controller
             $transaction->update([
                 'payment_status' => $request->payment_status // lunas / belum_bayar
             ]);
+            
+            // Clear dashboard cache when payment status is updated
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 
@@ -284,6 +309,11 @@ class AdminController extends Controller
                 'notes'          => $request->notes,
                 'updated_at'     => now()
             ]);
+            
+            // Clear dashboard cache when transaction is updated
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
 
@@ -425,6 +455,11 @@ class AdminController extends Controller
         try {
             $transaksi = Transaksi::with(['details', 'tasks'])->findOrFail($id);
             $transaksi->delete();
+            
+            // Clear dashboard cache when transaction is deleted
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
 
             return back()->with('success', 'Data berhasil dihapus!');
 

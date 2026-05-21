@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class PosController extends Controller
 {
@@ -186,6 +187,11 @@ class PosController extends Controller
             }
 
             DB::commit();
+            
+            // Clear dashboard cache when new transaction is created from POS
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->route('pos.nota', $transaksi->id)
                 ->with('success', 'Pesanan berhasil dibuat!');
@@ -237,6 +243,10 @@ class PosController extends Controller
                 'status' => 'diambil',
                 'updated_at' => now(),
             ]);
+            
+            // Clear dashboard cache when transaction status is updated
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_recent_transactions');
 
             return back()->with('success', "Pesanan #{$transaksi->transaksi_code} berhasil ditandai sebagai sudah diambil.");
 

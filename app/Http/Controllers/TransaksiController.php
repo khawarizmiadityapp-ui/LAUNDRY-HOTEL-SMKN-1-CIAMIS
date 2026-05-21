@@ -7,20 +7,17 @@ use App\Models\Transaksi;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TransactionsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Requests\StoreTransaksiRequest;
 
 class TransaksiController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreTransaksiRequest $request)
 {
-    $request->validate([
-    'customer_name' => 'required',
-    'customer_phone' => 'required',
-    'service_type' => 'required',
-    'weight' => 'required|numeric'
-    ]);
+    // Validation already handled by FormRequest
+    $validated = $request->validated();
 
-    $price = $request->service_type == 'express' ? 7000 : 5000;
-    $totalPrice = $request->weight * $price;
+    $price = $validated['service_type'] == 'express' ? 7000 : 5000;
+    $totalPrice = $validated['weight'] * $price;
 
     $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
     $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
@@ -36,15 +33,15 @@ class TransaksiController extends Controller
     Transaksi::create([
         'transaksi_code' => 'TRX-' . time(),
         'user_id' => auth()->id(),
-        'customer_name' => $request->customer_name,
-        'customer_phone' => $request->customer_phone,
-        'service_type' => $request->service_type,
-        'weight' => $request->weight,
+        'customer_name' => $validated['customer_name'],
+        'customer_phone' => $validated['customer_phone'],
+        'service_type' => $validated['service_type'],
+        'weight' => $validated['weight'],
         'price_per_kg' => $price,
         'total_price' => $totalPrice,
         'status' => 'diterima',
         'payment_status' => 'belum_lunas',
-        'notes' => $request->notes
+        'notes' => $validated['notes'] ?? null
     ]);
 
     return back();

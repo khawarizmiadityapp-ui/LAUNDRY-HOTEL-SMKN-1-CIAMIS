@@ -110,6 +110,12 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::post('/users', [AdminController::class, 'storeUser'])->middleware('throttle:20,1')->name('users.store');
         
+        // Activity Log
+        Route::prefix('activity')->name('activity.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ActivityController::class, 'index'])->name('index');
+            Route::get('/{id}', [App\Http\Controllers\ActivityController::class, 'show'])->name('show');
+        });
+        
         // Pembayaran
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/', [PembayaranController::class, 'index'])->name('index');

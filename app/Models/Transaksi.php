@@ -9,6 +9,7 @@ use App\Models\TransaksiDetail;
 
 class Transaksi extends Model
 {
+    
     protected $table = 'transaksi'; // sesuaikan sama nama tabel di database
 
     protected $fillable = [

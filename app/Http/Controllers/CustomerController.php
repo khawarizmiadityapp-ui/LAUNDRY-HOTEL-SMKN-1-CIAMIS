@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
 
 class CustomerController extends Controller
 {
@@ -47,14 +49,10 @@ class CustomerController extends Controller
     /**
      * Store a new customer.
      */
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
-        $validated = $request->validate([
-            'nama'   => 'required|string|max:100',
-            'email'  => 'nullable|email|unique:customers,email',
-            'no_hp'  => 'required|string|max:20',
-            'alamat' => 'nullable|string|max:255',
-        ]);
+        // Validation already handled by FormRequest
+        $validated = $request->validated();
 
         Customer::create($validated);
 
@@ -75,14 +73,10 @@ class CustomerController extends Controller
     /**
      * Update a customer.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCustomerRequest $request, string $id)
     {
-        $validated = $request->validate([
-            'nama'   => 'required|string|max:100',
-            'email'  => 'nullable|email|unique:customers,email,' . $id,
-            'no_hp'  => 'required|string|max:20',
-            'alamat' => 'nullable|string|max:255',
-        ]);
+        // Validation already handled by FormRequest
+        $validated = $request->validated();
 
         Customer::findOrFail($id)->update($validated);
 

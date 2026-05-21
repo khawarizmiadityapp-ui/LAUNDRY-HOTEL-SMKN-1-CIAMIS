@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
 
 class MenuService
 {
@@ -22,26 +23,31 @@ class MenuService
 
         $role = strtolower((string) ($user->role ?? 'staff'));
         $division = $this->normalizeDivision((string) ($user->division ?? ''));
+        
+        // Cache menu for each user role and division combination
+        $cacheKey = "menu_{$type}_{$role}_{$division}";
+        
+        return Cache::remember($cacheKey, 3600, function () use ($type, $role, $division) {
+            // Get menus from config
+            $configKey = $type === 'admin' ? 'admin_menus' : 'petugas_menus';
+            $allMenus = config("sidebar.{$configKey}", []);
 
-        // Get menus from config
-        $configKey = $type === 'admin' ? 'admin_menus' : 'petugas_menus';
-        $allMenus = config("sidebar.{$configKey}", []);
-
-        // Filter menus based on role and division
-        $filteredMenus = collect($allMenus)->filter(function ($menu) use ($role, $division) {
-            return $this->canAccessMenu($menu, $role, $division);
-        })->map(function ($menu) {
-            return $this->processMenu($menu);
-        })->values()->all();
-
-        // If no menus found, return all (fallback for safety)
-        if (empty($filteredMenus)) {
-            return collect($allMenus)->map(function ($menu) {
+            // Filter menus based on role and division
+            $filteredMenus = collect($allMenus)->filter(function ($menu) use ($role, $division) {
+                return $this->canAccessMenu($menu, $role, $division);
+            })->map(function ($menu) {
                 return $this->processMenu($menu);
             })->values()->all();
-        }
 
-        return $filteredMenus;
+            // If no menus found, return all (fallback for safety)
+            if (empty($filteredMenus)) {
+                return collect($allMenus)->map(function ($menu) {
+                    return $this->processMenu($menu);
+                })->values()->all();
+            }
+
+            return $filteredMenus;
+        });
     }
 
     /**
