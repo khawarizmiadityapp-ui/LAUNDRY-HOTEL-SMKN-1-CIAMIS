@@ -154,7 +154,7 @@
                         <td class="px-6 py-3.5">
                             <div class="flex items-center gap-3">
                                 @php $colors = ['from-brand-500 to-brand-700','from-violet-500 to-violet-700','from-rose-400 to-rose-600','from-teal-500 to-teal-700','from-amber-400 to-amber-600','from-emerald-500 to-emerald-700']; @endphp
-                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br {{ $colors[$index % 6] }} flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br {{ $colors[(int)$index % 6] }} flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">
                                     {{ strtoupper(substr($trx->customer_name, 0, 1)) }}
                                 </div>
                                 <div class="leading-none">

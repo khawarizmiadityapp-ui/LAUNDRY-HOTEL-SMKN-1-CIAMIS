@@ -11,7 +11,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PengeluaranController;
-use App\Http\Controllers\OTPController;
+
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
@@ -32,28 +32,6 @@ Route::get('/track', [LandingController::class, 'trackStatus'])->name('track.sta
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-// Password Reset Routes (Opsional)
-Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
-// OTP Routes
-Route::post('/send-otp', [OTPController::class, 'sendOTP'])->name('send.otp');
-
-Route::get('/otp', function () {return view('auth.otp');})->name('otp.form');
-
-Route::post('/verify-otp', [OTPController::class, 'verifyOTP'])->name('verify.otp');
-
-Route::get('/reset-password', function () {return view('auth.reset_password');})->name('reset.password');
-
-Route::post('/update-password', function (Illuminate\Http\Request $request) {
-    $request->validate([
-        'password' => 'required|confirmed|min:6'
-    ]);
-
-    $user = \App\Models\User::where('email', $request->email)->first();
-    $user->password = bcrypt($request->password);
-    $user->save();
-
-    return redirect('/login')->with('success', 'Password berhasil diubah!');})->name('update.password');
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
 Route::group(['middleware' => ['auth']], function () {
@@ -120,6 +98,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/', [PembayaranController::class, 'index'])->name('index');
             Route::get('/create', [PembayaranController::class, 'create'])->name('create');
+            Route::post('/', [PembayaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
         });
         
         // Pengeluaran

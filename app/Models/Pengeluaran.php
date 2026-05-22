@@ -57,7 +57,14 @@ class Pengeluaran extends Model
     public static function generateIdTransaksi(): string
     {
         $last = static::orderByDesc('id')->first();
-        $num  = $last ? (intval(substr($last->id_transaksi, 4)) + 1) : 2401;
+        if ($last && $last->id_transaksi) {
+            // Parse EXP-2401 -> 2401
+            $parts = explode('-', $last->id_transaksi);
+            $lastNum = isset($parts[1]) ? (int)$parts[1] : 2400;
+            $num = $lastNum + 1;
+        } else {
+            $num = 2401;
+        }
         return 'EXP-' . $num;
     }
 }

@@ -114,11 +114,7 @@
                             <i class="fa-regular fa-eye text-lg" id="toggleIcon"></i>
                         </button>
                     </div>
-                    <div class="flex justify-end mt-2">
-                        <a href="{{ route('password.request') }}" class="text-[10px] font-extrabold text-[#0047cc] hover:text-blue-800 tracking-wider uppercase bg-blue-50 px-3 py-1 rounded-full transition-colors">
-                            Lupa Password?
-                        </a>
-                    </div>
+
                     @error('password')
                         <p class="mt-1 text-xs text-red-500 ml-1">{{ $message }}</p>
                     @enderror

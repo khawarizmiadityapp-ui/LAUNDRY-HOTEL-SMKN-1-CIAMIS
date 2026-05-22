@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Services\TransactionService;
 
 class PosController extends Controller
 {
+    protected $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
     /**
      * Display the POS interface.
      */
@@ -129,21 +136,8 @@ class PosController extends Controller
 
             $totalPrice = $subtotal;
 
-            $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
-            $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('total_price');
-
-            if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'items' => 'Pesanan melebihi batas pemasukan bulanan. Sisa kuota pemasukan bulan ini: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
-                    ]);
-            }
-
             // Transaction code
-            $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+            $transactionCode = $this->transactionService->generateTransactionCode();
 
             DB::beginTransaction();
             
@@ -188,11 +182,6 @@ class PosController extends Controller
 
             DB::commit();
             
-            // Clear dashboard cache when new transaction is created from POS
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
-            Cache::forget('dashboard_recent_transactions');
-
             return redirect()->route('pos.nota', $transaksi->id)
                 ->with('success', 'Pesanan berhasil dibuat!');
 
@@ -244,10 +233,6 @@ class PosController extends Controller
                 'updated_at' => now(),
             ]);
             
-            // Clear dashboard cache when transaction status is updated
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_recent_transactions');
-
             return back()->with('success', "Pesanan #{$transaksi->transaksi_code} berhasil ditandai sebagai sudah diambil.");
 
         } catch (\Exception $e) {

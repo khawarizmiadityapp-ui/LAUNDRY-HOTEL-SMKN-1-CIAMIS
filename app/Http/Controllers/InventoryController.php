@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Inventory;
 use App\Models\InventoryAdjustmentRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
 {
@@ -44,12 +45,12 @@ class InventoryController extends Controller
         ]);
 
         if ($request->type === 'increment') {
-            $item->quantity += 1;
+            $item->increment('quantity');
         } else {
-            $item->quantity = max(0, $item->quantity - 1);
+            Inventory::where('id', $id)->where('quantity', '>', 0)->decrement('quantity');
         }
 
-        $item->save();
+        $item->refresh();
 
         return response()->json([
             'success' => true,
@@ -59,17 +60,21 @@ class InventoryController extends Controller
 
     public function approveAdjustment($id)
     {
-        $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->findOrFail($id);
-        $item = Inventory::findOrFail($requestAdjust->inventory_id);
+        DB::transaction(function () use ($id) {
+            $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->lockForUpdate()->findOrFail($id);
+            $item = Inventory::where('id', $requestAdjust->inventory_id)->lockForUpdate()->first();
 
-        $item->quantity = max(0, $item->quantity + $requestAdjust->adjustment);
-        $item->save();
+            if ($item) {
+                $item->quantity = max(0, $item->quantity + $requestAdjust->adjustment);
+                $item->save();
+            }
 
-        $requestAdjust->update([
-            'status' => 'approved',
-            'approved_by' => Auth::id(),
-            'approved_at' => now(),
-        ]);
+            $requestAdjust->update([
+                'status' => 'approved',
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Permintaan stok disetujui dan stok sudah diperbarui.');
     }

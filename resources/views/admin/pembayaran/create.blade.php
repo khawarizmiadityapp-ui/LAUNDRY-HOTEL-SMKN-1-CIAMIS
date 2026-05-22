@@ -19,8 +19,18 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- FORM UTAMA (2/3) -->
         <div class="lg:col-span-2">
-            <form action="{{ route('admin.pembayaran.store') }}" method="POST" class="bg-white rounded-xl shadow-md p-6">
+            <form action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-md p-6">
                 @csrf
+
+                @if($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <ul class="text-sm text-red-600">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
 
                 <!-- SECTION 1: PILIH TRANSAKSI -->
                 <div class="mb-6">
@@ -41,29 +51,34 @@
                     </div>
 
                     <!-- Transaksi Belum Lunas -->
-                    <div class="space-y-3 max-h-96 overflow-y-auto">
-                        @for($i = 1; $i <= 5; $i++)
-                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition">
+                    <div class="space-y-3 max-h-96 overflow-y-auto" id="transaksiList">
+                        @forelse($transaksiBelumLunas as $trx)
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition transaksi-item">
                             <input type="radio" 
                                    name="transaksi_id" 
-                                   value="TRX-{{ 8800 + $i }}" 
+                                   value="{{ $trx->transaksi_code }}" 
                                    class="w-5 h-5 text-blue-600 focus:ring-blue-500"
                                    required>
                             <div class="ml-4 flex-1">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="font-semibold text-gray-800">#BNG-{{ 8800 + $i }}</p>
-                                        <p class="text-sm text-gray-600">Pelanggan {{ $i }}</p>
-                                        <p class="text-xs text-gray-500 mt-1">Reguler - {{ rand(2, 10) }} kg</p>
+                                        <p class="font-semibold text-gray-800">{{ $trx->transaksi_code }}</p>
+                                        <p class="text-sm text-gray-600">{{ $trx->customer_name }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ ucfirst($trx->service_type) }} - {{ $trx->weight }} kg</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-bold text-blue-600">Rp {{ number_format(rand(25000, 60000), 0, ',', '.') }}</p>
+                                        <p class="font-bold text-blue-600">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</p>
                                         <span class="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">Belum Lunas</span>
                                     </div>
                                 </div>
                             </div>
                         </label>
-                        @endfor
+                        @empty
+                        <div class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">
+                            <i class="fas fa-inbox text-3xl mb-2"></i>
+                            <p>Tidak ada transaksi yang belum lunas</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -241,7 +256,7 @@
 <script>
 document.getElementById('searchTransaksi').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
-    const transaksiItems = document.querySelectorAll('label[class*="flex items-center p-4"]');
+    const transaksiItems = document.querySelectorAll('.transaksi-item');
     
     transaksiItems.forEach(item => {
         const text = item.textContent.toLowerCase();

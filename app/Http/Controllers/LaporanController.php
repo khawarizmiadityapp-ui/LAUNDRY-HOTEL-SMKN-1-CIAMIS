@@ -11,26 +11,49 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
+        // BUG FIX 3: Add input validation for date filters
+        $request->validate([
+            'filter' => 'nullable|in:bulanan,tahunan,custom',
+            'dari' => 'required_if:filter,custom|date',
+            'sampai' => 'required_if:filter,custom|date|after_or_equal:dari',
+        ]);
+
         $filter = $request->filter ?? 'bulanan';
 
         $query = Transaksi::query();
+        $pengeluaranQuery = Pengeluaran::query();
 
         if ($filter == 'bulanan') {
-            $query->whereMonth('created_at', now()->month)
-                  ->whereYear('created_at', now()->year);
+            // BUG FIX 1: Gunakan bulan sebelumnya untuk laporan bulanan
+            $prevMonth = now()->subMonth();
+            $query->whereMonth('created_at', $prevMonth->month)
+                ->whereYear('created_at', $prevMonth->year);
+
+            // BUG FIX 1: Pengeluaran juga harus terfilter per bulan
+            $pengeluaranQuery->whereMonth('tanggal', $prevMonth->month)
+                ->whereYear('tanggal', $prevMonth->year);
         } elseif ($filter == 'tahunan') {
             $query->whereYear('created_at', now()->year);
+            // BUG FIX 1: Pengeluaran juga harus terfilter per tahun
+            $pengeluaranQuery->whereYear('tanggal', now()->year);
         } elseif ($filter == 'custom') {
             if ($request->dari && $request->sampai) {
+                // BUG FIX 2: Gunakan endOfDay() agar tanggal terakhir tidak hilang
+                $end = Carbon::parse($request->sampai)->endOfDay();
                 $query->whereBetween('created_at', [
                     $request->dari,
-                    $request->sampai
+                    $end
+                ]);
+                // BUG FIX 2: Pengeluaran juga gunakan endOfDay()
+                $pengeluaranQuery->whereBetween('tanggal', [
+                    $request->dari,
+                    $end
                 ]);
             }
         }
 
         $pemasukan = (clone $query)->sum('total_price');
-        $pengeluaran = Pengeluaran::sum('nominal');
+        $pengeluaran = (clone $pengeluaranQuery)->sum('nominal');
         $laba = $pemasukan - $pengeluaran;
 
         $targetAnggaran = 50000000;
@@ -79,12 +102,12 @@ class LaporanController extends Controller
         ];
 
         $kategoriList = Pengeluaran::distinct()
-        ->orderBy('kategori')
-        ->pluck('kategori');
+            ->orderBy('kategori')
+            ->pluck('kategori');
 
         $persenLaba = $pemasukan > 0
-        ? ($laba / $pemasukan) * 100
-        : 0;
+            ? ($laba / $pemasukan) * 100
+            : 0;
 
         return view('admin.laporan_keuangan.index', [
             'pemasukan' => $pemasukan,

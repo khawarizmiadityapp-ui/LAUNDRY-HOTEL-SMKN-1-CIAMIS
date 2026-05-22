@@ -262,6 +262,7 @@ class PetugasController extends Controller
                 // Deduct 1 unit of detergent
                 $detergent = \App\Models\Inventory::where('category', 'detergent')
                     ->where('quantity', '>', 0)
+                    ->lockForUpdate()
                     ->first();
                 
                 if ($detergent) {
@@ -271,6 +272,7 @@ class PetugasController extends Controller
                 // Deduct 1 unit of fragrance
                 $fragrance = \App\Models\Inventory::where('category', 'fragrance')
                     ->where('quantity', '>', 0)
+                    ->lockForUpdate()
                     ->first();
                 
                 if ($fragrance) {

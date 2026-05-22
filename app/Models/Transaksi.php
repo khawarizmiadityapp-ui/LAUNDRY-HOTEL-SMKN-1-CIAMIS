@@ -28,6 +28,14 @@ class Transaksi extends Model
         'notes'
     ];
 
+    protected $casts = [
+        'weight' => 'decimal:2',
+        'price_per_kg' => 'decimal:2',
+        'total_price' => 'decimal:2',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     // Relasi ke User (Petugas)
     public function user()
     {

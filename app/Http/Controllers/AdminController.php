@@ -13,10 +13,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
-
+use App\Services\TransactionService;
 
 class AdminController extends Controller
 {
+    protected $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
     // 1. Dashboard Utama (Statistik)
     public function dashboard()
     {
@@ -41,6 +47,7 @@ class AdminController extends Controller
         // Cache dashboard statistics for 5 minutes
         $stats = Cache::remember('dashboard_stats', 300, function () {
             $today = Carbon::today();
+            $thisMonth = Carbon::now();
             
             return [
                 'total_orders' => Transaksi::count(),
@@ -48,7 +55,10 @@ class AdminController extends Controller
                 'processing' => Transaksi::whereIn('status', ['diterima', 'disortir', 'dicuci', 'dikeringkan', 'disetrika', 'dipacking'])->count(),
                 'completed' => Transaksi::where('status', 'selesai')->count(),
                 'total_income' => Transaksi::where('payment_status', 'lunas')->sum('total_price'),
-                'total_expense' => Pengeluaran::sum('nominal'),
+                // BUG FIX 4: Filter pengeluaran per bulan ini
+                'total_expense' => Pengeluaran::whereMonth('tanggal', $thisMonth->month)
+                    ->whereYear('tanggal', $thisMonth->year)
+                    ->sum('nominal'),
             ];
         });
 
@@ -89,9 +99,12 @@ class AdminController extends Controller
             return $data;
         });
 
+        // Clear old cache to prevent data corruption
+        Cache::forget('dashboard_recent_transactions');
+        
         // Cache recent transactions for 2 minutes
         $recentTransactions = Cache::remember('dashboard_recent_transactions', 120, function () {
-            return Transaksi::with(['user', 'details.layanan'])
+            return Transaksi::with(['user'])
                 ->latest()
                 ->take(10)
                 ->get();
@@ -141,30 +154,21 @@ class AdminController extends Controller
         DB::beginTransaction();
 
         try {
-            // Ambil Harga dari Database
-            $price = ServicePrice::where('service_type', $request->service_type)->first();
-            $pricePerKg = $price ? $price->price_per_kg : 6000; // Fallback harga
-
+            $pricePerKg = $this->transactionService->getPricePerKg($request->service_type);
             $totalPrice = $request->weight * $pricePerKg;
 
-            $monthlyIncomeLimit = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
-            $currentMonthIncome = Transaksi::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('total_price');
+            $transactionCode = $this->transactionService->generateTransactionCode();
 
-            if (($currentMonthIncome + $totalPrice) > $monthlyIncomeLimit) {
-                DB::rollBack();
-                return redirect()->back()->withErrors([
-                    'weight' => 'Transaksi melebihi batas pemasukan bulanan. Sisa kuota: Rp ' . number_format(max(0, $monthlyIncomeLimit - $currentMonthIncome), 0, ',', '.'),
-                ])->withInput();
-            }
-
-            // Generate Kode Transaksi Unik
-            $transactionCode = 'TRX-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+            // BUG FIX 3: Cari atau buat customer, isi customer_id agar transaksi masuk riwayat
+            $customer = \App\Models\Customer::firstOrCreate(
+                ['no_hp' => $request->customer_phone],
+                ['nama' => $request->customer_name, 'alamat' => '']
+            );
 
             Transaksi::create([
                 'transaksi_code' => $transactionCode,
                 'user_id' => Auth::id(), // Petugas yang input
+                'customer_id' => $customer->id, // BUG FIX: Tambahkan customer_id
                 'customer_name' => $request->customer_name,
                 'customer_phone' => $request->customer_phone,
                 'service_type' => $request->service_type,
@@ -179,11 +183,6 @@ class AdminController extends Controller
 
             DB::commit();
             
-            // Clear dashboard cache when new transaction is created
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
-            Cache::forget('dashboard_recent_transactions');
-
             return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
 
         } catch (\Exception $e) {
@@ -218,10 +217,6 @@ class AdminController extends Controller
                 'updated_at' => now()
             ]);
             
-            // Clear dashboard cache when status is updated
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_recent_transactions');
-
             // Opsional: Tambahkan log history status jika punya tabel history
             // TransactionStatusHistory::create([...]);
 
@@ -249,11 +244,6 @@ class AdminController extends Controller
                 'payment_status' => $request->payment_status // lunas / belum_bayar
             ]);
             
-            // Clear dashboard cache when payment status is updated
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
-            Cache::forget('dashboard_recent_transactions');
-
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 
         } catch (\Exception $e) {
@@ -310,11 +300,6 @@ class AdminController extends Controller
                 'updated_at'     => now()
             ]);
             
-            // Clear dashboard cache when transaction is updated
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
-            Cache::forget('dashboard_recent_transactions');
-
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
 
         } catch (\Exception $e) {
@@ -456,11 +441,6 @@ class AdminController extends Controller
             $transaksi = Transaksi::with(['details', 'tasks'])->findOrFail($id);
             $transaksi->delete();
             
-            // Clear dashboard cache when transaction is deleted
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
-            Cache::forget('dashboard_recent_transactions');
-
             return back()->with('success', 'Data berhasil dihapus!');
 
         } catch (\Exception $e) {

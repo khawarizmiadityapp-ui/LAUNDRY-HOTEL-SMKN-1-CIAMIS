@@ -3,56 +3,70 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use App\Models\Transaksi;
+use App\Models\Pembayaran;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
 {
     public function index(Request $request)
     {
-        // Generate dummy data
-        $allTransactions = collect($this->generateDummyTransactions());
+        // Query transaksi dengan user
+        $query = Transaksi::with(['user'])
+            ->orderBy('created_at', 'desc');
 
-        // Statistik (berdasarkan seluruh data)
-        $today = Carbon::today();
-        $totalPendapatanHariIni = $allTransactions->filter(function ($item) use ($today) {
-            return $item['status'] === 'Lunas' && $item['tanggal_bayar'] && Carbon::parse($item['tanggal_bayar'])->isToday();
-        })->sum('jumlah');
-
-        $transaksiBelumLunas = $allTransactions->where('status', 'Belum Lunas')->count();
-
-        // Metode populer
-        $metodeCount = $allTransactions->groupBy('metode')->map->count();
-        $totalTransaksi = $allTransactions->count();
-        $metodePopuler = $metodeCount->sortDesc()->first();
-        $metodePopulerNama = $metodeCount->sortDesc()->keys()->first();
-        $persentaseMetodePopuler = $totalTransaksi > 0 ? round(($metodePopuler / $totalTransaksi) * 100) : 0;
-
-        // Filter untuk tabel
-        $filtered = $allTransactions;
+        // Filter berdasarkan status pembayaran
         if ($request->filled('status')) {
-            $filtered = $filtered->where('status', $request->status);
+            $query->where('payment_status', $request->status);
         }
+
+        // Filter berdasarkan search
         if ($request->filled('search')) {
             $search = $request->search;
-            $filtered = $filtered->filter(function ($item) use ($search) {
-                return stripos($item['pelanggan']['nama'], $search) !== false;
+            $query->where(function($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('transaksi_code', 'like', "%{$search}%");
             });
         }
 
-        // Pagination manual (10 per halaman)
-        $page = $request->get('page', 1);
-        $perPage = 10;
-        $offset = ($page - 1) * $perPage;
-        $currentPageItems = $filtered->slice($offset, $perPage)->values();
-        $transactions = new LengthAwarePaginator(
-            $currentPageItems,
-            $filtered->count(),
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $transactions = $query->paginate(10)->appends($request->query());
+
+        // Statistik Real dari Database
+        $today = Carbon::today();
+        $startOfDay = Carbon::today()->startOfDay();
+        $endOfDay = Carbon::today()->endOfDay();
+
+        // Total pendapatan hari ini (transaksi lunas hari ini)
+        $totalPendapatanHariIni = Transaksi::where('payment_status', 'lunas')
+            ->whereBetween('updated_at', [$startOfDay, $endOfDay])
+            ->sum('total_price');
+
+        // Transaksi belum lunas
+        $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')->count();
+
+        // Total transaksi
+        $totalTransaksi = Transaksi::count();
+
+        // Metode pembayaran populer (jika ada tabel pembayaran)
+        $metodePopulerNama = 'QRIS'; // Default
+        $persentaseMetodePopuler = 0;
+
+        if ($totalTransaksi > 0) {
+            // Ambil metode paling sering dari transaksi
+            $metodePopuler = Transaksi::whereNotNull('payment_method')
+                ->select('payment_method', DB::raw('COUNT(*) as count'))
+                ->groupBy('payment_method')
+                ->orderByDesc('count')
+                ->first();
+
+            if ($metodePopuler) {
+                $metodePopulerNama = ucfirst($metodePopuler->payment_method);
+                $persentaseMetodePopuler = round(($metodePopuler->count / $totalTransaksi) * 100);
+            }
+        }
 
         return view('admin.pembayaran.index', compact(
             'transactions',
@@ -65,54 +79,66 @@ class PembayaranController extends Controller
 
     public function create()
     {
-        // Halaman form entri bayar baru (dummy)
-        return view('admin.pembayaran.create');
+        // Ambil transaksi yang belum lunas untuk ditampilkan di form
+        $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.pembayaran.create', compact('transaksiBelumLunas'));
     }
 
-    private function generateDummyTransactions()
+    public function store(Request $request)
     {
-        $transactions = [];
-        $namaPelanggan = [
-            'Aris Danu', 'Siska Putri', 'Reno Kuncoro', 'Nadia Maria', 'Budi Santoso',
-            'Dewi Lestari', 'Agus Salim', 'Rina Andriani', 'Eko Prasetyo', 'Maya Sari'
-        ];
-        $layananList = [
-            ['nama' => 'Reguler', 'satuan' => 'kg'],
-            ['nama' => 'Express', 'satuan' => 'kg'],
-            ['nama' => 'Dry Clean', 'satuan' => 'Item']
-        ];
-        $metodeList = ['QRIS', 'Tunai', 'Transfer BCA'];
+        $validated = $request->validate([
+            'transaksi_id' => 'required|string|exists:transaksi,transaksi_code',
+            'jumlah_bayar' => 'required|numeric|min:0',
+            'metode_pembayaran' => 'required|string|in:Tunai,QRIS,Transfer BCA,Transfer Mandiri,Transfer BRI,E-Wallet',
+            'tanggal_bayar' => 'required|date',
+            'status_pembayaran' => 'required|string|in:Lunas,Belum Lunas,Cicilan',
+            'catatan' => 'nullable|string|max:500',
+            'bukti_pembayaran' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-        for ($i = 1; $i <= 124; $i++) {
-            $status = rand(1, 100) <= 80 ? 'Lunas' : 'Belum Lunas'; // 80% lunas
-            $tanggalBayar = null;
-            if ($status === 'Lunas') {
-                // 10% transaksi lunas hari ini, sisanya random 1-30 hari lalu
-                if ($i <= 12) {
-                    $tanggalBayar = Carbon::today()->subDays(rand(0, 1))->format('d M Y, H:i');
-                } else {
-                    $tanggalBayar = Carbon::today()->subDays(rand(1, 30))->format('d M Y, H:i');
-                }
+        DB::beginTransaction();
+
+        try {
+            // Cari transaksi
+            $transaksi = Transaksi::where('transaksi_code', $validated['transaksi_id'])->firstOrFail();
+
+            // Handle upload bukti pembayaran
+            $buktiPath = null;
+            if ($request->hasFile('bukti_pembayaran')) {
+                $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
             }
-            $pelanggan = $namaPelanggan[array_rand($namaPelanggan)];
-            $layanan = $layananList[array_rand($layananList)];
-            $berat = $layanan['nama'] === 'Dry Clean' ? rand(1, 3) . ' ' . $layanan['satuan'] : rand(2, 10) . ' ' . $layanan['satuan'];
-            $jumlah = $layanan['nama'] === 'Express' ? rand(30000, 80000) : ($layanan['nama'] === 'Dry Clean' ? rand(100000, 200000) : rand(25000, 60000));
-            $metode = $metodeList[array_rand($metodeList)];
 
-            $transactions[] = [
-                'id_transaksi' => '#BNG-' . (8800 + $i),
-                'pelanggan' => [
-                    'nama' => $pelanggan,
-                    'layanan' => $layanan['nama'],
-                    'berat' => $berat,
-                ],
-                'tanggal_bayar' => $tanggalBayar,
-                'metode' => $metode,
-                'jumlah' => $jumlah,
-                'status' => $status,
-            ];
+            // Update status pembayaran transaksi
+            if ($validated['status_pembayaran'] === 'Lunas') {
+                $transaksi->update([
+                    'payment_status' => 'lunas',
+                    'payment_method' => strtolower(str_replace(' ', '_', $validated['metode_pembayaran'])),
+                ]);
+            }
+
+            // TODO: Jika ada tabel pembayaran terpisah, simpan juga ke sana
+            // Pembayaran::create([...]);
+
+            DB::commit();
+
+            return redirect()->route('admin.pembayaran.index')
+                ->with('success', 'Pembayaran berhasil dicatat! Transaksi #' . $transaksi->transaksi_code . ' telah diupdate.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Pembayaran store failed', [
+                'error' => $e->getMessage(),
+                'transaksi_id' => $validated['transaksi_id'],
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal mencatat pembayaran: ' . $e->getMessage());
         }
-        return $transactions;
     }
 }

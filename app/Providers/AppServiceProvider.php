@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Transaksi;
+use App\Models\Pengeluaran;
+use App\Observers\TransaksiObserver;
+use App\Observers\PengeluaranObserver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Transaksi::observe(TransaksiObserver::class);
+        Pengeluaran::observe(PengeluaranObserver::class);
+
         View::composer('layouts.admin', function ($view) {
             $currentRole = strtolower((string) optional(Auth::user())->role);
             $isAdminLike = str_contains($currentRole, 'admin');
