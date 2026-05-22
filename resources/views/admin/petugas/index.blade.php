@@ -32,8 +32,17 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-gray-500 text-sm">Admin Sistem</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1" x-text="adminSistem"></p>
+                    <p class="text-gray-500 text-sm">Tim Produksi</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1" x-text="timProduksi"></p>
+                </div>
+                <div class="bg-amber-100 p-3 rounded-xl"><i class="fas fa-tshirt text-amber-600 text-xl"></i></div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm">Kasir & Kurir</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1" x-text="kasirKurir"></p>
                 </div>
                 <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-user-cog text-purple-600 text-xl"></i></div>
             </div>
@@ -42,10 +51,10 @@
 
     {{-- Filter Kategori & Search (search sudah di header, tapi kita sinkronkan) --}}
     <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
-        <div class="flex space-x-2 bg-gray-100 p-1 rounded-xl">
-            <button @click="activeFilter = 'Semua'; currentPage = 1" :class="activeFilter === 'Semua' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Semua</button>
-            <button @click="activeFilter = 'Admin'; currentPage = 1" :class="activeFilter === 'Admin' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Admin</button>
-            <button @click="activeFilter = 'Operasional'; currentPage = 1" :class="activeFilter === 'Operasional' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-5 py-2 rounded-lg font-medium transition-all">Operasional</button>
+        <div class="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl">
+            <template x-for="role in allRoles" :key="role">
+                <button @click="activeFilter = role; currentPage = 1" :class="activeFilter === role ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-4 py-2 rounded-lg font-medium transition-all text-sm" x-text="role"></button>
+            </template>
         </div>
         <div class="relative w-64">
             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -65,7 +74,10 @@
                                 <h3 class="font-semibold text-gray-800" x-text="petugas.nama"></h3>
                                 <div class="flex items-center space-x-2 mt-1">
                                     <span x-show="petugas.role === 'Admin'" class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">Admin</span>
-                                    <span x-show="petugas.role === 'Operasional'" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 font-medium">Staff</span>
+                                    <span x-show="petugas.role === 'Washing'" class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-700 font-medium">Washing</span>
+                                    <span x-show="petugas.role === 'Setrika'" class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-medium">Setrika</span>
+                                    <span x-show="petugas.role === 'Packing'" class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">Packing</span>
+                                    <span x-show="petugas.role === 'Kasir'" class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium">Kasir</span>
                                     <span x-show="petugas.role === 'Kurir'" class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">Kurir</span>
                                     <span class="text-xs text-gray-400" x-text="petugas.idPetugas"></span>
                                 </div>
@@ -152,7 +164,10 @@
                         <select x-model="selectedPetugas.role" required
                                 class="w-full border rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
                             <option>Admin</option>
-                            <option>Operasional</option>
+                            <option>Washing</option>
+                            <option>Setrika</option>
+                            <option>Packing</option>
+                            <option>Kasir</option>
                             <option>Kurir</option>
                         </select>
                     </div>
@@ -230,7 +245,8 @@
 
         return {
             petugasList: [],
-            activeFilter: 'Semua',
+            activeFilter: 'Washing',
+            allRoles: ['Admin', 'Washing', 'Setrika', 'Packing', 'Kasir', 'Kurir'],
             searchQuery: '',
             currentPage: 1,
             perPage: 8,
@@ -243,7 +259,7 @@
 
             get filteredData() {
                 let result = this.petugasList;
-                if (this.activeFilter !== 'Semua') result = result.filter(p => p.role === this.activeFilter);
+                result = result.filter(p => p.role === this.activeFilter);
                 if (this.searchQuery.trim() !== '') result = result.filter(p => p.nama.toLowerCase().includes(this.searchQuery.toLowerCase()));
                 return result;
             },
@@ -254,13 +270,14 @@
             get endItem() { return Math.min(this.currentPage * this.perPage, this.filteredData.length); },
             get totalPetugas() { return this.petugasList.length; },
             get aktifSekarang() { return this.petugasList.filter(p => p.status === 'Aktif').length; },
-            get adminSistem() { return this.petugasList.filter(p => p.role === 'Admin').length; },
+            get timProduksi() { return this.petugasList.filter(p => ['Washing', 'Setrika', 'Packing'].includes(p.role)).length; },
+            get kasirKurir() { return this.petugasList.filter(p => ['Kasir', 'Kurir'].includes(p.role)).length; },
 
             prevPage() { if (this.currentPage > 1) this.currentPage--; },
             nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
 
             openAddModal() {
-                this.selectedPetugas = { nama: '', role: 'Operasional', status: 'Aktif', shift: '-' };
+                this.selectedPetugas = { nama: '', role: this.activeFilter, status: 'Aktif', shift: '-' };
                 this.modalMode = 'add';
             },
             async saveNewPetugas() {

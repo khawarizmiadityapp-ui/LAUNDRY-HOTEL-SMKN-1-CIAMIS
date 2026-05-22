@@ -90,12 +90,12 @@ class DatabaseSeeder extends Seeder
             LayananSeeder::class,
         ]);
 
-        // 4. Seed Petugas Piket Default
+        // 4. Seed Petugas Piket Default (per Role)
         \App\Models\Petugas::updateOrCreate(
             ['id_petugas' => 'STF-0001'],
             [
                 'nama' => 'Siti Aminah',
-                'role' => 'Operasional',
+                'role' => 'Washing',
                 'status' => 'Aktif',
                 'shift' => '-',
             ]
@@ -105,7 +105,7 @@ class DatabaseSeeder extends Seeder
             ['id_petugas' => 'STF-0002'],
             [
                 'nama' => 'Budi Santoso',
-                'role' => 'Operasional',
+                'role' => 'Setrika',
                 'status' => 'Aktif',
                 'shift' => '-',
             ]
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
             ['id_petugas' => 'STF-0003'],
             [
                 'nama' => 'Rian Hidayat',
-                'role' => 'Operasional',
+                'role' => 'Packing',
                 'status' => 'Aktif',
                 'shift' => '-',
             ]
@@ -125,7 +125,17 @@ class DatabaseSeeder extends Seeder
             ['id_petugas' => 'STF-0004'],
             [
                 'nama' => 'Dewi Lestari',
-                'role' => 'Operasional',
+                'role' => 'Kasir',
+                'status' => 'Aktif',
+                'shift' => '-',
+            ]
+        );
+
+        \App\Models\Petugas::updateOrCreate(
+            ['id_petugas' => 'STF-0005'],
+            [
+                'nama' => 'Ahmad Fauzi',
+                'role' => 'Kurir',
                 'status' => 'Aktif',
                 'shift' => '-',
             ]

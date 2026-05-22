@@ -119,7 +119,7 @@ class PetugasController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
-            'role' => 'required|in:Admin,Operasional,Kurir',
+            'role' => 'required|in:Admin,Washing,Setrika,Packing,Kasir,Kurir',
             'status' => 'required|in:Aktif,Off Duty',
         ]);
 
@@ -148,7 +148,7 @@ class PetugasController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama' => 'sometimes|string|max:255',
-            'role' => 'sometimes|in:Admin,Operasional,Kurir',
+            'role' => 'sometimes|in:Admin,Washing,Setrika,Packing,Kasir,Kurir',
             'status' => 'sometimes|in:Aktif,Off Duty',
         ]);
 
@@ -178,7 +178,7 @@ class PetugasController extends Controller
             $q->where('stage', 'washing')->where('status', 'pending');
         })->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Washing')->orderBy('nama')->get();
 
         return view('petugas_piket.washing.index', compact('transactions', 'petugasList'));
     }
@@ -199,7 +199,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Setrika')->orderBy('nama')->get();
 
         return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
     }
@@ -220,7 +220,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->orderBy('nama')->get();
+        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Packing')->orderBy('nama')->get();
 
         return view('petugas_piket.packing.index', compact('transactions', 'petugasList'));
     }
