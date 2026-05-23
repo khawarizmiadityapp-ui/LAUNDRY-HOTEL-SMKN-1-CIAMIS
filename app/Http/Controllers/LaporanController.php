@@ -38,15 +38,16 @@ class LaporanController extends Controller
             $pengeluaranQuery->whereYear('tanggal', now()->year);
         } elseif ($filter == 'custom') {
             if ($request->dari && $request->sampai) {
-                // BUG FIX 2: Gunakan endOfDay() agar tanggal terakhir tidak hilang
+                // BUG FIX 2: Gunakan startOfDay() dan endOfDay() agar presisi
+                $start = Carbon::parse($request->dari)->startOfDay();
                 $end = Carbon::parse($request->sampai)->endOfDay();
                 $query->whereBetween('created_at', [
-                    $request->dari,
+                    $start,
                     $end
                 ]);
-                // BUG FIX 2: Pengeluaran juga gunakan endOfDay()
+                // BUG FIX 2: Pengeluaran juga gunakan rentang yang sama
                 $pengeluaranQuery->whereBetween('tanggal', [
-                    $request->dari,
+                    $start,
                     $end
                 ]);
             }

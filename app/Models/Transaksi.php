@@ -28,6 +28,7 @@ class Transaksi extends Model
         'status',
         'payment_status',
         'payment_method',
+        'bukti_pembayaran',
         'notes'
     ];
 

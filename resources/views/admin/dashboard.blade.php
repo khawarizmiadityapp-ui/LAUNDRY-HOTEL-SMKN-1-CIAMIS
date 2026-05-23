@@ -196,18 +196,19 @@
 <script>
 // ── Chart.js Data (Dynamic) ──────────────────────────────────────────
 const chartDataValues = @json($chartData);
+console.log("Chart Data:", chartDataValues);
 
 // ── Chart Init ─────────────────────────────────────────────
 const ctx = document.getElementById('revenueChart').getContext('2d');
 
-const chart = new Chart(ctx, {
+let currentChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: chartDataValues.labels,
+        labels: chartDataValues.weekly.labels,
         datasets: [
             {
                 label: 'Pemasukan',
-                data: chartDataValues.income,
+                data: chartDataValues.weekly.income,
                 backgroundColor: 'rgba(53,104,244,.85)',
                 hoverBackgroundColor: 'rgba(53,104,244,1)',
                 borderRadius: { topLeft: 6, topRight: 6 },
@@ -217,7 +218,7 @@ const chart = new Chart(ctx, {
             },
             {
                 label: 'Pengeluaran',
-                data: chartDataValues.expense,
+                data: chartDataValues.weekly.expense,
                 backgroundColor: 'rgba(251,113,133,.75)',
                 hoverBackgroundColor: 'rgba(244,63,94,1)',
                 borderRadius: { topLeft: 6, topRight: 6 },
@@ -264,5 +265,31 @@ const chart = new Chart(ctx, {
         }
     }
 });
+
+// ── Tab Switcher Logic ─────────────────────────────────────────────
+window.switchTab = function(period, btnElement) {
+    // Update active UI tab
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-brand-600', 'shadow-sm');
+        btn.classList.add('text-slate-500', 'hover:text-slate-700');
+    });
+    btnElement.classList.remove('text-slate-500', 'hover:text-slate-700');
+    btnElement.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
+    
+    // Update chart subtitle
+    const subTitle = document.querySelector('.lg\\:col-span-2 p.text-xs');
+    if (period === 'daily') subTitle.textContent = 'Today\\'s performance (by hour)';
+    else if (period === 'weekly') subTitle.textContent = 'Last 7 days performance';
+    else if (period === 'monthly') subTitle.textContent = 'Last 6 months performance';
+
+    // Update chart data
+    const newData = chartDataValues[period];
+    if (newData) {
+        currentChart.data.labels = newData.labels;
+        currentChart.data.datasets[0].data = newData.income;
+        currentChart.data.datasets[1].data = newData.expense;
+        currentChart.update();
+    }
+}
 </script>
 @endpush

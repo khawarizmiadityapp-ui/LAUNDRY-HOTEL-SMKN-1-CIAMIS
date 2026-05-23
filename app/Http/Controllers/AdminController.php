@@ -63,39 +63,73 @@ class AdminController extends Controller
 
         // Cache chart data for 5 minutes
         $chartData = Cache::remember('dashboard_chart_data', 300, function () {
+            
+            // --- WEEKLY DATA (Last 7 Days) ---
             $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
-
-            // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
-            $incomeData = Transaksi::select(
-                    DB::raw('DATE(created_at) as date'),
-                    DB::raw('SUM(total_price) as total')
-                )
+            
+            $weeklyIncome = Transaksi::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_price) as total'))
                 ->where('payment_status', 'lunas')
                 ->where('created_at', '>=', $sevenDaysAgo)
-                ->groupBy('date')
-                ->get()
-                ->pluck('total', 'date');
-
-            $expenseData = Pengeluaran::select(
-                    DB::raw('DATE(tanggal) as date'),
-                    DB::raw('SUM(nominal) as total')
-                )
+                ->groupBy('date')->pluck('total', 'date');
+                
+            $weeklyExpense = Pengeluaran::select(DB::raw('DATE(tanggal) as date'), DB::raw('SUM(nominal) as total'))
                 ->where('tanggal', '>=', $sevenDaysAgo)
-                ->groupBy('date')
-                ->get()
-                ->pluck('total', 'date');
+                ->groupBy('date')->pluck('total', 'date');
 
-            // Format chart data for JS
-            $data = [];
+            $weekly = ['labels' => [], 'income' => [], 'expense' => []];
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i)->format('Y-m-d');
-                $label = Carbon::now()->subDays($i)->format('D');
-                $data['labels'][] = $label;
-                $data['income'][] = $incomeData->get($date, 0);
-                $data['expense'][] = $expenseData->get($date, 0);
+                $weekly['labels'][] = Carbon::now()->subDays($i)->format('D');
+                $weekly['income'][] = $weeklyIncome->get($date, 0);
+                $weekly['expense'][] = $weeklyExpense->get($date, 0);
             }
 
-            return $data;
+            // --- DAILY DATA (Today, 06:00 to 22:00 in 2-hour intervals) ---
+            $today = Carbon::today();
+            $dailyIncome = Transaksi::select(DB::raw('HOUR(created_at) as hour'), DB::raw('SUM(total_price) as total'))
+                ->where('payment_status', 'lunas')->whereDate('created_at', $today)
+                ->groupBy('hour')->pluck('total', 'hour');
+                
+            $dailyExpense = Pengeluaran::select(DB::raw('HOUR(tanggal) as hour'), DB::raw('SUM(nominal) as total'))
+                ->whereDate('tanggal', $today)
+                ->groupBy('hour')->pluck('total', 'hour');
+
+            $daily = ['labels' => [], 'income' => [], 'expense' => []];
+            for ($h = 6; $h <= 22; $h += 2) {
+                $daily['labels'][] = sprintf('%02d:00', $h);
+                $daily['income'][] = $dailyIncome->get($h, 0) + $dailyIncome->get($h+1, 0);
+                $daily['expense'][] = $dailyExpense->get($h, 0) + $dailyExpense->get($h+1, 0);
+            }
+
+            // --- MONTHLY DATA (Last 6 Months) ---
+            $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
+            
+            $monthlyIncome = Transaksi::select(DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'), DB::raw('SUM(total_price) as total'))
+                ->where('payment_status', 'lunas')->where('created_at', '>=', $sixMonthsAgo)
+                ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                    return $item->year . '-' . sprintf('%02d', $item->month);
+                })->map->total;
+                
+            $monthlyExpense = Pengeluaran::select(DB::raw('MONTH(tanggal) as month'), DB::raw('YEAR(tanggal) as year'), DB::raw('SUM(nominal) as total'))
+                ->where('tanggal', '>=', $sixMonthsAgo)
+                ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                    return $item->year . '-' . sprintf('%02d', $item->month);
+                })->map->total;
+
+            $monthly = ['labels' => [], 'income' => [], 'expense' => []];
+            for ($i = 5; $i >= 0; $i--) {
+                $date = Carbon::now()->subMonths($i);
+                $key = $date->format('Y-m');
+                $monthly['labels'][] = $date->format('M');
+                $monthly['income'][] = $monthlyIncome->get($key, 0);
+                $monthly['expense'][] = $monthlyExpense->get($key, 0);
+            }
+
+            return [
+                'daily' => $daily,
+                'weekly' => $weekly,
+                'monthly' => $monthly
+            ];
         });
 
         // Clear old cache to prevent data corruption
@@ -164,7 +198,7 @@ class AdminController extends Controller
                 ['nama' => $request->customer_name, 'alamat' => '']
             );
 
-            Transaksi::create([
+            $transaksi = Transaksi::create([
                 'transaksi_code' => $transactionCode,
                 'user_id' => Auth::id(), // Petugas yang input
                 'customer_id' => $customer->id, // BUG FIX: Tambahkan customer_id
@@ -179,6 +213,11 @@ class AdminController extends Controller
                 'payment_method' => $request->payment_method,
                 'notes' => $request->notes,
             ]);
+
+            // BUG FIX: Generate LaundryTasks automatically for Admin-created transactions
+            $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
+            $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
+            $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
 
             DB::commit();
 

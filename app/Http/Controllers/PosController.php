@@ -54,13 +54,18 @@ class PosController extends Controller
 
     /**
      * AJAX: Search customers by name or phone.
+     * SQL Injection safe - uses parameter binding.
      */
     public function searchCustomer(Request $request)
     {
         $q = $request->get('q', '');
 
-        $customers = Customer::where('nama', 'like', "%{$q}%")
-            ->orWhere('no_hp', 'like', "%{$q}%")
+        // Sanitize search term - remove special characters that could be used for SQL injection
+        $q = preg_replace('/[^\w\s\-]/u', '', $q);
+
+        // Use parameter binding to prevent SQL injection
+        $customers = Customer::where('nama', 'like', '%' . $q . '%')
+            ->orWhere('no_hp', 'like', '%' . $q . '%')
             ->limit(10)
             ->get(['id', 'nama', 'no_hp', 'alamat']);
 
@@ -102,6 +107,12 @@ class PosController extends Controller
      */
     public function store(Request $request)
     {
+        // Authorization check: only admin and staff can create transactions
+        $user = Auth::user();
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized. Only admin and staff can create transactions.');
+        }
+
         $request->validate([
             'customer_id'      => 'required|exists:customers,id',
             'items'            => 'required|array|min:1',

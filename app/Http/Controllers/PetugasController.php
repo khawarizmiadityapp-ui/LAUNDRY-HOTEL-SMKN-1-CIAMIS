@@ -84,21 +84,16 @@ class PetugasController extends Controller
     {
         $petugasList = Petugas::orderBy('nama')->get();
 
-        $petugasData = $petugasList->map(function (Petugas $item) {
-            $completedWashing = \App\Models\LaundryTask::where('stage', 'washing')
-                ->where('status', 'completed')
-                ->where('petugas_name', $item->nama)
-                ->count();
+        // Ambil semua task yang sudah selesai dan kelompokkan berdasarkan nama petugas dan stage
+        $completedTasks = \App\Models\LaundryTask::where('status', 'completed')
+            ->select('petugas_name', 'stage', \DB::raw('count(*) as total'))
+            ->groupBy('petugas_name', 'stage')
+            ->get();
 
-            $completedIroning = \App\Models\LaundryTask::where('stage', 'ironing')
-                ->where('status', 'completed')
-                ->where('petugas_name', $item->nama)
-                ->count();
-
-            $completedPacking = \App\Models\LaundryTask::where('stage', 'packing')
-                ->where('status', 'completed')
-                ->where('petugas_name', $item->nama)
-                ->count();
+        $petugasData = $petugasList->map(function (Petugas $item) use ($completedTasks) {
+            $completedWashing = $completedTasks->where('petugas_name', $item->nama)->where('stage', 'washing')->first()->total ?? 0;
+            $completedIroning = $completedTasks->where('petugas_name', $item->nama)->where('stage', 'ironing')->first()->total ?? 0;
+            $completedPacking = $completedTasks->where('petugas_name', $item->nama)->where('stage', 'packing')->first()->total ?? 0;
 
             return [
                 'id' => $item->id,

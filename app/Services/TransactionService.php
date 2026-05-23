@@ -5,33 +5,59 @@ namespace App\Services;
 use App\Models\ServicePrice;
 use App\Models\Transaksi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TransactionService
 {
     /**
-     * Generate a unique transaction code.
+     * Generate a unique transaction code with race condition protection.
+     * Uses database advisory lock to ensure uniqueness across concurrent requests.
      */
     public function generateTransactionCode(): string
     {
-        $maxAttempts = 5;
-        $attempt = 0;
-
-        do {
-            $randomStr = strtoupper(\Illuminate\Support\Str::random(4));
-            $code = 'TRX-' . date('Ymd') . '-' . $randomStr;
-
-            // Check if code already exists
-            $exists = Transaksi::where('transaksi_code', $code)->exists();
-
-            if (!$exists) {
-                return $code;
+        return DB::transaction(function () {
+            // Use advisory lock to prevent concurrent code generation
+            // Lock ID 1 is reserved for transaction code generation
+            $lockResult = DB::select('SELECT GET_LOCK(?, 10) as lock_status', [1]);
+            
+            if (!$lockResult[0]->lock_status) {
+                throw new \Exception('Failed to acquire lock for transaction code generation');
             }
-
-            $attempt++;
-        } while ($attempt < $maxAttempts);
-
-        // Fallback: use timestamp + random for guaranteed uniqueness
-        return 'TRX-' . date('Ymd') . '-' . time() . '-' . strtoupper(\Illuminate\Support\Str::random(2));
+            
+            try {
+                $maxAttempts = 10;
+                $attempt = 0;
+                
+                do {
+                    $randomStr = strtoupper(Str::random(4));
+                    $code = 'TRX-' . date('Ymd') . '-' . $randomStr;
+                    
+                    // Check if code already exists (with lock, this should be safe)
+                    $exists = Transaksi::where('transaksi_code', $code)->lockForUpdate()->exists();
+                    
+                    if (!$exists) {
+                        return $code;
+                    }
+                    
+                    $attempt++;
+                } while ($attempt < $maxAttempts);
+                
+                // Fallback: use timestamp + random for guaranteed uniqueness
+                $fallbackCode = 'TRX-' . date('Ymd') . '-' . time() . '-' . strtoupper(Str::random(2));
+                
+                // Verify fallback is also unique
+                if (Transaksi::where('transaksi_code', $fallbackCode)->exists()) {
+                    throw new \Exception('Unable to generate unique transaction code after maximum attempts');
+                }
+                
+                return $fallbackCode;
+                
+            } finally {
+                // Always release the lock
+                DB::select('SELECT RELEASE_LOCK(?)', [1]);
+            }
+        });
     }
 
     /**

@@ -12,6 +12,30 @@ use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
 {
+    /**
+     * Check if user has access to the transaction.
+     * Only admin or staff can access all transactions.
+     * Regular users can only access their own transactions.
+     */
+    private function checkTransactionAccess($transaksi)
+    {
+        $user = Auth::user();
+        
+        // Admin and staff can access all transactions
+        if (in_array($user->role, ['admin', 'staff'])) {
+            return true;
+        }
+        
+        // Regular users can only access their own transactions
+        // This assumes there's a relationship between user and customer
+        // Adjust this logic based on your actual data model
+        if ($transaksi->customer_id === $user->customer_id ?? null) {
+            return true;
+        }
+        
+        return false;
+    }
+
     public function index(Request $request)
     {
         // Query transaksi dengan user
@@ -105,6 +129,14 @@ class PembayaranController extends Controller
             // Cari transaksi
             $transaksi = Transaksi::where('transaksi_code', $validated['transaksi_id'])->firstOrFail();
 
+            // Authorization check: only admin and staff can process payments
+            // This prevents IDOR (Insecure Direct Object Reference) attacks
+            $user = Auth::user();
+            if (!in_array($user->role, ['admin', 'staff'])) {
+                DB::rollBack();
+                abort(403, 'Unauthorized. Only admin and staff can process payments.');
+            }
+
             // Handle upload bukti pembayaran
             $buktiPath = null;
             if ($request->hasFile('bukti_pembayaran')) {
@@ -112,11 +144,19 @@ class PembayaranController extends Controller
             }
 
             // Update status pembayaran transaksi
+            $updateData = [];
+            
             if ($validated['status_pembayaran'] === 'Lunas') {
-                $transaksi->update([
-                    'payment_status' => 'lunas',
-                    'payment_method' => strtolower(str_replace(' ', '_', $validated['metode_pembayaran'])),
-                ]);
+                $updateData['payment_status'] = 'lunas';
+                $updateData['payment_method'] = strtolower(str_replace(' ', '_', $validated['metode_pembayaran']));
+            }
+            
+            if ($buktiPath) {
+                $updateData['bukti_pembayaran'] = $buktiPath;
+            }
+            
+            if (!empty($updateData)) {
+                $transaksi->update($updateData);
             }
 
             // TODO: Jika ada tabel pembayaran terpisah, simpan juga ke sana
