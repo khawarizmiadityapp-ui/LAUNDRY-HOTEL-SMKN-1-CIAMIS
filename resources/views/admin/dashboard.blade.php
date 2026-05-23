@@ -168,7 +168,7 @@
                         </td>
                         <td class="px-4 py-3.5 text-center text-slate-600">{{ number_format($trx->weight, 1) }}</td>
                         <td class="px-4 py-3.5 text-center">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold 
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
                                 {{ $trx->status == 'selesai' ? 'bg-emerald-50 text-emerald-600' : 'bg-brand-50 text-brand-600' }}">
                                 {{ ucfirst($trx->status) }}
                             </span>
@@ -252,9 +252,9 @@ const chart = new Chart(ctx, {
             y: {
                 grid: { color: '#f1f5f9', drawBorder: false },
                 border: { display: false, dash: [4,4] },
-                ticks: { 
-                    color: '#94a3b8', 
-                    font: { size: 11 }, 
+                ticks: {
+                    color: '#94a3b8',
+                    font: { size: 11 },
                     padding: 8,
                     callback: function(value) {
                         return 'Rp ' + (value / 1000) + 'K';

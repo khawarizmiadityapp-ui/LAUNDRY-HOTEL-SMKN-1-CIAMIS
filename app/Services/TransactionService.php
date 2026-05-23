@@ -13,9 +13,25 @@ class TransactionService
      */
     public function generateTransactionCode(): string
     {
-        // Pilihan yang lebih aman dari uniqid()
-        $randomStr = strtoupper(\Illuminate\Support\Str::random(4));
-        return 'TRX-' . date('Ymd') . '-' . $randomStr;
+        $maxAttempts = 5;
+        $attempt = 0;
+
+        do {
+            $randomStr = strtoupper(\Illuminate\Support\Str::random(4));
+            $code = 'TRX-' . date('Ymd') . '-' . $randomStr;
+
+            // Check if code already exists
+            $exists = Transaksi::where('transaksi_code', $code)->exists();
+
+            if (!$exists) {
+                return $code;
+            }
+
+            $attempt++;
+        } while ($attempt < $maxAttempts);
+
+        // Fallback: use timestamp + random for guaranteed uniqueness
+        return 'TRX-' . date('Ymd') . '-' . time() . '-' . strtoupper(\Illuminate\Support\Str::random(2));
     }
 
     /**

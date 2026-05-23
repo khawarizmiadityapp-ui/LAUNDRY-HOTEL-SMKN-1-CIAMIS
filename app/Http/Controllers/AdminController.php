@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Auth\LoginController;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\ServicePrice;
@@ -27,11 +26,11 @@ class AdminController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        
+
         if (!$user) {
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
-        
+
         if ($user->role !== 'admin') {
             // Log for debugging
             Log::warning('Unauthorized dashboard access attempt', [
@@ -40,7 +39,7 @@ class AdminController extends Controller
                 'user_role' => $user->role,
                 'expected_role' => 'admin',
             ]);
-            
+
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Administrator. Role Anda: ' . ($user->role ?? 'unknown'));
         }
 
@@ -48,7 +47,7 @@ class AdminController extends Controller
         $stats = Cache::remember('dashboard_stats', 300, function () {
             $today = Carbon::today();
             $thisMonth = Carbon::now();
-            
+
             return [
                 'total_orders' => Transaksi::count(),
                 'orders_today' => Transaksi::whereDate('created_at', $today)->count(),
@@ -65,7 +64,7 @@ class AdminController extends Controller
         // Cache chart data for 5 minutes
         $chartData = Cache::remember('dashboard_chart_data', 300, function () {
             $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
-            
+
             // Data untuk Chart (Pendapatan & Pengeluaran 7 hari terakhir)
             $incomeData = Transaksi::select(
                     DB::raw('DATE(created_at) as date'),
@@ -95,16 +94,16 @@ class AdminController extends Controller
                 $data['income'][] = $incomeData->get($date, 0);
                 $data['expense'][] = $expenseData->get($date, 0);
             }
-            
+
             return $data;
         });
 
         // Clear old cache to prevent data corruption
         Cache::forget('dashboard_recent_transactions');
-        
+
         // Cache recent transactions for 2 minutes
         $recentTransactions = Cache::remember('dashboard_recent_transactions', 120, function () {
-            return Transaksi::with(['user'])
+            return Transaksi::with(['user', 'details.layanan', 'customer'])
                 ->latest()
                 ->take(10)
                 ->get();
@@ -182,12 +181,17 @@ class AdminController extends Controller
             ]);
 
             DB::commit();
-            
+
+            // Invalidate cache
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
+
             return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Admin Transaction Creation Failed', [
                 'operation' => 'admin.storeTransaction',
                 'user_id' => Auth::id(),
@@ -216,7 +220,12 @@ class AdminController extends Controller
                 'status' => $request->status,
                 'updated_at' => now()
             ]);
-            
+
+            // Invalidate cache
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
+
             // Opsional: Tambahkan log history status jika punya tabel history
             // TransactionStatusHistory::create([...]);
 
@@ -238,12 +247,21 @@ class AdminController extends Controller
     // 5. Update Pembayaran
     public function updatePayment(Request $request, $id)
     {
+        $request->validate([
+            'payment_status' => 'required|in:lunas,belum_bayar'
+        ]);
+
         try {
             $transaction = Transaksi::with(['customer'])->findOrFail($id);
             $transaction->update([
-                'payment_status' => $request->payment_status // lunas / belum_bayar
+                'payment_status' => $request->payment_status
             ]);
-            
+
+            // Invalidate cache
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
+
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 
         } catch (\Exception $e) {
@@ -299,7 +317,12 @@ class AdminController extends Controller
                 'notes'          => $request->notes,
                 'updated_at'     => now()
             ]);
-            
+
+            // Invalidate cache
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
+
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
 
         } catch (\Exception $e) {
@@ -381,7 +404,7 @@ class AdminController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Update Prices Failed', [
                 'operation' => 'admin.updatePrices',
                 'user_id' => Auth::id(),
@@ -440,7 +463,12 @@ class AdminController extends Controller
         try {
             $transaksi = Transaksi::with(['details', 'tasks'])->findOrFail($id);
             $transaksi->delete();
-            
+
+            // Invalidate cache
+            Cache::forget('dashboard_stats');
+            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_recent_transactions');
+
             return back()->with('success', 'Data berhasil dihapus!');
 
         } catch (\Exception $e) {

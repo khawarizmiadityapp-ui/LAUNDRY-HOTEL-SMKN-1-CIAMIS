@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class PetugasController extends Controller
 {
@@ -40,7 +41,7 @@ class PetugasController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        
+
         // ✅ FIX: Allow both admin and staff
         if (!in_array($user->role, ['admin', 'staff'])) {
             abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
@@ -77,12 +78,12 @@ class PetugasController extends Controller
                 ->where('status', 'completed')
                 ->where('petugas_name', $item->nama)
                 ->count();
-                
+
             $completedIroning = \App\Models\LaundryTask::where('stage', 'ironing')
                 ->where('status', 'completed')
                 ->where('petugas_name', $item->nama)
                 ->count();
-                
+
             $completedPacking = \App\Models\LaundryTask::where('stage', 'packing')
                 ->where('status', 'completed')
                 ->where('petugas_name', $item->nama)
@@ -237,7 +238,7 @@ class PetugasController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             $transaksi = Transaksi::with(['details.layanan', 'tasks'])->findOrFail($transaksiId);
             $stage = $request->stage;
@@ -261,22 +262,32 @@ class PetugasController extends Controller
             if ($stage === 'washing') {
                 // Deduct 1 unit of detergent
                 $detergent = \App\Models\Inventory::where('category', 'detergent')
-                    ->where('quantity', '>', 0)
+                    ->where('quantity', '>=', 1)
                     ->lockForUpdate()
                     ->first();
-                
+
                 if ($detergent) {
                     $detergent->decrement('quantity', 1);
+                } else {
+                    \Log::warning('Detergent out of stock during task completion', [
+                        'transaksi_id' => $transaksi->id,
+                        'stage' => $stage,
+                    ]);
                 }
 
                 // Deduct 1 unit of fragrance
                 $fragrance = \App\Models\Inventory::where('category', 'fragrance')
-                    ->where('quantity', '>', 0)
+                    ->where('quantity', '>=', 1)
                     ->lockForUpdate()
                     ->first();
-                
+
                 if ($fragrance) {
                     $fragrance->decrement('quantity', 1);
+                } else {
+                    \Log::warning('Fragrance out of stock during task completion', [
+                        'transaksi_id' => $transaksi->id,
+                        'stage' => $stage,
+                    ]);
                 }
             }
 
@@ -284,11 +295,21 @@ class PetugasController extends Controller
             $statusMap = [
                 'washing' => 'dicuci',
                 'ironing' => 'disetrika',
-                'packing' => 'selesai',
+                'packing' => 'dipacking',
             ];
 
             if (isset($statusMap[$stage])) {
                 $transaksi->update(['status' => $statusMap[$stage]]);
+            }
+
+            // If packing is completed, mark transaction as 'selesai' (ready for pickup)
+            if ($stage === 'packing') {
+                // Check if all tasks are completed
+                $allTasksCompleted = $transaksi->tasks()->where('status', '!=', 'completed')->count() === 0;
+
+                if ($allTasksCompleted) {
+                    $transaksi->update(['status' => 'selesai']);
+                }
             }
 
             DB::commit();
@@ -304,7 +325,7 @@ class PetugasController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Complete Task Failed', [
                 'operation' => 'petugas.completeTask',
                 'user_id' => Auth::id(),
@@ -390,14 +411,14 @@ class PetugasController extends Controller
     public function history()
     {
         $user = Auth::user();
-        
+
         // ✅ FIX: Allow both admin and staff
         if (!in_array($user->role, ['admin', 'staff'])) {
             abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
         }
 
         $division = strtolower((string) $user->division);
-        
+
         // ✅ FIX: Admin can see all history
         if ($user->role === 'admin') {
             $completedTasks = \App\Models\LaundryTask::where('status', 'completed')

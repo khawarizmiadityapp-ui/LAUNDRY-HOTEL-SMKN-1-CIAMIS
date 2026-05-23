@@ -40,7 +40,7 @@ class TransaksiController extends Controller
         'price_per_kg' => $price,
         'total_price' => $totalPrice,
         'status' => 'diterima',
-        'payment_status' => 'belum_lunas',
+        'payment_status' => 'belum_bayar',
         'notes' => $validated['notes'] ?? null
     ]);
 
