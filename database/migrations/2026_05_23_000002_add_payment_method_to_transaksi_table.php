@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->enum('payment_method', ['tunai', 'qris', 'transfer', 'cash', 'dana'])->default('tunai')->after('payment_status');
+            if (!Schema::hasColumn('transaksi', 'payment_method')) {
+                $table->enum('payment_method', ['tunai', 'qris', 'transfer', 'cash', 'dana'])->default('tunai')->after('payment_status');
+            }
         });
     }
 

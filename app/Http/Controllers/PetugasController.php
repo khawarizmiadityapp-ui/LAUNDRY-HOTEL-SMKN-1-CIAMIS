@@ -12,9 +12,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Services\NotificationService;
+use App\Services\InventoryService;
 
 class PetugasController extends Controller
 {
+    protected $notificationService;
+    protected $inventoryService;
+
+    public function __construct(NotificationService $notificationService, InventoryService $inventoryService)
+    {
+        $this->notificationService = $notificationService;
+        $this->inventoryService = $inventoryService;
+    }
+
     private function ensureStaffDivisionAccess(array $allowedDivisions): void
     {
         $user = Auth::user();
@@ -260,35 +271,7 @@ class PetugasController extends Controller
 
             // Auto-deduct Inventory if stage is washing
             if ($stage === 'washing') {
-                // Deduct 1 unit of detergent
-                $detergent = \App\Models\Inventory::where('category', 'detergent')
-                    ->where('quantity', '>=', 1)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($detergent) {
-                    $detergent->decrement('quantity', 1);
-                } else {
-                    \Log::warning('Detergent out of stock during task completion', [
-                        'transaksi_id' => $transaksi->id,
-                        'stage' => $stage,
-                    ]);
-                }
-
-                // Deduct 1 unit of fragrance
-                $fragrance = \App\Models\Inventory::where('category', 'fragrance')
-                    ->where('quantity', '>=', 1)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($fragrance) {
-                    $fragrance->decrement('quantity', 1);
-                } else {
-                    \Log::warning('Fragrance out of stock during task completion', [
-                        'transaksi_id' => $transaksi->id,
-                        'stage' => $stage,
-                    ]);
-                }
+                $this->inventoryService->deductWashingSupplies($transaksi->id, $stage);
             }
 
             // Update overall transaction status
@@ -315,9 +298,7 @@ class PetugasController extends Controller
             DB::commit();
 
             // Generate WhatsApp Notification Link
-            $phone = preg_replace('/^0/', '62', $transaksi->customer_phone);
-            $msg = "Halo " . $transaksi->customer_name . ", pesanan Anda #" . $transaksi->transaksi_code . " saat ini telah selesai pada tahap " . ucfirst($stage) . ". \n\nCek progress lengkapnya di: " . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
-            $waLink = "https://wa.me/" . $phone . "?text=" . urlencode($msg);
+            $waLink = $this->notificationService->generateWhatsAppProgressLink($transaksi, $stage);
 
             session()->flash('notification_link', $waLink);
 

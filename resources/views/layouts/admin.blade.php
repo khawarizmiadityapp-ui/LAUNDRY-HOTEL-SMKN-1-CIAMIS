@@ -108,6 +108,9 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
 <!-- Mobile overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 lg:hidden" onclick="toggleSidebar()"></div>
 
@@ -192,6 +195,70 @@
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
     }
+
+    // Global loading state for forms
+    document.addEventListener('submit', function (e) {
+        if(e.target.tagName === 'FORM') {
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if(submitBtn && !submitBtn.disabled) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
+
+                // Safety timeout to re-enable after 10s if something fails
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }, 10000);
+            }
+        }
+    });
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+
+        const icons = {
+            success: '<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            error: '<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>',
+            warning: '<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>',
+            info: '<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>'
+        };
+
+        toast.innerHTML = `
+            ${icons[type] || icons.info}
+            <div class="toast-content">${message}</div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+
+    // Show Laravel flash messages as toasts
+    @if(session('success'))
+        showToast('{{ session('success') }}', 'success');
+    @endif
+    @if(session('error'))
+        showToast('{{ session('error') }}', 'error');
+    @endif
+    @if(session('warning'))
+        showToast('{{ session('warning') }}', 'warning');
+    @endif
+    @if(session('info'))
+        showToast('{{ session('info') }}', 'info');
+    @endif
 </script>
 
 @stack('scripts')

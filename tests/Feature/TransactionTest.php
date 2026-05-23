@@ -30,11 +30,13 @@ class TransactionTest extends TestCase
 
         // Create service prices
         ServicePrice::create([
+            'service_name' => 'Regular',
             'service_type' => 'regular',
             'price_per_kg' => 6000,
         ]);
 
         ServicePrice::create([
+            'service_name' => 'Express',
             'service_type' => 'express',
             'price_per_kg' => 7000,
         ]);

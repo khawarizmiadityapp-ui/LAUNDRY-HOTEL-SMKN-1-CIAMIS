@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
 use App\Models\Customer;
 use App\Models\TransaksiDetail;
+use App\Traits\LogsActivity;
 
 class Transaksi extends Model
 {
-    
+    use HasFactory, LogsActivity;
+
     protected $table = 'transaksi'; // sesuaikan sama nama tabel di database
 
     protected $fillable = [
