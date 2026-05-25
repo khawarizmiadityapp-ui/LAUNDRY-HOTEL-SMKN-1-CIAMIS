@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use Carbon\Carbon;
 
 class CustomerController extends Controller
 {
@@ -31,7 +32,8 @@ class CustomerController extends Controller
         $stats = [
             'total_customer'  => Customer::count(),
             'aktif_bulan_ini' => Customer::whereHas('transaksis', function($q) {
-                $q->whereMonth('created_at', date('m'))->whereYear('created_at', date('Y'));
+                $q->whereMonth('created_at', Carbon::now()->month)
+                  ->whereYear('created_at', Carbon::now()->year);
             })->count(),
         ];
 

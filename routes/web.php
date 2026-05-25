@@ -17,6 +17,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
 use App\Exports\TransactionsExport;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\ErrorLogController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
@@ -119,6 +120,15 @@ Route::group(['middleware' => ['auth']], function () {
             Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->middleware('throttle:30,1')->name('update');
             Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->middleware('throttle:30,1')->name('request.approve');
             Route::post('/request/{id}/reject', [InventoryController::class, 'rejectAdjustment'])->middleware('throttle:30,1')->name('request.reject');
+        });
+
+        // Error Logs
+        Route::prefix('errors')->name('errors.')->group(function () {
+            Route::get('/', [ErrorLogController::class, 'index'])->name('index');
+            Route::get('/{errorLog}', [ErrorLogController::class, 'show'])->name('show');
+            Route::post('/{errorLog}/resolve', [ErrorLogController::class, 'resolve'])->name('resolve');
+            Route::delete('/{errorLog}', [ErrorLogController::class, 'destroy'])->name('destroy');
+            Route::post('/clear-old', [ErrorLogController::class, 'clearOld'])->name('clear-old');
         });
     });
 

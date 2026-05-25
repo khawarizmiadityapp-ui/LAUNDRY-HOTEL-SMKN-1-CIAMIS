@@ -260,7 +260,14 @@ function updateQty(id, type) {
         },
         body: JSON.stringify({ type: type })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => {
+                throw new Error(err.message || 'Gagal memperbarui stok');
+            });
+        }
+        return res.json();
+    })
     .then(data => {
         if (data.success) {
             const el = document.getElementById('qty' + id);
@@ -274,7 +281,13 @@ function updateQty(id, type) {
                 }
             }
             if (elDisp) elDisp.innerText = data.qty;
+        } else {
+            alert(data.message || 'Gagal memperbarui stok');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'Terjadi kesalahan saat memperbarui stok');
     });
 }
 </script>

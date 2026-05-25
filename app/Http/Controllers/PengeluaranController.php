@@ -31,9 +31,9 @@ class PengeluaranController extends Controller
                                     ->whereYear('tanggal', now()->year)
                                     ->sum('nominal');
 
-        $targetAnggaran = 7_000_000;
-        $terpakai       = Pengeluaran::sum('nominal');
-        $sisaAnggaran   = max(0, $targetAnggaran - $terpakai);
+        $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 7_000_000);
+        $terpakaiBulanIni = $totalBulanIni;
+        $sisaAnggaran   = max(0, $targetAnggaran - $terpakaiBulanIni);
 
         // Kategori terbesar berdasarkan total nominal
         $raw = Pengeluaran::selectRaw('kategori, SUM(nominal) as total')

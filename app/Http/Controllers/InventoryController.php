@@ -7,9 +7,17 @@ use App\Models\Inventory;
 use App\Models\InventoryAdjustmentRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\ErrorLoggingService;
 
 class InventoryController extends Controller
 {
+    protected $errorLogger;
+
+    public function __construct(ErrorLoggingService $errorLogger)
+    {
+        $this->errorLogger = $errorLogger;
+    }
+
     public function index()
     {
         // ambil berdasarkan kategori
@@ -47,7 +55,16 @@ class InventoryController extends Controller
         if ($request->type === 'increment') {
             $item->increment('quantity');
         } else {
-            Inventory::where('id', $id)->where('quantity', '>', 0)->decrement('quantity');
+            // Prevent negative stock
+            if ($item->quantity > 0) {
+                $item->decrement('quantity');
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stok tidak bisa kurang dari 0',
+                    'qty' => $item->quantity
+                ], 400);
+            }
         }
 
         $item->refresh();
@@ -60,23 +77,39 @@ class InventoryController extends Controller
 
     public function approveAdjustment($id)
     {
-        DB::transaction(function () use ($id) {
-            $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->lockForUpdate()->findOrFail($id);
-            $item = Inventory::where('id', $requestAdjust->inventory_id)->lockForUpdate()->first();
+        try {
+            DB::transaction(function () use ($id) {
+                $requestAdjust = InventoryAdjustmentRequest::where('status', 'pending')->lockForUpdate()->findOrFail($id);
+                $item = Inventory::where('id', $requestAdjust->inventory_id)->lockForUpdate()->first();
 
-            if ($item) {
-                $item->quantity = max(0, $item->quantity + $requestAdjust->adjustment);
-                $item->save();
-            }
+                if ($item) {
+                    // Validate that adjustment won't cause negative stock
+                    $newQuantity = $item->quantity + $requestAdjust->adjustment;
+                    if ($newQuantity < 0) {
+                        throw new \Exception('Penyesuaian akan menyebabkan stok negatif. Stok saat ini: ' . $item->quantity . ', Penyesuaian: ' . $requestAdjust->adjustment);
+                    }
+                    
+                    $item->quantity = $newQuantity;
+                    $item->save();
+                }
 
-            $requestAdjust->update([
-                'status' => 'approved',
-                'approved_by' => Auth::id(),
-                'approved_at' => now(),
+                $requestAdjust->update([
+                    'status' => 'approved',
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                ]);
+            });
+
+            return redirect()->back()->with('success', 'Permintaan stok disetujui dan stok sudah diperbarui.');
+        } catch (\Exception $e) {
+            $this->errorLogger->logError($e, 'Inventory Adjustment Approval Failed', [
+                'operation' => 'inventory.approveAdjustment',
+                'user_id' => Auth::id(),
+                'adjustment_request_id' => $id,
             ]);
-        });
 
-        return redirect()->back()->with('success', 'Permintaan stok disetujui dan stok sudah diperbarui.');
+            return redirect()->back()->with('error', 'Gagal menyetujui permintaan: ' . $e->getMessage());
+        }
     }
 
     public function rejectAdjustment($id)

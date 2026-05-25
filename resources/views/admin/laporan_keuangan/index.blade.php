@@ -206,7 +206,7 @@
     <div class="bg-white rounded-2xl shadow-md p-5">
         <div class="flex justify-between items-center flex-wrap mb-4">
             <h2 class="text-lg font-semibold text-gray-800">Detail Transaksi Terbaru</h2>
-            <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">Lihat Semua Ledger <i class="fas fa-arrow-right text-xs"></i></a>
+            <a href="{{ route('admin.transactions.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">Lihat Semua Ledger <i class="fas fa-arrow-right text-xs"></i></a>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -220,38 +220,35 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    <!-- Baris 1: Pengeluaran -->
+                    @forelse($recentExpenses->merge($recentTransactions)->sortByDesc('created_at')->take(10) as $item)
+                    @php
+                        $isExpense = $item instanceof \App\Models\Pengeluaran;
+                        $date = $isExpense ? $item->tanggal : $item->created_at;
+                        $description = $isExpense ? $item->nama : 'Transaksi #' . $item->transaksi_code . ' - ' . $item->customer_name;
+                        $category = $isExpense ? $item->kategori : 'LAYANAN';
+                        $type = $isExpense ? 'PENGELUARAN' : 'PEMASUKAN';
+                        $nominal = $isExpense ? $item->nominal : $item->total_price;
+                    @endphp
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-5 py-3 text-sm text-gray-700">12 Juni 2023</td>
-                        <td class="px-5 py-3 text-sm font-medium text-gray-800">Pembelian Detergen Premium 20kg</td>
-                        <td class="px-5 py-3 text-sm text-gray-600">SUPPLIES</td>
-                        <td class="px-5 py-3"><span class="bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full">PENGELUARAN</span></td>
-                        <td class="px-5 py-3 text-right text-sm font-medium text-red-600">- Rp 1.250.000</td>
+                        <td class="px-5 py-3 text-sm text-gray-700">{{ \Carbon\Carbon::parse($date)->format('d M Y') }}</td>
+                        <td class="px-5 py-3 text-sm font-medium text-gray-800">{{ $description }}</td>
+                        <td class="px-5 py-3 text-sm text-gray-600">{{ $category }}</td>
+                        <td class="px-5 py-3">
+                            <span class="{{ $isExpense ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }} text-xs font-semibold px-2.5 py-1 rounded-full">
+                                {{ $type }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 text-right text-sm font-medium {{ $isExpense ? 'text-red-600' : 'text-green-600' }}">
+                            {{ $isExpense ? '-' : '+' }} Rp {{ number_format($nominal, 0, ',', '.') }}
+                        </td>
                     </tr>
-                    <!-- Baris 2: Pemasukan -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-5 py-3 text-sm text-gray-700">11 Juni 2023</td>
-                        <td class="px-5 py-3 text-sm font-medium text-gray-800">Pendapatan Paket Laundry Ekspres (24 Order)</td>
-                        <td class="px-5 py-3 text-sm text-gray-600">LAYANAN</td>
-                        <td class="px-5 py-3"><span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">PEMASUKAN</span></td>
-                        <td class="px-5 py-3 text-right text-sm font-medium text-green-600">+ Rp 3.480.000</td>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-5 py-8 text-center text-gray-400">
+                            Belum ada data transaksi
+                        </td>
                     </tr>
-                    <!-- Baris 3: Pengeluaran -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-5 py-3 text-sm text-gray-700">10 Juni 2023</td>
-                        <td class="px-5 py-3 text-sm font-medium text-gray-800">Gaji Petugas Kebersihan Shift Pagi</td>
-                        <td class="px-5 py-3 text-sm text-gray-600">OPERASIONAL</td>
-                        <td class="px-5 py-3"><span class="bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full">PENGELUARAN</span></td>
-                        <td class="px-5 py-3 text-right text-sm font-medium text-red-600">- Rp 4.500.000</td>
-                    </tr>
-                    <!-- Baris 4: Pengeluaran -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-5 py-3 text-sm text-gray-700">09 Juni 2023</td>
-                        <td class="px-5 py-3 text-sm font-medium text-gray-800">Pembayaran Tagihan Listrik & Air Mei 2023</td>
-                        <td class="px-5 py-3 text-sm text-gray-600">UTILITY</td>
-                        <td class="px-5 py-3"><span class="bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full">PENGELUARAN</span></td>
-                        <td class="px-5 py-3 text-right text-sm font-medium text-red-600">- Rp 2.890.000</td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

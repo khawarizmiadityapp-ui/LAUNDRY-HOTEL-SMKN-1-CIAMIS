@@ -146,8 +146,8 @@
                     </td>
                     {{-- Aksi --}}
                     <td class="px-6 py-4 text-right">
-                        <div class="relative inline-block text-left" x-data="{ open: false }" @click.away="open = false">
-                            <button @click="open = !open" 
+                        <div class="relative inline-block text-left">
+                            <button onclick="toggleDropdown('dropdown-{{ $customer->id }}')"
                                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
                                            hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -155,15 +155,7 @@
                                 </svg>
                             </button>
                             
-                            <div x-show="open" 
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5"
-                                 style="display: none;">
+                            <div id="dropdown-{{ $customer->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
                                 
                                 <a href="{{ route('admin.customers.edit', $customer->id) }}" 
                                    class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">

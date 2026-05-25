@@ -57,8 +57,8 @@ class LaporanController extends Controller
         $pengeluaran = (clone $pengeluaranQuery)->sum('nominal');
         $laba = $pemasukan - $pengeluaran;
 
-        $targetAnggaran = 50000000;
-        $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+        $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 50_000_000);
+        $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50_000_000);
         $realisasiBulanIni = Transaksi::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_price');
@@ -110,6 +110,19 @@ class LaporanController extends Controller
             ? ($laba / $pemasukan) * 100
             : 0;
 
+        // Fetch recent transactions for the ledger
+        $recentTransactions = Transaksi::with(['user', 'customer'])
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Fetch recent expenses for the ledger
+        $recentExpenses = Pengeluaran::latest()
+            ->where('tanggal', '>=', Carbon::now()->subDays(30))
+            ->take(10)
+            ->get();
+
         return view('admin.laporan_keuangan.index', [
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
@@ -126,6 +139,8 @@ class LaporanController extends Controller
             'limitPemasukanBulanan' => $limitPemasukanBulanan,
             'realisasiBulanIni' => $realisasiBulanIni,
             'persenTargetBulanIni' => $persenTargetBulanIni,
+            'recentTransactions' => $recentTransactions,
+            'recentExpenses' => $recentExpenses,
         ]);
     }
 }

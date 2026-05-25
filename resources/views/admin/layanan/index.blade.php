@@ -198,33 +198,40 @@
             <span class="text-xs text-slate-400 font-medium">{{ $layanan->satuan }}</span>
         </div>
 
-        <div class="flex gap-2">
-            {{-- Edit Button --}}
-            <button @click="$dispatch('open-modal', { name: 'edit-layanan', data: {{ json_encode(['id' => $layanan->id, 'nama' => $layanan->nama, 'harga' => $layanan->harga, 'estimasi' => $layanan->estimasi, 'badge' => $layanan->badge]) }} })"
-                    class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold
-                           text-slate-600 bg-slate-50 border border-slate-200
-                           hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200
-                           active:scale-95 transition-all duration-150">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        {{-- Aksi Three Dots --}}
+        <div class="relative inline-block text-left">
+            <button onclick="toggleDropdown('dropdown-layanan-{{ $layanan->id }}')"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
+                           hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
                 </svg>
-                Edit Harga
             </button>
-
-            {{-- Delete Button --}}
-            <form action="{{ route('admin.layanan.destroy', $layanan) }}" method="POST" 
-                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus layanan ini?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
-                        class="p-2 rounded-xl text-rose-500 bg-rose-50 border border-rose-100
-                               hover:bg-rose-500 hover:text-white transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            
+            <div id="dropdown-layanan-{{ $layanan->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
+                <button @click="$dispatch('open-modal', { name: 'edit-layanan', data: {{ json_encode(['id' => $layanan->id, 'nama' => $layanan->nama, 'harga' => $layanan->harga, 'estimasi' => $layanan->estimasi, 'badge' => $layanan->badge]) }} })"
+                        class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors w-full text-left">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
+                    Edit Harga
                 </button>
-            </form>
+
+                <div class="h-px bg-slate-50 my-1"></div>
+
+                <form action="{{ route('admin.layanan.destroy', $layanan) }}" method="POST" 
+                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus layanan ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
+                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Hapus
+                    </button>
+                </form>
+            </div>
         </div>
 
     </div>

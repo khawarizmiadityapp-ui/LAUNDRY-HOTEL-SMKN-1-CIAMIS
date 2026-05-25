@@ -224,7 +224,7 @@
                                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1">
+                        <div class="dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1 absolute right-0 top-full mt-1">
                             <a href="{{ route('admin.pengeluaran.show', $item) }}"
                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

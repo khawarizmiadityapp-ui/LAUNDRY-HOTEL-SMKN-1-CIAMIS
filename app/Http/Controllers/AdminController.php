@@ -13,14 +13,17 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
 use App\Services\TransactionService;
+use App\Services\ErrorLoggingService;
 
 class AdminController extends Controller
 {
     protected $transactionService;
+    protected $errorLogger;
 
-    public function __construct(TransactionService $transactionService)
+    public function __construct(TransactionService $transactionService, ErrorLoggingService $errorLogger)
     {
         $this->transactionService = $transactionService;
+        $this->errorLogger = $errorLogger;
     }
     // 1. Dashboard Utama (Statistik)
     public function dashboard()
@@ -282,9 +285,17 @@ class AdminController extends Controller
             ]);
 
             // BUG FIX: Generate LaundryTasks automatically for Admin-created transactions
-            $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
-            $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
-            $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
+            try {
+                $transaksi->tasks()->create(['stage' => 'washing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['stage' => 'ironing', 'status' => 'pending']);
+                $transaksi->tasks()->create(['stage' => 'packing', 'status' => 'pending']);
+            } catch (\Exception $taskError) {
+                $this->errorLogger->logError($taskError, 'Failed to create laundry tasks', [
+                    'transaksi_id' => $transaksi->id,
+                    'transaksi_code' => $transaksi->transaksi_code,
+                ]);
+                throw $taskError; // Re-throw to trigger rollback
+            }
 
             DB::commit();
 
@@ -298,13 +309,10 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Admin Transaction Creation Failed', [
+            $this->errorLogger->logError($e, 'Admin Transaction Creation Failed', [
                 'operation' => 'admin.storeTransaction',
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'input' => $request->except(['_token']),
+                'input' => $request->except(['_token', 'password']),
             ]);
 
             return redirect()->back()
@@ -338,12 +346,11 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Status berhasil diperbarui!');
 
         } catch (\Exception $e) {
-            \Log::error('Update Status Failed', [
+            $this->errorLogger->logError($e, 'Update Status Failed', [
                 'operation' => 'admin.updateStatus',
                 'user_id' => Auth::id(),
                 'transaksi_id' => $id,
                 'status' => $request->status ?? null,
-                'error' => $e->getMessage(),
             ]);
 
             return redirect()->back()->with('error', 'Gagal memperbarui status. Silakan coba lagi.');
@@ -371,12 +378,11 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 
         } catch (\Exception $e) {
-            \Log::error('Update Payment Failed', [
+            $this->errorLogger->logError($e, 'Update Payment Failed', [
                 'operation' => 'admin.updatePayment',
                 'user_id' => Auth::id(),
                 'transaksi_id' => $id,
                 'payment_status' => $request->payment_status ?? null,
-                'error' => $e->getMessage(),
             ]);
 
             return redirect()->back()->with('error', 'Gagal memperbarui status pembayaran. Silakan coba lagi.');
@@ -432,13 +438,10 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
 
         } catch (\Exception $e) {
-            \Log::error('Update Transaction Failed', [
+            $this->errorLogger->logError($e, 'Update Transaction Failed', [
                 'operation' => 'admin.updateTransaction',
                 'user_id' => Auth::id(),
                 'transaksi_id' => $id,
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
                 'input' => $request->except(['_token']),
             ]);
 
@@ -578,11 +581,10 @@ class AdminController extends Controller
             return back()->with('success', 'Data berhasil dihapus!');
 
         } catch (\Exception $e) {
-            \Log::error('Delete Transaction Failed', [
+            $this->errorLogger->logError($e, 'Delete Transaction Failed', [
                 'operation' => 'admin.destroyTransaction',
                 'user_id' => Auth::id(),
                 'transaksi_id' => $id,
-                'error' => $e->getMessage(),
             ]);
 
             return back()->with('error', 'Gagal menghapus data. Silakan coba lagi.');

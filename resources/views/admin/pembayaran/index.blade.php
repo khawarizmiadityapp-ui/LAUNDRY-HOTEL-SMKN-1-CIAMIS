@@ -119,15 +119,34 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($trx->payment_status != 'lunas')
-                                    <a href="{{ route('admin.pembayaran.create') }}" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                                        <i class="fas fa-credit-card"></i> Bayar
-                                    </a>
-                                @else
-                                    <button class="text-gray-400 hover:text-gray-600">
-                                        <i class="fas fa-ellipsis-v"></i>
+                                <div class="relative inline-block text-left">
+                                    <button onclick="toggleDropdown('dropdown-pembayaran-{{ $trx->id }}')"
+                                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
+                                                   hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
+                                        </svg>
                                     </button>
-                                @endif
+                                    
+                                    <div id="dropdown-pembayaran-{{ $trx->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
+                                        @if($trx->payment_status != 'lunas')
+                                        <a href="{{ route('admin.pembayaran.create') }}"
+                                           class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                            </svg>
+                                            Bayar
+                                        </a>
+                                        @endif
+                                        <a href="{{ route('pos.nota', $trx->id) }}" target="_blank"
+                                           class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Cek Nota
+                                        </a>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         @empty

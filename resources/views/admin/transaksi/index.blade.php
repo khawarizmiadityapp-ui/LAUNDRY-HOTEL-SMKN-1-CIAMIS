@@ -89,19 +89,38 @@
     
                 <!-- Aksi -->
                 <td class="px-6 py-4 text-right whitespace-nowrap">
-                    <div class="flex justify-end gap-1.5">
-                        <a href="{{ route('pos.nota', $trx->id) }}" target="_blank"
-                            class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1">
-                            <i class="fa-solid fa-file-invoice"></i> Cek Nota
-                        </a>
-    
-                        <form action="{{ route('admin.transactions.destroy',$trx->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                                Hapus
-                            </button>
-                        </form>
+                    <div class="relative inline-block text-left">
+                        <button onclick="toggleDropdown('dropdown-{{ $trx->id }}')"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
+                                       hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
+                            </svg>
+                        </button>
+                        
+                        <div id="dropdown-{{ $trx->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
+                            <a href="{{ route('pos.nota', $trx->id) }}" target="_blank"
+                               class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Cek Nota
+                            </a>
+
+                            <div class="h-px bg-slate-50 my-1"></div>
+
+                            <form action="{{ route('admin.transactions.destroy', $trx->id) }}" method="POST"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" 
+                                        class="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
+                                    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -116,6 +135,13 @@
         </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    @if($transactions->hasPages())
+    <div class="bg-white rounded-xl shadow-sm border mt-4 p-4">
+        {{ $transactions->onEachSide(1)->links('vendor.pagination.custom') }}
+    </div>
+    @endif
 </div>
 
 <!-- MODAL CREATE -->

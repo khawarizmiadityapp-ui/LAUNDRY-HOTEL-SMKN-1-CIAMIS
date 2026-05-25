@@ -152,13 +152,61 @@
 
             <div class="flex items-center gap-3 ml-auto">
                 <!-- Notification Bell -->
-                <button class="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                    </svg>
-                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                </button>
+                <div class="relative">
+                    <button onclick="toggleNotifications()" class="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        @php
+                            $recentActivities = \App\Models\ActivityLog::latest()->limit(5)->get();
+                        @endphp
+                        @if($recentActivities->count() > 0)
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                        @endif
+                    </button>
+
+                    <!-- Notification Dropdown -->
+                    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-100 z-50 max-h-96 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <h3 class="font-semibold text-slate-800">Recent Activity</h3>
+                        </div>
+                        <div class="overflow-y-auto max-h-72">
+                            @php
+                                $recentActivities = \App\Models\ActivityLog::with('causer')
+                                    ->latest()
+                                    ->limit(5)
+                                    ->get();
+                            @endphp
+                            @if($recentActivities->count() > 0)
+                                @foreach($recentActivities as $activity)
+                                <div class="block p-4 hover:bg-slate-50 border-b border-slate-100 last:border-0 transition">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-slate-800 truncate">{{ $activity->description }}</p>
+                                            <p class="text-xs text-slate-500 mt-1">
+                                                {{ $activity->causer ? $activity->causer->name ?? $activity->causer->email : 'System' }} • {{ $activity->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            @else
+                                <div class="p-8 text-center text-slate-400">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                    </svg>
+                                    <p class="text-sm">No recent activity</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Divider -->
                 <div class="w-px h-7 bg-slate-200 hidden sm:block"></div>
@@ -195,6 +243,43 @@
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
     }
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notification-dropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown.classList.contains('hidden')) {
+            // Close all other dropdowns
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            dropdown.classList.remove('hidden');
+        } else {
+            dropdown.classList.add('hidden');
+        }
+    }
+
+    // Close notification dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notification-dropdown');
+        const button = event.target.closest('button[onclick="toggleNotifications()"]');
+        
+        if (!button && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+
+        // Close all dropdowns when clicking outside
+        if (!event.target.closest('button[onclick^="toggleDropdown"]')) {
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                if (!el.contains(event.target)) {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+    });
 
     // Global loading state for forms
     document.addEventListener('submit', function (e) {
