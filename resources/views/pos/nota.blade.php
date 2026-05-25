@@ -1,3 +1,24 @@
+@php
+    $itemsText = "";
+    foreach ($transaksi->details as $detail) {
+        $namaLayanan = $detail->layanan->nama ?? 'Layanan';
+        $qty = rtrim(rtrim(number_format($detail->qty, 2, ',', '.'), '0'), ',');
+        $price = number_format($detail->price, 0, ',', '.');
+        $subtotal = number_format($detail->subtotal, 0, ',', '.');
+        $itemsText .= "• {$namaLayanan} ({$qty}x) = Rp {$subtotal}\n";
+    }
+    if (empty($itemsText)) {
+        // Fallback
+        $pricePerKg = $transaksi->price_per_kg > 0 ? $transaksi->price_per_kg : ($transaksi->service_type === 'express' ? 12000 : 6000);
+        $itemsText = "• " . ucfirst($transaksi->service_type) . " ({$transaksi->weight} kg) @ Rp " . number_format($pricePerKg, 0, ',', '.') . " = Rp " . number_format($transaksi->total_price, 0, ',', '.') . "\n";
+    }
+
+    $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. Invoice: *#" . $transaksi->transaksi_code . "*\n📅 Tanggal: " . $transaksi->created_at->format('d/m/Y H:i') . "\n\n*Rincian Layanan:*\n" . $itemsText . "\n💰 *Total Tagihan: Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n💳 Pembayaran: " . strtoupper($transaksi->payment_method) . " (" . ($transaksi->payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas') . ")\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
+    $waPhone = preg_replace('/[^0-9]/', '', $transaksi->customer_phone);
+    if (str_starts_with($waPhone, '0')) {
+        $waPhone = '62' . substr($waPhone, 1);
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,7 +29,7 @@
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -33,6 +54,7 @@
             body {
                 background: #fff;
                 padding: 0;
+                color: #000;
             }
             .no-print {
                 display: none !important;
@@ -41,202 +63,127 @@
                 box-shadow: none !important;
                 border: none !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 width: 100% !important;
-                max-width: 100% !important;
+                max-width: 80mm !important; /* Standard thermal receipt size */
             }
         }
 
+        /* Thermal receipt styling */
         .nota-card {
             background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(21,34,120,0.08);
-            overflow: hidden;
+            font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.05);
+            border: 1px dashed #cbd5e1;
             width: 100%;
-            max-width: 480px;
+            max-width: 340px;
+            padding: 24px 16px;
+            color: #000;
         }
 
-        /* Header gradient */
         .nota-header {
-            background: linear-gradient(135deg, #3568f4 0%, #1736d6 100%);
-            color: #fff;
-            padding: 2rem 1.5rem 1.5rem;
             text-align: center;
-            position: relative;
-        }
-        .nota-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: #fff;
-            border-radius: 20px 20px 0 0;
+            margin-bottom: 12px;
         }
 
         .logo-text {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.35rem;
+            font-size: 1.15rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .logo-sub {
             font-size: 0.7rem;
-            opacity: 0.7;
             margin-top: 2px;
-            letter-spacing: 0.06em;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .nota-code {
-            display: inline-block;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 10px;
-            padding: 6px 16px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 12px;
-            letter-spacing: 0.04em;
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 6px;
         }
 
         /* Body */
         .nota-body {
-            padding: 1.5rem;
+            padding: 0;
         }
 
         /* Info rows */
         .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.25rem;
-            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 10px;
+            font-size: 0.75rem;
         }
-        .info-item label {
-            display: block;
-            font-size: 0.68rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 500;
-            margin-bottom: 2px;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
-        .info-item span {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #334155;
+        .info-row label {
+            color: #444;
+        }
+        .info-row span {
+            font-weight: bold;
         }
 
-        /* Table */
-        .item-table {
-            width: 100%;
-            font-size: 0.82rem;
-            border-collapse: collapse;
-            margin-bottom: 1.25rem;
+        /* Dotted/dashed separators */
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+            height: 0;
         }
-        .item-table thead th {
-            text-align: left;
-            font-size: 0.68rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            font-weight: 600;
-            padding: 6px 0;
-            border-bottom: 1px solid #e2e8f0;
+
+        /* Stacked columns for thermal receipt look */
+        .item-list {
+            margin-bottom: 10px;
+            font-size: 0.78rem;
         }
-        .item-table thead th:last-child,
-        .item-table tbody td:last-child {
-            text-align: right;
+        .item-row {
+            margin-bottom: 8px;
         }
-        .item-table tbody td {
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-            color: #475569;
+        .item-name {
+            font-weight: 700;
         }
-        .item-table tbody td:first-child {
-            font-weight: 500;
-            color: #334155;
-        }
-        .item-table .qty-col {
-            text-align: center;
-            color: #64748b;
+        .item-calc-row {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 10px;
+            color: #333;
         }
 
         /* Totals */
         .totals {
-            border-top: 1px dashed #e2e8f0;
-            padding-top: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
         }
         .totals-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.82rem;
-            color: #64748b;
-            padding: 4px 0;
+            font-size: 0.8rem;
+            padding: 2px 0;
         }
         .totals-row.grand {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1e293b;
-            padding-top: 8px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            border-top: 1px dashed #000;
+            padding-top: 6px;
             margin-top: 4px;
-            border-top: 2px solid #1e293b;
-        }
-        .totals-row.grand .amount {
-            color: #3568f4;
-        }
-
-        /* Status badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.72rem;
-            font-weight: 600;
-        }
-        .badge-success {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-        .badge-warning {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .badge-info {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
         }
 
         /* Footer */
         .nota-footer {
             text-align: center;
-            padding: 1.25rem 1.5rem 1.5rem;
-            border-top: 1px dashed #e2e8f0;
-        }
-        .nota-footer p {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            line-height: 1.6;
+            font-size: 0.7rem;
+            color: #333;
         }
         .nota-footer .thanks {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 700;
             margin-bottom: 4px;
         }
 
-        /* Action buttons */
+        /* Action buttons panel */
         .actions {
             display: flex;
             gap: 12px;
@@ -276,49 +223,40 @@
         }
 
         .payment-info {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-            margin-top: 8px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            text-transform: uppercase;
         }
 
         .wet-stamp {
-            margin-top: 1rem;
-            margin-left: auto;
-            width: 124px;
-            height: 124px;
-            border: 3px dashed rgba(30, 64, 175, 0.5);
+            margin: 1rem auto 0;
+            width: 110px;
+            height: 110px;
+            border: 2px dashed rgba(30, 64, 175, 0.4);
             border-radius: 999px;
-            color: rgba(30, 64, 175, 0.8);
+            color: rgba(30, 64, 175, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 0.66rem;
+            font-size: 0.6rem;
             font-weight: 800;
-            line-height: 1.35;
+            line-height: 1.3;
             letter-spacing: 0.05em;
-            transform: rotate(-12deg);
+            transform: rotate(-10deg);
         }
     </style>
 </head>
 <body>
 
     {{-- Action Buttons --}}
-    {{-- Action Buttons --}}
-    <div class="actions no-print" style="max-width:480px; width:100%; margin-bottom:1rem;">
+    <div class="actions no-print" style="max-width:340px; width:100%; margin-bottom:1rem;">
         <button onclick="window.print()" class="btn btn-primary">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.75 3H5.25"/></svg>
             Cetak
         </button>
-        @php
-            $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. Invoice: *#" . $transaksi->transaksi_code . "*\n💰 Total: *Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
-            $waPhone = preg_replace('/[^0-9]/', '', $transaksi->customer_phone);
-            if (str_starts_with($waPhone, '0')) {
-                $waPhone = '62' . substr($waPhone, 1);
-            }
-        @endphp
         <a href="https://wa.me/{{ $waPhone }}?text={{ urlencode($waMessage) }}" target="_blank" class="btn" style="background:#25D366; color:#fff; box-shadow: 0 4px 14px rgba(37,211,102,0.35);">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             Kirim WA
@@ -331,7 +269,7 @@
 
     {{-- Success banner --}}
     @if(session('success'))
-    <div class="no-print" style="max-width:480px; width:100%; margin-bottom:1rem; background:#dcfce7; color:#16a34a; padding:12px 16px; border-radius:12px; font-size:0.85rem; font-weight:500; display:flex; align-items:center; gap:8px;">
+    <div class="no-print" style="max-width:340px; width:100%; margin-bottom:1rem; background:#dcfce7; color:#16a34a; padding:12px 16px; border-radius:12px; font-size:0.85rem; font-weight:500; display:flex; align-items:center; gap:8px;">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         {{ session('success') }}
     </div>
@@ -343,79 +281,68 @@
         {{-- Header --}}
         <div class="nota-header">
             <div class="logo-text">Bening Laundry</div>
-            <div class="logo-sub">SMKN 1 Ciamis • Hotel Laundry Service</div>
-            <div class="nota-code">#{{ $transaksi->transaksi_code }}</div>
+            <div class="logo-sub">SMKN 1 Ciamis • Hotel Laundry</div>
+            <div class="logo-sub">Jl. Jend. Sudirman No. 99, Ciamis</div>
+            <div class="nota-code">No: #{{ $transaksi->transaksi_code }}</div>
         </div>
+
+        <div class="divider"></div>
 
         {{-- Body --}}
         <div class="nota-body">
 
             {{-- Info --}}
             <div class="info-grid">
-                <div class="info-item">
-                    <label>Customer</label>
+                <div class="info-row">
+                    <label>Pelanggan</label>
                     <span>{{ $transaksi->customer_name }}</span>
                 </div>
-                <div class="info-item">
+                <div class="info-row">
                     <label>No. HP</label>
                     <span>{{ $transaksi->customer_phone }}</span>
                 </div>
-                <div class="info-item">
+                <div class="info-row">
                     <label>Tanggal</label>
                     <span>{{ $transaksi->created_at->format('d/m/Y H:i') }}</span>
                 </div>
-                <div class="info-item">
-                    <label>Petugas</label>
+                <div class="info-row">
+                    <label>Kasir</label>
                     <span>{{ $transaksi->user->name ?? '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <label>Status</label>
+                    <span>{{ ucfirst($transaksi->status) }}</span>
+                </div>
+                <div class="info-row">
+                    <label>Bayar</label>
+                    <span>{{ $transaksi->payment_status === 'lunas' ? 'LUNAS' : 'BELUM LUNAS' }}</span>
                 </div>
             </div>
 
-            {{-- Status Row --}}
-            <div style="display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap;">
-                <span class="badge badge-info">
-                    <span class="badge-dot"></span>
-                    {{ ucfirst($transaksi->status) }}
-                </span>
-                @if($transaksi->payment_status === 'lunas')
-                    <span class="badge badge-success">
-                        <span class="badge-dot"></span>
-                        Lunas
-                    </span>
-                @else
-                    <span class="badge badge-warning">
-                        <span class="badge-dot"></span>
-                        Deposit
-                    </span>
-                @endif
+            <div class="divider"></div>
+
+            {{-- Items --}}
+            <div class="item-list">
+                @forelse($transaksi->details as $detail)
+                <div class="item-row">
+                    <div class="item-name">{{ $detail->layanan->nama ?? 'Layanan' }}</div>
+                    <div class="item-calc-row">
+                        <span>{{ rtrim(rtrim(number_format($detail->qty, 2, ',', '.'), '0'), ',') }} x Rp {{ number_format($detail->price, 0, ',', '.') }}</span>
+                        <span>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+                @empty
+                <div class="item-row">
+                    <div class="item-name">{{ ucfirst($transaksi->service_type) }}</div>
+                    <div class="item-calc-row">
+                        <span>{{ $transaksi->weight }}kg x Rp {{ number_format($transaksi->price_per_kg, 0, ',', '.') }}</span>
+                        <span>Rp {{ number_format($transaksi->total_price, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+                @endforelse
             </div>
 
-            {{-- Items Table --}}
-            <table class="item-table">
-                <thead>
-                    <tr>
-                        <th>Layanan</th>
-                        <th style="text-align:center">Qty</th>
-                        <th>Harga</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($transaksi->details as $detail)
-                    <tr>
-                        <td>{{ $detail->layanan->nama ?? 'Layanan' }}</td>
-                        <td class="qty-col">{{ rtrim(rtrim(number_format($detail->qty, 2, ',', '.'), '0'), ',') }}</td>
-                        <td>Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
-                        <td>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" style="text-align:center; color:#94a3b8; padding:16px;">
-                            {{ $transaksi->service_type }} — {{ $transaksi->weight }}kg × Rp {{ number_format($transaksi->price_per_kg) }}
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <div class="divider"></div>
 
             {{-- Totals --}}
             <div class="totals">
@@ -425,16 +352,14 @@
                 </div>
 
                 <div class="totals-row grand">
-                    <span>Total Tagihan</span>
-                    <span class="amount">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</span>
+                    <span>TOTAL</span>
+                    <span>Rp {{ number_format($totalTagihan, 0, ',', '.') }}</span>
                 </div>
             </div>
 
             {{-- Payment Info --}}
             <div class="payment-info">
-                <span class="badge badge-info" style="text-transform:uppercase;">
-                    {{ $transaksi->payment_method }}
-                </span>
+                {{ strtoupper($transaksi->payment_method) }}
             </div>
 
             <div class="wet-stamp">
@@ -444,40 +369,60 @@
             </div>
 
             @if($transaksi->notes)
-            <div style="margin-top:1rem; padding:10px 14px; background:#f8fafc; border-radius:10px; border:1px solid #f1f5f9;">
-                <p style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.06em; font-weight:500; margin-bottom:2px;">Catatan</p>
-                <p style="font-size:0.82rem; color:#475569;">{{ $transaksi->notes }}</p>
+            <div class="divider"></div>
+            <div style="font-size:0.7rem;">
+                <span style="font-weight:700;">Catatan:</span>
+                {{ $transaksi->notes }}
             </div>
             @endif
         </div>
 
+        <div class="divider"></div>
+
         {{-- Footer --}}
         <div class="nota-footer">
-            <p class="thanks">Terima kasih atas kepercayaan Anda! 🙏</p>
-            <p>Bening Laundry — SMKN 1 Ciamis<br>Jl. Jend. Sudirman No. 99, Ciamis</p>
+            <p class="thanks">Terima kasih!</p>
+            <p>Simpan struk ini sebagai<br>bukti transaksi Anda.</p>
         </div>
     </div>
 
-    {{-- Automation Script --}}
+    {{-- Pop-up Modal WA --}}
     @if(session('success'))
-    <script>
-        window.onload = function() {
-            setTimeout(function() {
-                // 1. Ambil link WA
-                const waLink = document.querySelector('a[href^="https://wa.me/"]');
-                
-                // 2. Trigger Print (Ini akan menahan eksekusi JS sampai dialog print ditutup/selesai)
-                window.print();
+    <div id="waModal" class="no-print" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;">
+        <div style="background: #fff; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); max-width: 400px; width: 100%; overflow: hidden; animation: modalFadeIn 0.3s ease-out;">
+            <div style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: #fff; padding: 2rem 1.5rem; text-align: center; position: relative;">
+                <div style="background: rgba(255, 255, 255, 0.2); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </div>
+                <h3 style="font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; text-align: center;">Kirim Nota via WA?</h3>
+                <p style="font-size: 0.85rem; opacity: 0.9; text-align: center; line-height: 1.4;">Kirim rincian transaksi langsung ke nomor WhatsApp pelanggan agar tidak lupa.</p>
+            </div>
+            <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 10px;">
+                <a id="btnSendWA" href="https://wa.me/{{ $waPhone }}?text={{ urlencode($waMessage) }}" target="_blank" onclick="closeWaModal()" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: #fff; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: all 0.2s;">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Kirim ke WhatsApp
+                </a>
+                <button onclick="window.print(); closeWaModal();" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #3568f4; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                    Cetak Nota
+                </button>
+                <button onclick="closeWaModal()" style="display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
 
-                // 3. Setelah dialog print selesai, alihkan halaman ini langsung ke WhatsApp
-                // Menggunakan window.location.href mencegah terblokirnya popup oleh browser
-                if (waLink) {
-                    setTimeout(function() {
-                        window.location.href = waLink.href;
-                    }, 500);
-                }
-            }, 500);
-        };
+    <style>
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+
+    <script>
+        function closeWaModal() {
+            document.getElementById('waModal').style.display = 'none';
+        }
     </script>
     @endif
 

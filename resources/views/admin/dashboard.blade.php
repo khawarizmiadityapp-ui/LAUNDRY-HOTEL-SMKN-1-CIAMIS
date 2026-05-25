@@ -55,15 +55,15 @@
 
 </div>
 
-{{-- ── Chart + Promo ────────────────────────────── --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
+{{-- ── Charts ────────────────────────────── --}}
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-7">
 
-    {{-- Chart Card --}}
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-card p-5 animate-fade-up" style="animation-delay:.1s">
+    {{-- Revenue Chart Card --}}
+    <div class="bg-white rounded-2xl shadow-card p-5 animate-fade-up" style="animation-delay:.1s">
         <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
             <div>
                 <h2 class="font-display text-base font-700 text-slate-900">Grafik Pemasukan & Pengeluaran</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Weekly performance analysis</p>
+                <p id="revenueChartSubtitle" class="text-xs text-slate-400 mt-0.5">Last 7 days performance</p>
             </div>
             <div class="flex items-center bg-slate-100 rounded-xl p-1 gap-0.5" id="chart-tabs">
                 @foreach(['Daily','Weekly','Monthly'] as $tab)
@@ -76,7 +76,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="relative h-52 sm:h-64">
+        <div class="relative h-72">
             <canvas id="revenueChart"></canvas>
         </div>
         <div class="flex items-center gap-5 mt-4">
@@ -89,32 +89,19 @@
         </div>
     </div>
 
-    {{-- Promo Card --}}
-    <div class="relative overflow-hidden rounded-2xl shadow-card animate-fade-up p-6 flex flex-col justify-between min-h-[240px]"
-         style="background: linear-gradient(135deg, #1f48e9 0%, #141d54 100%); animation-delay:.15s">
-        {{-- Decorative circles --}}
-        <div class="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5"></div>
-        <div class="absolute -bottom-10 -left-6 w-52 h-52 rounded-full bg-white/5"></div>
-        <div class="absolute top-14 right-0 w-24 h-24 rounded-full bg-white/5"></div>
-
-        <div class="relative">
-            <span class="inline-flex items-center gap-1.5 bg-white/15 text-white/90 text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full mb-4">
-                <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span>
-                Pro Feature
-            </span>
-            <h3 class="font-display text-xl font-700 text-white leading-snug">
-                Expedite Your<br>Laundry Operations
-            </h3>
-            <p class="text-sm text-white/65 mt-3 leading-relaxed">
-                Upgrade to the premium fleet management system to handle 200+ orders daily with AI scheduling.
-            </p>
+    {{-- Transaction Chart Card --}}
+    <div class="bg-white rounded-2xl shadow-card p-5 animate-fade-up" style="animation-delay:.15s">
+        <div class="mb-5">
+            <h2 class="font-display text-base font-700 text-slate-900">Grafik Transaksi</h2>
+            <p id="transactionChartSubtitle" class="text-xs text-slate-400 mt-0.5">Jumlah transaksi 7 hari terakhir</p>
         </div>
-
-        <div class="relative mt-6">
-            <button class="w-full py-2.5 px-4 rounded-xl bg-white text-brand-700 text-sm font-bold
-                           hover:bg-brand-50 active:scale-95 transition-all duration-150 shadow-sm">
-                Explore Pro Features →
-            </button>
+        <div class="relative h-72">
+            <canvas id="transactionChart"></canvas>
+        </div>
+        <div class="flex items-center gap-5 mt-4">
+            <span class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="inline-block w-3 h-3 rounded-sm bg-emerald-500"></span> Transaksi
+            </span>
         </div>
     </div>
 
@@ -188,7 +175,6 @@
         </a>
     </div>
 </div>
-</div>
 
 @endsection
 
@@ -196,10 +182,22 @@
 <script>
 // ── Chart.js Data (Dynamic) ──────────────────────────────────────────
 const chartDataValues = @json($chartData);
-console.log("Chart Data:", chartDataValues);
 
 // ── Chart Init ─────────────────────────────────────────────
 const ctx = document.getElementById('revenueChart').getContext('2d');
+const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+
+const tooltipOptions = {
+    backgroundColor: '#1e293b',
+    titleColor: '#94a3b8',
+    bodyColor: '#f1f5f9',
+    padding: 10,
+    cornerRadius: 10,
+    displayColors: true,
+    boxWidth: 8,
+    boxHeight: 8,
+    boxPadding: 4,
+};
 
 let currentChart = new Chart(ctx, {
     type: 'bar',
@@ -234,15 +232,7 @@ let currentChart = new Chart(ctx, {
         interaction: { intersect: false, mode: 'index' },
         plugins: {
             legend: { display: false },
-            tooltip: {
-                backgroundColor: '#1e293b',
-                titleColor: '#94a3b8',
-                bodyColor: '#f1f5f9',
-                padding: 10,
-                cornerRadius: 10,
-                displayColors: true,
-                boxWidth: 8, boxHeight: 8, boxPadding: 4,
-            }
+            tooltip: tooltipOptions
         },
         scales: {
             x: {
@@ -266,6 +256,54 @@ let currentChart = new Chart(ctx, {
     }
 });
 
+let transactionChart = new Chart(transactionCtx, {
+    type: 'line',
+    data: {
+        labels: chartDataValues.weekly.labels,
+        datasets: [
+            {
+                label: 'Transaksi',
+                data: chartDataValues.weekly.transactions,
+                borderColor: 'rgba(16,185,129,1)',
+                backgroundColor: 'rgba(16,185,129,.14)',
+                fill: true,
+                tension: .35,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#10b981',
+                borderWidth: 2.5,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: { display: false },
+            tooltip: tooltipOptions
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9', drawBorder: false },
+                border: { display: false, dash: [4,4] },
+                ticks: {
+                    color: '#94a3b8',
+                    font: { size: 11 },
+                    padding: 8,
+                    precision: 0,
+                }
+            }
+        }
+    }
+});
+
 // ── Tab Switcher Logic ─────────────────────────────────────────────
 window.switchTab = function(period, btnElement) {
     // Update active UI tab
@@ -277,10 +315,18 @@ window.switchTab = function(period, btnElement) {
     btnElement.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
     
     // Update chart subtitle
-    const subTitle = document.querySelector('.lg\\:col-span-2 p.text-xs');
-    if (period === 'daily') subTitle.textContent = 'Today\\'s performance (by hour)';
-    else if (period === 'weekly') subTitle.textContent = 'Last 7 days performance';
-    else if (period === 'monthly') subTitle.textContent = 'Last 6 months performance';
+    const revenueSubtitle = document.getElementById('revenueChartSubtitle');
+    const transactionSubtitle = document.getElementById('transactionChartSubtitle');
+    if (period === 'daily') {
+        revenueSubtitle.textContent = 'Today\'s performance by hour';
+        transactionSubtitle.textContent = 'Jumlah transaksi hari ini per 2 jam';
+    } else if (period === 'weekly') {
+        revenueSubtitle.textContent = 'Last 7 days performance';
+        transactionSubtitle.textContent = 'Jumlah transaksi 7 hari terakhir';
+    } else if (period === 'monthly') {
+        revenueSubtitle.textContent = 'Last 6 months performance';
+        transactionSubtitle.textContent = 'Jumlah transaksi 6 bulan terakhir';
+    }
 
     // Update chart data
     const newData = chartDataValues[period];
@@ -289,6 +335,10 @@ window.switchTab = function(period, btnElement) {
         currentChart.data.datasets[0].data = newData.income;
         currentChart.data.datasets[1].data = newData.expense;
         currentChart.update();
+
+        transactionChart.data.labels = newData.labels;
+        transactionChart.data.datasets[0].data = newData.transactions;
+        transactionChart.update();
     }
 }
 </script>

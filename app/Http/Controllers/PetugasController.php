@@ -197,12 +197,8 @@ class PetugasController extends Controller
 
         $transactions = Transaksi::whereHas('tasks', function ($q) {
             $q->where('stage', 'ironing')->where('status', 'pending');
-        })->whereHas('tasks', function ($q) {
-            $q->where(function ($q) {
-                $q->where('stage', 'washing');
-            })->orWhere(function ($q) {
-                $q->where('stage', 'washing')->where('status', 'completed');
-            });
+        })->whereDoesntHave('tasks', function ($q) {
+            $q->where('stage', 'washing')->where('status', '!=', 'completed');
         })
         ->with(['details.layanan'])->get();
 
@@ -218,12 +214,8 @@ class PetugasController extends Controller
 
         $transactions = Transaksi::whereHas('tasks', function ($q) {
             $q->where('stage', 'packing')->where('status', 'pending');
-        })->whereHas('tasks', function ($q) {
-            $q->where(function ($q) {
-                $q->where('stage', 'ironing');
-            })->orWhere(function ($q) {
-                $q->where('stage', 'ironing')->where('status', 'completed');
-            });
+        })->whereDoesntHave('tasks', function ($q) {
+            $q->whereIn('stage', ['washing', 'ironing'])->where('status', '!=', 'completed');
         })
         ->with(['details.layanan'])->get();
 

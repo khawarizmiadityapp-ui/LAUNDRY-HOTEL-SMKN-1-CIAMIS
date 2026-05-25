@@ -62,7 +62,7 @@ class AdminController extends Controller
         });
 
         // Cache chart data for 5 minutes
-        $chartData = Cache::remember('dashboard_chart_data', 300, function () {
+        $chartData = Cache::remember('dashboard_chart_data_v2', 300, function () {
             
             // --- WEEKLY DATA (Last 7 Days) ---
             $sevenDaysAgo = Carbon::now()->subDays(6)->startOfDay();
@@ -76,53 +76,118 @@ class AdminController extends Controller
                 ->where('tanggal', '>=', $sevenDaysAgo)
                 ->groupBy('date')->pluck('total', 'date');
 
-            $weekly = ['labels' => [], 'income' => [], 'expense' => []];
+            $weeklyTransactions = Transaksi::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+                ->where('created_at', '>=', $sevenDaysAgo)
+                ->groupBy('date')->pluck('total', 'date');
+
+            $weekly = ['labels' => [], 'income' => [], 'expense' => [], 'transactions' => []];
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i)->format('Y-m-d');
                 $weekly['labels'][] = Carbon::now()->subDays($i)->format('D');
                 $weekly['income'][] = $weeklyIncome->get($date, 0);
                 $weekly['expense'][] = $weeklyExpense->get($date, 0);
+                $weekly['transactions'][] = $weeklyTransactions->get($date, 0);
             }
+
+            $isSqlite = DB::connection()->getDriverName() === 'sqlite';
 
             // --- DAILY DATA (Today, 06:00 to 22:00 in 2-hour intervals) ---
             $today = Carbon::today();
-            $dailyIncome = Transaksi::select(DB::raw('HOUR(created_at) as hour'), DB::raw('SUM(total_price) as total'))
-                ->where('payment_status', 'lunas')->whereDate('created_at', $today)
-                ->groupBy('hour')->pluck('total', 'hour');
-                
-            $dailyExpense = Pengeluaran::select(DB::raw('HOUR(tanggal) as hour'), DB::raw('SUM(nominal) as total'))
-                ->whereDate('tanggal', $today)
-                ->groupBy('hour')->pluck('total', 'hour');
+            if ($isSqlite) {
+                $dailyIncome = Transaksi::select(DB::raw("CAST(strftime('%H', created_at) AS INTEGER) as hour"), DB::raw('SUM(total_price) as total'))
+                    ->where('payment_status', 'lunas')->whereDate('created_at', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
+                    
+                $dailyExpense = Pengeluaran::select(DB::raw("CAST(strftime('%H', tanggal) AS INTEGER) as hour"), DB::raw('SUM(nominal) as total'))
+                    ->whereDate('tanggal', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
 
-            $daily = ['labels' => [], 'income' => [], 'expense' => []];
+                $dailyTransactions = Transaksi::select(DB::raw("CAST(strftime('%H', created_at) AS INTEGER) as hour"), DB::raw('COUNT(*) as total'))
+                    ->whereDate('created_at', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
+            } else {
+                $dailyIncome = Transaksi::select(DB::raw('HOUR(created_at) as hour'), DB::raw('SUM(total_price) as total'))
+                    ->where('payment_status', 'lunas')->whereDate('created_at', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
+                    
+                $dailyExpense = Pengeluaran::select(DB::raw('HOUR(tanggal) as hour'), DB::raw('SUM(nominal) as total'))
+                    ->whereDate('tanggal', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
+
+                $dailyTransactions = Transaksi::select(DB::raw('HOUR(created_at) as hour'), DB::raw('COUNT(*) as total'))
+                    ->whereDate('created_at', $today)
+                    ->groupBy('hour')->pluck('total', 'hour');
+            }
+
+            $daily = ['labels' => [], 'income' => [], 'expense' => [], 'transactions' => []];
             for ($h = 6; $h <= 22; $h += 2) {
                 $daily['labels'][] = sprintf('%02d:00', $h);
                 $daily['income'][] = $dailyIncome->get($h, 0) + $dailyIncome->get($h+1, 0);
                 $daily['expense'][] = $dailyExpense->get($h, 0) + $dailyExpense->get($h+1, 0);
+                $daily['transactions'][] = $dailyTransactions->get($h, 0) + $dailyTransactions->get($h+1, 0);
             }
 
             // --- MONTHLY DATA (Last 6 Months) ---
             $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
             
-            $monthlyIncome = Transaksi::select(DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'), DB::raw('SUM(total_price) as total'))
-                ->where('payment_status', 'lunas')->where('created_at', '>=', $sixMonthsAgo)
-                ->groupBy('year', 'month')->get()->keyBy(function($item) {
-                    return $item->year . '-' . sprintf('%02d', $item->month);
-                })->map->total;
-                
-            $monthlyExpense = Pengeluaran::select(DB::raw('MONTH(tanggal) as month'), DB::raw('YEAR(tanggal) as year'), DB::raw('SUM(nominal) as total'))
-                ->where('tanggal', '>=', $sixMonthsAgo)
-                ->groupBy('year', 'month')->get()->keyBy(function($item) {
-                    return $item->year . '-' . sprintf('%02d', $item->month);
-                })->map->total;
+            if ($isSqlite) {
+                $monthlyIncome = Transaksi::select(
+                        DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month"), 
+                        DB::raw("strftime('%Y', created_at) as year"), 
+                        DB::raw('SUM(total_price) as total')
+                    )
+                    ->where('payment_status', 'lunas')->where('created_at', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
+                    
+                $monthlyExpense = Pengeluaran::select(
+                        DB::raw("CAST(strftime('%m', tanggal) AS INTEGER) as month"), 
+                        DB::raw("strftime('%Y', tanggal) as year"), 
+                        DB::raw('SUM(nominal) as total')
+                    )
+                    ->where('tanggal', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
 
-            $monthly = ['labels' => [], 'income' => [], 'expense' => []];
+                $monthlyTransactions = Transaksi::select(
+                        DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month"),
+                        DB::raw("strftime('%Y', created_at) as year"),
+                        DB::raw('COUNT(*) as total')
+                    )
+                    ->where('created_at', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
+            } else {
+                $monthlyIncome = Transaksi::select(DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'), DB::raw('SUM(total_price) as total'))
+                    ->where('payment_status', 'lunas')->where('created_at', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
+                    
+                $monthlyExpense = Pengeluaran::select(DB::raw('MONTH(tanggal) as month'), DB::raw('YEAR(tanggal) as year'), DB::raw('SUM(nominal) as total'))
+                    ->where('tanggal', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
+
+                $monthlyTransactions = Transaksi::select(DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'), DB::raw('COUNT(*) as total'))
+                    ->where('created_at', '>=', $sixMonthsAgo)
+                    ->groupBy('year', 'month')->get()->keyBy(function($item) {
+                        return $item->year . '-' . sprintf('%02d', $item->month);
+                    })->map->total;
+            }
+
+            $monthly = ['labels' => [], 'income' => [], 'expense' => [], 'transactions' => []];
             for ($i = 5; $i >= 0; $i--) {
                 $date = Carbon::now()->subMonths($i);
                 $key = $date->format('Y-m');
                 $monthly['labels'][] = $date->format('M');
                 $monthly['income'][] = $monthlyIncome->get($key, 0);
                 $monthly['expense'][] = $monthlyExpense->get($key, 0);
+                $monthly['transactions'][] = $monthlyTransactions->get($key, 0);
             }
 
             return [
@@ -153,8 +218,10 @@ class AdminController extends Controller
 
         // Fitur Search
         if ($request->has('search')) {
-            $query->where('customer_name', 'like', '%' . $request->search . '%')
+            $query->where(function ($q) use ($request) {
+                $q->where('customer_name', 'like', '%' . $request->search . '%')
                   ->orWhere('transaksi_code', 'like', '%' . $request->search . '%');
+            });
         }
 
         // Fitur Filter Status
@@ -223,7 +290,7 @@ class AdminController extends Controller
 
             // Invalidate cache
             Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_chart_data_v2');
             Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
@@ -262,7 +329,7 @@ class AdminController extends Controller
 
             // Invalidate cache
             Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_chart_data_v2');
             Cache::forget('dashboard_recent_transactions');
 
             // Opsional: Tambahkan log history status jika punya tabel history
@@ -298,7 +365,7 @@ class AdminController extends Controller
 
             // Invalidate cache
             Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_chart_data_v2');
             Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
@@ -359,7 +426,7 @@ class AdminController extends Controller
 
             // Invalidate cache
             Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_chart_data_v2');
             Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
@@ -505,7 +572,7 @@ class AdminController extends Controller
 
             // Invalidate cache
             Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data');
+            Cache::forget('dashboard_chart_data_v2');
             Cache::forget('dashboard_recent_transactions');
 
             return back()->with('success', 'Data berhasil dihapus!');

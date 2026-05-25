@@ -106,11 +106,11 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [PengeluaranController::class, 'index'])->name('index');
             Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
             Route::post('/', [PengeluaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
             Route::get('/{pengeluaran}', [PengeluaranController::class, 'show'])->name('show');
             Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
             Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->middleware('throttle:30,1')->name('update');
             Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
-            Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
         });
         
         // Inventory

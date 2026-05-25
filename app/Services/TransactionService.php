@@ -16,13 +16,17 @@ class TransactionService
      */
     public function generateTransactionCode(): string
     {
-        return DB::transaction(function () {
-            // Use advisory lock to prevent concurrent code generation
-            // Lock ID 1 is reserved for transaction code generation
-            $lockResult = DB::select('SELECT GET_LOCK(?, 10) as lock_status', [1]);
-            
-            if (!$lockResult[0]->lock_status) {
-                throw new \Exception('Failed to acquire lock for transaction code generation');
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+
+        return DB::transaction(function () use ($isSqlite) {
+            if (!$isSqlite) {
+                // Use advisory lock to prevent concurrent code generation
+                // Lock ID 1 is reserved for transaction code generation
+                $lockResult = DB::select('SELECT GET_LOCK(?, 10) as lock_status', [1]);
+                
+                if (!$lockResult[0]->lock_status) {
+                    throw new \Exception('Failed to acquire lock for transaction code generation');
+                }
             }
             
             try {
@@ -54,8 +58,10 @@ class TransactionService
                 return $fallbackCode;
                 
             } finally {
-                // Always release the lock
-                DB::select('SELECT RELEASE_LOCK(?)', [1]);
+                if (!$isSqlite) {
+                    // Always release the lock
+                    DB::select('SELECT RELEASE_LOCK(?)', [1]);
+                }
             }
         });
     }
