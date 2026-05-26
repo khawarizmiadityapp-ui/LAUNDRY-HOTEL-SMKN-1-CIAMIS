@@ -58,6 +58,13 @@ class InventoryController extends Controller
             // Prevent negative stock
             if ($item->quantity > 0) {
                 $item->decrement('quantity');
+                $newQty = $item->quantity;
+                if ($newQty < ($item->minimum_stock ?? 5)) {
+                    \App\Models\ActivityLog::create([
+                        'description' => "Peringatan Stok Rendah: {$item->name} sisa {$newQty}",
+                        'causer_id' => Auth::id(),
+                    ]);
+                }
             } else {
                 return response()->json([
                     'success' => false,
@@ -91,6 +98,13 @@ class InventoryController extends Controller
                     
                     $item->quantity = $newQuantity;
                     $item->save();
+
+                    if ($item->quantity < ($item->minimum_stock ?? 5)) {
+                        \App\Models\ActivityLog::create([
+                            'description' => "Peringatan Stok Rendah: {$item->name} sisa {$item->quantity}",
+                            'causer_id' => Auth::id(),
+                        ]);
+                    }
                 }
 
                 $requestAdjust->update([
@@ -123,5 +137,24 @@ class InventoryController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Permintaan stok ditolak.');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'quantity' => 'required|numeric|min:0',
+            'unit' => 'required|string|max:50',
+            'minimum_stock' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            Inventory::create($request->only(['name', 'category', 'quantity', 'unit', 'minimum_stock']));
+            return redirect()->back()->with('success', 'Barang baru berhasil ditambahkan ke inventory.');
+        } catch (\Exception $e) {
+            $this->errorLogger->logError($e, 'Create Inventory Failed', ['operation' => 'inventory.store']);
+            return redirect()->back()->with('error', 'Gagal menambahkan barang. Silakan coba lagi.');
+        }
     }
 }

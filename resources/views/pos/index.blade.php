@@ -260,9 +260,7 @@
                     <h3 class="text-sm font-semibold text-slate-800 leading-tight mb-1">{{ $layanan->nama }}</h3>
                     <p class="text-[11px] text-slate-400 capitalize mb-2">{{ $layanan->kategori }}</p>
 
-                    @if($layanan->badge)
-                    <span class="inline-block px-2 py-0.5 bg-brand-50 text-brand-600 text-[10px] font-semibold rounded-full mb-2">{{ $layanan->badge }}</span>
-                    @endif
+
 
                     <p class="text-sm font-bold text-brand-600">{{ $layanan->harga_format }}<span class="text-[11px] font-normal text-slate-400">{{ $layanan->satuan }}</span></p>
                 </div>
@@ -511,89 +509,119 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         <div @click.outside="showServiceModal = false"
-             class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-fade-up">
-            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="font-display font-bold text-slate-900" x-text="serviceForm.id ? 'Edit Layanan' : 'Tambah Layanan Baru'"></h3>
-                <button @click="showServiceModal = false" class="p-1 text-slate-400 hover:text-slate-600 transition">
+             class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 animate-fade-up overflow-hidden border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex flex-col">
+                    <h3 class="text-base font-bold text-slate-900" x-text="serviceForm.id ? 'Edit Layanan' : 'Tambah Layanan Baru'"></h3>
+                    <p class="text-xs text-slate-400 mt-0.5" x-text="serviceForm.id ? 'Perbarui informasi layanan laundry Anda' : 'Buat master data layanan laundry baru'"></p>
+                </div>
+                <button @click="showServiceModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="px-6 py-5 space-y-4">
+            
+            <div class="px-6 py-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
-                    <label class="text-sm font-medium text-slate-700 mb-1 block">Nama Layanan <span class="text-rose-400">*</span></label>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Nama Layanan <span class="text-rose-400">*</span></label>
                     <input type="text" x-model="serviceForm.nama" placeholder="Contoh: Cuci Kering Regular"
-                           class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 placeholder:text-slate-300">
+                           class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 placeholder:text-slate-300 transition bg-white">
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-sm font-medium text-slate-700 mb-1 block">Kategori <span class="text-rose-400">*</span></label>
-                        <select x-model="serviceForm.kategori" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Kategori <span class="text-rose-400">*</span></label>
+                        <select x-model="serviceForm.kategori" 
+                                @change="serviceForm.satuan = serviceForm.kategori === 'kiloan' ? '/kg' : '/pcs'"
+                                class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition bg-white">
                             <option value="kiloan">Kiloan</option>
                             <option value="satuan">Satuan</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-slate-700 mb-1 block">Satuan <span class="text-rose-400">*</span></label>
-                        <input type="text" x-model="serviceForm.satuan" placeholder="/kg atau /pcs"
-                               class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Satuan (Otomatis)</label>
+                        <input type="text" x-model="serviceForm.satuan" readonly disabled
+                               class="w-full px-4 py-2.5 text-sm border border-slate-200 bg-slate-50 text-slate-400 rounded-xl cursor-not-allowed">
                     </div>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-slate-700 mb-1 block">Harga <span class="text-rose-400">*</span></label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">Rp</span>
-                        <input type="number" x-model="serviceForm.harga" placeholder="0"
-                               class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Harga <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 text-sm font-semibold pointer-events-none">Rp</span>
+                            <input type="number" x-model="serviceForm.harga" placeholder="0"
+                                   class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Estimasi</label>
+                        <input type="text" x-model="serviceForm.estimasi" placeholder="Contoh: 2-3 Hari"
+                               class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 placeholder:text-slate-300 transition bg-white">
                     </div>
                 </div>
+                
                 <div>
-                    <label class="text-sm font-medium text-slate-700 mb-1 block">Estimasi</label>
-                    <input type="text" x-model="serviceForm.estimasi" placeholder="Contoh: 2-3 Hari"
-                           class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 placeholder:text-slate-300">
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-slate-700 mb-1 block">Icon Visual</label>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Icon Visual</label>
                     <div class="grid grid-cols-6 gap-2">
                         <template x-for="icon in ['bolt', 'hourglass', 'shirt', 'bed', 'shoe', 'droplet']">
                             <button @click="serviceForm.icon = icon"
-                                    :class="serviceForm.icon === icon ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-slate-100 bg-slate-50 text-slate-400'"
-                                    class="h-10 border-2 rounded-xl flex items-center justify-center transition-all">
-                                <template x-if="icon === 'bolt'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></template>
-                                <template x-if="icon === 'hourglass'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></template>
-                                <template x-if="icon === 'shirt'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg></template>
-                                <template x-if="icon === 'bed'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M22.5 12c0-5.385-4.365-9.75-9.75-9.75S3 6.615 3 12a9.75 9.75 0 009.75 9.75c4.507 0 8.334-3.057 9.447-7.29a.75.75 0 01.72-.544c.414 0 .75.336.75.75v.084c0 .307-.122.6-.339.817l-1.06 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.084.084 0 00.026-.062l-.004-.007a8.25 8.25 0 01-8.25 6.75 8.25 8.25 0 01-8.25-8.25 8.25 8.25 0 018.25-8.25 8.25 8.25 0 017.388 4.544.75.75 0 01-1.352.648 6.75 6.75 0 00-6.036-3.712z"/></svg></template>
-                                <template x-if="icon === 'shoe'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></template>
-                                <template x-if="icon === 'droplet'"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg></template>
+                                    type="button"
+                                    :class="serviceForm.icon === icon ? 'border-brand-500 bg-brand-50/70 text-brand-600 shadow-sm shadow-brand-100 scale-[1.03]' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-400'"
+                                    class="h-11 border-2 rounded-xl flex items-center justify-center transition-all duration-200">
+                                <template x-if="icon === 'bolt'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></template>
+                                <template x-if="icon === 'hourglass'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></template>
+                                <template x-if="icon === 'shirt'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg></template>
+                                <template x-if="icon === 'bed'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M22.5 12c0-5.385-4.365-9.75-9.75-9.75S3 6.615 3 12a9.75 9.75 0 009.75 9.75c4.507 0 8.334-3.057 9.447-7.29a.75.75 0 01.72-.544c.414 0 .75.336.75.75v.084c0 .307-.122.6-.339.817l-1.06 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.084.084 0 00.026-.062l-.004-.007a8.25 8.25 0 01-8.25 6.75 8.25 8.25 0 01-8.25-8.25 8.25 8.25 0 018.25-8.25 8.25 8.25 0 017.388 4.544.75.75 0 01-1.352.648 6.75 6.75 0 00-6.036-3.712z"/></svg></template>
+                                <template x-if="icon === 'shoe'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></template>
+                                <template x-if="icon === 'droplet'"><svg class="w-5 h-5 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg></template>
                             </button>
                         </template>
                     </div>
                 </div>
+                
                 <div>
-                    <label class="text-sm font-medium text-slate-700 mb-2 block">Alur Kerja (Workflow) <span class="text-rose-400">*</span></label>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 block">Alur Kerja (Workflow) <span class="text-rose-400">*</span></label>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                            <input type="checkbox" x-model="serviceForm.needs_washing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
-                            <span class="text-xs font-medium text-slate-700">Mencuci</span>
+                        <!-- Mencuci -->
+                        <label :class="serviceForm.needs_washing ? 'border-brand-500 bg-brand-50/50 text-brand-700 shadow-sm shadow-brand-50' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                               class="flex items-center gap-2.5 p-3 border-2 rounded-xl cursor-pointer transition-all duration-200">
+                            <input type="checkbox" x-model="serviceForm.needs_washing" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold">Mencuci</span>
+                                <span class="text-[9px] opacity-75">Cuci basah/kering</span>
+                            </div>
                         </label>
-                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                            <input type="checkbox" x-model="serviceForm.needs_ironing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
-                            <span class="text-xs font-medium text-slate-700">Setrika</span>
+                        
+                        <!-- Setrika -->
+                        <label :class="serviceForm.needs_ironing ? 'border-brand-500 bg-brand-50/50 text-brand-700 shadow-sm shadow-brand-50' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                               class="flex items-center gap-2.5 p-3 border-2 rounded-xl cursor-pointer transition-all duration-200">
+                            <input type="checkbox" x-model="serviceForm.needs_ironing" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold">Setrika</span>
+                                <span class="text-[9px] opacity-75">Suhu & uap</span>
+                            </div>
                         </label>
-                        <label class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                            <input type="checkbox" x-model="serviceForm.needs_packing" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
-                            <span class="text-xs font-medium text-slate-700">Packing</span>
+                        
+                        <!-- Packing (Mandatory / Locked) -->
+                        <label class="flex items-center gap-2.5 p-3 border-2 border-slate-200 bg-slate-50 text-slate-400 rounded-xl cursor-not-allowed opacity-80 transition-all duration-200">
+                            <input type="checkbox" checked disabled class="w-4 h-4 text-slate-400 rounded border-slate-300 cursor-not-allowed">
+                            <div class="flex flex-col text-left">
+                                <span class="text-xs font-bold text-slate-500">Packing</span>
+                                <span class="text-[9px] text-slate-400 font-medium">Langkah wajib</span>
+                            </div>
                         </label>
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-slate-100 flex gap-3 justify-end">
+            
+            <div class="px-6 py-4 border-t border-slate-100 flex gap-3 justify-end bg-slate-50/50">
                 <button @click="showServiceModal = false"
-                        class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition">
+                        class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition">
                     Batal
                 </button>
                 <button @click="saveService()"
                         :disabled="!serviceForm.nama || !serviceForm.harga || savingService"
-                        class="px-5 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition flex items-center gap-2">
+                        class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-brand-100 transition duration-200 flex items-center gap-2">
                     <svg x-show="savingService" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     <span x-text="serviceForm.id ? 'Simpan Perubahan' : 'Tambah Layanan'"></span>
                 </button>
@@ -663,6 +691,16 @@ function posApp() {
             } else {
                 const svc = this.services.find(s => s.id === id);
                 if (svc) {
+                    // Jika tipe layanan baru adalah kiloan:
+                    if (svc.kategori === 'kiloan') {
+                        if (svc.needs_washing) {
+                            // Layanan Kiloan yang butuh cuci: keluarkan layanan Kiloan butuh cuci lainnya
+                            this.cart = this.cart.filter(item => !(item.kategori === 'kiloan' && item.needs_washing));
+                        } else {
+                            // Layanan Kiloan yang hanya setrika (tidak butuh cuci): keluarkan layanan Kiloan hanya setrika lainnya
+                            this.cart = this.cart.filter(item => !(item.kategori === 'kiloan' && !item.needs_washing));
+                        }
+                    }
                     this.cart.push({ ...svc, qty: 1 });
                 }
             }
@@ -793,7 +831,7 @@ function posApp() {
                 icon: layanan.icon || 'bolt',
                 needs_washing: !!layanan.needs_washing,
                 needs_ironing: !!layanan.needs_ironing,
-                needs_packing: !!layanan.needs_packing,
+                needs_packing: true, // Always force true for packing
             };
             this.showServiceModal = true;
         },
@@ -814,6 +852,7 @@ function posApp() {
                     },
                     body: JSON.stringify({
                         ...this.serviceForm,
+                        needs_packing: true, // Always force true when saving to DB
                         _method: this.serviceForm.id ? 'PUT' : 'POST'
                     }),
                 });

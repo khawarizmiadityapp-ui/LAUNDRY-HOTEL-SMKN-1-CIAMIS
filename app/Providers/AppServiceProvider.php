@@ -130,14 +130,6 @@ class AppServiceProvider extends ServiceProvider
 
                 $sidebarOnDutyCount = $activePetugas->count();
 
-                $sidebarMenus = $sidebarMenus->map(function (array $menu) use ($sidebarOnDutyCount) {
-                    if (($menu['label'] ?? '') === 'Petugas' && $sidebarOnDutyCount > 0) {
-                        $menu['badge'] = $sidebarOnDutyCount;
-                    }
-
-                    return $menu;
-                });
-
                 $view->with('sidebarMenus', $sidebarMenus);
                 $view->with('sidebarOnDutyCount', $sidebarOnDutyCount);
                 $view->with('sidebarOnDutyPetugas', $activePetugas->take(5));

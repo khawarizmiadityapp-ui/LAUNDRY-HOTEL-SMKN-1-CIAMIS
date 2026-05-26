@@ -70,7 +70,7 @@
         </div>
 
         {{-- Pagination --}}
-        @if(isset($completedTasks) && $completedTasks->hasPages())
+        @if(isset($completedTasks) && method_exists($completedTasks, 'hasPages') && $completedTasks->hasPages())
             <div class="px-6 py-4 border-t border-slate-100">
                 {{ $completedTasks->links() }}
             </div>

@@ -24,8 +24,9 @@ class MenuService
         $role = strtolower((string) ($user->role ?? 'staff'));
         $division = $this->normalizeDivision((string) ($user->division ?? ''));
         
-        // Cache menu for each user role and division combination
-        $cacheKey = "menu_{$type}_{$role}_{$division}";
+        // Cache menu for each user role, division, and route combination (prevents active state leakage)
+        $currentRoute = request()->route() ? request()->route()->getName() : request()->path();
+        $cacheKey = "menu_{$type}_{$role}_{$division}_" . md5((string)$currentRoute);
         
         return Cache::remember($cacheKey, 3600, function () use ($type, $role, $division) {
             // Get menus from config

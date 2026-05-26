@@ -21,14 +21,20 @@
 
 @section('content')
     <!-- Header -->
-    <div class="mb-8 fade-up">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-100 text-[10px] font-bold tracking-widest text-blue-500 uppercase mb-3">
-            Inventaris Kecil
-        </span>
-        <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Supply Management</h1>
-        <p class="mt-1.5 text-sm text-slate-400 max-w-lg leading-relaxed">
-            Curated list of essential laundry supplies. Monitor detergent levels and scent reserves with high-precision conductors.
-        </p>
+    <div class="mb-8 fade-up flex justify-between items-end">
+        <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-100 text-[10px] font-bold tracking-widest text-blue-500 uppercase mb-3">
+                Inventaris Kecil
+            </span>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Supply Management</h1>
+            <p class="mt-1.5 text-sm text-slate-400 max-w-lg leading-relaxed">
+                Curated list of essential laundry supplies. Monitor detergent levels and scent reserves with high-precision conductors.
+            </p>
+        </div>
+        <button onclick="document.getElementById('add-item-modal').classList.remove('hidden')" class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition font-bold text-sm h-full flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Barang
+        </button>
     </div>
 
     @if(isset($pendingRequests) && $pendingRequests->isNotEmpty())
@@ -245,6 +251,56 @@
         </div>
 
     </div>
+
+<!-- Add Item Modal -->
+<div id="add-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Tambah Barang Baru</h3>
+            <button onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form action="{{ route('admin.inventory.store') }}" method="POST" class="p-6 space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="detergent">Detergent</option>
+                        <option value="fragrance">Pewangi</option>
+                        <option value="hanger">Hanger</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Satuan (Unit)</label>
+                    <input type="text" name="unit" required placeholder="Liter, Pcs, dll" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal</label>
+                    <input type="number" name="quantity" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum</label>
+                    <input type="number" name="minimum_stock" required min="0" value="5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">Simpan Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')

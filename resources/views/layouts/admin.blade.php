@@ -102,6 +102,72 @@
         #sidebar-overlay { display: none; }
         #sidebar-overlay.active { display: block; }
         #sidebar.open { transform: translateX(0) !important; }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            min-width: 300px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid;
+        }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.info { border-left-color: #3b82f6; }
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toast.success .toast-icon { color: #10b981; }
+        .toast.error .toast-icon { color: #ef4444; }
+        .toast.warning .toast-icon { color: #f59e0b; }
+        .toast.info .toast-icon { color: #3b82f6; }
+        .toast-content {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .toast-close:hover {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast.removing {
+            animation: slideOut 0.3s ease forwards;
+        }
     </style>
 
     @stack('styles')

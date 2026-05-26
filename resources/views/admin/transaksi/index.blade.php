@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas_piket')
 
 @section('content')
 
@@ -7,88 +7,124 @@
         <h1 class="text-2xl font-bold text-slate-800">Manajemen Transaksi</h1>
         <p class="text-slate-500">Kelola pesanan masuk dan status pengerjaan.</p>
     </div>
+</div>
 
-    <button onclick="toggleModal('modalInput')" 
-        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-lg">
-        <i class="fa-solid fa-plus"></i> Pesanan Baru
-    </button>
+<!-- Search & Filters -->
+<div class="bg-white p-4 rounded-xl border shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+    <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div class="relative w-full sm:w-72">
+            <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z"/>
+                </svg>
+            </span>
+            <input type="text" name="search" value="{{ request('search') }}"
+                   placeholder="Cari transaksi, pelanggan..."
+                   class="w-full pl-9 pr-4 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition h-10">
+        </div>
+
+        <select name="status" onchange="this.form.submit()" 
+                class="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 h-10 min-w-[140px] cursor-pointer">
+            <option value="">Semua Status</option>
+            <option value="diterima" {{ request('status') == 'diterima' ? 'selected' : '' }}>Diterima</option>
+            <option value="disortir" {{ request('status') == 'disortir' ? 'selected' : '' }}>Disortir</option>
+            <option value="dicuci" {{ request('status') == 'dicuci' ? 'selected' : '' }}>Dicuci</option>
+            <option value="dikeringkan" {{ request('status') == 'dikeringkan' ? 'selected' : '' }}>Dikeringkan</option>
+            <option value="disetrika" {{ request('status') == 'disetrika' ? 'selected' : '' }}>Disetrika</option>
+            <option value="dipacking" {{ request('status') == 'dipacking' ? 'selected' : '' }}>Dipacking</option>
+            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+            <option value="diambil" {{ request('status') == 'diambil' ? 'selected' : '' }}>Diambil</option>
+        </select>
+
+        <select name="payment_status" onchange="this.form.submit()" 
+                class="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 h-10 min-w-[150px] cursor-pointer">
+            <option value="">Semua Pembayaran</option>
+            <option value="lunas" {{ request('payment_status') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+            <option value="belum_bayar" {{ request('payment_status') == 'belum_bayar' ? 'selected' : '' }}>Belum Lunas</option>
+        </select>
+
+        @if(request('search') || request('status') || request('payment_status'))
+            <a href="{{ url()->current() }}" class="text-xs font-semibold text-red-500 hover:text-red-600 transition">Reset Filter</a>
+        @endif
+    </form>
 </div>
 
 <!-- TABLE -->
 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-slate-600 min-w-[950px]">
+        <table class="w-full text-sm text-slate-600 min-w-[950px] table-auto">
         <thead class="bg-slate-50 text-slate-700">
             <tr>
-                <th class="px-6 py-3 text-left">Pelanggan</th>
-                <th class="px-6 py-3 text-left">Layanan</th>
-                <th class="px-6 py-3 text-left">Berat</th>
-                <th class="px-6 py-3 text-left">Status</th>
-                <th class="px-6 py-3 text-left">Pembayaran</th>
-                <th class="px-6 py-3 text-left">Metode</th>
-                <th class="px-6 py-3 text-left">Total</th>
-                <th class="px-6 py-3 text-right">Aksi</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[20%]">Pelanggan</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[25%]">Layanan</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[10%]">Berat</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[12%]">Status</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[13%]">Pembayaran</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[10%]">Metode</th>
+                <th class="px-6 py-4 text-left whitespace-nowrap font-semibold w-[10%]">Total</th>
+                <th class="px-6 py-4 text-right whitespace-nowrap font-semibold w-[5%]">Aksi</th>
             </tr>
         </thead>
     
-        <tbody class="divide-y">
+        <tbody class="divide-y divide-slate-100">
             @forelse($transactions as $trx)
-            <tr class="hover:bg-slate-50 transition">
+            <tr class="hover:bg-slate-50/50 transition">
                 
                 <!-- Pelanggan -->
-                <td class="px-6 py-4">
-                    <div class="font-semibold text-slate-800">
+                <td class="px-6 py-4 align-middle">
+                    <div class="font-semibold text-slate-800 whitespace-nowrap">
                         {{ $trx->customer_name }}
                     </div>
-                    <div class="text-xs text-slate-400">
+                    <div class="text-xs text-slate-400 whitespace-nowrap mt-0.5">
                         {{ $trx->created_at->format('d M Y') }}
                     </div>
                 </td>
     
                 <!-- Layanan -->
-                <td class="px-6 py-4 capitalize">
+                <td class="px-6 py-4 align-middle capitalize">
                     @if(isset($trx->details) && $trx->details->count() > 0)
-                        <ul class="text-xs list-disc pl-3 text-slate-600">
+                        <ul class="text-xs list-disc pl-4 text-slate-600 space-y-1">
                         @foreach($trx->details as $detail)
-                            <li>{{ $detail->layanan->nama ?? 'Layanan' }} ({{ $detail->qty }}x)</li>
+                            <li class="whitespace-nowrap">{{ $detail->layanan->nama ?? 'Layanan' }} ({{ $detail->qty }}x)</li>
                         @endforeach
                         </ul>
                     @else
-                        {{ $trx->service_type }}
+                        <span class="whitespace-nowrap">{{ $trx->service_type }}</span>
                     @endif
                 </td>
     
                 <!-- Berat -->
-                <td class="px-6 py-4">
-                    {{ $trx->weight }} kg
+                <td class="px-6 py-4 align-middle whitespace-nowrap text-slate-700 font-medium">
+                    {{ number_format($trx->weight, 2, '.', ',') }} kg
                 </td>
     
                 <!-- Status -->
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-600">
+                <td class="px-6 py-4 align-middle whitespace-nowrap">
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-100 text-blue-700">
                         {{ $trx->status }}
                     </span>
                 </td>
     
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-xs rounded 
-                        {{ $trx->payment_status == 'lunas' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
+                <!-- Pembayaran -->
+                <td class="px-6 py-4 align-middle whitespace-nowrap">
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-lg 
+                        {{ $trx->payment_status == 'lunas' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
                         {{ $trx->payment_status == 'lunas' ? 'Lunas' : 'Belum Lunas' }}
                     </span>
                 </td>
      
                 <!-- Metode -->
-                <td class="px-6 py-4 uppercase font-bold text-xs">
+                <td class="px-6 py-4 align-middle uppercase font-bold text-xs text-slate-700 whitespace-nowrap">
                     {{ $trx->payment_method ?? 'Cash' }}
                 </td>
     
                 <!-- Total -->
-                <td class="px-6 py-4 font-semibold text-slate-800">
+                <td class="px-6 py-4 align-middle font-semibold text-slate-800 whitespace-nowrap">
                     Rp {{ number_format($trx->total_price,0,',','.') }}
                 </td>
     
                 <!-- Aksi -->
-                <td class="px-6 py-4 text-right whitespace-nowrap">
+                <td class="px-6 py-4 align-middle text-right whitespace-nowrap">
                     <div class="relative inline-block text-left">
                         <button onclick="toggleDropdown('dropdown-{{ $trx->id }}')"
                                 class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
@@ -106,9 +142,10 @@
                                 </svg>
                                 Cek Nota
                             </a>
-
+ 
+                            @if(auth()->user()->role === 'admin')
                             <div class="h-px bg-slate-50 my-1"></div>
-
+ 
                             <form action="{{ route('admin.transactions.destroy', $trx->id) }}" method="POST"
                                   onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
                                 @csrf @method('DELETE')
@@ -120,6 +157,7 @@
                                     Hapus
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </div>
                 </td>
@@ -144,82 +182,31 @@
     @endif
 </div>
 
-<!-- MODAL CREATE -->
-<div id="modalInput" class="hidden fixed inset-0 bg-black/50 z-[9999] overflow-y-auto p-4">
-    <div class="flex items-start justify-center min-h-screen">
-        <div class="bg-white p-6 rounded-xl w-full max-w-md my-8 shadow-xl">
-            <h2 class="font-bold text-lg mb-4 text-slate-800">Tambah Transaksi</h2>
-
-            <form action="{{ route('admin.transactions.store') }}" method="POST">
-                @csrf
-
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Nama Pelanggan</label>
-                        <input name="customer_name" placeholder="Nama" required
-                            class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-slate-500 uppercase">No HP</label>
-                        <input name="customer_phone" placeholder="No HP" required
-                            class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-500 uppercase">Tipe Layanan</label>
-                            <select name="service_type" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700">
-                                <option value="regular">Regular</option>
-                                <option value="express">Express</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-semibold text-slate-500 uppercase">Berat (kg)</label>
-                            <input name="weight" type="number" step="0.1" placeholder="0.0" required
-                                class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700 focus:ring focus:ring-blue-100">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Metode Pembayaran</label>
-                        <select name="payment_method" class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700">
-                            <option value="tunai">Tunai</option>
-                            <option value="qris">QRIS</option>
-                            <option value="transfer">Transfer</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Catatan</label>
-                        <textarea name="notes" placeholder="Catatan" rows="2"
-                            class="w-full border border-slate-200 p-2 rounded text-sm text-slate-700"></textarea>
-                    </div>
-                </div>
-
-                <!-- BUTTON -->
-                <div class="flex justify-end gap-2 mt-6">
-                    <button type="button" onclick="toggleModal('modalInput')" 
-                        class="px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded font-medium transition">
-                        Batal
-                    </button>
-
-                    <button type="submit" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition shadow-md">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- SCRIPT -->
+@push('scripts')
 <script>
-function toggleModal(id){
-    document.getElementById(id).classList.toggle('hidden')
-}
+    window.toggleDropdown = window.toggleDropdown || function(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown.classList.contains('hidden')) {
+            // Close all other dropdowns
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            dropdown.classList.remove('hidden');
+        } else {
+            dropdown.classList.add('hidden');
+        }
+    };
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('button[onclick^="toggleDropdown"]')) {
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                if (!el.contains(event.target)) {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+    });
 </script>
+@endpush
 
 @endsection

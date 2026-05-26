@@ -20,7 +20,7 @@ class LaporanController extends Controller
 
         $filter = $request->filter ?? 'bulanan';
 
-        $query = Transaksi::query();
+        $query = Transaksi::where('payment_status', 'lunas');
         $pengeluaranQuery = Pengeluaran::query();
 
         if ($filter == 'bulanan') {
@@ -59,7 +59,8 @@ class LaporanController extends Controller
 
         $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 50_000_000);
         $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50_000_000);
-        $realisasiBulanIni = Transaksi::whereMonth('created_at', now()->month)
+        $realisasiBulanIni = Transaksi::where('payment_status', 'lunas')
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_price');
         $persenTargetBulanIni = $limitPemasukanBulanan > 0
@@ -77,7 +78,8 @@ class LaporanController extends Controller
 
             $months[] = $date->format('M');
 
-            $totalMasuk = Transaksi::whereMonth('created_at', $date->month)
+            $totalMasuk = Transaksi::where('payment_status', 'lunas')
+                ->whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)
                 ->sum('total_price');
 
@@ -112,6 +114,7 @@ class LaporanController extends Controller
 
         // Fetch recent transactions for the ledger
         $recentTransactions = Transaksi::with(['user', 'customer'])
+            ->where('payment_status', 'lunas')
             ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->latest()
             ->take(10)

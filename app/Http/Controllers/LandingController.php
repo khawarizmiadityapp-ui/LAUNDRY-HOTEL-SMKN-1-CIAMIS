@@ -31,9 +31,9 @@ class LandingController extends Controller
             ->where('transaksi_code', $request->nota_number)
             ->first();
 
-        // Beberapa notasi lama mungkin menggunakan huruf kecil, atau jika database schema berbeda
         if (!$order) {
-            return back()->with('error', "Nomor nota/resi '{$request->nota_number}' tidak ditemukan.");
+            return back()->with('error', "Nomor nota/resi '{$request->nota_number}' tidak ditemukan.")
+                ->withInput();
         }
 
         return view('pages.track-result', compact('order'));

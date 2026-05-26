@@ -204,21 +204,6 @@
                 {{-- INI YANG DIGANTI-GANTI --}}
                 @yield('content')
             </div>
-
-{{-- ======================================================
-     FLOATING ACTION BUTTON
-     ====================================================== --}}
-<button class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-600 text-white
-               shadow-lg shadow-blue-300 hover:bg-blue-700 hover:scale-105
-               active:scale-95 transition-all duration-150
-               flex items-center justify-center z-40"
-        title="New Action">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-         stroke-width="2.5" stroke="currentColor" width="22" height="22">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-</button>
-
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -336,6 +321,74 @@
     @if(session('info'))
         showToast('{{ session('info') }}', 'info');
     @endif
+
+    // Alpine component for searchable petugas input
+    window.petugasSearchComponent = function(petugasList) {
+        return {
+            list: petugasList,
+            filteredList: petugasList,
+            search: '',
+            showDropdown: false,
+            isInvalid: false,
+            
+            init() {
+                this.filteredList = this.list;
+                
+                // Load initial name from localStorage if available
+                const savedName = localStorage.getItem('petugas_piket_name');
+                if (savedName) {
+                    this.search = savedName;
+                    this.filterPetugas();
+                }
+                
+                // Watch search changes to sync with localStorage
+                this.$watch('search', value => {
+                    localStorage.setItem('petugas_piket_name', value);
+                });
+            },
+            
+            filterPetugas() {
+                // limit input to 50 words
+                let words = this.search.split(/\s+/);
+                if (words.length > 50) {
+                    this.search = words.slice(0, 50).join(' ');
+                }
+                
+                const q = this.search.toLowerCase().trim();
+                if (q === '') {
+                    this.filteredList = this.list;
+                    this.isInvalid = false;
+                } else {
+                    this.filteredList = this.list.filter(p => p.nama.toLowerCase().includes(q));
+                    // check exact match
+                    this.isInvalid = !this.list.some(p => p.nama.toLowerCase() === q);
+                }
+                
+                // HTML5 validation
+                let inputEl = this.$el.querySelector('input[name="petugas_name"]');
+                if (inputEl) {
+                    if (this.isInvalid) {
+                        inputEl.setCustomValidity('Petugas tidak terdaftar');
+                    } else {
+                        inputEl.setCustomValidity('');
+                    }
+                }
+            },
+            
+            select(p) {
+                this.search = p.nama;
+                this.showDropdown = false;
+                this.isInvalid = false;
+                
+                let inputEl = this.$el.querySelector('input[name="petugas_name"]');
+                if (inputEl) {
+                    inputEl.setCustomValidity('');
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        };
+    }
 </script>
 
 @stack('scripts')

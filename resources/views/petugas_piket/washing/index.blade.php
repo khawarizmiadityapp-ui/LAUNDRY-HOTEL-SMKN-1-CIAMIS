@@ -55,15 +55,40 @@
                                 @csrf
                                 <input type="hidden" name="stage" value="washing">
                                 
-                                <div class="mb-4">
+                                <div class="mb-4" x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])) }})" @click.outside="showDropdown = false">
                                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Petugas Piket</label>
-                                    <select name="petugas_name" required
-                                            class="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white">
-                                        <option value="">-- Pilih Nama Anda --</option>
-                                        @foreach($petugasList as $p)
-                                            <option value="{{ $p->nama }}">{{ $p->nama }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                            </svg>
+                                        </span>
+                                        <input type="text" name="petugas_name" x-model="search" @input="filterPetugas()" @focus="showDropdown = true" required placeholder="Cari nama Anda..."
+                                               class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white">
+                                    </div>
+                                    
+                                    {{-- Autocomplete Dropdown --}}
+                                    <div x-show="showDropdown && filteredList.length > 0" x-cloak
+                                         class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+                                        <template x-for="p in filteredList" :key="p.id_petugas">
+                                            <button type="button" @click="select(p)"
+                                                    class="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition text-left">
+                                                <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold" x-text="p.nama.charAt(0).toUpperCase()"></div>
+                                                <div class="min-w-0">
+                                                    <p class="text-sm font-semibold text-slate-800 truncate" x-text="p.nama"></p>
+                                                    <p class="text-xs text-slate-400" x-text="p.id_petugas"></p>
+                                                </div>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    
+                                    {{-- Error Warning --}}
+                                    <div x-show="isInvalid" x-cloak class="mt-1.5 text-xs text-rose-500 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                                        </svg>
+                                        <span>Petugas tidak terdaftar</span>
+                                    </div>
                                 </div>
 
                                 <button type="submit" 

@@ -41,7 +41,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-gray-500 text-sm">Kasir & Kurir</p>
+                    <p class="text-gray-500 text-sm">Kasir</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1" x-text="kasirKurir"></p>
                 </div>
                 <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-user-cog text-purple-600 text-xl"></i></div>
@@ -84,7 +84,7 @@
                             </div>
                         </div>
                         <div class="relative inline-block text-left">
-                            <button onclick="toggleDropdown('dropdown-petugas-{{ $petugas->id ?? $loop->index }}')"
+                            <button @click="toggleDropdown('dropdown-petugas-' + petugas.id)"
                                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
                                            hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
                                 </svg>
                             </button>
                             
-                            <div id="dropdown-petugas-{{ $petugas->id ?? $loop->index }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
+                            <div :id="'dropdown-petugas-' + petugas.id" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
                                 <button @click="editPetugas(petugas)"
                                         class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors w-full text-left">
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -188,12 +188,10 @@
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Role</label>
                         <select x-model="selectedPetugas.role" required
                                 class="w-full border rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
-                            <option>Admin</option>
                             <option>Washing</option>
                             <option>Setrika</option>
                             <option>Packing</option>
                             <option>Kasir</option>
-                            <option>Kurir</option>
                         </select>
                     </div>
 
@@ -271,7 +269,7 @@
         return {
             petugasList: [],
             activeFilter: 'Washing',
-            allRoles: ['Admin', 'Washing', 'Setrika', 'Packing', 'Kasir', 'Kurir'],
+            allRoles: ['Washing', 'Setrika', 'Packing', 'Kasir'],
             searchQuery: '',
             currentPage: 1,
             perPage: 8,
@@ -296,7 +294,7 @@
             get totalPetugas() { return this.petugasList.length; },
             get aktifSekarang() { return this.petugasList.filter(p => p.status === 'Aktif').length; },
             get timProduksi() { return this.petugasList.filter(p => ['Washing', 'Setrika', 'Packing'].includes(p.role)).length; },
-            get kasirKurir() { return this.petugasList.filter(p => ['Kasir', 'Kurir'].includes(p.role)).length; },
+            get kasirKurir() { return this.petugasList.filter(p => p.role === 'Kasir').length; },
 
             prevPage() { if (this.currentPage > 1) this.currentPage--; },
             nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },

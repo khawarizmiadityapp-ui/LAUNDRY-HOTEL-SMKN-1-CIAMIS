@@ -15,6 +15,10 @@
             <p class="text-xs text-amber-600 mt-2">Setiap perubahan stok dari petugas akan masuk sebagai permintaan dan wajib konfirmasi admin/guru piket.</p>
         </div>
         <div class="flex items-center gap-3">
+            <button onclick="document.getElementById('add-item-modal').classList.remove('hidden')" class="px-4 py-2 bg-indigo-600 text-white rounded-xl shadow-sm hover:bg-indigo-700 transition font-bold text-sm h-full flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Tambah Barang
+            </button>
             <div class="px-4 py-2 bg-white border border-slate-100 rounded-xl shadow-sm">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Total Kategori</p>
                 <p class="text-xl font-bold text-slate-900 leading-none">{{ $inventory->count() }}</p>
@@ -108,4 +112,54 @@
     animation: fadeIn 0.4s ease out forwards;
 }
 </style>
+
+<!-- Add Item Modal -->
+<div id="add-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Tambah Barang Baru</h3>
+            <button onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form action="{{ route('petugas_piket.inventory.store') }}" method="POST" class="p-6 space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                        <option value="Detergent">Detergent</option>
+                        <option value="Fragrance">Pewangi</option>
+                        <option value="Packaging">Packaging</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Satuan (Unit)</label>
+                    <input type="text" name="unit" required placeholder="Liter, Pcs, dll" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal</label>
+                    <input type="number" name="quantity" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum</label>
+                    <input type="number" name="minimum_stock" required min="0" value="5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">Simpan Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection

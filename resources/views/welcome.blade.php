@@ -191,8 +191,10 @@
                         </div>
                         <input 
                             type="text" 
+                            id="nota_number"
                             name="nota_number" 
                             required
+                            value="{{ old('nota_number') }}"
                             placeholder="Contoh: TRX-20260401-ABCD" 
                             class="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all"
                         >
@@ -263,6 +265,25 @@
             </div>
         </div>
     </footer>
+
+    @if(Session::has('error') || $errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trackingSection = document.getElementById('tracking');
+            if (trackingSection) {
+                trackingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            const inputField = document.getElementById('nota_number');
+            if (inputField) {
+                inputField.focus();
+                // Put cursor at the end of the text
+                const val = inputField.value;
+                inputField.value = '';
+                inputField.value = val;
+            }
+        });
+    </script>
+    @endif
 
 </body>
 </html>

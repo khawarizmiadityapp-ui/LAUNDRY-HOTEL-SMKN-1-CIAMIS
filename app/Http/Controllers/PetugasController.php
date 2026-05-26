@@ -126,7 +126,7 @@ class PetugasController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
-            'role' => 'required|in:Admin,Washing,Setrika,Packing,Kasir,Kurir',
+            'role' => 'required|in:Washing,Setrika,Packing,Kasir',
             'status' => 'required|in:Aktif,Off Duty',
         ]);
 
@@ -155,7 +155,7 @@ class PetugasController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama' => 'sometimes|string|max:255',
-            'role' => 'sometimes|in:Admin,Washing,Setrika,Packing,Kasir,Kurir',
+            'role' => 'sometimes|in:Washing,Setrika,Packing,Kasir',
             'status' => 'sometimes|in:Aktif,Off Duty',
         ]);
 
@@ -284,11 +284,6 @@ class PetugasController extends Controller
 
             DB::commit();
 
-            // Generate WhatsApp Notification Link
-            $waLink = $this->notificationService->generateWhatsAppProgressLink($transaksi, $stage);
-
-            session()->flash('notification_link', $waLink);
-
             return redirect()->back()->with('success', 'Tugas ' . ucfirst($stage) . ' berhasil diselesaikan!');
 
         } catch (\Exception $e) {
@@ -329,6 +324,28 @@ class PetugasController extends Controller
 
         $inventory = \App\Models\Inventory::all()->groupBy('category');
         return view('petugas_piket.inventory.index', compact('inventory'));
+    }
+
+    // Tambah barang baru ke inventory
+    public function storeInventory(Request $request)
+    {
+        $this->ensureStaffDivisionAccess(['inventory']);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'quantity' => 'required|numeric|min:0',
+            'unit' => 'required|string|max:50',
+            'minimum_stock' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            \App\Models\Inventory::create($request->only(['name', 'category', 'quantity', 'unit', 'minimum_stock']));
+            return redirect()->back()->with('success', 'Barang baru berhasil ditambahkan ke inventory.');
+        } catch (\Exception $e) {
+            \Log::error('Create Inventory Failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal menambahkan barang. Silakan coba lagi.');
+        }
     }
 
     // Update stok inventory dari portal petugas
@@ -404,10 +421,41 @@ class PetugasController extends Controller
                 ->paginate(15);
         } else {
             // Default empty if they don't have a valid division
-            $completedTasks = collect();
+            $completedTasks = new \Illuminate\Pagination\LengthAwarePaginator(collect(), 0, 15);
         }
 
         return view('petugas_piket.history.index', compact('completedTasks', 'division'));
     }
 
+    // Halaman Transaksi untuk Petugas Kasir (Customer Service)
+    public function transactions(Request $request)
+    {
+        $this->ensureStaffDivisionAccess(['customer_service']);
+
+        $query = Transaksi::with(['user', 'details.layanan']);
+
+        // Fitur Search
+        if ($request->has('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('customer_name', 'like', '%' . $request->search . '%')
+                  ->orWhere('transaksi_code', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Fitur Filter Status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        // Fitur Filter Pembayaran
+        if ($request->has('payment_status') && $request->payment_status != '') {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        $transactions = $query->latest()->paginate(10);
+
+        return view('admin.transaksi.index', compact('transactions'));
+    }
+
 }
+

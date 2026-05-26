@@ -58,7 +58,6 @@ return [
             'label' => 'Petugas',
             'route' => 'admin.petugas.index',
             'active' => ['admin.petugas.*'],
-            'badge' => 'sidebarOnDutyCount',
             'roles' => ['admin'],
         ],
         [
@@ -106,6 +105,14 @@ return [
             'route' => 'petugas.pos.index',
             'active' => ['petugas.pos.*'],
             'icon' => 'M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z',
+            'divisions' => ['customer_service'],
+            'roles' => ['admin', 'staff'],
+        ],
+        [
+            'label' => 'Transaksi',
+            'route' => 'petugas_piket.transaksi.index',
+            'active' => ['petugas_piket.transaksi.*'],
+            'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
             'divisions' => ['customer_service'],
             'roles' => ['admin', 'staff'],
         ],
