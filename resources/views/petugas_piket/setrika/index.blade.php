@@ -10,8 +10,8 @@
     </div>
 
     {{-- Main Content --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
             <h2 class="text-lg font-bold text-slate-800">Antrean Setrika</h2>
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
                 {{ count($transactions) }} Menunggu
@@ -64,21 +64,21 @@
                                         </span>
                                         <input type="text" name="petugas_name" x-model="search" @input="filterPetugas()" @focus="showDropdown = true" required placeholder="Cari nama Anda..."
                                                class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white">
-                                    </div>
-                                    
-                                    {{-- Autocomplete Dropdown --}}
-                                    <div x-show="showDropdown && filteredList.length > 0" x-cloak
-                                         class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
-                                        <template x-for="p in filteredList" :key="p.id_petugas">
-                                            <button type="button" @click="select(p)"
-                                                    class="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition text-left">
-                                                <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold" x-text="p.nama.charAt(0).toUpperCase()"></div>
-                                                <div class="min-w-0">
-                                                    <p class="text-sm font-semibold text-slate-800 truncate" x-text="p.nama"></p>
-                                                    <p class="text-xs text-slate-400" x-text="p.id_petugas"></p>
-                                                </div>
-                                            </button>
-                                        </template>
+                                        
+                                        {{-- Autocomplete Dropdown --}}
+                                        <div x-show="showDropdown && filteredList.length > 0" x-cloak
+                                             class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+                                            <template x-for="p in filteredList" :key="p.id_petugas">
+                                                <button type="button" @click="select(p)"
+                                                        class="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition text-left">
+                                                    <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold" x-text="p.nama.charAt(0).toUpperCase()"></div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-sm font-semibold text-slate-800 truncate" x-text="p.nama"></p>
+                                                        <p class="text-xs text-slate-400" x-text="p.id_petugas"></p>
+                                                    </div>
+                                                </button>
+                                            </template>
+                                        </div>
                                     </div>
                                     
                                     {{-- Error Warning --}}

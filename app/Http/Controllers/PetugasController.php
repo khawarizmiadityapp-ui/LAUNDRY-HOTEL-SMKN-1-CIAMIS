@@ -127,7 +127,6 @@ class PetugasController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'role' => 'required|in:Washing,Setrika,Packing,Kasir',
-            'status' => 'required|in:Aktif,Off Duty',
         ]);
 
         if ($validator->fails()) {
@@ -141,7 +140,7 @@ class PetugasController extends Controller
             'nama' => $request->nama,
             'id_petugas' => $idPetugas,
             'role' => $request->role,
-            'status' => $request->status,
+            'status' => 'Aktif',
             'shift' => '-',
         ]);
 
@@ -156,14 +155,13 @@ class PetugasController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'sometimes|string|max:255',
             'role' => 'sometimes|in:Washing,Setrika,Packing,Kasir',
-            'status' => 'sometimes|in:Aktif,Off Duty',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $petugas->update($request->only(['nama', 'role', 'status']));
+        $petugas->update($request->only(['nama', 'role']));
         return response()->json($petugas);
     }
 
@@ -185,7 +183,7 @@ class PetugasController extends Controller
             $q->where('stage', 'washing')->where('status', 'pending');
         })->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Washing')->orderBy('nama')->get();
+        $petugasList = Petugas::where('role', 'Washing')->orderBy('nama')->get();
 
         return view('petugas_piket.washing.index', compact('transactions', 'petugasList'));
     }
@@ -202,7 +200,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Setrika')->orderBy('nama')->get();
+        $petugasList = Petugas::where('role', 'Setrika')->orderBy('nama')->get();
 
         return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
     }
@@ -219,7 +217,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('status', 'Aktif')->where('role', 'Packing')->orderBy('nama')->get();
+        $petugasList = Petugas::where('role', 'Packing')->orderBy('nama')->get();
 
         return view('petugas_piket.packing.index', compact('transactions', 'petugasList'));
     }

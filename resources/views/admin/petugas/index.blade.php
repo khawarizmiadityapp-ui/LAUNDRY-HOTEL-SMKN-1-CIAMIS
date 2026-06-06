@@ -6,11 +6,11 @@
     {{-- Header & Stats --}}
     <div class="mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Petugas</h1>
-        <p class="text-gray-500 mt-1">Kelola akses, peran, dan status keaktifan tim operasional</p>
+        <p class="text-gray-500 mt-1">Kelola akses dan peran tim operasional</p>
     </div>
 
     {{-- Statistik Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div class="flex justify-between items-start">
                 <div>
@@ -18,15 +18,6 @@
                     <p class="text-3xl font-bold text-gray-800 mt-1" x-text="totalPetugas"></p>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl"><i class="fas fa-users text-blue-600 text-xl"></i></div>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-gray-500 text-sm">Aktif Sekarang</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1" x-text="aktifSekarang"></p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-xl"><i class="fas fa-user-check text-green-600 text-xl"></i></div>
             </div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
@@ -100,9 +91,9 @@
                                     </svg>
                                     Edit
                                 </button>
-
+ 
                                 <div class="h-px bg-slate-50 my-1"></div>
-
+ 
                                 <button @click="confirmDelete(petugas)"
                                         class="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors">
                                     <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -114,13 +105,6 @@
                         </div>
                     </div>
                     <div class="mt-4 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span x-show="petugas.status === 'Aktif'" class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>
-                                <span x-show="petugas.status === 'Off Duty'" class="relative flex h-2.5 w-2.5"><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-gray-400"></span></span>
-                                <span class="text-sm font-medium" :class="petugas.status === 'Aktif' ? 'text-green-600' : 'text-gray-500'" x-text="petugas.status"></span>
-                            </div>
-                        </div>
                         <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
                             <span>Selesai Kerja:</span>
                             <span class="font-bold text-gray-700"><span x-text="petugas.total_completed || 0"></span> tugas</span>
@@ -195,15 +179,6 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
-                        <select x-model="selectedPetugas.status" required
-                                class="w-full border rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
-                            <option>Aktif</option>
-                            <option>Off Duty</option>
-                        </select>
-                    </div>
-
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6">
@@ -224,7 +199,6 @@
                     <p class="flex justify-between"><span class="text-gray-400">Nama:</span> <strong class="text-gray-800" x-text="selectedPetugas.nama"></strong></p>
                     <p class="flex justify-between"><span class="text-gray-400">ID Petugas:</span> <span class="font-mono bg-slate-50 px-2 py-0.5 rounded text-gray-600" x-text="selectedPetugas.idPetugas"></span></p>
                     <p class="flex justify-between"><span class="text-gray-400">Peran/Role:</span> <span class="font-semibold" x-text="selectedPetugas.role"></span></p>
-                    <p class="flex justify-between"><span class="text-gray-400">Status Keaktifan:</span> <span class="font-semibold" :class="selectedPetugas.status === 'Aktif' ? 'text-green-600' : 'text-gray-500'" x-text="selectedPetugas.status"></span></p>
                 </div>
 
                 <div>
@@ -292,7 +266,6 @@
             get startItem() { return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1; },
             get endItem() { return Math.min(this.currentPage * this.perPage, this.filteredData.length); },
             get totalPetugas() { return this.petugasList.length; },
-            get aktifSekarang() { return this.petugasList.filter(p => p.status === 'Aktif').length; },
             get timProduksi() { return this.petugasList.filter(p => ['Washing', 'Setrika', 'Packing'].includes(p.role)).length; },
             get kasirKurir() { return this.petugasList.filter(p => p.role === 'Kasir').length; },
 
