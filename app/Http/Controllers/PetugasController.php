@@ -184,8 +184,9 @@ class PetugasController extends Controller
         })->with(['details.layanan'])->get();
 
         $petugasList = Petugas::where('role', 'Washing')->orderBy('nama')->get();
+        $inventories = \App\Models\Inventory::select('id', 'name', 'category')->orderBy('name')->get();
 
-        return view('petugas_piket.washing.index', compact('transactions', 'petugasList'));
+        return view('petugas_piket.washing.index', compact('transactions', 'petugasList', 'inventories'));
     }
 
     // Halaman Setrika
@@ -230,7 +231,10 @@ class PetugasController extends Controller
     {
         $request->validate([
             'stage' => 'required|in:washing,ironing,packing',
-            'petugas_name' => 'nullable|string|max:255'
+            'petugas_name' => 'nullable|string|max:255',
+            'materials' => 'nullable|array',
+            'materials.*.id' => 'required_with:materials|exists:inventories,id',
+            'materials.*.quantity' => 'required_with:materials|numeric|min:0.1'
         ]);
 
         DB::beginTransaction();
@@ -256,7 +260,11 @@ class PetugasController extends Controller
 
             // Auto-deduct Inventory if stage is washing
             if ($stage === 'washing') {
-                $this->inventoryService->deductWashingSupplies($transaksi->id, $stage);
+                if ($request->has('materials') && is_array($request->materials)) {
+                    $this->inventoryService->deductCustomWashingSupplies($transaksi->id, $stage, $request->materials);
+                } else {
+                    $this->inventoryService->deductWashingSupplies($transaksi->id, $stage);
+                }
             }
 
             // Update overall transaction status
@@ -297,7 +305,7 @@ class PetugasController extends Controller
                 'line' => $e->getLine(),
             ]);
 
-            return redirect()->back()->with('error', 'Gagal menyelesaikan tugas. Silakan coba lagi atau hubungi administrator.');
+            return redirect()->back()->with('error', 'Gagal menyelesaikan tugas: ' . $e->getMessage());
         }
     }
 

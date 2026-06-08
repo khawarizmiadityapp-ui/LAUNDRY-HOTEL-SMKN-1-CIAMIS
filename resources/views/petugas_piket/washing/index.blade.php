@@ -51,7 +51,29 @@
                             </div>
 
                             {{-- Action Form --}}
-                            <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST" class="mt-auto">
+                            <div x-data="{ 
+                                materials: [],
+                                availableMaterials: {{ json_encode($inventories->map(fn($i) => ['id' => $i->id, 'name' => $i->name, 'category' => $i->category])) }},
+                                addMaterial() { this.materials.push({ id: '', quantity: 1 }); },
+                                removeMaterial(index) { this.materials.splice(index, 1); },
+                                confirmSubmission(e) {
+                                    if (this.materials.length > 0) {
+                                        let msg = 'Anda akan mencatat penggunaan bahan tambahan:\n';
+                                        this.materials.forEach((m) => {
+                                            let item = this.availableMaterials.find(x => x.id == m.id);
+                                            if(item) {
+                                                msg += `- ${item.name}: ${m.quantity} ml\n`;
+                                            }
+                                        });
+                                        msg += '\nApakah jumlah bahan yang dipakai ini sudah sesuai?';
+                                        if (!confirm(msg)) {
+                                            return;
+                                        }
+                                    }
+                                    e.target.submit();
+                                }
+                            }">
+                                <form action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST" class="mt-auto" @submit.prevent="confirmSubmission($event)">
                                 @csrf
                                 <input type="hidden" name="stage" value="washing">
                                 
@@ -91,6 +113,50 @@
                                     </div>
                                 </div>
 
+                                {{-- Multi-select Bahan (Inventory) --}}
+                                <div class="mb-6">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Penggunaan Bahan (ml)</label>
+                                        <button type="button" @click="addMaterial()" class="text-xs text-blue-600 font-bold hover:text-blue-700 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                            Tambah Bahan
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <template x-for="(material, index) in materials" :key="index">
+                                            <div class="flex gap-2 items-start bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                                <div class="flex-1">
+                                                    <select x-model="material.id" :name="`materials[${index}][id]`" required
+                                                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
+                                                        <option value="" disabled>Pilih Bahan...</option>
+                                                        <template x-for="item in availableMaterials" :key="item.id">
+                                                            <option :value="item.id" x-text="`${item.name} (${item.category})`"></option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                                <div class="w-24">
+                                                    <div class="relative">
+                                                        <input type="number" x-model="material.quantity" :name="`materials[${index}][quantity]`" required min="0.1" step="0.1" placeholder="Qty"
+                                                            class="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
+                                                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs text-slate-400 font-medium">ml</span>
+                                                    </div>
+                                                </div>
+                                                <button type="button" @click="removeMaterial(index)" class="p-2 text-rose-500 hover:text-rose-600 hover:bg-rose-100 rounded-lg transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <template x-if="materials.length === 0">
+                                            <p class="text-xs text-slate-400 text-center py-2 italic border border-dashed border-slate-200 rounded-xl">Belum ada bahan tambahan. (Otomatis potong 1 unit jika kosong)</p>
+                                        </template>
+                                    </div>
+                                </div>
+
                                 <button type="submit" 
                                         class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm shadow-blue-200 active:scale-[0.98]">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -99,6 +165,7 @@
                                     Konfirmasi Selesai Cuci
                                 </button>
                             </form>
+                            </div>
                         </div>
                     @endforeach
                 </div>
