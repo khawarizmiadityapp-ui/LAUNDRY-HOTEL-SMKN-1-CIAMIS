@@ -17,7 +17,7 @@
         </div>
 
         <!-- STATISTIK CARDS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- Card 1 -->
             <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
@@ -48,23 +48,6 @@
                     <a href="{{ route('admin.pembayaran.create') }}" class="text-red-600 hover:text-red-800 text-sm font-medium">
                         <i class="fas fa-arrow-right mr-1"></i> Proses Pembayaran
                     </a>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Metode Populer</p>
-                        <p class="text-2xl font-bold mt-1">{{ $metodePopulerNama ?? 'QRIS' }}</p>
-                    </div>
-                    <i class="fas fa-qrcode text-green-500 text-2xl"></i>
-                </div>
-                <div class="mt-3">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ $persentaseMetodePopuler }}%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2">{{ $persentaseMetodePopuler }}% dari total transaksi</p>
                 </div>
             </div>
         </div>

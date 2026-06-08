@@ -62,7 +62,7 @@
             </div>
 
             <div class="pt-2 flex items-center gap-3">
-                <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-semibold">Simpan</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold">Simpan</button>
                 <a href="{{ route('admin.pengeluaran.index') }}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700">Batal</a>
             </div>
         </form>

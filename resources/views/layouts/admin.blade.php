@@ -338,7 +338,16 @@
         }
 
         // Close all dropdowns when clicking outside
-        if (!event.target.closest('button[onclick^="toggleDropdown"]')) {
+        const toggleBtn = event.target.closest('button');
+        let isDropdownToggle = false;
+        if (toggleBtn) {
+            const attrs = ['onclick', '@click', 'x-on:click'];
+            isDropdownToggle = attrs.some(attr => {
+                const val = toggleBtn.getAttribute(attr);
+                return val && val.includes('toggleDropdown');
+            });
+        }
+        if (!isDropdownToggle) {
             document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
                 if (!el.contains(event.target)) {
                     el.classList.add('hidden');

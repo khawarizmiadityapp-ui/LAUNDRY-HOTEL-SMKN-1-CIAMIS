@@ -55,7 +55,7 @@
             @foreach($items as $item)
             <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group">
                 <div class="flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl {{ $item->quantity < 5 ? 'bg-rose-50 text-rose-500' : 'bg-indigo-50 text-indigo-600' }} flex items-center justify-center transition-colors">
+                    <div class="w-12 h-12 rounded-xl {{ $item->stock_units < $item->minimum_stock ? 'bg-rose-50 text-rose-500' : 'bg-indigo-50 text-indigo-600' }} flex items-center justify-center transition-colors">
                         @if(Str::contains(Str::lower($category), 'detergent'))
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.423 15.621a11.205 11.205 0 01-3.133 2.709m-11.339-4.547a11.205 11.205 0 013.133-2.709m11.339 4.547c.593.593.91 1.396.878 2.194a3.11 3.11 0 01-3.11 3.11c-.798.032-1.601-.285-2.194-.878L13.12 18.23l-1.13-1.13m2.784-2.785a4.416 4.416 0 00-6.244-6.244m6.244 6.244L11.51 16.5m-3.526-3.526L6.5 11.49m0 0a3.11 3.11 0 013.11-3.11c.798-.032 1.601.285 2.194.878L13.23 10.12l1.13 1.13m-3.472-3.472a11.203 11.203 0 013.133-2.709m-3.133 2.709a11.203 11.203 0 01-3.133 2.709" /></svg>
                         @elseif(Str::contains(Str::lower($category), 'fragrance'))
@@ -64,7 +64,7 @@
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                         @endif
                     </div>
-                    @if($item->quantity < 5)
+                    @if($item->stock_units < $item->minimum_stock)
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 animate-pulse">
                         STOK RENDAH
                     </span>
@@ -77,10 +77,22 @@
                 <div class="mt-6 flex items-end justify-between">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jumlah Stok</p>
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-3xl font-black {{ $item->quantity < 5 ? 'text-rose-600' : 'text-slate-900' }}">{{ $item->quantity }}</span>
-                            <span class="text-xs font-bold text-slate-400">Unit</span>
-                        </div>
+                        @if($item->unit_of_measurement === 'pcs' || $item->capacity_per_unit <= 1)
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-black {{ $item->stock_units < $item->minimum_stock ? 'text-rose-600' : 'text-slate-900' }}">{{ $item->stock_units }}</span>
+                                <span class="text-xs font-bold text-slate-400">{{ $item->unit_type }}</span>
+                            </div>
+                        @else
+                            <div class="flex flex-col">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl font-black {{ $item->stock_units < $item->minimum_stock ? 'text-rose-600' : 'text-slate-900' }}">{{ $item->stock_units }}</span>
+                                    <span class="text-xs font-bold text-slate-400">{{ $item->unit_type }}</span>
+                                </div>
+                                <span class="text-[11px] text-slate-500 font-semibold mt-1">
+                                    + {{ number_format($item->stock_subunits) }} {{ $item->unit_of_measurement }} aktif
+                                </span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -89,7 +101,7 @@
                         @csrf
                         <input type="hidden" name="reason" value="Penyesuaian stok oleh petugas {{ auth()->user()->name }}">
                         <button type="submit" name="adjustment" value="-1" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all flex items-center justify-center font-bold"> - </button>
-                        <span class="text-sm font-bold text-slate-700 min-w-[20px] text-center">{{ $item->quantity }}</span>
+                        <span class="text-sm font-bold text-slate-700 min-w-[20px] text-center">{{ $item->stock_units }}</span>
                         <button type="submit" name="adjustment" value="1" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex items-center justify-center font-bold"> + </button>
                     </form>
                     <div class="text-[10px] text-slate-300 italic">
@@ -139,17 +151,33 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Satuan (Unit)</label>
-                    <input type="text" name="unit" required placeholder="Liter, Pcs, dll" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="unit_type_select" onchange="toggleUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
                 </div>
             </div>
+            
+            <div id="capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="capacity_input" required min="1" value="1000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="subunits_input" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal (Unit)</label>
                     <input type="number" name="quantity" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
                     <input type="number" name="minimum_stock" required min="0" value="5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
                 </div>
             </div>
@@ -161,5 +189,31 @@
         </form>
     </div>
 </div>
+
+
+<script>
+function toggleUnitFields(val) {
+    const capacityFields = document.getElementById('capacity_fields');
+    const capacityInput = document.getElementById('capacity_input');
+    const subunitsInput = document.getElementById('subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+        capacityInput.value = 1;
+        subunitsInput.value = 0;
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else {
+            capacityInput.value = 1000;
+        }
+    }
+}
+</script>
 
 @endsection

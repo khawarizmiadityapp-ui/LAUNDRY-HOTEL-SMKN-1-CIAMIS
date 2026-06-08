@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengeluaran;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,9 @@ class PengeluaranController extends Controller
                                     ->whereYear('tanggal', now()->year)
                                     ->sum('nominal');
 
-        $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 7_000_000);
+        // Target anggaran diambil dari seluruh total penjualan jasa (transaksi lunas)
+        $targetAnggaran = (int) Transaksi::where('payment_status', 'lunas')
+                                    ->sum('total_price');
         $terpakaiBulanIni = $totalBulanIni;
         $sisaAnggaran   = max(0, $targetAnggaran - $terpakaiBulanIni);
 
@@ -86,6 +89,8 @@ class PengeluaranController extends Controller
 
         if ($request->hasFile('bon_file')) {
             $validated['bon_file'] = $request->file('bon_file')->store('bon-pengeluaran', 'public');
+        } else {
+            unset($validated['bon_file']);
         }
 
         Pengeluaran::create($validated);
@@ -125,6 +130,8 @@ class PengeluaranController extends Controller
                 Storage::disk('public')->delete($pengeluaran->bon_file);
             }
             $validated['bon_file'] = $request->file('bon_file')->store('bon-pengeluaran', 'public');
+        } else {
+            unset($validated['bon_file']);
         }
 
         $pengeluaran->update($validated);

@@ -39,7 +39,7 @@
             <dt class="text-gray-500">File Bon</dt>
             <dd class="col-span-2">
                 @if($pengeluaran->bon_file)
-                    <a href="{{ asset('storage/' . $pengeluaran->bon_file) }}" target="_blank" class="text-brand-600 hover:underline">Lihat File Bon</a>
+                    <a href="{{ asset('storage/' . $pengeluaran->bon_file) }}" target="_blank" class="text-blue-600 hover:underline">Lihat File Bon</a>
                 @else
                     -
                 @endif
@@ -48,7 +48,7 @@
     </dl>
 
     <div class="mt-6 flex items-center gap-3">
-        <a href="{{ route('admin.pengeluaran.edit', $pengeluaran) }}" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl">Edit</a>
+        <a href="{{ route('admin.pengeluaran.edit', $pengeluaran) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl">Edit</a>
         <a href="{{ route('admin.pengeluaran.index') }}" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl">Kembali</a>
     </div>
 </div>

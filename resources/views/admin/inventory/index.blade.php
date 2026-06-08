@@ -91,7 +91,7 @@
                     @foreach($detergents as $item)
                     <div class="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
                         <div class="relative bg-gradient-to-br {{ $loop->index % 2 == 0 ? 'from-cyan-50 via-teal-50 to-sky-50' : 'from-blue-50 via-sky-50 to-indigo-50' }} h-44 flex items-center justify-center p-4">
-                            @if($item->quantity < 20)
+                            @if($item->stock_units < $item->minimum_stock)
                             <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-red-50 border border-red-200 text-red-500 shadow-sm">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                                 Low Stock
@@ -125,14 +125,20 @@
                                     <p class="text-xs text-slate-400 mt-0.5">Industrial Grade Formula</p>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <span class="text-xl font-bold text-slate-800" id="qty{{ $item->id }}">{{ $item->quantity }}</span>
-                                    <span class="text-xs text-slate-400 ml-0.5">units</span>
+                                    @if($item->unit_of_measurement === 'pcs' || $item->capacity_per_unit <= 1)
+                                        <span class="text-xl font-bold text-slate-800" id="qty{{ $item->id }}">{{ $item->stock_units }}</span>
+                                        <span class="text-xs text-slate-400 ml-0.5">{{ $item->unit_type }}</span>
+                                    @else
+                                        <span class="text-xl font-bold text-slate-800" id="qty{{ $item->id }}">{{ $item->stock_units }}</span>
+                                        <span class="text-xs text-slate-400 ml-0.5">{{ $item->unit_type }}</span>
+                                        <p class="text-[10px] text-slate-500 font-semibold mt-0.5">+{{ number_format($item->stock_subunits) }} {{ $item->unit_of_measurement }}</p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 mt-3">
                                 <button onclick="updateQty({{ $item->id }}, 'decrement')"
                                         class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">−</button>
-                                <span class="min-w-[2rem] text-center font-semibold text-slate-700 text-sm" id="qty-disp-{{ $item->id }}">{{ $item->quantity }}</span>
+                                <span class="min-w-[2rem] text-center font-semibold text-slate-700 text-sm" id="qty-disp-{{ $item->id }}">{{ $item->stock_units }}</span>
                                 <button onclick="updateQty({{ $item->id }}, 'increment')"
                                         class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">+</button>
                             </div>
@@ -172,9 +178,12 @@
                         <p class="text-[11px] text-slate-400 mt-0.5 leading-tight">{{ $item->type ?? 'Concentrated Oil' }}</p>
                         <div class="flex items-center gap-2 mt-3">
                             <button onclick="updateQty({{ $item->id }}, 'decrement')" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-xs font-bold transition-colors">−</button>
-                            <span class="text-sm font-mono font-semibold text-slate-700 min-w-[1.75rem] text-center" id="qty{{ $item->id }}">{{ str_pad($item->quantity, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="text-sm font-mono font-semibold text-slate-700 min-w-[1.75rem] text-center" id="qty{{ $item->id }}">{{ str_pad($item->stock_units, 2, '0', STR_PAD_LEFT) }}</span>
                             <button onclick="updateQty({{ $item->id }}, 'increment')" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-xs font-bold transition-colors">+</button>
                         </div>
+                        @if($item->unit_of_measurement !== 'pcs' && $item->capacity_per_unit > 1)
+                            <p class="text-[9px] text-slate-400 mt-1 font-semibold">+{{ number_format($item->stock_subunits) }} {{ $item->unit_of_measurement }} aktif</p>
+                        @endif
                     </div>
                     @endforeach
                 </div>
@@ -235,7 +244,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-slate-700 leading-tight">{{ $item->name }}</p>
-                                <p class="text-xs text-slate-400">Qty: <span id="qty{{ $item->id }}">{{ number_format($item->quantity) }}</span></p>
+                                <p class="text-xs text-slate-400">Qty: <span id="qty{{ $item->id }}">{{ number_format($item->stock_units) }}</span></p>
                             </div>
                         </div>
                         <button onclick="updateQty({{ $item->id }}, 'increment')" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-colors flex-shrink-0">
@@ -279,17 +288,33 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Satuan (Unit)</label>
-                    <input type="text" name="unit" required placeholder="Liter, Pcs, dll" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="unit_type_select" onchange="toggleUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
                 </div>
             </div>
+            
+            <div id="capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="capacity_input" required min="1" value="1000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="subunits_input" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal (Unit)</label>
                     <input type="number" name="quantity" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
                     <input type="number" name="minimum_stock" required min="0" value="5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
                 </div>
             </div>
@@ -305,6 +330,29 @@
 
 @push('scripts')
 <script>
+function toggleUnitFields(val) {
+    const capacityFields = document.getElementById('capacity_fields');
+    const capacityInput = document.getElementById('capacity_input');
+    const subunitsInput = document.getElementById('subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+        capacityInput.value = 1;
+        subunitsInput.value = 0;
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else {
+            capacityInput.value = 1000;
+        }
+    }
+}
+
 function updateQty(id, type) {
     let url = "{{ route('admin.inventory.update', ['id' => ':id']) }}";
     url = url.replace(':id', id);

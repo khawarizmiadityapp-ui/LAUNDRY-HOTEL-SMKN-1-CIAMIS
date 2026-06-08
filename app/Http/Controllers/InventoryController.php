@@ -53,23 +53,22 @@ class InventoryController extends Controller
         ]);
 
         if ($request->type === 'increment') {
-            $item->increment('quantity');
+            $item->adjustStockUnits(1);
         } else {
-            // Prevent negative stock
-            if ($item->quantity > 0) {
-                $item->decrement('quantity');
-                $newQty = $item->quantity;
+            try {
+                $item->adjustStockUnits(-1);
+                $newQty = $item->stock_units;
                 if ($newQty < ($item->minimum_stock ?? 5)) {
                     \App\Models\ActivityLog::create([
                         'description' => "Peringatan Stok Rendah: {$item->name} sisa {$newQty}",
                         'causer_id' => Auth::id(),
                     ]);
                 }
-            } else {
+            } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Stok tidak bisa kurang dari 0',
-                    'qty' => $item->quantity
+                    'qty' => $item->stock_units
                 ], 400);
             }
         }
@@ -78,7 +77,7 @@ class InventoryController extends Controller
 
         return response()->json([
             'success' => true,
-            'qty' => $item->quantity
+            'qty' => $item->stock_units
         ]);
     }
 
@@ -90,18 +89,11 @@ class InventoryController extends Controller
                 $item = Inventory::where('id', $requestAdjust->inventory_id)->lockForUpdate()->first();
 
                 if ($item) {
-                    // Validate that adjustment won't cause negative stock
-                    $newQuantity = $item->quantity + $requestAdjust->adjustment;
-                    if ($newQuantity < 0) {
-                        throw new \Exception('Penyesuaian akan menyebabkan stok negatif. Stok saat ini: ' . $item->quantity . ', Penyesuaian: ' . $requestAdjust->adjustment);
-                    }
-                    
-                    $item->quantity = $newQuantity;
-                    $item->save();
+                    $item->adjustStockUnits($requestAdjust->adjustment);
 
-                    if ($item->quantity < ($item->minimum_stock ?? 5)) {
+                    if ($item->stock_units < ($item->minimum_stock ?? 5)) {
                         \App\Models\ActivityLog::create([
-                            'description' => "Peringatan Stok Rendah: {$item->name} sisa {$item->quantity}",
+                            'description' => "Peringatan Stok Rendah: {$item->name} sisa {$item->stock_units}",
                             'causer_id' => Auth::id(),
                         ]);
                     }
@@ -144,17 +136,35 @@ class InventoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'minimum_stock' => 'required|numeric|min:0',
+            'unit_type' => 'required|in:botol,sachet,pcs',
+            'capacity_per_unit' => 'required|integer|min:1',
+            'stock_subunits' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
+            'minimum_stock' => 'required|integer|min:0',
         ]);
 
         try {
-            Inventory::create($request->only(['name', 'category', 'quantity', 'unit', 'minimum_stock']));
+            $unitOfMeasurement = ($request->unit_type === 'pcs') ? 'pcs' : 'ml';
+
+            Inventory::create([
+                'name' => $request->name,
+                'category' => strtolower($request->category),
+                'unit_type' => $request->unit_type,
+                'capacity_per_unit' => $request->capacity_per_unit,
+                'unit_of_measurement' => $unitOfMeasurement,
+                'stock_units' => $request->quantity,
+                'stock_subunits' => $request->stock_subunits,
+                'quantity' => $request->quantity,
+                'minimum_stock' => $request->minimum_stock,
+            ]);
+
             return redirect()->back()->with('success', 'Barang baru berhasil ditambahkan ke inventory.');
         } catch (\Exception $e) {
-            $this->errorLogger->logError($e, 'Create Inventory Failed', ['operation' => 'inventory.store']);
-            return redirect()->back()->with('error', 'Gagal menambahkan barang. Silakan coba lagi.');
+            $this->errorLogger->logError($e, 'Create Inventory Failed', [
+                'operation' => 'inventory.store',
+                'user_id' => Auth::id(),
+            ]);
+            return redirect()->back()->with('error', 'Gagal menambahkan barang: ' . $e->getMessage());
         }
     }
 }

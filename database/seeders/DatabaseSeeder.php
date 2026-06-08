@@ -84,10 +84,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Jalankan Seeder Lainnya (jika ada)
         $this->call([
             ServicePriceSeeder::class,
             LayananSeeder::class,
+            InventorySeeder::class,
         ]);
 
         // 4. Seed Petugas Piket Default (per Role)

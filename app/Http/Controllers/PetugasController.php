@@ -53,7 +53,7 @@ class PetugasController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ FIX: Allow both admin and staff
+        // Allow both admin and staff
         if (!in_array($user->role, ['admin', 'staff'])) {
             abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
         }
@@ -183,8 +183,8 @@ class PetugasController extends Controller
             $q->where('stage', 'washing')->where('status', 'pending');
         })->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('role', 'Washing')->orderBy('nama')->get();
-        $inventories = \App\Models\Inventory::select('id', 'name', 'category')->orderBy('name')->get();
+        $petugasList = Petugas::orderBy('nama')->get();
+        $inventories = \App\Models\Inventory::select('id', 'name', 'category', 'unit_of_measurement')->orderBy('name')->get();
 
         return view('petugas_piket.washing.index', compact('transactions', 'petugasList', 'inventories'));
     }
@@ -201,7 +201,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('role', 'Setrika')->orderBy('nama')->get();
+        $petugasList = Petugas::orderBy('nama')->get();
 
         return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
     }
@@ -218,7 +218,7 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::where('role', 'Packing')->orderBy('nama')->get();
+        $petugasList = Petugas::orderBy('nama')->get();
 
         return view('petugas_piket.packing.index', compact('transactions', 'petugasList'));
     }
@@ -340,17 +340,31 @@ class PetugasController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'minimum_stock' => 'required|numeric|min:0',
+            'unit_type' => 'required|in:botol,sachet,pcs',
+            'capacity_per_unit' => 'required|integer|min:1',
+            'stock_subunits' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
+            'minimum_stock' => 'required|integer|min:0',
         ]);
 
         try {
-            \App\Models\Inventory::create($request->only(['name', 'category', 'quantity', 'unit', 'minimum_stock']));
+            $unitOfMeasurement = ($request->unit_type === 'pcs') ? 'pcs' : 'ml';
+
+            \App\Models\Inventory::create([
+                'name' => $request->name,
+                'category' => strtolower($request->category),
+                'unit_type' => $request->unit_type,
+                'capacity_per_unit' => $request->capacity_per_unit,
+                'unit_of_measurement' => $unitOfMeasurement,
+                'stock_units' => $request->quantity,
+                'stock_subunits' => $request->stock_subunits,
+                'quantity' => $request->quantity,
+                'minimum_stock' => $request->minimum_stock,
+            ]);
             return redirect()->back()->with('success', 'Barang baru berhasil ditambahkan ke inventory.');
         } catch (\Exception $e) {
             \Log::error('Create Inventory Failed', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Gagal menambahkan barang. Silakan coba lagi.');
+            return redirect()->back()->with('error', 'Gagal menambahkan barang: ' . $e->getMessage());
         }
     }
 
@@ -369,9 +383,7 @@ class PetugasController extends Controller
             $adjustment = (int) $request->adjustment;
 
             if (Auth::user()->role === 'admin') {
-                $item->quantity = max(0, $item->quantity + $adjustment);
-                $item->save();
-
+                $item->adjustStockUnits($adjustment);
                 return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
             }
 
@@ -403,14 +415,14 @@ class PetugasController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ FIX: Allow both admin and staff
+        // Allow both admin and staff
         if (!in_array($user->role, ['admin', 'staff'])) {
             abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
         }
 
         $division = strtolower((string) $user->division);
 
-        // ✅ FIX: Admin can see all history
+        // Admin can see all history
         if ($user->role === 'admin') {
             $completedTasks = \App\Models\LaundryTask::where('status', 'completed')
                 ->with(['transaksi'])

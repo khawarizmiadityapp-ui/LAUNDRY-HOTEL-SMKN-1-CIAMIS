@@ -13,7 +13,7 @@
     <div class="card-stat bg-white rounded-2xl shadow-card p-6 border border-gray-100 fade-in">
         <div class="flex items-start justify-between mb-4">
             <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
-                <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
             </div>
@@ -47,10 +47,10 @@
 
                 $pct = $target > 0 ? round(($nilai / $target) * 100) : 0;
             @endphp
-            <div class="progress-bar-inner h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full"
+            <div class="progress-bar-inner h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                  style="width: {{ $pct }}%"></div>
         </div>
-        <p class="text-[11px] text-gray-400 mt-1.5">Target: {{ rupiah($targetAnggaran) }}</p>
+        <p class="text-[11px] text-gray-400 mt-1.5">Penjualan Jasa: {{ rupiah($targetAnggaran) }}</p>
     </div>
 
     {{-- Card 3: Kategori Terbesar --}}
@@ -96,7 +96,7 @@
 
     {{-- Tambah Baru --}}
     <a href="{{ route('admin.pengeluaran.create') }}"
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
         </svg>
@@ -109,7 +109,7 @@
     <form method="GET" action="{{ route('admin.pengeluaran.index') }}" class="flex flex-wrap gap-4 items-end">
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Kategori</label>
-            <select name="kategori" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-200 bg-white">
+            <select name="kategori" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white">
                 <option value="">Semua Kategori</option>
                 @foreach($kategoriList as $kat)
                     <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
@@ -118,7 +118,7 @@
         </div>
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Status</label>
-            <select name="status" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-200 bg-white">
+            <select name="status" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white">
                 <option value="">Semua Status</option>
                 <option value="lunas"   {{ request('status') == 'lunas'   ? 'selected' : '' }}>Lunas</option>
                 <option value="urgent"  {{ request('status') == 'urgent'  ? 'selected' : '' }}>Urgent</option>
@@ -128,15 +128,15 @@
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Dari Tanggal</label>
             <input type="date" name="dari" value="{{ request('dari') }}"
-                class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200">
         </div>
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Sampai Tanggal</label>
             <input type="date" name="sampai" value="{{ request('sampai') }}"
-                class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200">
         </div>
         <div class="flex gap-2 mt-auto">
-            <button type="submit" class="px-4 py-2.5 text-sm font-600 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition">Terapkan</button>
+            <button type="submit" class="px-4 py-2.5 text-sm font-600 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">Terapkan</button>
             <a href="{{ route('admin.pengeluaran.index') }}" class="px-4 py-2.5 text-sm font-600 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
         </div>
     </form>
@@ -166,7 +166,7 @@
                     {{-- ID Transaksi --}}
                     <td class="px-6 py-4">
                         <a href="{{ route('admin.pengeluaran.show', $item) }}"
-                           class="text-brand-600 font-600 hover:text-brand-700 hover:underline transition">#{{ $item->id_transaksi }}</a>
+                           class="text-blue-600 font-600 hover:text-blue-700 hover:underline transition">#{{ $item->id_transaksi }}</a>
                     </td>
 
                     {{-- Nama --}}
@@ -195,7 +195,7 @@
                     {{-- Bon --}}
                     <td class="px-4 py-4">
                         @if($item->bon_file)
-                            <a href="{{ asset('storage/' . $item->bon_file) }}" target="_blank" class="text-xs font-600 text-brand-600 hover:underline">Lihat Bon</a>
+                            <a href="{{ asset('storage/' . $item->bon_file) }}" target="_blank" class="text-xs font-600 text-blue-600 hover:underline">Lihat Bon</a>
                         @else
                             <span class="text-xs text-gray-400">-</span>
                         @endif
@@ -262,7 +262,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                         <p class="font-500">Belum ada data pengeluaran</p>
-                        <a href="{{ route('admin.pengeluaran.create') }}" class="text-brand-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
+                        <a href="{{ route('admin.pengeluaran.create') }}" class="text-blue-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
                     </td>
                 </tr>
                 @endforelse

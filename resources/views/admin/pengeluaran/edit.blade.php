@@ -55,12 +55,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">File Bon Baru (opsional)</label>
                 <input type="file" name="bon_file" accept=".jpg,.jpeg,.png,.pdf" class="w-full border border-gray-300 rounded-xl px-3 py-2.5 bg-white">
                 @if($pengeluaran->bon_file)
-                    <a href="{{ asset('storage/' . $pengeluaran->bon_file) }}" target="_blank" class="inline-block mt-2 text-sm text-brand-600 hover:underline">Lihat bon saat ini</a>
+                    <a href="{{ asset('storage/' . $pengeluaran->bon_file) }}" target="_blank" class="inline-block mt-2 text-sm text-blue-600 hover:underline">Lihat bon saat ini</a>
                 @endif
             </div>
 
             <div class="pt-2 flex items-center gap-3">
-                <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-semibold">Simpan Perubahan</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold">Simpan Perubahan</button>
                 <a href="{{ route('admin.pengeluaran.index') }}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700">Batal</a>
             </div>
         </form>

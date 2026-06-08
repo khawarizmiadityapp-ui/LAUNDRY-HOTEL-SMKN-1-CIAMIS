@@ -76,7 +76,7 @@
     </div>
 
     {{-- Table --}}
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto min-h-[250px]">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-slate-100">
@@ -91,19 +91,6 @@
             </thead>
             <tbody>
                 @forelse($customers as $customer)
-                @php
-                    // Generate avatar color from name
-                    $colors = [
-                        'bg-blue-100 text-blue-700',
-                        'bg-violet-100 text-violet-700',
-                        'bg-rose-100 text-rose-700',
-                        'bg-amber-100 text-amber-700',
-                        'bg-emerald-100 text-emerald-700',
-                        'bg-cyan-100 text-cyan-700',
-                    ];
-                    $colorClass = $colors[$loop->index % count($colors)];
-                    $initials = collect(explode(' ', $customer->nama))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
-                @endphp
                 <tr class="table-row border-b border-slate-50 last:border-0">
                     {{-- ID --}}
                     <td class="px-6 py-4">
@@ -111,15 +98,9 @@
                     </td>
                     {{-- Nama + email --}}
                     <td class="px-4 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg {{ $colorClass }} flex items-center justify-center
-                                        text-xs font-extrabold flex-shrink-0">
-                                {{ $initials }}
-                            </div>
-                            <div>
-                                <p class="font-semibold text-slate-800 leading-tight">{{ $customer->nama }}</p>
-                                <p class="text-[11px] text-slate-400">{{ $customer->email ?? '-' }}</p>
-                            </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 leading-tight">{{ $customer->nama }}</p>
+                            <p class="text-[11px] text-slate-400">{{ $customer->email ?? '-' }}</p>
                         </div>
                     </td>
                     {{-- Telepon --}}

@@ -56,15 +56,18 @@ class Pengeluaran extends Model
     // ─── Auto-generate ID transaksi ────────────────────────────────────
     public static function generateIdTransaksi(): string
     {
+        $num = 2401;
         $last = static::orderByDesc('id')->first();
         if ($last && $last->id_transaksi) {
             // Parse EXP-2401 -> 2401
             $parts = explode('-', $last->id_transaksi);
-            $lastNum = isset($parts[1]) ? (int)$parts[1] : 2400;
-            $num = $lastNum + 1;
-        } else {
-            $num = 2401;
+            $num = (isset($parts[1]) && is_numeric($parts[1])) ? (int)$parts[1] + 1 : 2401;
         }
+
+        while (static::where('id_transaksi', 'EXP-' . $num)->exists()) {
+            $num++;
+        }
+
         return 'EXP-' . $num;
     }
 }

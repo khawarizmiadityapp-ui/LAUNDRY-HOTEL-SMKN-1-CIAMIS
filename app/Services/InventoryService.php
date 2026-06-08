@@ -9,7 +9,7 @@ class InventoryService
 {
     /**
      * Deduct standard washing supplies from inventory.
-     * Usually 1 detergent and 1 fragrance.
+     * Usually 1 detergent and 1 fragrance (or 50ml / 20ml respectively if bottle-based).
      * 
      * @param int $transaksiId The ID of the transaction to log warning against
      * @param string $stage The stage of the task
@@ -18,14 +18,15 @@ class InventoryService
     public function deductWashingSupplies(int $transaksiId, string $stage): void
     {
         try {
-            // Deduct 1 unit of detergent
+            // Deduct detergent
             $detergent = Inventory::where('category', 'detergent')
-                ->where('quantity', '>=', 1)
                 ->lockForUpdate()
                 ->first();
             
             if ($detergent) {
-                $detergent->decrement('quantity', 1);
+                // Default deduction: 50 ml for liquid/ml detergents, 1 pc for others
+                $amount = $detergent->unit_of_measurement === 'ml' ? 50 : 1;
+                $detergent->deductStock($amount);
             } else {
                 Log::warning('Detergent out of stock during task completion', [
                     'transaksi_id' => $transaksiId,
@@ -33,14 +34,15 @@ class InventoryService
                 ]);
             }
 
-            // Deduct 1 unit of fragrance
+            // Deduct fragrance
             $fragrance = Inventory::where('category', 'fragrance')
-                ->where('quantity', '>=', 1)
                 ->lockForUpdate()
                 ->first();
             
             if ($fragrance) {
-                $fragrance->decrement('quantity', 1);
+                // Default deduction: 20 ml for liquid/ml fragrances, 1 pc for others
+                $amount = $fragrance->unit_of_measurement === 'ml' ? 20 : 1;
+                $fragrance->deductStock($amount);
             } else {
                 Log::warning('Fragrance out of stock during task completion', [
                     'transaksi_id' => $transaksiId,
@@ -87,8 +89,7 @@ class InventoryService
 
         $ids = array_keys($aggregatedMaterials);
 
-        // 2. Fetch dan Lock DB dalam 1 query (hindari N+1 query problem). 
-        // Order by ID berguna untuk mencegah deadlock saat transaksi konkuren.
+        // 2. Fetch dan Lock DB
         $inventories = Inventory::whereIn('id', $ids)
             ->orderBy('id')
             ->lockForUpdate()
@@ -102,14 +103,16 @@ class InventoryService
             }
 
             $inventory = $inventories[$id];
-            if ($inventory->quantity < $quantity) {
-                throw new \Exception("Stok '{$inventory->name}' tidak mencukupi. Sisa stok: {$inventory->quantity}, dibutuhkan: {$quantity}.");
+            $totalAvailable = ($inventory->stock_units * $inventory->capacity_per_unit) + $inventory->stock_subunits;
+            if ($totalAvailable < $quantity) {
+                $unitName = $inventory->unit_of_measurement;
+                throw new \Exception("Stok '{$inventory->name}' tidak mencukupi. Sisa stok: {$totalAvailable} {$unitName}, dibutuhkan: {$quantity} {$unitName}.");
             }
         }
 
         // 4. Eksekusi pemotongan stok
         foreach ($aggregatedMaterials as $id => $quantity) {
-            $inventories[$id]->decrement('quantity', $quantity);
+            $inventories[$id]->deductStock($quantity);
         }
     }
 }

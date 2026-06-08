@@ -40,14 +40,9 @@
         </div>
     </div>
 
-    {{-- Filter Kategori & Search (search sudah di header, tapi kita sinkronkan) --}}
-    <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
-        <div class="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl">
-            <template x-for="role in allRoles" :key="role">
-                <button @click="activeFilter = role; currentPage = 1" :class="activeFilter === role ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'" class="px-4 py-2 rounded-lg font-medium transition-all text-sm" x-text="role"></button>
-            </template>
-        </div>
-        <div class="relative w-64">
+    {{-- Search Bar --}}
+    <div class="flex justify-end mb-6">
+        <div class="relative w-full sm:w-64">
             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             <input type="text" x-model="searchQuery" @input="currentPage = 1" placeholder="Cari nama petugas..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
@@ -56,23 +51,12 @@
     {{-- Grid Petugas --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <template x-for="petugas in paginatedData" :key="petugas.id">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-smooth hover-card">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 transition-smooth hover-card relative">
                 <div class="p-5">
                     <div class="flex items-start justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg" x-text="petugas.nama.charAt(0)"></div>
-                            <div>
-                                <h3 class="font-semibold text-gray-800" x-text="petugas.nama"></h3>
-                                <div class="flex items-center space-x-2 mt-1">
-                                    <span x-show="petugas.role === 'Admin'" class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">Admin</span>
-                                    <span x-show="petugas.role === 'Washing'" class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-700 font-medium">Washing</span>
-                                    <span x-show="petugas.role === 'Setrika'" class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-medium">Setrika</span>
-                                    <span x-show="petugas.role === 'Packing'" class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">Packing</span>
-                                    <span x-show="petugas.role === 'Kasir'" class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium">Kasir</span>
-                                    <span x-show="petugas.role === 'Kurir'" class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">Kurir</span>
-                                    <span class="text-xs text-gray-400" x-text="petugas.idPetugas"></span>
-                                </div>
-                            </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800" x-text="petugas.nama"></h3>
+                            <span class="text-xs text-gray-400" x-text="petugas.idPetugas"></span>
                         </div>
                         <div class="relative inline-block text-left">
                             <button @click="toggleDropdown('dropdown-petugas-' + petugas.id)"
@@ -256,8 +240,9 @@
 
             get filteredData() {
                 let result = this.petugasList;
-                result = result.filter(p => p.role === this.activeFilter);
-                if (this.searchQuery.trim() !== '') result = result.filter(p => p.nama.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                if (this.searchQuery.trim() !== '') {
+                    result = result.filter(p => p.nama.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                }
                 return result;
             },
 
@@ -272,8 +257,23 @@
             prevPage() { if (this.currentPage > 1) this.currentPage--; },
             nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
 
+            toggleDropdown(id) {
+                const dropdown = document.getElementById(id);
+                if (dropdown) {
+                    if (dropdown.classList.contains('hidden')) {
+                        // Close all other dropdowns
+                        document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                            el.classList.add('hidden');
+                        });
+                        dropdown.classList.remove('hidden');
+                    } else {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+            },
+
             openAddModal() {
-                this.selectedPetugas = { nama: '', role: this.activeFilter, status: 'Aktif', shift: '-' };
+                this.selectedPetugas = { nama: '', role: 'Washing', status: 'Aktif', shift: '-' };
                 this.modalMode = 'add';
             },
             async saveNewPetugas() {

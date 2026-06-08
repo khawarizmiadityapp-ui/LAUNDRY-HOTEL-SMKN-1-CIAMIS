@@ -53,7 +53,7 @@
                             {{-- Action Form --}}
                             <div x-data="{ 
                                 materials: [],
-                                availableMaterials: {{ json_encode($inventories->map(fn($i) => ['id' => $i->id, 'name' => $i->name, 'category' => $i->category])) }},
+                                availableMaterials: {{ json_encode($inventories->map(fn($i) => ['id' => $i->id, 'name' => $i->name, 'category' => $i->category, 'unit' => $i->unit_of_measurement])) }},
                                 addMaterial() { this.materials.push({ id: '', quantity: 1 }); },
                                 removeMaterial(index) { this.materials.splice(index, 1); },
                                 confirmSubmission(e) {
@@ -62,7 +62,8 @@
                                         this.materials.forEach((m) => {
                                             let item = this.availableMaterials.find(x => x.id == m.id);
                                             if(item) {
-                                                msg += `- ${item.name}: ${m.quantity} ml\n`;
+                                                let unit = item.unit || 'ml';
+                                                msg += `- ${item.name}: ${m.quantity} ${unit}\n`;
                                             }
                                         });
                                         msg += '\nApakah jumlah bahan yang dipakai ini sudah sesuai?';
@@ -116,7 +117,7 @@
                                 {{-- Multi-select Bahan (Inventory) --}}
                                 <div class="mb-6">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Penggunaan Bahan (ml)</label>
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Penggunaan Bahan</label>
                                         <button type="button" @click="addMaterial()" class="text-xs text-blue-600 font-bold hover:text-blue-700 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -141,7 +142,7 @@
                                                     <div class="relative">
                                                         <input type="number" x-model="material.quantity" :name="`materials[${index}][quantity]`" required min="0.1" step="0.1" placeholder="Qty"
                                                             class="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
-                                                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs text-slate-400 font-medium">ml</span>
+                                                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs text-slate-400 font-medium" x-text="availableMaterials.find(x => x.id == material.id)?.unit || 'ml'"></span>
                                                     </div>
                                                 </div>
                                                 <button type="button" @click="removeMaterial(index)" class="p-2 text-rose-500 hover:text-rose-600 hover:bg-rose-100 rounded-lg transition-colors">
