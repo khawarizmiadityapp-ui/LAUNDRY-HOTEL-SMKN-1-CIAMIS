@@ -119,6 +119,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [InventoryController::class, 'index'])->name('index');
             Route::post('/', [InventoryController::class, 'store'])->name('store');
             Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->middleware('throttle:30,1')->name('update');
+            Route::delete('/{id}', [InventoryController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
             Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->middleware('throttle:30,1')->name('request.approve');
             Route::post('/request/{id}/reject', [InventoryController::class, 'rejectAdjustment'])->middleware('throttle:30,1')->name('request.reject');
         });

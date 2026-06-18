@@ -14,6 +14,7 @@ class TransaksiObserver
     {
         Cache::forget('dashboard_stats');
         Cache::forget('dashboard_chart_data');
+        Cache::forget('dashboard_chart_data_v2');
         Cache::forget('dashboard_recent_transactions');
     }
 

@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PembayaranController extends Controller
 {
@@ -143,6 +144,18 @@ class PembayaranController extends Controller
                 $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
             }
 
+            // Validasi jumlah_bayar vs total_price
+            if ($validated['status_pembayaran'] === 'Lunas' && $validated['jumlah_bayar'] < $transaksi->total_price) {
+                DB::rollBack();
+                // Hapus file yang baru saja diupload jika validasi gagal
+                if ($buktiPath && Storage::disk('public')->exists($buktiPath)) {
+                    Storage::disk('public')->delete($buktiPath);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Jumlah bayar (Rp ' . number_format($validated['jumlah_bayar'], 0, ',', '.') . ') kurang dari total tagihan (Rp ' . number_format($transaksi->total_price, 0, ',', '.') . '). Transaksi tidak bisa dilunasi.');
+            }
+
             // Update status pembayaran transaksi
             $updateData = [];
             
@@ -169,6 +182,11 @@ class PembayaranController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Hapus file yang terlanjur diupload jika transaksi database gagal
+            if (isset($buktiPath) && Storage::disk('public')->exists($buktiPath)) {
+                Storage::disk('public')->delete($buktiPath);
+            }
 
             Log::error('Pembayaran store failed', [
                 'error' => $e->getMessage(),

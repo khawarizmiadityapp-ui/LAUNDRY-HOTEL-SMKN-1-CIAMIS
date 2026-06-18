@@ -33,6 +33,7 @@ class PosController extends Controller
         $readyToPickup = Transaksi::where('status', 'selesai')
             ->with(['details.layanan'])
             ->orderBy('updated_at', 'desc')
+            ->take(50)
             ->get();
 
         // Pre-format data for Alpine.js (avoid arrow functions in Blade @json)

@@ -17,42 +17,30 @@ class InventoryService
      */
     public function deductWashingSupplies(int $transaksiId, string $stage): void
     {
-        try {
-            // Deduct detergent
-            $detergent = Inventory::where('category', 'detergent')
-                ->lockForUpdate()
-                ->first();
-            
-            if ($detergent) {
-                // Default deduction: 50 ml for liquid/ml detergents, 1 pc for others
-                $amount = $detergent->unit_of_measurement === 'ml' ? 50 : 1;
-                $detergent->deductStock($amount);
-            } else {
-                Log::warning('Detergent out of stock during task completion', [
-                    'transaksi_id' => $transaksiId,
-                    'stage' => $stage,
-                ]);
-            }
+        // Deduct detergent
+        $detergent = Inventory::where('category', 'detergent')
+            ->lockForUpdate()
+            ->first();
+        
+        if ($detergent) {
+            // Default deduction: 50 ml for liquid/ml detergents, 1 pc for others
+            $amount = $detergent->unit_of_measurement === 'ml' ? 50 : 1;
+            $detergent->deductStock($amount);
+        } else {
+            throw new \Exception("Deterjen tidak ditemukan di gudang. Harap tambahkan stok deterjen terlebih dahulu.");
+        }
 
-            // Deduct fragrance
-            $fragrance = Inventory::where('category', 'fragrance')
-                ->lockForUpdate()
-                ->first();
-            
-            if ($fragrance) {
-                // Default deduction: 20 ml for liquid/ml fragrances, 1 pc for others
-                $amount = $fragrance->unit_of_measurement === 'ml' ? 20 : 1;
-                $fragrance->deductStock($amount);
-            } else {
-                Log::warning('Fragrance out of stock during task completion', [
-                    'transaksi_id' => $transaksiId,
-                    'stage' => $stage,
-                ]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to deduct washing supplies', [
-                'error' => $e->getMessage()
-            ]);
+        // Deduct fragrance
+        $fragrance = Inventory::where('category', 'fragrance')
+            ->lockForUpdate()
+            ->first();
+        
+        if ($fragrance) {
+            // Default deduction: 20 ml for liquid/ml fragrances, 1 pc for others
+            $amount = $fragrance->unit_of_measurement === 'ml' ? 20 : 1;
+            $fragrance->deductStock($amount);
+        } else {
+            throw new \Exception("Pewangi tidak ditemukan di gudang. Harap tambahkan stok pewangi terlebih dahulu.");
         }
     }
 

@@ -299,11 +299,6 @@ class AdminController extends Controller
 
             DB::commit();
 
-            // Invalidate cache
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data_v2');
-            Cache::forget('dashboard_recent_transactions');
-
             return redirect()->back()->with('success', 'Pesanan berhasil dibuat!');
 
         } catch (\Exception $e) {
@@ -335,11 +330,6 @@ class AdminController extends Controller
                 'updated_at' => now()
             ]);
 
-            // Invalidate cache
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data_v2');
-            Cache::forget('dashboard_recent_transactions');
-
             // Opsional: Tambahkan log history status jika punya tabel history
             // TransactionStatusHistory::create([...]);
 
@@ -369,11 +359,6 @@ class AdminController extends Controller
             $transaction->update([
                 'payment_status' => $request->payment_status
             ]);
-
-            // Invalidate cache
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data_v2');
-            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 
@@ -411,9 +396,14 @@ class AdminController extends Controller
             $price = ServicePrice::where('service_type', $request->service_type)->first();
             $pricePerKg = $price ? $price->price_per_kg : 6000;
 
+            // Validasi & Kalkulasi Ulang Harga
+            $calculatedTotalPrice = 0;
             // Jika transaksi asal dari POS (multi detail), biarkan price_per_kg tetap 0
             if ($transaction->price_per_kg == 0) {
                 $pricePerKg = 0;
+                $calculatedTotalPrice = $transaction->details->sum('subtotal');
+            } else {
+                $calculatedTotalPrice = $request->weight * $pricePerKg;
             }
 
             $transaction->update([
@@ -422,18 +412,13 @@ class AdminController extends Controller
                 'weight'         => $request->weight,
                 'service_type'   => $request->service_type,
                 'price_per_kg'   => $pricePerKg,
-                'total_price'    => $request->total_price,
+                'total_price'    => $calculatedTotalPrice, // Dihitung di backend agar tidak bisa dimanipulasi client
                 'payment_status' => $request->payment_status,
                 'payment_method' => $request->payment_method,
                 'status'         => $request->status,
                 'notes'          => $request->notes,
                 'updated_at'     => now()
             ]);
-
-            // Invalidate cache
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data_v2');
-            Cache::forget('dashboard_recent_transactions');
 
             return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
 
@@ -572,11 +557,6 @@ class AdminController extends Controller
         try {
             $transaksi = Transaksi::with(['details', 'tasks'])->findOrFail($id);
             $transaksi->delete();
-
-            // Invalidate cache
-            Cache::forget('dashboard_stats');
-            Cache::forget('dashboard_chart_data_v2');
-            Cache::forget('dashboard_recent_transactions');
 
             return back()->with('success', 'Data berhasil dihapus!');
 

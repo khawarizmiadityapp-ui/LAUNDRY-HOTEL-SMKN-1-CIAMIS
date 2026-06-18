@@ -167,4 +167,25 @@ class InventoryController extends Controller
             return redirect()->back()->with('error', 'Gagal menambahkan barang: ' . $e->getMessage());
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $item = Inventory::findOrFail($id);
+            
+            // Hapus request penyesuaian terkait jika ada agar tidak error constraint (jika ada)
+            InventoryAdjustmentRequest::where('inventory_id', $id)->delete();
+            
+            $item->delete();
+            
+            return redirect()->back()->with('success', 'Barang berhasil dihapus dari inventory.');
+        } catch (\Exception $e) {
+            $this->errorLogger->logError($e, 'Delete Inventory Failed', [
+                'operation' => 'inventory.destroy',
+                'user_id' => Auth::id(),
+                'inventory_id' => $id,
+            ]);
+            return redirect()->back()->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
+        }
+    }
 }

@@ -89,8 +89,15 @@
                 <!-- Product cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($detergents as $item)
-                    <div class="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div class="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative">
                         <div class="relative bg-gradient-to-br {{ $loop->index % 2 == 0 ? 'from-cyan-50 via-teal-50 to-sky-50' : 'from-blue-50 via-sky-50 to-indigo-50' }} h-44 flex items-center justify-center p-4">
+                            <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" class="absolute top-3 right-3 z-10" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Hapus Barang" class="w-8 h-8 rounded-full bg-white/50 hover:bg-red-100 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
                             @if($item->stock_units < $item->minimum_stock)
                             <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-red-50 border border-red-200 text-red-500 shadow-sm">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
@@ -168,7 +175,14 @@
                         ];
                         $style = $colors[$loop->index % 4];
                     @endphp
-                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 relative">
+                        <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" class="absolute top-3 right-3 z-10" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full hover:bg-red-50 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
                         <div class="w-11 h-11 rounded-xl {{ $style['bg'] }} flex items-center justify-center mb-3">
                             <svg class="w-5 h-5 {{ $style['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $style['icon'] }}"/>
@@ -247,11 +261,20 @@
                                 <p class="text-xs text-slate-400">Qty: <span id="qty{{ $item->id }}">{{ number_format($item->stock_units) }}</span></p>
                             </div>
                         </div>
-                        <button onclick="updateQty({{ $item->id }}, 'increment')" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-colors flex-shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                            </svg>
-                        </button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button onclick="updateQty({{ $item->id }}, 'increment')" title="Tambah Stok" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-colors flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </button>
+                            <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus hanger ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-colors flex-shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     @endforeach
                 </div>

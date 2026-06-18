@@ -54,7 +54,7 @@ class Inventory extends Model
             if ($this->stock_units < $amount) {
                 throw new \Exception("Stok {$this->name} tidak mencukupi. Sisa: {$this->stock_units} pcs.");
             }
-            $this->decrement('stock_units', $amount);
+            $this->stock_units -= (int) ceil($amount);
             $this->quantity = $this->stock_units;
             $this->save();
             return;
@@ -69,20 +69,20 @@ class Inventory extends Model
 
         if ($this->stock_subunits >= $amount) {
             // We have enough in the active/opened bottle
-            $this->decrement('stock_subunits', $amount);
+            $this->stock_subunits -= (int) round($amount);
         } else {
             // Active bottle is not enough, we need to open new bottle(s)
             $remainingNeed = $amount - $this->stock_subunits;
             $this->stock_subunits = 0;
 
             // Calculate how many full bottles we need to open
-            $bottlesToOpen = ceil($remainingNeed / $this->capacity_per_unit);
+            $bottlesToOpen = (int) ceil($remainingNeed / $this->capacity_per_unit);
             
-            $this->decrement('stock_units', $bottlesToOpen);
+            $this->stock_units -= $bottlesToOpen;
             
             // Set the active subunit of the newly opened bottle
             $newActiveSubunit = ($bottlesToOpen * $this->capacity_per_unit) - $remainingNeed;
-            $this->stock_subunits = $newActiveSubunit;
+            $this->stock_subunits = (int) round($newActiveSubunit);
         }
 
         $this->quantity = $this->stock_units;
