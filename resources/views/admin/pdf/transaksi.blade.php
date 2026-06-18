@@ -3,21 +3,31 @@
 <head>
     <title>Laporan Transaksi</title>
     <style>
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; }
+        body { font-family: sans-serif; font-size: 12px; }
+        .text-center { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
 
-<h2>Laporan Transaksi</h2>
+<h2 class="text-center">Laporan Transaksi Keuangan</h2>
+@if(isset($filter))
+    <p class="text-center">Filter: {{ str_replace('_', ' ', ucfirst($filter)) }}</p>
+@endif
 
 <table>
     <thead>
         <tr>
             <th>Kode</th>
-            <th>Nama</th>
+            <th>Pelanggan</th>
             <th>Layanan</th>
-            <th>Total</th>
+            <th>Berat</th>
+            <th>Total Harga</th>
+            <th>Status Pengerjaan</th>
+            <th>Status Pembayaran</th>
+            <th>Tanggal</th>
         </tr>
     </thead>
     <tbody>
@@ -25,8 +35,12 @@
         <tr>
             <td>{{ $trx->transaksi_code }}</td>
             <td>{{ $trx->customer_name }}</td>
-            <td>{{ $trx->service_type }}</td>
-            <td>{{ $trx->total_price }}</td>
+            <td>{{ ucfirst($trx->service_type) }}</td>
+            <td>{{ $trx->weight }} kg</td>
+            <td>Rp {{ number_format($trx->total_price, 0, ',', '.') }}</td>
+            <td>{{ ucfirst($trx->status) }}</td>
+            <td>{{ str_replace('_', ' ', ucfirst($trx->payment_status)) }}</td>
+            <td>{{ $trx->created_at->format('d/m/Y H:i') }}</td>
         </tr>
         @endforeach
     </tbody>

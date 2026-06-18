@@ -27,10 +27,7 @@
             <dt class="text-gray-500">Nominal</dt>
             <dd class="col-span-2 font-semibold">Rp {{ number_format($pengeluaran->nominal, 0, ',', '.') }}</dd>
         </div>
-        <div class="grid grid-cols-3 gap-3">
-            <dt class="text-gray-500">Status</dt>
-            <dd class="col-span-2">{{ ucfirst($pengeluaran->status) }}</dd>
-        </div>
+
         <div class="grid grid-cols-3 gap-3">
             <dt class="text-gray-500">Keterangan</dt>
             <dd class="col-span-2">{{ $pengeluaran->keterangan ?? '-' }}</dd>

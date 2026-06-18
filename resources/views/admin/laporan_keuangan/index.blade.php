@@ -24,10 +24,10 @@
                 class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : '' }}"
                 >Custom</button>
             </div>
-            <a href="{{ route('export.transaksi.excel') }}" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
+            <a href="{{ route('export.transaksi.excel') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
                 <i class="fas fa-file-excel"></i> Export Excel
             </a>
-            <a href="{{ route('export.transaksi.pdf') }}"
+            <a href="{{ route('export.transaksi.pdf') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}"
              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
                 <i class="fas fa-file-pdf"></i> Export PDF
             </a>
@@ -82,7 +82,12 @@
     <div class="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
             <div>
-                <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Bulan Ini</h3>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Bulan Ini</h3>
+                    <button onclick="document.getElementById('targetModal').classList.remove('hidden')" class="text-blue-500 hover:text-blue-700 text-sm">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
                 <p class="text-sm text-gray-500">Target: Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} • Realisasi: Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</p>
             </div>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
@@ -91,6 +96,39 @@
         </div>
         <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
             <div class="h-full {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-500' : 'bg-blue-600' }}" style="width: {{ min(100, $persenTargetBulanIni) }}%"></div>
+        </div>
+    </div>
+
+    {{-- ── Edit Target Modal (Hidden by default) ── --}}
+    <div id="targetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('targetModal').classList.add('hidden')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="{{ route('admin.update_target') }}" method="POST">
+                    @csrf
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-3-2.818l.879.659c1.171.33 2.51-.645 2.51-1.857v-1a2 2 0 011.01-1.756l.291-.16c1.043-.614 1.043-2.07 0-2.684L13.51 9.24a2 2 0 01-1.01-1.756V6.5a1.5 1.5 0 013 0v.5" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Target Bulanan</h3>
+                                <div class="mt-4">
+                                    <label for="target" class="block text-sm font-medium text-gray-700">Jumlah Target (Rp)</label>
+                                    <input type="number" name="target" id="target" value="{{ $limitPemasukanBulanan }}" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                        <button type="button" onclick="document.getElementById('targetModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -117,46 +155,19 @@
             <div class="bg-white rounded-2xl shadow-md p-5">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-chart-simple text-blue-500"></i> Distribusi Pengeluaran</h3>
                 <div class="mt-4 space-y-4">
-                    <!-- Operasional & Gaji 45% -->
+                    @forelse($distribusiPengeluaran as $item)
                     <div>
                         <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">Operasional</span>
-                            <span class="text-gray-600">45%</span>
+                            <span class="font-medium text-gray-700">{{ $item['kategori'] }}</span>
+                            <span class="text-gray-600">{{ $item['persen'] }}%</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 45%"></div>
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $item['persen'] }}%"></div>
                         </div>
                     </div>
-                    <!-- Bahan Kimia & Sabun 25% -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">Bahan Kimia & Sabun</span>
-                            <span class="text-gray-600">25%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 25%"></div>
-                        </div>
-                    </div>
-                    <!-- Listrik & Air 20% -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">Listrik & Air</span>
-                            <span class="text-gray-600">20%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 20%"></div>
-                        </div>
-                    </div>
-                    <!-- Lain-lain 10% -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">Lain-lain</span>
-                            <span class="text-gray-600">10%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 10%"></div>
-                        </div>
-                    </div>
+                    @empty
+                    <p class="text-sm text-gray-500">Belum ada pengeluaran.</p>
+                    @endforelse
                 </div>
             </div>
 

@@ -36,19 +36,9 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nominal</label>
-                    <input type="number" min="0" name="nominal" value="{{ old('nominal') }}" class="w-full border border-gray-300 rounded-xl px-3 py-2.5" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status" class="w-full border border-gray-300 rounded-xl px-3 py-2.5" required>
-                        <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="lunas" {{ old('status') === 'lunas' ? 'selected' : '' }}>Lunas</option>
-                        <option value="urgent" {{ old('status') === 'urgent' ? 'selected' : '' }}>Urgent</option>
-                    </select>
-                </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nominal</label>
+                <input type="number" min="0" name="nominal" value="{{ old('nominal') }}" class="w-full border border-gray-300 rounded-xl px-3 py-2.5" required>
             </div>
 
             <div>

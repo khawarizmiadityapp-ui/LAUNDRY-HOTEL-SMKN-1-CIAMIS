@@ -116,15 +116,7 @@
                 @endforeach
             </select>
         </div>
-        <div>
-            <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Status</label>
-            <select name="status" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white">
-                <option value="">Semua Status</option>
-                <option value="lunas"   {{ request('status') == 'lunas'   ? 'selected' : '' }}>Lunas</option>
-                <option value="urgent"  {{ request('status') == 'urgent'  ? 'selected' : '' }}>Urgent</option>
-                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-            </select>
-        </div>
+
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Dari Tanggal</label>
             <input type="date" name="dari" value="{{ request('dari') }}"
@@ -155,7 +147,7 @@
                     <th class="text-left px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Tanggal</th>
                     <th class="text-right px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Nominal</th>
                     <th class="text-left px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Bon</th>
-                    <th class="text-center px-4 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Status</th>
+
                     <th class="text-center px-6 py-3.5 text-xs font-700 text-gray-400 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -201,20 +193,6 @@
                         @endif
                     </td>
 
-                    {{-- Status --}}
-                    <td class="px-4 py-4 text-center">
-                        @php
-                            $statusKey = strtolower($item->status);
-                            $badgeClass = match($statusKey) {
-                                'lunas'   => 'badge-lunas',
-                                'urgent'  => 'badge-urgent',
-                                default   => 'badge-pending',
-                            };
-                        @endphp
-                        <span class="inline-block text-xs font-600 uppercase tracking-wider px-3 py-1 rounded-full {{ $badgeClass }}">
-                            {{ ucfirst($item->status) }}
-                        </span>
-                    </td>
 
                     {{-- Aksi Dropdown --}}
                     <td class="px-6 py-4 text-center relative">
@@ -257,7 +235,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-16 text-gray-400">
+                    <td colspan="7" class="text-center py-16 text-gray-400">
                         <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>

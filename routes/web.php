@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth']], function () {
         
         // Dashboard
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('/update-target', [AdminController::class, 'updateTarget'])->name('update_target');
         
         // POS (Pesanan Baru)
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');

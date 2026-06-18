@@ -16,7 +16,6 @@ class PengeluaranController extends Controller
         // Base query with filters
         $query = Pengeluaran::query()
             ->when($request->kategori, fn($q) => $q->kategori($request->kategori))
-            ->when($request->status,   fn($q) => $q->status($request->status))
             ->when(
                 $request->dari || $request->sampai,
                 fn($q) => $q->dateRange($request->dari, $request->sampai)
@@ -81,7 +80,6 @@ class PengeluaranController extends Controller
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
-            'status'     => 'required|in:lunas,pending,urgent',
             'bon_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
@@ -121,7 +119,6 @@ class PengeluaranController extends Controller
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
-            'status'     => 'required|in:lunas,pending,urgent',
             'bon_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
@@ -167,7 +164,7 @@ class PengeluaranController extends Controller
             $handle = fopen('php://output', 'w');
             // BOM for Excel UTF-8
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
-            fputcsv($handle, ['ID Transaksi', 'Nama', 'Kategori', 'Keterangan', 'Tanggal', 'Nominal', 'Status']);
+            fputcsv($handle, ['ID Transaksi', 'Nama', 'Kategori', 'Keterangan', 'Tanggal', 'Nominal']);
             foreach ($data as $row) {
                 fputcsv($handle, [
                     $row->id_transaksi,
@@ -176,7 +173,6 @@ class PengeluaranController extends Controller
                     $row->keterangan,
                     $row->tanggal->format('d/m/Y'),
                     $row->nominal,
-                    $row->status,
                 ]);
             }
             fclose($handle);

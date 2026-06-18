@@ -47,18 +47,30 @@ class TransaksiController extends Controller
     return back();
 }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new TransactionsExport, 'laporan-keuangan.xlsx');
+        return Excel::download(new TransactionsExport($request->filter), 'laporan-keuangan.xlsx');
     }
 
-    public function exportPdf()
+    public function exportPdf(Request $request)
     {
-    $data = Transaksi::with(['user', 'customer', 'details.layanan'])->get();
+        $filter = $request->filter;
+        $query = Transaksi::with(['user', 'customer', 'details.layanan']);
+        
+        if ($filter == 'bulan_ini') {
+            $query->whereMonth('created_at', now()->month)
+                  ->whereYear('created_at', now()->year);
+        } elseif ($filter == 'target') {
+            $query->where('payment_status', 'lunas');
+        } elseif ($filter == 'tahun_ini') {
+            $query->whereYear('created_at', now()->year);
+        }
+        
+        $data = $query->get();
 
-    $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data'))->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data', 'filter'))->setPaper('a4', 'landscape');
 
-    return $pdf->download('laporan-keuangan.pdf');
+        return $pdf->download('laporan-keuangan.pdf');
     }
 
 }

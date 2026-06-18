@@ -571,4 +571,30 @@ class AdminController extends Controller
         }
     }
 
+    public function updateTarget(Request $request)
+    {
+        $request->validate([
+            'target' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $path = base_path('.env');
+            if (file_exists($path)) {
+                $envContent = file_get_contents($path);
+                $oldValue = env('MONTHLY_INCOME_LIMIT', 50000000);
+                
+                if (str_contains($envContent, 'MONTHLY_INCOME_LIMIT=')) {
+                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $request->target, $envContent);
+                } else {
+                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $request->target;
+                }
+                
+                file_put_contents($path, $envContent);
+            }
+            
+            return back()->with('success', 'Target pendapatan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui target.');
+        }
+    }
 }

@@ -108,6 +108,19 @@ class LaporanController extends Controller
             ->orderBy('kategori')
             ->pluck('kategori');
 
+        $distribusiPengeluaran = (clone $pengeluaranQuery)
+            ->selectRaw('kategori, SUM(nominal) as total')
+            ->groupBy('kategori')
+            ->orderByDesc('total')
+            ->get()
+            ->map(function ($item) use ($pengeluaran) {
+                return [
+                    'kategori' => $item->kategori,
+                    'total' => $item->total,
+                    'persen' => $pengeluaran > 0 ? round(($item->total / $pengeluaran) * 100, 1) : 0
+                ];
+            });
+
         $persenLaba = $pemasukan > 0
             ? ($laba / $pemasukan) * 100
             : 0;
@@ -137,6 +150,7 @@ class LaporanController extends Controller
             'targetAnggaran' => $targetAnggaran,
             'kategoriTerbesar' => $kategoriTerbesar,
             'kategoriList' => $kategoriList,
+            'distribusiPengeluaran' => $distribusiPengeluaran,
             'persenLaba' => $persenLaba,
             'laporanBulanan' => $laporanBulanan,
             'limitPemasukanBulanan' => $limitPemasukanBulanan,
