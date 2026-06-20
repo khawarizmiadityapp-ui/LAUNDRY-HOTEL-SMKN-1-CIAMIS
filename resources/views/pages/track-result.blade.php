@@ -84,7 +84,7 @@
                                     <h4 class="text-sm font-extrabold text-slate-800 tracking-tight">Pesanan Diterima</h4>
                                     <span class="text-[10px] font-bold text-slate-400">{{ $order->created_at->format('H:i') }}</span>
                                 </div>
-                                <p class="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Oleh: {{ $order->user->name ?? 'Customer Service' }}</p>
+                                <p class="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Oleh: {{ $order->kasir_name ?? $order->user->name ?? 'Customer Service' }}</p>
                             </div>
                         </div>
 
@@ -193,7 +193,7 @@
 
         {{-- Help Banner --}}
         @php
-            $adminWA = "6282116035029"; // Nomor CS SMKN 1 Ciamis
+            $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
             $trackMsg = "Halo Admin Bening Laundry, saya ingin menanyakan pesanan saya dengan nomor invoice #" . $order->transaksi_code;
         @endphp
         <div class="bg-emerald-500 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-emerald-100">

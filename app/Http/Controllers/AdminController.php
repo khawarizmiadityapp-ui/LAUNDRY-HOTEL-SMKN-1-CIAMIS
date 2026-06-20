@@ -597,4 +597,44 @@ class AdminController extends Controller
             return back()->with('error', 'Gagal memperbarui target.');
         }
     }
+
+    public function settings()
+    {
+        $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
+        $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
+        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'target' => 'required|numeric|min:0',
+            'admin_wa' => 'required|string',
+        ]);
+
+        try {
+            // Update target limit in .env
+            $path = base_path('.env');
+            if (file_exists($path)) {
+                $envContent = file_get_contents($path);
+                if (str_contains($envContent, 'MONTHLY_INCOME_LIMIT=')) {
+                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $request->target, $envContent);
+                } else {
+                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $request->target;
+                }
+                file_put_contents($path, $envContent);
+            }
+
+            // Update WhatsApp number in settings table
+            $phone = preg_replace('/[^0-9]/', '', $request->admin_wa);
+            if (str_starts_with($phone, '0')) {
+                $phone = '62' . substr($phone, 1);
+            }
+            \App\Models\Setting::setValue('admin_wa', $phone);
+
+            return back()->with('success', 'Pengaturan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
+        }
+    }
 }

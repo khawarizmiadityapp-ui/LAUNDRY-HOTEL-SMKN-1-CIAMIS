@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->integer('dibayar')->default(0)->after('total_price');
+            $table->string('kasir_name')->nullable()->after('user_id');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->dropColumn('dibayar');
+            $table->dropColumn('kasir_name');
         });
     }
 };

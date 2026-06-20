@@ -50,8 +50,8 @@
 </div>
 
 <!-- TABLE -->
-<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-    <div class="overflow-x-auto">
+<div class="bg-white rounded-xl shadow-sm border">
+    <div class="overflow-x-auto min-h-[300px]">
         <table class="w-full text-sm text-slate-600 min-w-[950px] table-auto">
         <thead class="bg-slate-50 text-slate-700">
             <tr>
@@ -119,8 +119,16 @@
                 </td>
     
                 <!-- Total -->
-                <td class="px-6 py-4 align-middle font-semibold text-slate-800 whitespace-nowrap">
-                    Rp {{ number_format($trx->total_price,0,',','.') }}
+                <td class="px-6 py-4 align-middle whitespace-nowrap">
+                    <div class="font-semibold text-slate-800">
+                        Rp {{ number_format($trx->total_price, 0, ',', '.') }}
+                    </div>
+                    @if($trx->dibayar > 0)
+                    <div class="text-[11px] text-slate-500 mt-1 leading-tight">
+                        <span class="text-slate-400">Tunai:</span> Rp {{ number_format($trx->dibayar, 0, ',', '.') }}<br>
+                        <span class="text-emerald-500 font-medium">Kembali: Rp {{ number_format($trx->kembalian, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
                 </td>
     
                 <!-- Aksi -->

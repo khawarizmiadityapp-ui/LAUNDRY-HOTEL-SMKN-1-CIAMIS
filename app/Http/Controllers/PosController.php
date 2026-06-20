@@ -50,7 +50,9 @@ class PosController extends Controller
             ];
         });
 
-        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup'));
+        $petugasList = \App\Models\Petugas::orderBy('nama')->get();
+
+        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup', 'petugasList'));
     }
 
     /**
@@ -121,7 +123,9 @@ class PosController extends Controller
             'items.*.qty'      => 'required|numeric|min:0.1',
             'payment_method'   => 'required|in:tunai,qris,transfer',
             'payment_status'   => 'required|in:lunas,belum_bayar',
-            'notes'            => 'nullable|string',
+            'kasir_name'       => 'required|string|max:255',
+            'dibayar'          => 'nullable|numeric|min:0',
+            'kembalian'        => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -156,6 +160,7 @@ class PosController extends Controller
             $transaksi = Transaksi::create([
                 'transaksi_code' => $transactionCode,
                 'user_id'        => Auth::id(),
+                'kasir_name'     => $request->kasir_name,
                 'customer_id'    => $customer->id,
                 'customer_name'  => $customer->nama,
                 'customer_phone' => $customer->no_hp ?? '-',
@@ -166,7 +171,8 @@ class PosController extends Controller
                 'status'         => 'diterima',
                 'payment_status' => $request->payment_status,
                 'payment_method' => $request->payment_method,
-                'notes'          => $request->notes,
+                'dibayar'        => $request->input('dibayar', 0),
+                'kembalian'      => $request->input('kembalian', 0),
             ]);
 
             foreach ($detailsData as $detail) {

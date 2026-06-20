@@ -1,5 +1,5 @@
 {{-- resources/views/admin/customers/create.blade.php --}}
-@extends('layouts.admin')
+@extends('layouts.' . (auth()->user()->role === 'admin' ? 'admin' : 'petugas_piket'))
 
 @section('title', 'Tambah Customer Baru')
 

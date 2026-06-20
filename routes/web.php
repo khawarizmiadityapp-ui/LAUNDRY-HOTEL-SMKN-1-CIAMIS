@@ -44,6 +44,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::post('/update-target', [AdminController::class, 'updateTarget'])->name('update_target');
         
+        // Settings
+        Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+        Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
+        
         // POS (Pesanan Baru)
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
         
@@ -57,15 +61,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::delete('/{id}', [AdminController::class, 'destroyTransaction'])->middleware('throttle:20,1')->name('destroy');
         });
         
-        // Customer Management
-        Route::prefix('customers')->name('customers.')->group(function () {
-            Route::get('/', [CustomerController::class, 'index'])->name('index');
-            Route::get('/create', [CustomerController::class, 'create'])->name('create');
-            Route::post('/', [CustomerController::class, 'store'])->middleware('throttle:30,1')->name('store');
-            Route::get('/{id}/edit', [CustomerController::class, 'edit'])->name('edit');
-            Route::patch('/{id}', [CustomerController::class, 'update'])->middleware('throttle:30,1')->name('update');
-            Route::delete('/{id}', [CustomerController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
-        });
+
         
         // Layanan Management
         Route::resource('layanan', LayananController::class)->except(['show', 'create', 'edit'])->middleware('throttle:30,1');
@@ -145,6 +141,16 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/pos/order', [PosController::class, 'store'])->middleware('throttle:60,1')->name('pos.order.store');
         Route::get('/transaksi/{id}/nota', [PosController::class, 'nota'])->name('pos.nota');
         Route::post('/transaksi/{id}/pickup', [PosController::class, 'pickup'])->middleware('throttle:60,1')->name('pos.pickup');
+    });
+    
+    // Shared Customer Management
+    Route::prefix('customers')->name('admin.customers.')->middleware(['throttle:100,1'])->group(function () {
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerController::class, 'create'])->name('create');
+        Route::post('/', [CustomerController::class, 'store'])->middleware('throttle:30,1')->name('store');
+        Route::get('/{id}/edit', [CustomerController::class, 'edit'])->name('edit');
+        Route::patch('/{id}', [CustomerController::class, 'update'])->middleware('throttle:30,1')->name('update');
+        Route::delete('/{id}', [CustomerController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
     });
     
     // Export Routes (Admin + Staff with permission)

@@ -1,5 +1,5 @@
 {{-- resources/views/admin/customers/index.blade.php --}}
-@extends('layouts.admin')
+@extends('layouts.' . (auth()->user()->role === 'admin' ? 'admin' : 'petugas_piket'))
 
 @section('title', 'Manajemen Customer')
 
@@ -192,5 +192,37 @@
     @endif
 
 </div>
+
+@push('scripts')
+<script>
+    window.toggleDropdown = window.toggleDropdown || function(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown.classList.contains('hidden')) {
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            dropdown.classList.remove('hidden');
+        } else {
+            dropdown.classList.add('hidden');
+        }
+    };
+
+    document.addEventListener('click', function(event) {
+        const toggleBtn = event.target.closest('button');
+        let isDropdownToggle = false;
+        if (toggleBtn) {
+            const val = toggleBtn.getAttribute('onclick');
+            isDropdownToggle = val && val.includes('toggleDropdown');
+        }
+        if (!isDropdownToggle) {
+            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
+                if (!el.contains(event.target)) {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+@endpush
 
 @endsection

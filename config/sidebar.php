@@ -88,6 +88,13 @@ return [
             'active' => ['admin.inventory.*'],
             'roles' => ['admin'],
         ],
+        [
+            'icon' => 'M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 1 11 16H2m12 2.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z',
+            'label' => 'Pengaturan',
+            'route' => 'admin.settings',
+            'active' => ['admin.settings'],
+            'roles' => ['admin'],
+        ],
     ],
 
     // Petugas/Staff menus
@@ -105,6 +112,14 @@ return [
             'route' => 'petugas.pos.index',
             'active' => ['petugas.pos.*'],
             'icon' => 'M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z',
+            'divisions' => ['customer_service'],
+            'roles' => ['admin', 'staff'],
+        ],
+        [
+            'label' => 'Daftar Customer',
+            'route' => 'admin.customers.index',
+            'active' => ['admin.customers.*'],
+            'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
             'divisions' => ['customer_service'],
             'roles' => ['admin', 'staff'],
         ],

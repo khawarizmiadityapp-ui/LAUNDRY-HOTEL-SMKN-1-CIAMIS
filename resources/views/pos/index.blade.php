@@ -98,11 +98,47 @@
     /* Smooth scrollbar for right panel */
     .order-panel::-webkit-scrollbar { width: 4px; }
     .order-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+    @if(auth()->user()->role !== 'admin')
+    /* Override cashier layout constraints for full-screen POS */
+    body {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
+    main {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    main > div.max-w-screen-xl {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+        flex: 1 1 0% !important;
+        height: 100% !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    main > div.max-w-screen-xl > div.p-6 {
+        padding: 0 !important;
+        flex: 1 1 0% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    div[x-data="posApp()"] {
+        margin: 0 !important;
+        height: 100% !important;
+    }
+    @endif
 </style>
 @endpush
 
 @section('content')
-<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-0 -mx-5 lg:-mx-8 -my-8 h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-hidden">
+<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-0 -mx-5 lg:-mx-8 -my-8 {{ auth()->user()->role === 'admin' ? 'h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-hidden' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4rem)]' }}">
 
     {{-- ═══════════ LEFT: Service Grid ═══════════ --}}
     <div class="flex-1 p-5 lg:p-7 overflow-y-auto">
@@ -324,7 +360,7 @@
             </div>
         </div>
     </div>
-    <div class="w-full lg:w-[380px] bg-white border-l border-slate-100 flex flex-col order-panel shrink-0">
+    <div class="w-full lg:w-[380px] bg-white border-l border-slate-100 flex flex-col order-panel shrink-0 overflow-y-auto">
 
         {{-- Cart Header --}}
         <div class="p-5 border-b border-slate-100">
@@ -424,28 +460,85 @@
                 </button>
             </div>
 
-            {{-- Notes --}}
-            <textarea x-model="notes" rows="2" placeholder="Catatan pesanan (opsional)..."
-                      class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-400/30 resize-none placeholder:text-slate-300"></textarea>
+            <!-- Cash Change Calculator (only for Tunai & Lunas payment) -->
+            <div x-show="paymentMethod === 'tunai' && paymentStatus === 'lunas'" x-cloak class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                <div>
+                    <label for="cash_received" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 font-sans">Nominal Uang Pelanggan</label>
+                    <div class="relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-semibold text-xs">
+                            Rp
+                        </div>
+                        <input type="number" id="cash_received" x-model.number="cashReceived"
+                               class="w-full pl-8 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-semibold"
+                               placeholder="Contoh: 50000" min="0">
+                    </div>
+                    <div x-show="cashReceived && cashReceived < totalTagihan" x-cloak class="text-xs text-rose-500 font-semibold mt-1">
+                        Uang pelanggan kurang dari total tagihan
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-500">
+                    <span>Kembalian</span>
+                    <span class="text-sm font-bold text-emerald-600 font-sans" x-text="formatRupiah(changeAmount)"></span>
+                </div>
+            </div>
+
+            {{-- Petugas Kasir --}}
+            <div class="space-y-1.5 relative" @click.outside="showKasirDropdown = false">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Petugas Kasir <span class="text-rose-500">*</span></label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                        </svg>
+                    </span>
+                    <input type="text"
+                           x-model="kasirSearch"
+                           @input="filterKasir()"
+                           @focus="showKasirDropdown = true"
+                           placeholder="Cari nama Kasir..."
+                           class="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl
+                                  focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500
+                                  placeholder:text-slate-300 transition-all font-medium text-slate-800">
+                    
+                    {{-- Autocomplete Dropdown --}}
+                    <div x-show="showKasirDropdown && filteredKasirList.length > 0" x-cloak
+                         class="absolute bottom-full left-0 right-0 mb-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+                        <template x-for="p in filteredKasirList" :key="p.id_petugas">
+                            <button type="button" @click="selectKasir(p)"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition text-left">
+                                <div class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-xs font-bold" x-text="p.nama.charAt(0).toUpperCase()"></div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 truncate" x-text="p.nama"></p>
+                                    <p class="text-xs text-slate-400" x-text="p.id_petugas"></p>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Error Warning --}}
+                <div x-show="isKasirInvalid && kasirSearch.length > 0" x-cloak class="text-xs text-rose-500 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                    </svg>
+                    <span>Petugas tidak terdaftar</span>
+                </div>
+            </div>
 
             {{-- Submit --}}
             <button @click="submitOrder()"
-                    :disabled="cart.length === 0 || !selectedCustomer || submitting"
-                    :class="cart.length === 0 || !selectedCustomer ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-brand-200'"
+                    :disabled="cart.length === 0 || !selectedCustomer || submitting || isKasirInvalid || isPaymentInvalid"
+                    :class="cart.length === 0 || !selectedCustomer || isKasirInvalid || isPaymentInvalid ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-brand-200'"
                     class="w-full py-3 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-semibold text-sm
                            flex items-center justify-center gap-2 transition-all duration-200">
-                <template x-if="!submitting">
-                    <span class="flex items-center gap-2">
-                        Proses Pesanan
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                    </span>
-                </template>
-                <template x-if="submitting">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        Memproses...
-                    </span>
-                </template>
+                <span x-show="!submitting" class="flex items-center gap-2">
+                    Proses Pesanan
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                </span>
+                <span x-show="submitting" x-cloak class="flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    Memproses...
+                </span>
             </button>
         </div>
     </div>
@@ -649,7 +742,12 @@ function posApp() {
         showNewCustomerModal: false,
         paymentMethod: 'tunai',
         paymentStatus: 'belum_bayar',
-        notes: '',
+        cashReceived: '',
+        petugasList: @json($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])),
+        kasirSearch: '',
+        showKasirDropdown: false,
+        isKasirInvalid: true,
+        filteredKasirList: [],
         viewMode: 'order', // 'order' or 'pickup'
         submitting: false,
         currentDate: '',
@@ -665,6 +763,39 @@ function posApp() {
             const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
             const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
             this.currentDate = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} • ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            
+            // Initialize cashier list
+            this.filteredKasirList = this.petugasList;
+            
+            // Load saved cashier name
+            let savedKasir = localStorage.getItem('petugas_kasir_name');
+            if (!savedKasir && "{{ auth()->check() }}") {
+                savedKasir = "{{ auth()->user()->name }}";
+            }
+            if (savedKasir) {
+                this.kasirSearch = savedKasir;
+                const exactMatch = this.petugasList.some(p => p.nama.toLowerCase() === savedKasir.toLowerCase().trim());
+                this.isKasirInvalid = !exactMatch;
+            }
+        },
+
+        filterKasir() {
+            const q = this.kasirSearch.toLowerCase().trim();
+            if (q === '') {
+                this.filteredKasirList = this.petugasList;
+                this.isKasirInvalid = true;
+            } else {
+                this.filteredKasirList = this.petugasList.filter(p => p.nama.toLowerCase().includes(q));
+                const exactMatch = this.petugasList.find(p => p.nama.toLowerCase() === q);
+                this.isKasirInvalid = !exactMatch;
+            }
+        },
+
+        selectKasir(p) {
+            this.kasirSearch = p.nama;
+            this.showKasirDropdown = false;
+            this.isKasirInvalid = false;
+            localStorage.setItem('petugas_kasir_name', p.nama);
         },
 
         // Computed
@@ -673,6 +804,18 @@ function posApp() {
         },
         get totalTagihan() {
             return this.subtotal;
+        },
+        get changeAmount() {
+            if (!this.cashReceived || this.cashReceived < this.totalTagihan) {
+                return 0;
+            }
+            return this.cashReceived - this.totalTagihan;
+        },
+        get isPaymentInvalid() {
+            if (this.paymentStatus === 'lunas' && this.paymentMethod === 'tunai') {
+                return !this.cashReceived || this.cashReceived < this.totalTagihan;
+            }
+            return false;
         },
 
         // Methods
@@ -772,7 +915,7 @@ function posApp() {
         },
 
         async submitOrder() {
-            if (!this.selectedCustomer || this.cart.length === 0) return;
+            if (!this.selectedCustomer || this.cart.length === 0 || this.isKasirInvalid) return;
             this.submitting = true;
 
             const payload = {
@@ -780,7 +923,9 @@ function posApp() {
                 items: this.cart.map(i => ({ layanan_id: i.id, qty: i.qty })),
                 payment_method: this.paymentMethod,
                 payment_status: this.paymentStatus,
-                notes: this.notes,
+                kasir_name: this.kasirSearch,
+                dibayar: this.paymentMethod === 'tunai' ? (this.cashReceived || 0) : this.totalTagihan,
+                kembalian: this.paymentMethod === 'tunai' ? this.changeAmount : 0,
             };
 
             try {

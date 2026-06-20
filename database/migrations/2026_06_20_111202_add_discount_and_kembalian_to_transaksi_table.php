@@ -6,13 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->integer('dibayar')->default(0)->after('total_price');
+            if (!Schema::hasColumn('transaksi', 'discount')) {
+                $table->integer('discount')->default(0)->after('total_price');
+            }
+            if (!Schema::hasColumn('transaksi', 'kembalian')) {
+                $table->integer('kembalian')->default(0)->after('dibayar');
+            }
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->dropColumn('dibayar');
+            $table->dropColumn(['discount', 'kembalian']);
         });
     }
 };

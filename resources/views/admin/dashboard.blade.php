@@ -27,7 +27,7 @@
     @include('components.stat-card', [
         'icon'   => 'M12 6v12m-3-2.818.879.659c1.171.33 2.51-.645 2.51-1.857v-1a2 2 0 011.01-1.756l.291-.16c1.043-.614 1.043-2.07 0-2.684L13.51 9.24a2 2 0 01-1.01-1.756V6.5a1.5 1.5 0 013 0v.5',
         'label'  => 'Total Pendapatan',
-        'value'  => 'Rp ' . number_format($stats['total_income'] / 1000, 1) . 'K',
+        'value'  => 'Rp ' . number_format($stats['total_income'], 0, ',', '.'),
         'sub'    => 'Pemasukan lunas',
         'badge'  => 'Aktif',
         'up'     => true,
@@ -37,7 +37,7 @@
     @include('components.stat-card', [
         'icon'   => 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
         'label'  => 'Total Pengeluaran',
-        'value'  => 'Rp ' . number_format($stats['total_expense'] / 1000, 1) . 'K',
+        'value'  => 'Rp ' . number_format($stats['total_expense'], 0, ',', '.'),
         'sub'    => 'Biaya operasional',
         'badge'  => 'Bulan ini',
         'up'     => false,
@@ -248,7 +248,7 @@ let currentChart = new Chart(ctx, {
                     font: { size: 11 },
                     padding: 8,
                     callback: function(value) {
-                        return 'Rp ' + (value / 1000) + 'K';
+                        return 'Rp ' + value.toLocaleString('id-ID');
                     }
                 }
             }

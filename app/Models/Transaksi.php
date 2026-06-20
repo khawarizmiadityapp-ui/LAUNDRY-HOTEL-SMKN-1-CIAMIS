@@ -18,6 +18,7 @@ class Transaksi extends Model
     protected $fillable = [
         'transaksi_code',
         'user_id',
+        'kasir_name',
         'customer_id',
         'customer_name',
         'customer_phone',
@@ -29,7 +30,10 @@ class Transaksi extends Model
         'payment_status',
         'payment_method',
         'bukti_pembayaran',
-        'notes'
+        'notes',
+        'dibayar',
+        'kembalian',
+        'discount',
     ];
 
     protected $casts = [

@@ -1,3 +1,7 @@
+@php
+    $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
+    $formattedWA = '+' . substr($adminWA, 0, 2) . ' ' . substr($adminWA, 2, 3) . '-' . substr($adminWA, 5, 4) . '-' . substr($adminWA, 9);
+@endphp
 <!DOCTYPE html>
 <html lang="id" class="h-full scroll-smooth">
 <head>
@@ -105,7 +109,7 @@
                         Nikmati layanan laundry premium dengan standar kebersihan tertinggi. Kami pastikan setiap helai pakaian Anda kembali bersih, rapi, dan sejuk dipandang.
                     </p>
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                        <a href="https://wa.me/628123456789?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-xl shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all">Pesan Layanan</a>
+                        <a href="https://wa.me/{{ $adminWA }}?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-xl shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all">Pesan Layanan</a>
                         <a href="#tracking" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">Lacak Cucian</a>
                     </div>
                 </div>
@@ -242,7 +246,7 @@
 
                 <div class="space-y-6">
                     <h4 class="text-lg font-bold tracking-tight">Hubungi Kami</h4>
-                    <a href="https://wa.me/628123456789" target="_blank" class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group">
+                    <a href="https://wa.me/{{ $adminWA }}" target="_blank" class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group">
                         <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
@@ -250,7 +254,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">WhatsApp Chat</p>
-                            <p class="text-sm font-bold">+62 812-3456-789</p>
+                            <p class="text-sm font-bold">{{ $formattedWA }}</p>
                         </div>
                     </a>
                 </div>

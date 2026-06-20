@@ -6,6 +6,29 @@
     <title>@yield('title', 'Dashboard petugas_piket') - beninglaundry</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50:  '#eef4ff',
+                            100: '#dae6ff',
+                            200: '#bdd2ff',
+                            300: '#90b5fd',
+                            400: '#5d8ff9',
+                            500: '#3568f4',
+                            600: '#1f48e9',
+                            700: '#1736d6',
+                            800: '#192cad',
+                            900: '#1a2b88',
+                            950: '#141d54',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @stack('styles')
