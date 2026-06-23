@@ -72,33 +72,10 @@ class PembayaranController extends Controller
         // Transaksi belum lunas
         $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')->count();
 
-        // Total transaksi
-        $totalTransaksi = Transaksi::count();
-
-        // Metode pembayaran populer (jika ada tabel pembayaran)
-        $metodePopulerNama = 'QRIS'; // Default
-        $persentaseMetodePopuler = 0;
-
-        if ($totalTransaksi > 0) {
-            // Ambil metode paling sering dari transaksi
-            $metodePopuler = Transaksi::whereNotNull('payment_method')
-                ->select('payment_method', DB::raw('COUNT(*) as count'))
-                ->groupBy('payment_method')
-                ->orderByDesc('count')
-                ->first();
-
-            if ($metodePopuler) {
-                $metodePopulerNama = ucfirst($metodePopuler->payment_method);
-                $persentaseMetodePopuler = round(($metodePopuler->count / $totalTransaksi) * 100);
-            }
-        }
-
         return view('admin.pembayaran.index', compact(
             'transactions',
             'totalPendapatanHariIni',
-            'transaksiBelumLunas',
-            'metodePopulerNama',
-            'persentaseMetodePopuler'
+            'transaksiBelumLunas'
         ));
     }
 
@@ -119,7 +96,6 @@ class PembayaranController extends Controller
             'jumlah_bayar' => 'required|numeric|min:0',
             'metode_pembayaran' => 'required|string|in:Tunai,QRIS,Transfer BCA,Transfer Mandiri,Transfer BRI,E-Wallet',
             'tanggal_bayar' => 'required|date',
-            'status_pembayaran' => 'required|string|in:Lunas,Belum Lunas,Cicilan',
             'catatan' => 'nullable|string|max:500',
             'bukti_pembayaran' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -144,43 +120,65 @@ class PembayaranController extends Controller
                 $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
             }
 
-            // Validasi jumlah_bayar vs total_price
-            if ($validated['status_pembayaran'] === 'Lunas' && $validated['jumlah_bayar'] < $transaksi->total_price) {
+            // AUTO-DETECT STATUS PEMBAYARAN
+            $jumlahBayar = $validated['jumlah_bayar'];
+            $totalPrice = $transaksi->total_price;
+            
+            if ($jumlahBayar >= $totalPrice) {
+                // Pembayaran penuh atau lebih -> LUNAS
+                $statusPembayaran = 'Lunas';
+                $paymentStatus = 'lunas';
+            } elseif ($jumlahBayar > 0 && $jumlahBayar < $totalPrice) {
+                // Pembayaran sebagian -> CICILAN
+                $statusPembayaran = 'Cicilan';
+                $paymentStatus = 'cicilan';
+            } else {
+                // Tidak ada pembayaran
                 DB::rollBack();
-                // Hapus file yang baru saja diupload jika validasi gagal
                 if ($buktiPath && Storage::disk('public')->exists($buktiPath)) {
                     Storage::disk('public')->delete($buktiPath);
                 }
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Jumlah bayar (Rp ' . number_format($validated['jumlah_bayar'], 0, ',', '.') . ') kurang dari total tagihan (Rp ' . number_format($transaksi->total_price, 0, ',', '.') . '). Transaksi tidak bisa dilunasi.');
+                    ->with('error', 'Jumlah pembayaran harus lebih dari 0.');
             }
 
             // Update status pembayaran transaksi
-            $updateData = [];
-            $wasBelumBayar = $transaksi->payment_status === 'belum_bayar';
+            $updateData = [
+                'payment_status' => $paymentStatus,
+                'payment_method' => strtolower(str_replace(' ', '_', $validated['metode_pembayaran'])),
+            ];
             
-            if ($validated['status_pembayaran'] === 'Lunas') {
-                $updateData['payment_status'] = 'lunas';
-                $updateData['payment_method'] = strtolower(str_replace(' ', '_', $validated['metode_pembayaran']));
-            }
+            $wasBelumBayar = $transaksi->payment_status === 'belum_bayar';
             
             if ($buktiPath) {
                 $updateData['bukti_pembayaran'] = $buktiPath;
             }
             
-            if (!empty($updateData)) {
-                $transaksi->update($updateData);
-            }
+            $transaksi->update($updateData);
 
             // TODO: Jika ada tabel pembayaran terpisah, simpan juga ke sana
             // Pembayaran::create([...]);
 
             DB::commit();
 
-            $msg = 'Pembayaran berhasil dicatat! Transaksi #' . $transaksi->transaksi_code . ' telah diupdate.';
-            if ($wasBelumBayar && $validated['status_pembayaran'] === 'Lunas') {
-                $msg = 'Notifikasi: Pelanggan ' . $transaksi->customer_name . ' yang sebelumnya belum bayar kini statusnya Lunas. Pembayaran berhasil dicatat.';
+            // Log activity
+            if ($paymentStatus === 'lunas') {
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($transaksi)
+                    ->withProperties(['status' => 'lunas', 'jumlah' => $jumlahBayar])
+                    ->log('Pembayaran lunas untuk transaksi ' . $transaksi->transaksi_code);
+            }
+
+            // Custom message based on payment status
+            if ($wasBelumBayar && $paymentStatus === 'lunas') {
+                $msg = '✅ NOTIFIKASI: Pelanggan ' . $transaksi->customer_name . ' yang sebelumnya belum bayar kini statusnya LUNAS! Pembayaran Rp ' . number_format($jumlahBayar, 0, ',', '.') . ' berhasil dicatat.';
+            } elseif ($statusPembayaran === 'Lunas') {
+                $msg = 'Pembayaran LUNAS berhasil dicatat untuk transaksi ' . $transaksi->transaksi_code . '. Kembalian: Rp ' . number_format($jumlahBayar - $totalPrice, 0, ',', '.');
+            } else {
+                $sisaBayar = $totalPrice - $jumlahBayar;
+                $msg = 'Pembayaran CICILAN berhasil dicatat. Sisa pembayaran: Rp ' . number_format($sisaBayar, 0, ',', '.');
             }
 
             return redirect()->route('admin.pembayaran.index')

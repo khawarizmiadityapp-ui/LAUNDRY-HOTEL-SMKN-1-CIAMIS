@@ -290,7 +290,44 @@ class PetugasController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Tugas ' . ucfirst($stage) . ' untuk pelanggan ' . $transaksi->customer_name . ' berhasil diselesaikan!');
+            // Send WhatsApp notification with customer name
+            $stageNames = [
+                'washing' => 'Pencucian',
+                'ironing' => 'Setrika',
+                'packing' => 'Packing',
+            ];
+            
+            $stageName = $stageNames[$stage] ?? ucfirst($stage);
+            $customerName = $transaksi->customer_name;
+            
+            // Build WhatsApp message
+            $waMessage = "Halo *{$customerName}*,\n\n";
+            $waMessage .= "Proses *{$stageName}* untuk pesanan Anda telah selesai! ✅\n\n";
+            $waMessage .= "📌 No. Invoice: *#{$transaksi->transaksi_code}*\n";
+            $waMessage .= "📅 Selesai: " . now()->format('d/m/Y H:i') . "\n\n";
+            
+            if ($stage === 'packing') {
+                $waMessage .= "🎉 *Cucian Anda sudah siap diambil!*\n\n";
+                $waMessage .= "Silakan ambil di Bening Laundry pada jam operasional.\n\n";
+            } else {
+                $waMessage .= "Cucian Anda sedang dilanjutkan ke tahap berikutnya.\n\n";
+            }
+            
+            $waMessage .= "Lacak status laundry Anda secara real-time:\n";
+            $waMessage .= route('track.status', ['nota_number' => $transaksi->transaksi_code]);
+            
+            // Format phone number for WhatsApp
+            $waPhone = preg_replace('/[^0-9]/', '', $transaksi->customer_phone);
+            if (str_starts_with($waPhone, '0')) {
+                $waPhone = '62' . substr($waPhone, 1);
+            }
+            
+            $waLink = "https://wa.me/{$waPhone}?text=" . urlencode($waMessage);
+            
+            session()->flash('notification_link', $waLink);
+            session()->flash('customer_name', $customerName);
+
+            return redirect()->back()->with('success', 'Tugas ' . $stageName . ' untuk pelanggan *' . $customerName . '* berhasil diselesaikan!');
 
         } catch (\Exception $e) {
             DB::rollBack();

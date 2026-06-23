@@ -24,13 +24,9 @@
                 class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : '' }}"
                 >Custom</button>
             </div>
-            <a href="{{ route('export.transaksi.excel') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
-            <a href="{{ route('export.transaksi.pdf') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}"
-             class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
-                <i class="fas fa-file-pdf"></i> Export PDF
-            </a>
+            <button type="button" onclick="openExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
+                <i class="fas fa-file-export"></i> Export Data
+            </button>
         </div>
         </form>
     </div>
@@ -274,6 +270,8 @@
     </div>
 </div>
 @endsection
+
+@include('admin.laporan_keuangan.partials.export_modal')
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>

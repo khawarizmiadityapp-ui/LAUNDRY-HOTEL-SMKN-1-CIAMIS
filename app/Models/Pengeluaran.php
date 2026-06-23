@@ -24,7 +24,6 @@ class Pengeluaran extends Model
         'keterangan',
         'tanggal',
         'nominal',
-        'status',
         'bon_file',
     ];
 

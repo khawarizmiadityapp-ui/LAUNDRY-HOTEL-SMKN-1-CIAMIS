@@ -130,7 +130,7 @@
                         </div>
 
                         <!-- Tanggal Pembayaran -->
-                        <div>
+                        <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Tanggal Pembayaran <span class="text-red-500">*</span>
                             </label>
@@ -139,20 +139,7 @@
                                    value="{{ now()->format('Y-m-d\TH:i') }}"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                    required>
-                        </div>
-
-                        <!-- Status Pembayaran -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Status Pembayaran <span class="text-red-500">*</span>
-                            </label>
-                            <select name="status_pembayaran" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                                <option value="Lunas">✅ Lunas</option>
-                                <option value="Belum Lunas">⏳ Belum Lunas</option>
-                                <option value="Cicilan">💰 Cicilan</option>
-                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Status pembayaran akan otomatis ditentukan berdasarkan nominal yang dibayarkan</p>
                         </div>
                     </div>
 
@@ -223,14 +210,27 @@
                     </div>
 
                     <div class="border-t border-gray-100 pt-4">
+                        <p class="text-sm text-gray-500">Status Pembayaran</p>
+                        <p class="text-lg font-bold mb-1" :class="jumlahBayar >= totalTagihan ? 'text-green-600' : 'text-orange-600'">
+                            <span x-show="jumlahBayar >= totalTagihan">✅ Lunas</span>
+                            <span x-show="jumlahBayar < totalTagihan && jumlahBayar > 0">💰 Cicilan</span>
+                            <span x-show="jumlahBayar == 0">⏳ Belum Dibayar</span>
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4" x-show="jumlahBayar >= totalTagihan">
                         <p class="text-sm text-gray-500">Kembalian</p>
-                        <p class="text-3xl font-bold" :class="kembalian >= 0 ? 'text-green-600' : 'text-red-600'">
+                        <p class="text-3xl font-bold text-green-600">
                             Rp <span x-text="formatRupiah(kembalian > 0 ? kembalian : 0)"></span>
                         </p>
                     </div>
+
+                    <div x-show="jumlahBayar < totalTagihan && jumlahBayar > 0" x-cloak class="p-3 bg-orange-50 text-orange-700 text-sm rounded-lg border border-orange-200 mt-4">
+                        <i class="fas fa-info-circle mr-1"></i> Pembayaran cicilan. Sisa: Rp <span x-text="formatRupiah(Math.abs(kembalian))"></span>
+                    </div>
                     
-                    <div x-show="kembalian < 0" x-cloak class="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 mt-4">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Pembayaran kurang Rp <span x-text="formatRupiah(Math.abs(kembalian))"></span>
+                    <div x-show="kembalian < 0 && jumlahBayar == 0" x-cloak class="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 mt-4">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Belum ada pembayaran
                     </div>
                 </div>
             </div>
