@@ -16,36 +16,36 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-xs">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/50">
-                        <th class="text-left px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">No. Transaksi</th>
-                        <th class="text-left px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pelanggan</th>
-                        <th class="text-left px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Petugas Piket</th>
-                        <th class="text-left px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Waktu Selesai</th>
-                        <th class="text-left px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Transaksi</th>
+                        <th class="text-left px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">No. Transaksi</th>
+                        <th class="text-left px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pelanggan</th>
+                        <th class="text-left px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Petugas Piket</th>
+                        <th class="text-left px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Waktu Selesai</th>
+                        <th class="text-left px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status Transaksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @if(isset($completedTasks) && $completedTasks->count() > 0)
                         @foreach($completedTasks as $task)
                             <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider rounded-lg">
+                                <td class="px-3 py-2">
+                                    <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg">
                                         #{{ $task->transaksi->transaksi_code ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 py-2">
                                     <span class="font-bold text-slate-800">{{ $task->transaksi->customer_name ?? '-' }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-600 font-medium">
+                                <td class="px-3 py-2 text-slate-600 font-medium">
                                     {{ $task->petugas_name ?? $task->petugas->nama ?? 'Sistem' }}
                                 </td>
-                                <td class="px-6 py-4 text-slate-500 text-sm">
+                                <td class="px-3 py-2 text-slate-500">
                                     {{ $task->completed_at ? $task->completed_at->format('d M Y, H:i') : '-' }}
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-bold uppercase tracking-wider border border-emerald-100/50">
+                                <td class="px-3 py-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider border border-emerald-100/50">
                                         {{ $task->transaksi->status ?? '-' }}
                                     </span>
                                 </td>
@@ -53,10 +53,10 @@
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center">
+                            <td colspan="5" class="px-3 py-10 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                        <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>

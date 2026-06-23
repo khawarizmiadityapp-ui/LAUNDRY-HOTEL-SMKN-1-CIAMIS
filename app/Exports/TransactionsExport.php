@@ -6,27 +6,37 @@ use App\Models\Transaksi;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Carbon\Carbon;
 
-class TransactionsExport implements FromCollection, WithHeadings, WithMapping
+class TransactionsExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
 {
     protected $filter;
+    protected $dari;
+    protected $sampai;
 
-    public function __construct($filter = null)
+    public function __construct($filter = null, $dari = null, $sampai = null)
     {
-        $this->filter = $filter;
+        $this->filter = $filter ?? 'bulanan';
+        $this->dari = $dari;
+        $this->sampai = $sampai;
     }
 
     public function collection()
     {
         $query = Transaksi::with(['user', 'customer', 'details.layanan']);
         
-        if ($this->filter == 'bulan_ini') {
+        if ($this->filter == 'bulanan') {
             $query->whereMonth('created_at', now()->month)
                   ->whereYear('created_at', now()->year);
-        } elseif ($this->filter == 'target') {
-            $query->where('payment_status', 'lunas');
-        } elseif ($this->filter == 'tahun_ini') {
+        } elseif ($this->filter == 'tahunan') {
             $query->whereYear('created_at', now()->year);
+        } elseif ($this->filter == 'custom') {
+            if ($this->dari && $this->sampai) {
+                $start = Carbon::parse($this->dari)->startOfDay();
+                $end = Carbon::parse($this->sampai)->endOfDay();
+                $query->whereBetween('created_at', [$start, $end]);
+            }
         }
 
         return $query->get();

@@ -412,14 +412,23 @@
         <div class="border-t border-slate-100 p-5 space-y-4">
 
             {{-- Subtotal etc --}}
-            <div class="space-y-2 text-sm">
+            <div class="space-y-3 text-sm">
                 <div class="flex justify-between items-center text-slate-900 font-semibold">
                     <span>Subtotal</span>
                     <span x-text="formatRupiah(subtotal)"></span>
                 </div>
+
+                {{-- Diskon --}}
+                <div class="flex justify-between items-center text-slate-900 font-semibold">
+                    <span>Diskon</span>
+                    <div class="relative w-32">
+                        <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">Rp</span>
+                        <input type="number" x-model.number="discount" min="0" placeholder="0" class="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-right text-slate-800 font-semibold shadow-sm">
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+            <div class="flex justify-between items-center pt-3 border-t border-slate-100">
                 <span class="text-base font-bold text-slate-900">Total Tagihan</span>
                 <span class="text-xl font-bold text-brand-600" x-text="formatRupiah(totalTagihan)"></span>
             </div>
@@ -743,6 +752,7 @@ function posApp() {
         paymentMethod: 'tunai',
         paymentStatus: 'belum_bayar',
         cashReceived: '',
+        discount: 0,
         petugasList: @json($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])),
         kasirSearch: '',
         showKasirDropdown: false,
@@ -803,7 +813,7 @@ function posApp() {
             return this.cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
         },
         get totalTagihan() {
-            return this.subtotal;
+            return Math.max(0, this.subtotal - (Number(this.discount) || 0));
         },
         get changeAmount() {
             if (!this.cashReceived || this.cashReceived < this.totalTagihan) {
@@ -924,6 +934,7 @@ function posApp() {
                 payment_method: this.paymentMethod,
                 payment_status: this.paymentStatus,
                 kasir_name: this.kasirSearch,
+                discount: this.discount || 0,
                 dibayar: this.paymentMethod === 'tunai' ? (this.cashReceived || 0) : this.totalTagihan,
                 kembalian: this.paymentMethod === 'tunai' ? this.changeAmount : 0,
             };

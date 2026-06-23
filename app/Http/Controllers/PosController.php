@@ -124,6 +124,7 @@ class PosController extends Controller
             'payment_method'   => 'required|in:tunai,qris,transfer',
             'payment_status'   => 'required|in:lunas,belum_bayar',
             'kasir_name'       => 'required|string|max:255',
+            'discount'         => 'nullable|numeric|min:0',
             'dibayar'          => 'nullable|numeric|min:0',
             'kembalian'        => 'nullable|numeric|min:0',
         ]);
@@ -150,7 +151,8 @@ class PosController extends Controller
                 ];
             }
 
-            $totalPrice = $subtotal;
+            $discount = $request->input('discount', 0);
+            $totalPrice = max(0, $subtotal - $discount);
 
             // Transaction code
             $transactionCode = $this->transactionService->generateTransactionCode();
@@ -171,6 +173,7 @@ class PosController extends Controller
                 'status'         => 'diterima',
                 'payment_status' => $request->payment_status,
                 'payment_method' => $request->payment_method,
+                'discount'       => $discount,
                 'dibayar'        => $request->input('dibayar', 0),
                 'kembalian'      => $request->input('kembalian', 0),
             ]);

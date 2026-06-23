@@ -181,7 +181,7 @@ class PetugasController extends Controller
         // Ambil transaksi yang memiliki task 'washing' dengan status 'pending'
         $transactions = Transaksi::whereHas('tasks', function ($q) {
             $q->where('stage', 'washing')->where('status', 'pending');
-        })->with(['details.layanan'])->get();
+        })->with(['details.layanan'])->orderBy('created_at', 'asc')->get();
 
         $petugasList = Petugas::orderBy('nama')->get();
         $inventories = \App\Models\Inventory::select('id', 'name', 'category', 'unit_of_measurement')->orderBy('name')->get();
@@ -290,7 +290,7 @@ class PetugasController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Tugas ' . ucfirst($stage) . ' berhasil diselesaikan!');
+            return redirect()->back()->with('success', 'Tugas ' . ucfirst($stage) . ' untuk pelanggan ' . $transaksi->customer_name . ' berhasil diselesaikan!');
 
         } catch (\Exception $e) {
             DB::rollBack();

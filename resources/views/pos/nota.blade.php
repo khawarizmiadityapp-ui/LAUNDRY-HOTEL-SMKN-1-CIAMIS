@@ -350,10 +350,16 @@
 
             {{-- Totals --}}
             <div class="totals">
+                @if($transaksi->discount > 0)
                 <div class="totals-row">
                     <span>Subtotal</span>
                     <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                 </div>
+                <div class="totals-row">
+                    <span>Diskon</span>
+                    <span>-Rp {{ number_format($transaksi->discount, 0, ',', '.') }}</span>
+                </div>
+                @endif
 
                 <div class="totals-row grand">
                     <span>TOTAL</span>

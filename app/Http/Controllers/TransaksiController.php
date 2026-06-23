@@ -49,21 +49,25 @@ class TransaksiController extends Controller
 
     public function exportExcel(Request $request)
     {
-        return Excel::download(new TransactionsExport($request->filter), 'laporan-keuangan.xlsx');
+        return Excel::download(new TransactionsExport($request->filter, $request->dari, $request->sampai), 'laporan-keuangan.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
-        $filter = $request->filter;
+        $filter = $request->filter ?? 'bulanan';
         $query = Transaksi::with(['user', 'customer', 'details.layanan']);
         
-        if ($filter == 'bulan_ini') {
+        if ($filter == 'bulanan') {
             $query->whereMonth('created_at', now()->month)
                   ->whereYear('created_at', now()->year);
-        } elseif ($filter == 'target') {
-            $query->where('payment_status', 'lunas');
-        } elseif ($filter == 'tahun_ini') {
+        } elseif ($filter == 'tahunan') {
             $query->whereYear('created_at', now()->year);
+        } elseif ($filter == 'custom') {
+            if ($request->dari && $request->sampai) {
+                $start = \Carbon\Carbon::parse($request->dari)->startOfDay();
+                $end = \Carbon\Carbon::parse($request->sampai)->endOfDay();
+                $query->whereBetween('created_at', [$start, $end]);
+            }
         }
         
         $data = $query->get();

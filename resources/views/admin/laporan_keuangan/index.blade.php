@@ -43,7 +43,11 @@
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pemasukan</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pemasukan, 0, ',', '.') }}</p>
-                    <span class="inline-flex items-center text-sm text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-up mr-1 text-xs"></i>{{ number_format($pemasukan - $pengeluaran, 0, ',', '.') }}% vs bulan lalu</span>
+                    @php $isMasukNaik = $persentaseMasuk >= 0; @endphp
+                    <span class="inline-flex items-center text-sm {{ $isMasukNaik ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50' }} px-2 py-0.5 rounded-full mt-2">
+                        <i class="fas {{ $isMasukNaik ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-1 text-xs"></i>
+                        {{ number_format(abs($persentaseMasuk), 1, ',', '.') }}% vs {{ $filter == 'bulanan' ? 'bulan lalu' : 'periode sebelumnya' }}
+                    </span>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl">
                     <i class="fas fa-wallet text-blue-600 text-xl"></i>
@@ -56,7 +60,11 @@
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pengeluaran</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</p>
-                    <span class="inline-flex items-center text-sm text-red-600 bg-red-50 px-2 py-0.5 rounded-full mt-2"><i class="fas fa-arrow-down mr-1 text-xs"></i> {{ number_format($pengeluaran - $pemasukan, 0, ',', '.') }}% efisiensi biaya</span>
+                    @php $isKeluarNaik = $persentaseKeluar >= 0; @endphp
+                    <span class="inline-flex items-center text-sm {{ $isKeluarNaik ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50' }} px-2 py-0.5 rounded-full mt-2">
+                        <i class="fas {{ $isKeluarNaik ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-1 text-xs"></i> 
+                        {{ number_format(abs($persentaseKeluar), 1, ',', '.') }}% {{ $isKeluarNaik ? 'peningkatan' : 'efisiensi' }} biaya
+                    </span>
                 </div>
                 <div class="bg-red-100 p-3 rounded-xl">
                     <i class="fas fa-receipt text-red-600 text-xl"></i>

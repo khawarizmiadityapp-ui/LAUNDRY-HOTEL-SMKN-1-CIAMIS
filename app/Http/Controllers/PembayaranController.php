@@ -158,6 +158,7 @@ class PembayaranController extends Controller
 
             // Update status pembayaran transaksi
             $updateData = [];
+            $wasBelumBayar = $transaksi->payment_status === 'belum_bayar';
             
             if ($validated['status_pembayaran'] === 'Lunas') {
                 $updateData['payment_status'] = 'lunas';
@@ -177,8 +178,13 @@ class PembayaranController extends Controller
 
             DB::commit();
 
+            $msg = 'Pembayaran berhasil dicatat! Transaksi #' . $transaksi->transaksi_code . ' telah diupdate.';
+            if ($wasBelumBayar && $validated['status_pembayaran'] === 'Lunas') {
+                $msg = 'Notifikasi: Pelanggan ' . $transaksi->customer_name . ' yang sebelumnya belum bayar kini statusnya Lunas. Pembayaran berhasil dicatat.';
+            }
+
             return redirect()->route('admin.pembayaran.index')
-                ->with('success', 'Pembayaran berhasil dicatat! Transaksi #' . $transaksi->transaksi_code . ' telah diupdate.');
+                ->with('success', $msg);
 
         } catch (\Exception $e) {
             DB::rollBack();

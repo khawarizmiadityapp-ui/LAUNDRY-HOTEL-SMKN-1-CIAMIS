@@ -24,14 +24,11 @@ class LaporanController extends Controller
         $pengeluaranQuery = Pengeluaran::query();
 
         if ($filter == 'bulanan') {
-            // BUG FIX 1: Gunakan bulan sebelumnya untuk laporan bulanan
-            $prevMonth = now()->subMonth();
-            $query->whereMonth('created_at', $prevMonth->month)
-                ->whereYear('created_at', $prevMonth->year);
+            $query->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year);
 
-            // BUG FIX 1: Pengeluaran juga harus terfilter per bulan
-            $pengeluaranQuery->whereMonth('tanggal', $prevMonth->month)
-                ->whereYear('tanggal', $prevMonth->year);
+            $pengeluaranQuery->whereMonth('tanggal', now()->month)
+                ->whereYear('tanggal', now()->year);
         } elseif ($filter == 'tahunan') {
             $query->whereYear('created_at', now()->year);
             // BUG FIX 1: Pengeluaran juga harus terfilter per tahun
@@ -56,6 +53,33 @@ class LaporanController extends Controller
         $pemasukan = (clone $query)->sum('total_price');
         $pengeluaran = (clone $pengeluaranQuery)->sum('nominal');
         $laba = $pemasukan - $pengeluaran;
+
+        $persentaseMasuk = 0;
+        $persentaseKeluar = 0;
+
+        if ($filter == 'bulanan') {
+            $prevMonth = now()->subMonth();
+            $pemasukanLalu = Transaksi::where('payment_status', 'lunas')
+                ->whereMonth('created_at', $prevMonth->month)
+                ->whereYear('created_at', $prevMonth->year)
+                ->sum('total_price');
+                
+            $pengeluaranLalu = Pengeluaran::whereMonth('tanggal', $prevMonth->month)
+                ->whereYear('tanggal', $prevMonth->year)
+                ->sum('nominal');
+
+            if ($pemasukanLalu > 0) {
+                $persentaseMasuk = (($pemasukan - $pemasukanLalu) / $pemasukanLalu) * 100;
+            } elseif ($pemasukan > 0) {
+                $persentaseMasuk = 100;
+            }
+
+            if ($pengeluaranLalu > 0) {
+                $persentaseKeluar = (($pengeluaran - $pengeluaranLalu) / $pengeluaranLalu) * 100;
+            } elseif ($pengeluaran > 0) {
+                $persentaseKeluar = 100;
+            }
+        }
 
         $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 50_000_000);
         $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50_000_000);
@@ -158,6 +182,8 @@ class LaporanController extends Controller
             'persenTargetBulanIni' => $persenTargetBulanIni,
             'recentTransactions' => $recentTransactions,
             'recentExpenses' => $recentExpenses,
+            'persentaseMasuk' => $persentaseMasuk,
+            'persentaseKeluar' => $persentaseKeluar,
         ]);
     }
 }
