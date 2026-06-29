@@ -69,20 +69,7 @@
 @endphp
 
 <aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-100 z-30 flex flex-col py-6 px-4 gap-6 -translate-x-full md:translate-x-0">
-    
-    {{-- DEBUG INFO (Remove after testing) --}}
-    @if(config('app.debug'))
-    <div class="px-2 py-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-        <div class="font-bold text-yellow-800 mb-1">🔍 Debug Info:</div>
-        <div class="text-yellow-700 space-y-0.5">
-            @foreach($debugInfo as $key => $value)
-                <div><strong>{{ $key }}:</strong> {{ is_bool($value) ? ($value ? 'true' : 'false') : $value }}</div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-    
+       class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-100 z-30 flex flex-col py-6 px-4 gap-6 -translate-x-full md:translate-x-0">  
     {{-- Brand --}}
     <div class="px-2">
         <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{ $brand['name'] }}</span>

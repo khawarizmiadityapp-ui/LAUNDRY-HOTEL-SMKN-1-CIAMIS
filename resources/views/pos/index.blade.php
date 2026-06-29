@@ -307,48 +307,63 @@
 
         {{-- Pickup Mode --}}
         <div x-show="viewMode === 'pickup'" x-transition x-cloak>
-            <div class="space-y-4">
-                @forelse($readyToPickup as $trx)
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
-                            {{ strtoupper(substr($trx->customer_name, 0, 1)) }}
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-slate-900">{{ $trx->customer_name }}</h3>
-                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full uppercase">{{ $trx->transaksi_code }}</span>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-0.5">{{ $trx->customer_phone }} • {{ count($trx->details) }} Item</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                @foreach($trx->details as $det)
-                                <span class="text-[10px] bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md font-medium">{{ $det->layanan->nama }} ({{ $det->qty }}{{ $det->layanan->satuan }})</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-3 self-end sm:self-auto">
-                        <div class="text-right mr-2 hidden sm:block">
-                            <p class="text-xs text-slate-400">Total Tagihan</p>
-                            <p class="text-sm font-bold text-brand-600">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</p>
-                            <span class="text-[10px] font-bold {{ $trx->payment_status === 'lunas' ? 'text-emerald-500' : 'text-rose-500' }} uppercase">
-                                {{ $trx->payment_status === 'lunas' ? 'LUNAS' : 'BELUM BAYAR' }}
-                            </span>
-                        </div>
-                        
-                        <form action="{{ route('pos.pickup', $trx->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" 
-                                    onclick="return confirm('Konfirmasi pengambilan cucian untuk {{ $trx->customer_name }}?')"
-                                    class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Ambil Cucian
-                            </button>
-                        </form>
-                    </div>
+            @if(count($readyToPickup) > 0)
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="px-6 py-4 font-semibold rounded-tl-xl">Pelanggan</th>
+                                <th class="px-6 py-4 font-semibold">Detail Cucian</th>
+                                <th class="px-6 py-4 font-semibold">Tagihan</th>
+                                <th class="px-6 py-4 font-semibold rounded-tr-xl w-[200px]">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white rounded-b-xl border border-t-0 border-slate-100">
+                            @foreach($readyToPickup as $trx)
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 align-top">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
+                                                {{ strtoupper(substr($trx->customer_name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 leading-tight">{{ $trx->customer_name }}</h3>
+                                                <span class="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-md uppercase">{{ $trx->transaksi_code }}</span>
+                                                <p class="text-xs text-slate-500 mt-1">{{ $trx->customer_phone }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 align-top">
+                                        <p class="text-xs text-slate-500 mb-1.5 font-semibold">{{ count($trx->details) }} Item Layanan</p>
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($trx->details as $det)
+                                                <span class="text-[10px] bg-brand-50 text-brand-600 px-2 py-1 rounded-md font-medium border border-brand-100">{{ $det->layanan->nama }} ({{ $det->qty }}{{ $det->layanan->satuan }})</span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 align-top">
+                                        <p class="text-sm font-bold text-brand-600">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</p>
+                                        <span class="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full {{ $trx->payment_status === 'lunas' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600' }} uppercase tracking-wider">
+                                            {{ $trx->payment_status === 'lunas' ? 'LUNAS' : 'BELUM BAYAR' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 align-top">
+                                        <form action="{{ route('pos.pickup', $trx->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" 
+                                                    onclick="return confirm('Konfirmasi pengambilan cucian untuk {{ $trx->customer_name }}?')"
+                                                    class="w-full px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition flex items-center justify-center gap-2 active:scale-95">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Ambil Cucian
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                @empty
+            @else
                 <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl py-12 px-4 text-center">
                     <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
@@ -356,8 +371,7 @@
                     <h3 class="text-slate-900 font-bold">Tidak ada cucian siap diambil</h3>
                     <p class="text-sm text-slate-400 mt-1">Cucian yang sudah selesai di-packing akan muncul di sini.</p>
                 </div>
-                @endforelse
-            </div>
+            @endif
         </div>
     </div>
     <div class="w-full lg:w-[380px] bg-white border-l border-slate-100 flex flex-col order-panel shrink-0 overflow-y-auto">
