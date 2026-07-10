@@ -1,5 +1,6 @@
 @php
     $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
+    $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
     $formattedWA = '+' . substr($adminWA, 0, 2) . ' ' . substr($adminWA, 2, 3) . '-' . substr($adminWA, 5, 4) . '-' . substr($adminWA, 9);
 @endphp
 <!DOCTYPE html>
@@ -43,7 +44,8 @@
 
     {{-- ===================== NAVBAR ===================== --}}
     <nav 
-        class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 py-5 shadow-sm"
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        :class="{ 'bg-white/80 backdrop-blur-lg shadow-sm border-b border-slate-100 py-3': scrolled, 'bg-white py-5': !scrolled }"
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             {{-- Logo --}}
@@ -73,7 +75,7 @@
     </nav>
 
     {{-- ===================== HERO SECTION ===================== --}}
-    <section class="relative pt-16 pb-12 md:pt-24 md:pb-20 overflow-hidden">
+    <section class="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-gradient-to-b from-sky-50/50 via-white to-white">
 
         @if(Session::has('success'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50 mb-8 mt-4">
@@ -108,22 +110,22 @@
                     <p class="text-base text-slate-500 max-w-lg leading-relaxed">
                         Nikmati layanan laundry premium dengan standar kebersihan tertinggi. Kami pastikan setiap helai pakaian Anda kembali bersih, rapi, dan sejuk dipandang.
                     </p>
-                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                        <a href="https://wa.me/{{ $adminWA }}?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-xl shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all">Pesan Layanan</a>
-                        <a href="#tracking" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">Lacak Cucian</a>
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-4">
+                        <a href="https://wa.me/{{ $serviceWA }}?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all flex items-center gap-2">
+                            Pesan Layanan
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </a>
+                        <a href="#tracking" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold shadow-sm hover:shadow-md hover:border-sky-200 hover:text-sky-600 transition-all">Lacak Cucian</a>
                     </div>
                 </div>
 
                 <div class="hidden md:block flex-1 relative">
                     {{-- Mockup or Image --}}
-                    <div class="relative w-full aspect-square rounded-[3rem] bg-slate-100 overflow-hidden shadow-2xl rotate-3 transition-transform hover:rotate-0 duration-500">
-                         <div class="absolute inset-0 bg-gradient-to-br from-sky-400/20 to-transparent"></div>
-                         {{-- Placeholder for actual image --}}
-                         <div class="flex items-center justify-center h-full text-slate-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-32 h-32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                            </svg>
-                         </div>
+                    <div class="relative w-full aspect-square rounded-[3rem] bg-slate-100 overflow-hidden shadow-2xl rotate-3 transition-transform hover:rotate-0 duration-500 group">
+                         <div class="absolute inset-0 bg-gradient-to-br from-sky-500/20 to-transparent z-10 group-hover:opacity-50 transition-opacity"></div>
+                         <img src="https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop" alt="Laundry Services" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                     </div>
                     {{-- Floating Checkmark --}}
                     <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 flex items-center justify-center">
@@ -139,7 +141,8 @@
     </section>
 
     {{-- ===================== SERVICES SECTION ===================== --}}
-    <section id="services" class="py-20">
+    <section id="services" class="py-24 bg-white relative">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 space-y-4">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Layanan Kami</h2>
@@ -150,7 +153,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {{-- Service Cards --}}
                 @forelse($layanans as $svc)
-                <div class="group bg-white p-8 rounded-3xl border border-slate-100 hover:border-sky-100 hover:shadow-2xl hover:shadow-sky-100 transition-all duration-300">
+                <div class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:border-sky-200 hover:shadow-2xl hover:shadow-sky-100/50 hover:-translate-y-1 transition-all duration-300">
                     <div class="w-14 h-14 bg-sky-50 text-sky-500 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-sky-500 group-hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
@@ -178,12 +181,20 @@
     </section>
 
     {{-- ===================== TRACKING SECTION ===================== --}}
-    <section id="tracking" class="py-20 bg-slate-50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-8 md:p-12 border border-slate-100">
+    <section id="tracking" class="py-24 relative overflow-hidden">
+        {{-- Background Gradient --}}
+        <div class="absolute inset-0 bg-slate-900 z-0"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-sky-900/40 to-slate-900 z-0"></div>
+        
+        {{-- Decorative circles --}}
+        <div class="absolute top-0 left-0 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 z-0"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 z-0"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-white/10 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-8 md:p-12 border border-white/20">
                 <div class="text-center mb-10">
-                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">Lacak Status Cucian</h2>
-                    <p class="text-sm text-slate-400 font-medium">Masukkan nomor nota Anda untuk melihat progres pengerjaan.</p>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">Lacak Status Cucian</h2>
+                    <p class="text-sm text-slate-300 font-medium">Masukkan nomor nota Anda untuk melihat progres pengerjaan secara real-time.</p>
                 </div>
 
                 <form action="{{ route('track.status') }}" method="GET" class="space-y-4">
@@ -200,10 +211,10 @@
                             required
                             value="{{ old('nota_number') }}"
                             placeholder="Contoh: TRX-20260401-ABCD" 
-                            class="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all"
+                            class="block w-full pl-14 pr-6 py-5 bg-white/5 border-2 border-white/10 rounded-2xl text-white font-semibold placeholder-slate-400 focus:bg-white/10 focus:border-sky-400/50 focus:ring-0 focus:outline-none transition-all"
                         >
                     </div>
-                    <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-xl shadow-slate-900/25 hover:bg-slate-800 hover:shadow-2xl hover:shadow-slate-900/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                    <button type="submit" class="w-full py-5 bg-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-sky-500/25 hover:bg-sky-400 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                         Cek Status Sekarang
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>

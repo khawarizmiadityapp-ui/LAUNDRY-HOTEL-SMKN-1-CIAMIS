@@ -602,7 +602,8 @@ class AdminController extends Controller
     {
         $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
         $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
-        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA'));
+        $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
+        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA'));
     }
 
     public function updateSettings(Request $request)
@@ -610,6 +611,7 @@ class AdminController extends Controller
         $request->validate([
             'target' => 'required|numeric|min:0',
             'admin_wa' => 'required|string',
+            'service_wa' => 'required|string',
         ]);
 
         try {
@@ -631,6 +633,12 @@ class AdminController extends Controller
                 $phone = '62' . substr($phone, 1);
             }
             \App\Models\Setting::setValue('admin_wa', $phone);
+
+            $servicePhone = preg_replace('/[^0-9]/', '', $request->service_wa);
+            if (str_starts_with($servicePhone, '0')) {
+                $servicePhone = '62' . substr($servicePhone, 1);
+            }
+            \App\Models\Setting::setValue('service_wa', $servicePhone);
 
             return back()->with('success', 'Pengaturan berhasil diperbarui.');
         } catch (\Exception $e) {

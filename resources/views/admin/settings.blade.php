@@ -56,6 +56,20 @@
                     <p class="text-xs text-slate-400 mt-1.5">Format diawali kode negara tanpa tanda tambah (+), contoh: 6282116035029. Nomor ini digunakan oleh pelanggan pada halaman tracking dan landing page untuk menghubungi laundry.</p>
                 </div>
 
+                <!-- Nomor WA Pihak Layanan (Pemesanan) -->
+                <div>
+                    <label for="service_wa" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp Service (Pemesanan)</label>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-semibold text-sm">
+                            +
+                        </div>
+                        <input type="text" name="service_wa" id="service_wa" value="{{ $serviceWA }}" required
+                               class="w-full pl-8 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                               placeholder="Contoh: 6282116035029">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1.5">Format diawali kode negara tanpa tanda tambah (+), contoh: 6282116035029. Nomor ini digunakan khusus ketika pelanggan menekan tombol "Pesan Layanan".</p>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="pt-2 flex justify-end">
                     <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-brand-500/25 transition flex items-center gap-2">
@@ -74,7 +88,7 @@
                 <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Informasi Kontak</span>
                 <h3 class="text-xl font-bold leading-snug">Kontak ini akan dihubungi oleh pembeli/pelanggan di situs depan.</h3>
                 <p class="text-brand-100 text-sm leading-relaxed">
-                    Sistem akan menyinkronkan nomor WhatsApp ini ke link tombol "Hubungi Admin" di halaman Lacak Status Cucian dan "Pesan Layanan" di Landing Page utama. Pastikan nomor tersebut aktif WhatsApp-nya agar pesan dapat terkirim secara langsung.
+                    Sistem akan menyinkronkan nomor WhatsApp Admin ke link tombol "Hubungi Admin" di halaman Lacak Status Cucian, serta nomor WhatsApp Service ke tombol "Pesan Layanan". Pastikan nomor-nomor tersebut aktif agar pesan dari pelanggan dapat terkirim secara langsung.
                 </p>
             </div>
             
