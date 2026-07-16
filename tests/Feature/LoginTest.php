@@ -11,14 +11,14 @@ class LoginTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function login_page_is_accessible(): void
+    public function test_login_page_is_accessible(): void
     {
         $response = $this->get('/login');
         $response->assertStatus(200);
     }
 
     /** @test */
-    public function admin_can_login_with_valid_credentials(): void
+    public function test_admin_can_login_with_valid_credentials(): void
     {
         $user = User::factory()->create([
             'email' => 'admin@test.com',
@@ -36,7 +36,7 @@ class LoginTest extends TestCase
     }
 
     /** @test */
-    public function staff_washing_is_redirected_to_washing_page(): void
+    public function test_staff_washing_is_redirected_to_washing_page(): void
     {
         $user = User::factory()->create([
             'email' => 'staff@test.com',
@@ -55,7 +55,7 @@ class LoginTest extends TestCase
     }
 
     /** @test */
-    public function login_fails_with_wrong_password(): void
+    public function test_login_fails_with_wrong_password(): void
     {
         User::factory()->create([
             'email' => 'admin@test.com',

@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom middleware aliases
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'staffOrAdmin' => \App\Http\Middleware\EnsureUserIsStaffOrAdmin::class,
         ]);
     })
     ->withSchedule(function ($schedule): void {

@@ -48,7 +48,6 @@ class PetugasController extends Controller
         }
     }
 
-    // Dashboard untuk Petugas Piket
     public function dashboard()
     {
         $user = Auth::user();
@@ -79,7 +78,6 @@ class PetugasController extends Controller
 
         return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division'));
     }
-    // Menampilkan halaman Blade
     public function index()
     {
         $petugasList = Petugas::orderBy('nama')->get();
@@ -114,14 +112,12 @@ class PetugasController extends Controller
         ]);
     }
 
-    // API: ambil semua data petugas
     public function apiIndex()
     {
         $petugas = Petugas::orderBy('nama')->get();
         return response()->json($petugas);
     }
 
-    // API: simpan petugas baru
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -147,7 +143,6 @@ class PetugasController extends Controller
         return response()->json($petugas, 201);
     }
 
-    // API: update petugas
     public function update(Request $request, $id)
     {
         $petugas = Petugas::findOrFail($id);
@@ -165,7 +160,6 @@ class PetugasController extends Controller
         return response()->json($petugas);
     }
 
-    // API: hapus petugas
     public function destroy($id)
     {
         $petugas = Petugas::findOrFail($id);
@@ -173,7 +167,6 @@ class PetugasController extends Controller
         return response()->json(['message' => 'Petugas berhasil dihapus']);
     }
 
-    // Halaman Washing
     public function washing()
     {
         $this->ensureStaffDivisionAccess(['washing']);
@@ -189,7 +182,6 @@ class PetugasController extends Controller
         return view('petugas_piket.washing.index', compact('transactions', 'petugasList', 'inventories'));
     }
 
-    // Halaman Setrika
     public function setrika()
     {
         $this->ensureStaffDivisionAccess(['ironing', 'setrika']);
@@ -206,7 +198,6 @@ class PetugasController extends Controller
         return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
     }
 
-    // Halaman Packing
     public function packing()
     {
         $this->ensureStaffDivisionAccess(['packing']);
@@ -360,7 +351,6 @@ class PetugasController extends Controller
         return redirect()->back()->with('success', 'Status transaksi berhasil diperbarui.');
     }
 
-    // Halaman Inventory
     public function inventory()
     {
         $this->ensureStaffDivisionAccess(['inventory']);
@@ -369,7 +359,6 @@ class PetugasController extends Controller
         return view('petugas_piket.inventory.index', compact('inventory'));
     }
 
-    // Tambah barang baru ke inventory
     public function storeInventory(Request $request)
     {
         $this->ensureStaffDivisionAccess(['inventory']);
@@ -447,7 +436,6 @@ class PetugasController extends Controller
         }
     }
 
-    // Halaman History
     public function history()
     {
         $user = Auth::user();
@@ -482,7 +470,6 @@ class PetugasController extends Controller
         return view('petugas_piket.history.index', compact('completedTasks', 'division'));
     }
 
-    // Halaman Transaksi untuk Petugas Kasir (Customer Service)
     public function transactions(Request $request)
     {
         $this->ensureStaffDivisionAccess(['customer_service']);

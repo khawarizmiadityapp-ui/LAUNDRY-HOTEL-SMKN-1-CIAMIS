@@ -13,7 +13,7 @@ class PosOrderTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function can_create_pos_order(): void
+    public function test_can_create_pos_order(): void
     {
         $cs = User::factory()->create([
             'role' => 'staff',
@@ -46,6 +46,7 @@ class PosOrderTest extends TestCase
             ],
             'payment_method' => 'tunai',
             'payment_status' => 'belum_bayar',
+            'kasir_name' => $cs->name,
             'notes' => 'Tolong cepat'
         ]);
 

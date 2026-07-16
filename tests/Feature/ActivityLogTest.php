@@ -13,7 +13,7 @@ class ActivityLogTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function transaksi_model_can_log_activity()
+    public function test_transaksi_model_can_log_activity()
     {
         $user = User::factory()->create();
         $transaksi = Transaksi::factory()->create(['user_id' => $user->id]);
@@ -29,7 +29,7 @@ class ActivityLogTest extends TestCase
     }
 
     /** @test */
-    public function inventory_model_can_log_activity()
+    public function test_inventory_model_can_log_activity()
     {
         $inventory = Inventory::factory()->create();
 

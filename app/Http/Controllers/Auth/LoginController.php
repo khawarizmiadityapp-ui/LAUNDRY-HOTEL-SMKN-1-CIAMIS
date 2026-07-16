@@ -9,13 +9,11 @@ use Illuminate\Support\Facades\Cache;
 
 class LoginController extends Controller
 {
-    // Menampilkan form login
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Memproses login
     public function login(Request $request)
     {
     $credentials = $request->validate([
@@ -24,7 +22,8 @@ class LoginController extends Controller
     ]);
 
     if (Auth::attempt($credentials)) {
-            $request->session()->regenerate(); // security
+            // Regaining session security after verifying credentials to avoid fixation attacks
+            $request->session()->regenerate();
 
             $user = Auth::user();
 
@@ -34,7 +33,7 @@ class LoginController extends Controller
                 Cache::forever('online_staff_users', $onlineStaff);
             }
 
-            // 🔥 CEK ROLE
+            // Route user to their specific portal based on their permission level
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role === 'staff') {
@@ -50,7 +49,7 @@ class LoginController extends Controller
                 };
             }
 
-            // fallback
+            // Default route for unidentified roles
             return redirect('/');
             }
 
@@ -59,7 +58,6 @@ class LoginController extends Controller
     ])->onlyInput('email');
     }
 
-    // Logout
     public function logout(Request $request)
     {
         $user = Auth::user();

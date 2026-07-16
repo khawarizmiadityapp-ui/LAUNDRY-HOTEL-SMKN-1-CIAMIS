@@ -39,16 +39,13 @@ class PembayaranController extends Controller
 
     public function index(Request $request)
     {
-        // Query transaksi dengan user
         $query = Transaksi::with(['user'])
             ->orderBy('created_at', 'desc');
 
-        // Filter berdasarkan status pembayaran
         if ($request->filled('status')) {
             $query->where('payment_status', $request->status);
         }
 
-        // Filter berdasarkan search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -59,17 +56,14 @@ class PembayaranController extends Controller
 
         $transactions = $query->paginate(10)->appends($request->query());
 
-        // Statistik Real dari Database
         $today = Carbon::today();
         $startOfDay = Carbon::today()->startOfDay();
         $endOfDay = Carbon::today()->endOfDay();
 
-        // Total pendapatan hari ini (transaksi lunas hari ini)
         $totalPendapatanHariIni = Transaksi::where('payment_status', 'lunas')
             ->whereBetween('updated_at', [$startOfDay, $endOfDay])
             ->sum('total_price');
 
-        // Transaksi belum lunas
         $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')->count();
 
         return view('admin.pembayaran.index', compact(
@@ -81,7 +75,6 @@ class PembayaranController extends Controller
 
     public function create()
     {
-        // Ambil transaksi yang belum lunas untuk ditampilkan di form
         $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -103,7 +96,6 @@ class PembayaranController extends Controller
         DB::beginTransaction();
 
         try {
-            // Cari transaksi
             $transaksi = Transaksi::where('transaksi_code', $validated['transaksi_id'])->firstOrFail();
 
             // Authorization check: only admin and staff can process payments
@@ -114,13 +106,13 @@ class PembayaranController extends Controller
                 abort(403, 'Unauthorized. Only admin and staff can process payments.');
             }
 
-            // Handle upload bukti pembayaran
             $buktiPath = null;
             if ($request->hasFile('bukti_pembayaran')) {
                 $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
             }
 
-            // AUTO-DETECT STATUS PEMBAYARAN
+            // Automatically resolve payment status to prevent manual selection errors.
+            // Full amount meets or exceeds total_price while partial implies an installment.
             $jumlahBayar = $validated['jumlah_bayar'];
             $totalPrice = $transaksi->total_price;
             
@@ -143,7 +135,6 @@ class PembayaranController extends Controller
                     ->with('error', 'Jumlah pembayaran harus lebih dari 0.');
             }
 
-            // Update status pembayaran transaksi
             $updateData = [
                 'payment_status' => $paymentStatus,
                 'payment_method' => strtolower(str_replace(' ', '_', $validated['metode_pembayaran'])),

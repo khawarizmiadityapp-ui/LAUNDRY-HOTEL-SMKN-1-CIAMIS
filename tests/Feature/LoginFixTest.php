@@ -12,7 +12,7 @@ class LoginFixTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function admin_can_login_with_correct_credentials()
+    public function test_admin_can_login_with_correct_credentials()
     {
         // Create admin user with hashed password
         $user = User::create([
@@ -34,7 +34,7 @@ class LoginFixTest extends TestCase
     }
 
     /** @test */
-    public function staff_can_login_with_correct_credentials()
+    public function test_staff_can_login_with_correct_credentials()
     {
         // Create staff user with hashed password
         $user = User::create([

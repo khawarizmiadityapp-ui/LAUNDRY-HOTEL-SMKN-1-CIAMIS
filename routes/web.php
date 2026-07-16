@@ -134,7 +134,7 @@ Route::group(['middleware' => ['auth']], function () {
     // ================= SHARED ROUTES (Admin + Staff) =================
     
     // POS Routes (Accessible by Admin + CS Staff)
-    Route::middleware(['throttle:100,1'])->group(function () {
+    Route::middleware(['staffOrAdmin', 'throttle:100,1'])->group(function () {
         Route::get('/petugas/customer-service', [PosController::class, 'index'])->name('petugas.pos.index');
         Route::get('/pos/customer/search', [PosController::class, 'searchCustomer'])->name('pos.customer.search');
         Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->middleware('throttle:60,1')->name('pos.customer.store');
@@ -144,7 +144,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
     
     // Shared Customer Management
-    Route::prefix('customers')->name('admin.customers.')->middleware(['throttle:100,1'])->group(function () {
+    Route::prefix('customers')->name('admin.customers.')->middleware(['staffOrAdmin', 'throttle:100,1'])->group(function () {
         Route::get('/', [CustomerController::class, 'index'])->name('index');
         Route::get('/create', [CustomerController::class, 'create'])->name('create');
         Route::post('/', [CustomerController::class, 'store'])->middleware('throttle:30,1')->name('store');
@@ -154,7 +154,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
     
     // Export Routes (Admin + Staff with permission)
-    Route::middleware(['throttle:10,1'])->group(function () {
+    Route::middleware(['staffOrAdmin', 'throttle:10,1'])->group(function () {
         Route::get('/export-transaksi', [TransaksiController::class, 'exportExcel'])->name('export.transaksi.excel');
         Route::get('/export-transaksi-pdf', [TransaksiController::class, 'exportPdf'])->name('export.transaksi.pdf');
     });

@@ -13,11 +13,37 @@ class TaskCompletionTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function washing_staff_can_complete_washing_task(): void
+    public function test_washing_staff_can_complete_washing_task(): void
     {
         $staff = User::factory()->create([
             'role' => 'staff',
             'division' => 'washing',
+        ]);
+
+        \App\Models\Inventory::create([
+            'name' => 'Detergent Liquid',
+            'category' => 'detergent',
+            'unit_type' => 'botol',
+            'capacity_per_unit' => 1000,
+            'unit_of_measurement' => 'ml',
+            'stock_units' => 5,
+            'stock_subunits' => 500,
+            'quantity' => 5,
+            'minimum_stock' => 1,
+            'type' => 'consumable',
+        ]);
+
+        \App\Models\Inventory::create([
+            'name' => 'Fragrance Lavender',
+            'category' => 'fragrance',
+            'unit_type' => 'botol',
+            'capacity_per_unit' => 1000,
+            'unit_of_measurement' => 'ml',
+            'stock_units' => 5,
+            'stock_subunits' => 500,
+            'quantity' => 5,
+            'minimum_stock' => 1,
+            'type' => 'consumable',
         ]);
         
         $customer = Customer::create([

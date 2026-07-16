@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureUserIsStaffOrAdmin
+{
+    /**
+     * Handle an incoming request.
+     * Ensure the user has either 'admin' or 'staff' role to access restricted modules.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+        
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            abort(403, 'Akses ditolak. Fitur ini hanya untuk Petugas atau Administrator.');
+        }
+        
+        return $next($request);
+    }
+}
