@@ -27,11 +27,11 @@ use App\Http\Controllers\LandingController;
 
 // Public UI Routes
 Route::get('/', [LandingController::class, 'index'])->name('home');
-Route::get('/track', [LandingController::class, 'trackStatus'])->name('track.status');
+Route::get('/track', [LandingController::class, 'trackStatus'])->middleware('throttle:15,1')->name('track.status');
 
 // Public Routes
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
@@ -160,7 +160,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
 
     // ================= PETUGAS/STAFF ROUTES =================
-    Route::prefix('petugas')->name('petugas_piket.')->middleware(['throttle:100,1'])->group(function () {
+    Route::prefix('petugas')->name('petugas_piket.')->middleware(['staffOrAdmin', 'throttle:100,1'])->group(function () {
         Route::get('/', [PetugasController::class, 'dashboard'])->name('dashboard');
         Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
         Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');

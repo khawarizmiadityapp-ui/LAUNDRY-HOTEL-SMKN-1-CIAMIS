@@ -123,3 +123,95 @@ if (!function_exists('status_label')) {
         };
     }
 }
+
+if (!function_exists('format_whatsapp_number')) {
+    /**
+     * Normalize and format a phone number to WhatsApp country-code standard format (e.g. 6282116035029)
+     *
+     * @param string|null $phone
+     * @return string
+     */
+    function format_whatsapp_number(?string $phone): string
+    {
+        if (empty($phone)) {
+            return '';
+        }
+
+        // 1. Remove all non-numeric characters (using \D is faster than [^0-9])
+        $phone = preg_replace('/\D/', '', $phone);
+
+        // 2. Fast-path prefix checks with early returns to save CPU cycles
+        if (str_starts_with($phone, '620')) {
+            return '62' . substr($phone, 3);
+        }
+
+        if (str_starts_with($phone, '0')) {
+            return '62' . substr($phone, 1);
+        }
+
+        if (str_starts_with($phone, '8')) {
+            return '62' . $phone;
+        }
+
+        return $phone;
+    }
+}
+
+if (!function_exists('mask_phone_number')) {
+    /**
+     * Mask a phone number for public display, keeping the first 4 and last 3 digits visible.
+     * Example: 082116035029 -> 0821*****029
+     *
+     * @param string|null $phone
+     * @return string
+     */
+    function mask_phone_number(?string $phone): string
+    {
+        if (empty($phone)) {
+            return '';
+        }
+
+        $phone = preg_replace('/\D/', '', $phone);
+        $len = strlen($phone);
+
+        if ($len <= 7) {
+            // Too short to mask meaningfully, mask all but first 2 and last 2
+            return substr($phone, 0, 2) . str_repeat('*', max($len - 4, 0)) . substr($phone, -2);
+        }
+
+        return substr($phone, 0, 4) . str_repeat('*', $len - 7) . substr($phone, -3);
+    }
+}
+
+if (!function_exists('mask_name')) {
+    /**
+     * Mask a person's name for public display, keeping first and last letter of each word.
+     * Example: Budi Santoso -> B**i S*****o
+     *
+     * @param string|null $name
+     * @return string
+     */
+    function mask_name(?string $name): string
+    {
+        if (empty($name)) {
+            return '';
+        }
+
+        $words = explode(' ', trim($name));
+        $masked = [];
+
+        foreach ($words as $word) {
+            $len = mb_strlen($word);
+
+            if ($len <= 2) {
+                $masked[] = $word;
+            } else {
+                $first = mb_substr($word, 0, 1);
+                $last = mb_substr($word, -1);
+                $masked[] = $first . str_repeat('*', $len - 2) . $last;
+            }
+        }
+
+        return implode(' ', $masked);
+    }
+}

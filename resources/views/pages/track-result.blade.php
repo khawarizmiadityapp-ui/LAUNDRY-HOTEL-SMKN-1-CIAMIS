@@ -162,11 +162,11 @@
                         <div class="space-y-4">
                             <div>
                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nama Lengkap</p>
-                                <p class="text-sm font-bold text-slate-800">{{ $order->customer_name }}</p>
+                                <p class="text-sm font-bold text-slate-800">{{ mask_name($order->customer_name) }}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">No. WhatsApp</p>
-                                <p class="text-sm font-bold text-slate-800">{{ $order->customer_phone }}</p>
+                                <p class="text-sm font-bold text-slate-800">{{ mask_phone_number($order->customer_phone) }}</p>
                             </div>
                         </div>
                     </div>

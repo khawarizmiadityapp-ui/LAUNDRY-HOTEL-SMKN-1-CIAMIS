@@ -46,28 +46,28 @@
                 <div>
                     <label for="admin_wa" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp Admin (Contact Person)</label>
                     <div class="relative rounded-xl shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-semibold text-sm">
-                            +
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                         </div>
                         <input type="text" name="admin_wa" id="admin_wa" value="{{ $adminWA }}" required
-                               class="w-full pl-8 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
-                               placeholder="Contoh: 6282116035029">
+                               class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                               placeholder="Contoh: 082116035029">
                     </div>
-                    <p class="text-xs text-slate-400 mt-1.5">Format diawali kode negara tanpa tanda tambah (+), contoh: 6282116035029. Nomor ini digunakan oleh pelanggan pada halaman tracking dan landing page untuk menghubungi laundry.</p>
+                    <p class="text-xs text-slate-400 mt-1.5">Bisa diawali 08, 628, atau +62 (contoh: 082116035029). Nomor ini digunakan oleh pelanggan pada halaman tracking dan landing page untuk menghubungi laundry.</p>
                 </div>
 
                 <!-- Nomor WA Pihak Layanan (Pemesanan) -->
                 <div>
                     <label for="service_wa" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp Service (Pemesanan)</label>
                     <div class="relative rounded-xl shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-semibold text-sm">
-                            +
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                         </div>
                         <input type="text" name="service_wa" id="service_wa" value="{{ $serviceWA }}" required
-                               class="w-full pl-8 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
-                               placeholder="Contoh: 6282116035029">
+                               class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                               placeholder="Contoh: 082116035029">
                     </div>
-                    <p class="text-xs text-slate-400 mt-1.5">Format diawali kode negara tanpa tanda tambah (+), contoh: 6282116035029. Nomor ini digunakan khusus ketika pelanggan menekan tombol "Pesan Layanan".</p>
+                    <p class="text-xs text-slate-400 mt-1.5">Bisa diawali 08, 628, atau +62 (contoh: 082116035029). Nomor ini digunakan khusus ketika pelanggan menekan tombol "Pesan Layanan".</p>
                 </div>
 
                 <!-- Submit Button -->

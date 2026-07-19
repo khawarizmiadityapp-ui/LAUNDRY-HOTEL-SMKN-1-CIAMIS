@@ -308,10 +308,7 @@ class PetugasController extends Controller
             $waMessage .= route('track.status', ['nota_number' => $transaksi->transaksi_code]);
             
             // Format phone number for WhatsApp
-            $waPhone = preg_replace('/[^0-9]/', '', $transaksi->customer_phone);
-            if (str_starts_with($waPhone, '0')) {
-                $waPhone = '62' . substr($waPhone, 1);
-            }
+            $waPhone = format_whatsapp_number($transaksi->customer_phone);
             
             $waLink = "https://wa.me/{$waPhone}?text=" . urlencode($waMessage);
             

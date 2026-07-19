@@ -15,8 +15,8 @@ class NotificationService
      */
     public function generateWhatsAppProgressLink(Transaksi $transaksi, string $stage): string
     {
-        // Ganti 0 depannya dengan 62
-        $phone = preg_replace('/^0/', '62', $transaksi->customer_phone);
+        // Ganti ke format standar WhatsApp
+        $phone = format_whatsapp_number($transaksi->customer_phone);
         
         $msg = "Halo " . $transaksi->customer_name . ", pesanan Anda #" . $transaksi->transaksi_code . 
                " saat ini telah selesai pada tahap " . ucfirst($stage) . ". \n\n" .

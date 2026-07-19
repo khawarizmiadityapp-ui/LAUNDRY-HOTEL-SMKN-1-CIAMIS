@@ -628,16 +628,10 @@ class AdminController extends Controller
             }
 
             // Update WhatsApp number in settings table
-            $phone = preg_replace('/[^0-9]/', '', $request->admin_wa);
-            if (str_starts_with($phone, '0')) {
-                $phone = '62' . substr($phone, 1);
-            }
+            $phone = format_whatsapp_number($request->admin_wa);
             \App\Models\Setting::setValue('admin_wa', $phone);
 
-            $servicePhone = preg_replace('/[^0-9]/', '', $request->service_wa);
-            if (str_starts_with($servicePhone, '0')) {
-                $servicePhone = '62' . substr($servicePhone, 1);
-            }
+            $servicePhone = format_whatsapp_number($request->service_wa);
             \App\Models\Setting::setValue('service_wa', $servicePhone);
 
             return back()->with('success', 'Pengaturan berhasil diperbarui.');
