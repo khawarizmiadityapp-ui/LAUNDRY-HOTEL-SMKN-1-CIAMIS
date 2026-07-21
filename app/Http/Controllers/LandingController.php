@@ -15,7 +15,9 @@ class LandingController extends Controller
     public function index()
     {
         $layanans = Layanan::aktif()->get();
-        return view('welcome', compact('layanans'));
+        $heroImage = \App\Models\Setting::getValue('hero_image', 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop');
+        $logoImage = \App\Models\Setting::getValue('logo_image', asset('images/logobening.jpeg'));
+        return view('welcome', compact('layanans', 'heroImage', 'logoImage'));
     }
 
     /**

@@ -84,6 +84,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::updateOrCreate(
+            ['email' => 'allroles@laundry.com'],
+            [
+                'name' => 'Petugas All-In-One',
+                'password' => Hash::make('123456'),
+                'role' => 'staff',
+                'division' => 'all_roles',
+            ]
+        );
+
         $this->call([
             ServicePriceSeeder::class,
             LayananSeeder::class,

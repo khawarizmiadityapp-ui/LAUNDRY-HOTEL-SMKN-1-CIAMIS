@@ -325,6 +325,11 @@ class AdminController extends Controller
 
         try {
             $transaction = Transaksi::with(['details.layanan', 'tasks'])->findOrFail($id);
+
+            if ($request->status == 'diambil' && $transaction->payment_status !== 'lunas') {
+                return redirect()->back()->with('error', 'Pesanan tidak bisa diambil karena belum dibayar lunas.');
+            }
+
             $transaction->update([
                 'status' => $request->status,
                 'updated_at' => now()
@@ -404,6 +409,12 @@ class AdminController extends Controller
                 $calculatedTotalPrice = $transaction->details->sum('subtotal');
             } else {
                 $calculatedTotalPrice = $request->weight * $pricePerKg;
+            }
+
+            if ($request->status == 'diambil' && $request->payment_status !== 'lunas') {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Pesanan tidak bisa diambil karena belum dibayar lunas.');
             }
 
             $transaction->update([
@@ -603,7 +614,9 @@ class AdminController extends Controller
         $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
         $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
         $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
-        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA'));
+        $heroImage = \App\Models\Setting::getValue('hero_image', 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop');
+        $logoImage = \App\Models\Setting::getValue('logo_image', asset('images/logobening.jpeg'));
+        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA', 'heroImage', 'logoImage'));
     }
 
     public function updateSettings(Request $request)
@@ -612,6 +625,8 @@ class AdminController extends Controller
             'target' => 'required|numeric|min:0',
             'admin_wa' => 'required|string',
             'service_wa' => 'required|string',
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'logo_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:1024',
         ]);
 
         try {
@@ -633,6 +648,22 @@ class AdminController extends Controller
 
             $servicePhone = format_whatsapp_number($request->service_wa);
             \App\Models\Setting::setValue('service_wa', $servicePhone);
+
+            // Handle hero_image upload
+            if ($request->hasFile('hero_image')) {
+                $file = $request->file('hero_image');
+                $filename = 'hero_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images'), $filename);
+                \App\Models\Setting::setValue('hero_image', asset('images/' . $filename));
+            }
+
+            // Handle logo_image upload
+            if ($request->hasFile('logo_image')) {
+                $file = $request->file('logo_image');
+                $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images'), $filename);
+                \App\Models\Setting::setValue('logo_image', asset('images/' . $filename));
+            }
 
             return back()->with('success', 'Pengaturan berhasil diperbarui.');
         } catch (\Exception $e) {

@@ -25,7 +25,7 @@
                 Konfigurasi Umum
             </h2>
             
-            <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-5">
+            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
                 
                 <!-- Target Pendapatan Bulanan -->
@@ -68,6 +68,44 @@
                                placeholder="Contoh: 082116035029">
                     </div>
                     <p class="text-xs text-slate-400 mt-1.5">Bisa diawali 08, 628, atau +62 (contoh: 082116035029). Nomor ini digunakan khusus ketika pelanggan menekan tombol "Pesan Layanan".</p>
+                </div>
+
+                <!-- Foto Home (Hero Image) -->
+                <div>
+                    <label for="hero_image" class="block text-sm font-semibold text-gray-700 mb-1">Foto Home (Banner Utama)</label>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <input type="file" name="hero_image" id="hero_image" accept="image/*"
+                               class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1.5">Biarkan kosong jika tidak ingin mengubah foto. (Rekomendasi rasio kotak/square, maks 2MB)</p>
+                    @if(isset($heroImage))
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="text-xs text-slate-500">Foto saat ini:</span>
+                            <img src="{{ $heroImage }}" alt="Current Hero" class="h-10 w-10 object-cover rounded shadow-sm border border-slate-200">
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Logo Laundry -->
+                <div>
+                    <label for="logo_image" class="block text-sm font-semibold text-gray-700 mb-1">Logo Laundry</label>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <input type="file" name="logo_image" id="logo_image" accept="image/*"
+                               class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1.5">Biarkan kosong jika tidak mengubah logo. (Rekomendasi rasio 1:1, maks 1MB)</p>
+                    @if(isset($logoImage))
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="text-xs text-slate-500">Logo saat ini:</span>
+                            <img src="{{ $logoImage }}" alt="Current Logo" class="h-10 w-10 object-contain bg-white rounded shadow-sm border border-slate-200">
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Submit Button -->

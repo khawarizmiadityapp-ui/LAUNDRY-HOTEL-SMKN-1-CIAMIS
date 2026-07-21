@@ -350,9 +350,16 @@
                                     <td class="px-6 py-4 align-top">
                                         <form action="{{ route('pos.pickup', $trx->id) }}" method="POST">
                                             @csrf
+                                            @if($trx->payment_status !== 'lunas')
+                                            <div class="mb-3">
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nominal Bayar (Rp)</label>
+                                                <input type="number" name="dibayar" placeholder="Contoh: {{ $trx->total_price }}" min="{{ $trx->total_price }}" required
+                                                       class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-semibold text-slate-800 placeholder:text-slate-300">
+                                            </div>
+                                            @endif
                                             <button type="submit" 
                                                     onclick="return confirm('Konfirmasi pengambilan cucian untuk {{ $trx->customer_name }}?')"
-                                                    class="w-full px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition flex items-center justify-center gap-2 active:scale-95">
+                                                    class="w-full px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition flex items-center justify-center gap-2 active:scale-95 mt-2">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 Ambil Cucian
                                             </button>

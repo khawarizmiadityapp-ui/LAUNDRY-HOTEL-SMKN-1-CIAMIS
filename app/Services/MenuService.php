@@ -80,6 +80,11 @@ class MenuService
             return true;
         }
 
+        // Special division 'all_roles' has access to everything
+        if ($division === 'all_roles') {
+            return true;
+        }
+
         // If user has no division, deny access (staff must have division)
         if (empty($division)) {
             return false;

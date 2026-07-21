@@ -50,7 +50,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             {{-- Logo --}}
             <a href="/" class="flex items-center gap-3 group">
-                <img src="{{ asset('images/logobening.jpeg') }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300">
+                <img src="{{ $logoImage }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300">
                 <div class="hidden sm:block">
                     <p class="text-sm font-900 text-slate-800 font-black tracking-tight uppercase">Bening</p>
                     <p class="text-[10px] text-sky-600 font-bold uppercase tracking-widest">Laundry Services</p>
@@ -125,7 +125,7 @@
                     {{-- Mockup or Image --}}
                     <div class="relative w-full aspect-square rounded-[3rem] bg-slate-100 overflow-hidden shadow-2xl rotate-3 transition-transform hover:rotate-0 duration-500 group">
                          <div class="absolute inset-0 bg-gradient-to-br from-sky-500/20 to-transparent z-10 group-hover:opacity-50 transition-opacity"></div>
-                         <img src="https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop" alt="Laundry Services" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                         <img src="{{ $heroImage }}" alt="Laundry Services" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                     </div>
                     {{-- Floating Checkmark --}}
                     <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 flex items-center justify-center">
@@ -235,7 +235,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20">
                 <div class="space-y-6">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/logobening.jpeg') }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain bg-white rounded-xl shadow-lg">
+                        <img src="{{ $logoImage }}" alt="Bening Laundry Logo" class="w-12 h-12 object-contain bg-white rounded-xl shadow-lg">
                         <p class="text-xl font-800 font-extrabold tracking-tight">Bening<span class="text-sky-500"> Laundry</span></p>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed max-w-xs">

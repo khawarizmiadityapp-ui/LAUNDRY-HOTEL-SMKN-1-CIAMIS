@@ -167,6 +167,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
         
         Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->middleware('throttle:60,1')->name('tasks.updateStatus');
+        Route::post('/tasks/bulk-complete', [PetugasController::class, 'completeTaskBulk'])->middleware('throttle:60,1')->name('tasks.completeBulk');
         Route::post('/tasks/{id}/complete', [PetugasController::class, 'completeTask'])->middleware('throttle:60,1')->name('tasks.complete');
         
         Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');

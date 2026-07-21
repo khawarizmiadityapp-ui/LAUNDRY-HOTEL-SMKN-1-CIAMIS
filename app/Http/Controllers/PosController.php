@@ -249,8 +249,24 @@ class PosController extends Controller
                 return back()->with('error', 'Pesanan belum selesai diproses.');
             }
 
+            if ($transaksi->payment_status !== 'lunas') {
+                $dibayar = (float) $request->input('dibayar', 0);
+                if ($dibayar >= $transaksi->total_price) {
+                    $transaksi->payment_status = 'lunas';
+                    $transaksi->dibayar = $dibayar;
+                    $transaksi->kembalian = $dibayar - $transaksi->total_price;
+                    $transaksi->payment_method = 'tunai'; // Default to cash if paid at pickup
+                } else {
+                    return back()->with('error', 'Pesanan tidak bisa diambil karena belum dibayar lunas. Pembayaran kurang dari tagihan.');
+                }
+            }
+
             $transaksi->update([
                 'status' => 'diambil',
+                'payment_status' => $transaksi->payment_status,
+                'dibayar' => $transaksi->dibayar,
+                'kembalian' => $transaksi->kembalian,
+                'payment_method' => $transaksi->payment_method,
                 'updated_at' => now(),
             ]);
             

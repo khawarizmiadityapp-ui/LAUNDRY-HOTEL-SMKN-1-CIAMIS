@@ -43,6 +43,11 @@ class PetugasController extends Controller
         }
 
         $division = strtolower((string) $user->division);
+        
+        if ($division === 'all_roles') {
+            return;
+        }
+
         if (!in_array($division, $allowedDivisions, true)) {
             abort(403, 'Akun Anda tidak memiliki akses ke modul ini.');
         }
@@ -334,6 +339,80 @@ class PetugasController extends Controller
         }
     }
 
+    public function completeTaskBulk(Request $request)
+    {
+        $request->validate([
+            'transaction_ids' => 'required|array',
+            'transaction_ids.*' => 'exists:transaksis,id',
+            'stage' => 'required|in:washing,ironing,packing',
+            'petugas_name' => 'required|string|max:100',
+        ]);
+
+        $this->ensureStaffDivisionAccess([$request->stage]);
+
+        DB::beginTransaction();
+
+        try {
+            $stage = $request->stage;
+            $statusMap = [
+                'washing' => 'dicuci',
+                'ironing' => 'disetrika',
+                'packing' => 'dipacking',
+            ];
+            $stageNames = [
+                'washing' => 'Pencucian',
+                'ironing' => 'Setrika',
+                'packing' => 'Packing',
+            ];
+            $stageName = $stageNames[$stage] ?? ucfirst($stage);
+            $count = 0;
+
+            foreach ($request->transaction_ids as $transaksiId) {
+                $transaksi = Transaksi::find($transaksiId);
+                
+                if (!$transaksi) continue;
+
+                $task = $transaksi->tasks()->where('stage', $stage)->first();
+
+                if ($task && $task->status !== 'completed') {
+                    $task->update([
+                        'status' => 'completed',
+                        'petugas_id' => Auth::id(),
+                        'petugas_name' => $request->petugas_name,
+                        'completed_at' => now(),
+                    ]);
+
+                    if ($stage === 'washing') {
+                        // For bulk we only auto-deduct standard supplies
+                        $this->inventoryService->deductWashingSupplies($transaksi->id, $stage);
+                    }
+
+                    if (isset($statusMap[$stage])) {
+                        $transaksi->update(['status' => $statusMap[$stage]]);
+                    }
+
+                    if ($stage === 'packing') {
+                        $allTasksCompleted = $transaksi->tasks()->where('status', '!=', 'completed')->count() === 0;
+                        if ($allTasksCompleted) {
+                            $transaksi->update(['status' => 'selesai']);
+                        }
+                    }
+
+                    $count++;
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', "Sebanyak $count tugas $stageName berhasil diselesaikan secara bersamaan!");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Complete Task Bulk Failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal menyelesaikan tugas secara massal: ' . $e->getMessage());
+        }
+    }
+
     // Update status transaksi via Operations Hub (Lama - Masih dipertahankan untuk kompatibilitas jika perlu)
     public function updateTaskStatus(Request $request, $id)
     {
@@ -342,6 +421,11 @@ class PetugasController extends Controller
         ]);
 
         $transaksi = Transaksi::with(['tasks'])->findOrFail($id);
+        
+        if ($request->status == 'diambil' && $transaksi->payment_status !== 'lunas') {
+            return redirect()->back()->with('error', 'Pesanan tidak bisa diambil karena belum dibayar lunas.');
+        }
+
         $transaksi->status = $request->status;
         $transaksi->save();
 
