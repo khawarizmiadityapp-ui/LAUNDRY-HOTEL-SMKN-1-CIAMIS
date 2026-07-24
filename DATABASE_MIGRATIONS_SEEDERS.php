@@ -64,7 +64,7 @@ return new class extends Migration
     {
         Schema::create('laundry_tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaksi_id')->constrained('transaksis')->onDelete('cascade');
+            $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
 
             // Task information

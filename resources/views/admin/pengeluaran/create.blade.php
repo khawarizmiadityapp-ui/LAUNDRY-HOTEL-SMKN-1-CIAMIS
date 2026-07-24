@@ -22,13 +22,16 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <select name="kategori" class="w-full border border-gray-300 rounded-xl px-3 py-2.5" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
+                    <select name="kategori_id" class="w-full border border-gray-300 rounded-xl px-3 py-2.5" required>
                         <option value="">Pilih kategori</option>
                         @foreach($kategoriList as $kategori)
-                            <option value="{{ $kategori }}" {{ old('kategori') === $kategori ? 'selected' : '' }}>{{ $kategori }}</option>
+                            <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>{{ $kategori->nama }}</option>
                         @endforeach
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <a href="{{ route('admin.kategori-pengeluaran.index') }}" class="text-indigo-600 hover:underline">Kelola kategori</a>
+                    </p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>

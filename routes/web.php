@@ -11,6 +11,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PengeluaranController;
+use App\Http\Controllers\KategoriPengeluaranController;
 
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PosController;
@@ -102,6 +103,7 @@ Route::group(['middleware' => ['auth']], function () {
         // Pengeluaran
         Route::prefix('pengeluaran')->name('pengeluaran.')->group(function () {
             Route::get('/', [PengeluaranController::class, 'index'])->name('index');
+            Route::post('/anggaran', [PengeluaranController::class, 'updateAnggaran'])->name('anggaran.update');
             Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
             Route::post('/', [PengeluaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
             Route::get('/export/csv', [PengeluaranController::class, 'export'])->name('export');
@@ -109,6 +111,17 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
             Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->middleware('throttle:30,1')->name('update');
             Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
+        });
+        
+        // Kategori Pengeluaran
+        Route::prefix('kategori-pengeluaran')->name('kategori-pengeluaran.')->group(function () {
+            Route::get('/', [App\Http\Controllers\KategoriPengeluaranController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\KategoriPengeluaranController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\KategoriPengeluaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/{kategoriPengeluaran}/edit', [App\Http\Controllers\KategoriPengeluaranController::class, 'edit'])->name('edit');
+            Route::put('/{kategoriPengeluaran}', [App\Http\Controllers\KategoriPengeluaranController::class, 'update'])->middleware('throttle:30,1')->name('update');
+            Route::patch('/{kategoriPengeluaran}/toggle-status', [App\Http\Controllers\KategoriPengeluaranController::class, 'toggleStatus'])->middleware('throttle:60,1')->name('toggle-status');
+            Route::delete('/{kategoriPengeluaran}', [App\Http\Controllers\KategoriPengeluaranController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
         });
         
         // Inventory

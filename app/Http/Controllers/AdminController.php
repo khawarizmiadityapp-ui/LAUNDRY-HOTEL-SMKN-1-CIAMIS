@@ -616,7 +616,13 @@ class AdminController extends Controller
         $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
         $heroImage = \App\Models\Setting::getValue('hero_image', 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop');
         $logoImage = \App\Models\Setting::getValue('logo_image', asset('images/logobening.jpeg'));
-        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA', 'heroImage', 'logoImage'));
+        
+        // Load kategori pengeluaran dengan jumlah penggunaan
+        $kategoriList = \App\Models\KategoriPengeluaran::withCount('pengeluarans')
+            ->orderBy('nama')
+            ->get();
+        
+        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList'));
     }
 
     public function updateSettings(Request $request)

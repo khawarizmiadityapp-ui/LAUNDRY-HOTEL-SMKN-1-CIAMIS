@@ -17,12 +17,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
             </div>
-            <span class="inline-flex items-center gap-1 text-xs font-600 text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                </svg>
-                +5.2%
-            </span>
         </div>
         <p class="text-xs font-500 text-gray-400 uppercase tracking-wider mb-1">Total Pengeluaran Bulan Ini</p>
         <p class="font-display text-2xl font-700 text-gray-900 tracking-tight">{{ rupiah($totalBulanIni) }}</p>
@@ -50,7 +44,7 @@
             <div class="progress-bar-inner h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                  style="width: {{ $pct }}%"></div>
         </div>
-        <p class="text-[11px] text-gray-400 mt-1.5">Penjualan Jasa: {{ rupiah($targetAnggaran) }}</p>
+        <p class="text-[11px] text-gray-400 mt-1.5">Anggaran Bulanan: {{ rupiah($targetAnggaran) }}</p>
     </div>
 
     {{-- Card 3: Kategori Terbesar --}}
@@ -84,24 +78,28 @@
             Filter
         </button>
 
-        {{-- Export --}}
-        <a href="{{ route('admin.pengeluaran.export') }}"
-            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-500 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-card">
-            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-            </svg>
-            Export
-        </a>
+
     </div>
 
-    {{-- Tambah Baru --}}
-    <a href="{{ route('admin.pengeluaran.create') }}"
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-        </svg>
-        Tambah Pengeluaran Baru
-    </a>
+    <div class="flex items-center gap-3">
+        {{-- Atur Anggaran --}}
+        <button onclick="openAnggaranModal()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Atur Anggaran
+        </button>
+
+        {{-- Tambah Baru --}}
+        <a href="{{ route('admin.pengeluaran.create') }}"
+            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Pengeluaran Baru
+        </a>
+    </div>
 </div>
 
 {{-- ===== FILTER PANEL (hidden by default) ===== --}}
@@ -112,7 +110,7 @@
             <select name="kategori" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white">
                 <option value="">Semua Kategori</option>
                 @foreach($kategoriList as $kat)
-                    <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
+                    <option value="{{ $kat->id }}" {{ request('kategori') == $kat->id ? 'selected' : '' }}>{{ $kat->nama }}</option>
                 @endforeach
             </select>
         </div>
@@ -137,7 +135,7 @@
 
 {{-- ===== TABLE ===== --}}
 <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden fade-in delay-3">
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto min-h-[320px]">
         <table class="w-full text-sm" id="pengeluaranTable">
             <thead>
                 <tr class="border-b border-gray-100 bg-gray-50/60">
@@ -153,7 +151,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @forelse($pengeluarans as $item)
-                <tr class="table-row transition-colors" data-search="{{ strtolower($item->nama . ' ' . $item->kategori . ' ' . $item->id_transaksi) }}">
+                <tr class="table-row transition-colors" data-search="{{ strtolower($item->nama . ' ' . $item->kategori_nama . ' ' . $item->id_transaksi) }}">
 
                     {{-- ID Transaksi --}}
                     <td class="px-6 py-4">
@@ -171,7 +169,7 @@
 
                     {{-- Kategori --}}
                     <td class="px-4 py-4">
-                        <span class="inline-block text-xs font-500 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg">{{ $item->kategori }}</span>
+                        <span class="inline-block text-xs font-500 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg">{{ $item->kategori_nama }}</span>
                     </td>
 
                     {{-- Tanggal --}}
@@ -196,13 +194,13 @@
 
                     {{-- Aksi Dropdown --}}
                     <td class="px-6 py-4 text-center relative">
-                        <button onclick="toggleDropdown(this)"
+                        <button onclick="toggleDropdown('dropdown-{{ $item->id }}')"
                             class="btn-action w-8 h-8 rounded-lg flex items-center justify-center mx-auto text-gray-400 hover:text-gray-700 transition">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1 absolute right-0 top-full mt-1">
+                        <div id="dropdown-{{ $item->id }}" class="hidden z-50 dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1 absolute right-0 top-full mt-1">
                             <a href="{{ route('admin.pengeluaran.show', $item) }}"
                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,6 +259,35 @@
 
 </div>{{-- end table card --}}
 
+{{-- MODAL ANGGARAN --}}
+<div id="anggaranModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div class="relative mx-auto p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white">
+        <div class="flex justify-between items-center mb-5">
+            <h3 class="text-lg font-bold text-gray-900">Atur Anggaran Bulanan</h3>
+            <button onclick="closeAnggaranModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <form action="{{ route('admin.pengeluaran.anggaran.update') }}" method="POST">
+            @csrf
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nominal Anggaran</label>
+                <div class="flex items-center">
+                    <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-xl text-gray-500 font-medium">Rp</span>
+                    <input type="number" name="anggaran_bulanan" value="{{ $targetAnggaran }}" class="w-full border border-gray-300 rounded-r-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none" required min="0">
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="closeAnggaranModal()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-sm font-medium transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-medium transition-colors">
+                    Simpan Anggaran
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -277,6 +304,14 @@
     function toggleFilterPanel() {
         const p = document.getElementById('filterPanel');
         p.classList.toggle('hidden');
+    }
+
+    function openAnggaranModal() {
+        document.getElementById('anggaranModal').classList.remove('hidden');
+    }
+    
+    function closeAnggaranModal() {
+        document.getElementById('anggaranModal').classList.add('hidden');
     }
 </script>
 @endpush

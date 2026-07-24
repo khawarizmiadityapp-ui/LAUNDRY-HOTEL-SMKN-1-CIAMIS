@@ -6,29 +6,50 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header + Filter Section -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Laporan Keuangan</h1>
             <p class="text-gray-500 mt-1">Analisis komprehensif arus kas dan performa bisnis laundry.</p>
         </div>
-        <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" class="flex flex-wrap items-center gap-3">
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                <button type="submit" name="filter" value="bulanan"
-                class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white shadow-sm transition {{ $filter == 'bulanan' ? 'bg-blue-500 text-white' : '' }}
-                ">Bulanan</button>
-                <button type="submit" name="filter" value="tahunan"
-                class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : '' }}"
-                >Tahunan</button>
-                <button type="submit" name="filter" value="custom"
-                class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-800 shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : '' }}"
-                >Custom</button>
+        <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan']) }}"
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ ($filter ?? 'bulanan') == 'bulanan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Bulanan</a>
+                        
+                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'tahunan']) }}"
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Tahunan</a>
+                        
+                        <button type="button" onclick="toggleCustomFilter(this)"
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Custom</button>
+                    </div>
+                    <button type="button" onclick="openExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
+                        <i class="fas fa-file-export"></i> Export Data
+                    </button>
+                </div>
             </div>
-            <button type="button" onclick="openExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
-                <i class="fas fa-file-export"></i> Export Data
-            </button>
+            
+            <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" id="customFilterDiv" class="{{ $filter == 'custom' ? 'flex' : 'hidden' }} absolute right-0 top-full mt-2 z-50 flex-col gap-3 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64">
+                <input type="hidden" name="filter" value="custom">
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Dari Tanggal</label>
+                    <input type="date" name="dari" value="{{ request('dari') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Sampai Tanggal</label>
+                    <input type="date" name="sampai" value="{{ request('sampai') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition w-full mt-1">Terapkan Filter</button>
+            </form>
+
+            @if($errors->has('dari') || $errors->has('sampai'))
+                <div class="text-red-500 text-xs">
+                    @error('dari') <div>{{ $message }}</div> @enderror
+                    @error('sampai') <div>{{ $message }}</div> @enderror
+                </div>
+            @endif
         </div>
-        </form>
     </div>
 
     <!-- Statistik Cards (3) -->
@@ -39,11 +60,7 @@
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pemasukan</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pemasukan, 0, ',', '.') }}</p>
-                    @php $isMasukNaik = $persentaseMasuk >= 0; @endphp
-                    <span class="inline-flex items-center text-sm {{ $isMasukNaik ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50' }} px-2 py-0.5 rounded-full mt-2">
-                        <i class="fas {{ $isMasukNaik ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-1 text-xs"></i>
-                        {{ number_format(abs($persentaseMasuk), 1, ',', '.') }}% vs {{ $filter == 'bulanan' ? 'bulan lalu' : 'periode sebelumnya' }}
-                    </span>
+
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl">
                     <i class="fas fa-wallet text-blue-600 text-xl"></i>
@@ -56,11 +73,7 @@
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pengeluaran</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</p>
-                    @php $isKeluarNaik = $persentaseKeluar >= 0; @endphp
-                    <span class="inline-flex items-center text-sm {{ $isKeluarNaik ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50' }} px-2 py-0.5 rounded-full mt-2">
-                        <i class="fas {{ $isKeluarNaik ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-1 text-xs"></i> 
-                        {{ number_format(abs($persentaseKeluar), 1, ',', '.') }}% {{ $isKeluarNaik ? 'peningkatan' : 'efisiensi' }} biaya
-                    </span>
+
                 </div>
                 <div class="bg-red-100 p-3 rounded-xl">
                     <i class="fas fa-receipt text-red-600 text-xl"></i>
@@ -73,7 +86,7 @@
                 <div>
                     <p class="text-blue-100 text-sm font-medium">Laba Bersih</p>
                     <p class="text-3xl font-bold mt-1">Rp {{ number_format($laba, 0, ',', '.') }}</p>
-                    <span class="inline-flex items-center text-sm bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full mt-2"><i class="fas fa-chart-line mr-1"></i> profit {{ number_format($persenLaba, 2) }}%</span>
+
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
                     <i class="fas fa-chart-pie text-white text-xl"></i>
@@ -142,13 +155,6 @@
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-5">
             <div class="flex justify-between items-center flex-wrap mb-4">
                 <h2 class="text-lg font-semibold text-gray-800">Tren Pendapatan & Pengeluaran</h2>
-                <div class="relative">
-                    <select class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option>6 Bulan Terakhir</option>
-                        <option>12 Bulan Terakhir</option>
-                        <option>Triwulan Ini</option>
-                    </select>
-                </div>
             </div>
             <canvas id="trendChart"></canvas>
         </div>
@@ -345,5 +351,41 @@
             }
         });
     });
+
+    function toggleCustomFilter(btn) {
+        const form = document.getElementById('customFilterDiv');
+        const isHidden = form.classList.toggle('hidden');
+        
+        const container = btn.parentElement;
+        const links = container.querySelectorAll('a');
+        
+        if (!isHidden) {
+            // Activate Custom button visually
+            btn.classList.remove('text-gray-600', 'hover:text-gray-800');
+            btn.classList.add('bg-blue-600', 'text-white');
+            
+            // Visually deactivate others
+            links.forEach(l => {
+                if (l.classList.contains('bg-blue-600')) {
+                    l.dataset.wasActive = 'true';
+                    l.classList.remove('bg-blue-600', 'text-white');
+                    l.classList.add('text-gray-600', 'hover:text-gray-800');
+                }
+            });
+        } else {
+            // Revert Custom button
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            
+            // Restore previous active button
+            links.forEach(l => {
+                if (l.dataset.wasActive === 'true') {
+                    l.classList.add('bg-blue-600', 'text-white');
+                    l.classList.remove('text-gray-600', 'hover:text-gray-800');
+                    delete l.dataset.wasActive;
+                }
+            });
+        }
+    }
 </script>
 @endpush

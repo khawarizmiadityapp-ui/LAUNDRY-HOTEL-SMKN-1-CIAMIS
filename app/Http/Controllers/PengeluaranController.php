@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengeluaran;
 use App\Models\Transaksi;
+use App\Models\Setting;
+use App\Models\KategoriPengeluaran;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +16,7 @@ class PengeluaranController extends Controller
     public function index(Request $request)
     {
         // Base query with filters
-        $query = Pengeluaran::query()
+        $query = Pengeluaran::with('kategoriPengeluaran')
             ->when($request->kategori, fn($q) => $q->kategori($request->kategori))
             ->when(
                 $request->dari || $request->sampai,
@@ -31,26 +33,25 @@ class PengeluaranController extends Controller
                                     ->whereYear('tanggal', now()->year)
                                     ->sum('nominal');
 
-        // Target anggaran diambil dari seluruh total penjualan jasa (transaksi lunas)
-        $targetAnggaran = (int) Transaksi::where('payment_status', 'lunas')
-                                    ->sum('total_price');
+        // Target anggaran diambil dari pengaturan yang disetel pengguna
+        $targetAnggaran = (int) Setting::getValue('anggaran_bulanan', 0);
         $terpakaiBulanIni = $totalBulanIni;
         $sisaAnggaran   = max(0, $targetAnggaran - $terpakaiBulanIni);
 
         // Kategori terbesar berdasarkan total nominal
-        $raw = Pengeluaran::selectRaw('kategori, SUM(nominal) as total')
-                ->groupBy('kategori')
+        $raw = Pengeluaran::selectRaw('kategori_id, SUM(nominal) as total')
+                ->groupBy('kategori_id')
                 ->orderByDesc('total')
                 ->first();
 
         $totalSemua     = Pengeluaran::sum('nominal') ?: 1;
         $kategoriTerbesar = [
-            'nama'   => $raw?->kategori ?? '-',
+            'nama'   => $raw ? KategoriPengeluaran::find($raw->kategori_id)?->nama ?? '-' : '-',
             'persen' => $raw ? round(($raw->total / $totalSemua) * 100) : 0,
         ];
 
-        // Daftar kategori unik untuk filter
-        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
+        // Daftar kategori untuk filter
+        $kategoriList = KategoriPengeluaran::active()->orderBy('nama')->get();
 
         return view('admin.pengeluaran.index', compact(
             'pengeluarans',
@@ -62,11 +63,24 @@ class PengeluaranController extends Controller
         ));
     }
 
+    // ─── UPDATE ANGGARAN ────────────────────────────────────────────────
+    public function updateAnggaran(Request $request)
+    {
+        $request->validate([
+            'anggaran_bulanan' => 'required|numeric|min:0',
+        ]);
+
+        Setting::setValue('anggaran_bulanan', $request->anggaran_bulanan);
+
+        return redirect()->route('admin.pengeluaran.index')
+                         ->with('success', 'Anggaran operasional bulanan berhasil diperbarui.');
+    }
+
     // ─── CREATE ─────────────────────────────────────────────────────────
     public function create()
     {
         $idTransaksi  = Pengeluaran::generateIdTransaksi();
-        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
+        $kategoriList = KategoriPengeluaran::active()->orderBy('nama')->get();
 
         return view('admin.pengeluaran.create', compact('idTransaksi', 'kategoriList'));
     }
@@ -76,7 +90,7 @@ class PengeluaranController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:255',
-            'kategori'   => 'required|in:' . implode(',', Pengeluaran::KATEGORI_DIIZINKAN),
+            'kategori_id' => 'required|exists:kategori_pengeluaran,id',
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
@@ -84,6 +98,10 @@ class PengeluaranController extends Controller
         ]);
 
         $validated['id_transaksi'] = Pengeluaran::generateIdTransaksi();
+
+        // Set legacy kategori field for backward compatibility
+        $kategori = KategoriPengeluaran::find($validated['kategori_id']);
+        $validated['kategori'] = $kategori->nama;
 
         if ($request->hasFile('bon_file')) {
             $validated['bon_file'] = $request->file('bon_file')->store('bon-pengeluaran', 'public');
@@ -106,7 +124,7 @@ class PengeluaranController extends Controller
     // ─── EDIT ───────────────────────────────────────────────────────────
     public function edit(Pengeluaran $pengeluaran)
     {
-        $kategoriList = collect(Pengeluaran::KATEGORI_DIIZINKAN);
+        $kategoriList = KategoriPengeluaran::active()->orderBy('nama')->get();
         return view('admin.pengeluaran.edit', compact('pengeluaran', 'kategoriList'));
     }
 
@@ -115,12 +133,16 @@ class PengeluaranController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:255',
-            'kategori'   => 'required|in:' . implode(',', Pengeluaran::KATEGORI_DIIZINKAN),
+            'kategori_id' => 'required|exists:kategori_pengeluaran,id',
             'keterangan' => 'nullable|string|max:255',
             'tanggal'    => 'required|date',
             'nominal'    => 'required|numeric|min:0',
             'bon_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
+
+        // Set legacy kategori field for backward compatibility
+        $kategori = KategoriPengeluaran::find($validated['kategori_id']);
+        $validated['kategori'] = $kategori->nama;
 
         if ($request->hasFile('bon_file')) {
             if ($pengeluaran->bon_file) {

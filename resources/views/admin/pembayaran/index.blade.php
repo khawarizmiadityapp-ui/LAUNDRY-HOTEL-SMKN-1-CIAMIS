@@ -11,9 +11,6 @@
                 <h1 class="text-2xl font-bold text-gray-800">Manajemen Pembayaran</h1>
                 <p class="text-gray-500 text-sm mt-1">Kelola seluruh transaksi masuk, status pelunasan pelanggan, dan riwayat metode pembayaran dalam satu alur yang jernih.</p>
             </div>
-            <a href="{{ route('admin.pembayaran.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 transition">
-                <i class="fas fa-plus"></i> Entri Bayar Baru
-            </a>
         </div>
 
         <!-- STATISTIK CARDS -->
@@ -45,8 +42,8 @@
                     <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('admin.pembayaran.create') }}" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                        <i class="fas fa-arrow-right mr-1"></i> Proses Pembayaran
+                    <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'belum_bayar'])) }}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <i class="fas fa-arrow-right mr-1"></i> Lihat Transaksi
                     </a>
                 </div>
             </div>
@@ -58,12 +55,12 @@
                class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ !request('status') ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                 Semua
             </a>
-            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'Lunas'])) }}" 
-               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'Lunas' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
+            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'lunas'])) }}" 
+               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'lunas' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                 Lunas
             </a>
-            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'Belum Lunas'])) }}" 
-               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'Belum Lunas' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
+            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'belum_bayar'])) }}" 
+               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'belum_bayar' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                 Belum Lunas
             </a>
         </div>
@@ -113,13 +110,13 @@
                                     
                                     <div id="dropdown-pembayaran-{{ $trx->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
                                         @if($trx->payment_status != 'lunas')
-                                        <a href="{{ route('admin.pembayaran.create') }}"
-                                           class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                        <button onclick="openPaymentModal('{{ $trx->transaksi_code }}', {{ $trx->total_price }})"
+                                           class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
                                             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                             </svg>
                                             Bayar
-                                        </a>
+                                        </button>
                                         @endif
                                         <a href="{{ route('pos.nota', $trx->id) }}" target="_blank"
                                            class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
@@ -144,5 +141,94 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Proses Pembayaran</h3>
+            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <form id="paymentForm" action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="transaksi_id" id="modal_transaksi_id">
+            <input type="hidden" name="tanggal_bayar" value="{{ date('Y-m-d') }}">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">ID Transaksi</label>
+                <input type="text" id="modal_transaksi_code_display" class="w-full border border-gray-300 rounded-lg bg-gray-50 p-2.5 text-sm font-mono" readonly>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Total Tagihan</label>
+                <div class="flex items-center">
+                    <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-lg text-gray-500 font-medium">Rp</span>
+                    <input type="text" id="modal_total_price_display" class="w-full border border-gray-300 rounded-r-lg bg-gray-50 p-2.5 text-sm font-bold text-gray-800" readonly>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nominal Uang Pelanggan <span class="text-red-500">*</span></label>
+                <div class="flex items-center">
+                    <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-lg text-gray-500 font-medium">Rp</span>
+                    <input type="number" name="jumlah_bayar" id="modal_jumlah_bayar" class="w-full border border-gray-300 rounded-r-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none" required min="0">
+                </div>
+                <p class="text-xs text-gray-500 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Masukkan nominal sama atau lebih besar dari tagihan.</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <select name="metode_pembayaran" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm appearance-none focus:ring-blue-500 focus:border-blue-500 outline-none" required>
+                        <option value="Tunai">Tunai</option>
+                        <option value="QRIS">QRIS</option>
+                        <option value="Transfer BCA">Transfer BCA</option>
+                        <option value="Transfer Mandiri">Transfer Mandiri</option>
+                        <option value="Transfer BRI">Transfer BRI</option>
+                        <option value="E-Wallet">E-Wallet</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bukti Pembayaran <span class="text-gray-400 text-xs font-normal">(Opsional)</span></label>
+                <input type="file" name="bukti_pembayaran" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="closePaymentModal()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 shadow-sm transition-colors">
+                    <i class="fas fa-check"></i> Proses Pembayaran
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPaymentModal(transaksiCode, totalPrice) {
+        document.getElementById('modal_transaksi_id').value = transaksiCode;
+        document.getElementById('modal_transaksi_code_display').value = transaksiCode;
+        document.getElementById('modal_total_price_display').value = new Intl.NumberFormat('id-ID').format(totalPrice);
+        
+        // Default jumlah bayar to total price
+        let jumlahBayarInput = document.getElementById('modal_jumlah_bayar');
+        jumlahBayarInput.value = totalPrice;
+        jumlahBayarInput.min = totalPrice;
+        
+        document.getElementById('paymentModal').classList.remove('hidden');
+    }
+    
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+    }
+</script>
+
 </main>
 @endsection

@@ -203,6 +203,17 @@ class PosController extends Controller
 
             DB::commit();
             
+            // Return JSON response dengan redirect URL untuk AJAX compatibility
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil dibuat!',
+                    'redirect' => route('pos.nota', $transaksi->id),
+                    'transaksi_id' => $transaksi->id,
+                    'transaksi_code' => $transaksi->transaksi_code,
+                ]);
+            }
+            
             return redirect()->route('pos.nota', $transaksi->id)
                 ->with('success', 'Pesanan berhasil dibuat!');
 
@@ -218,6 +229,15 @@ class PosController extends Controller
                 'line' => $e->getLine(),
                 'input' => $request->except(['_token']),
             ]);
+
+            // Return JSON error untuk AJAX request
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.',
+                    'error' => config('app.debug') ? $e->getMessage() : null,
+                ], 500);
+            }
 
             return back()
                 ->withInput()

@@ -9,18 +9,13 @@ class Pengeluaran extends Model
 {
     use HasFactory;
 
-    public const KATEGORI_DIIZINKAN = [
-        'Operasional',
-        'Bahan Kimia & Sabun',
-        'Listrik & Air',
-    ];
-
     protected $table = 'pengeluarans';
 
     protected $fillable = [
         'id_transaksi',
         'nama',
-        'kategori',
+        'kategori', // Legacy - akan di-phase out
+        'kategori_id', // New - relasi ke tabel kategori_pengeluaran
         'keterangan',
         'tanggal',
         'nominal',
@@ -32,19 +27,29 @@ class Pengeluaran extends Model
         'nominal'  => 'integer',
     ];
 
-    // ─── Scope: filter by status ───────────────────────────────────────
+    // ─── RELATIONSHIPS ──────────────────────────────────────────────────
+
+    // Relasi ke KategoriPengeluaran
+    public function kategoriPengeluaran()
+    {
+        return $this->belongsTo(KategoriPengeluaran::class, 'kategori_id');
+    }
+
+    // ─── SCOPES ─────────────────────────────────────────────────────────
+
+    // Scope: filter by status
     public function scopeStatus($query, $status)
     {
         return $query->where('status', $status);
     }
 
-    // ─── Scope: filter by kategori ─────────────────────────────────────
-    public function scopeKategori($query, $kategori)
+    // Scope: filter by kategori (using kategori_id)
+    public function scopeKategori($query, $kategoriId)
     {
-        return $query->where('kategori', $kategori);
+        return $query->where('kategori_id', $kategoriId);
     }
 
-    // ─── Scope: filter by date range ───────────────────────────────────
+    // Scope: filter by date range
     public function scopeDateRange($query, $dari, $sampai)
     {
         if ($dari)    $query->whereDate('tanggal', '>=', $dari);
@@ -52,7 +57,9 @@ class Pengeluaran extends Model
         return $query;
     }
 
-    // ─── Auto-generate ID transaksi ────────────────────────────────────
+    // ─── METHODS ────────────────────────────────────────────────────────
+
+    // Auto-generate ID transaksi
     public static function generateIdTransaksi(): string
     {
         $num = 2401;
@@ -68,5 +75,11 @@ class Pengeluaran extends Model
         }
 
         return 'EXP-' . $num;
+    }
+
+    // Accessor untuk nama kategori (backward compatibility)
+    public function getKategoriNamaAttribute()
+    {
+        return $this->kategoriPengeluaran?->nama ?? $this->kategori;
     }
 }

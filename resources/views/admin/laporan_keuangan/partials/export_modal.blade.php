@@ -31,14 +31,14 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Export</label>
                                 <div class="grid grid-cols-2 gap-3">
                                     <label class="relative flex cursor-pointer rounded-lg border bg-white p-3 shadow-sm focus:outline-none" :class="exportType === 'excel' ? 'border-blue-600 ring-2 ring-blue-600' : 'border-gray-300'">
-                                        <input type="radio" x-model="exportType" value="excel" class="sr-only">
+                                        <input type="radio" name="exportType" x-model="exportType" value="excel" class="sr-only">
                                         <div class="flex flex-1 items-center justify-center">
                                             <i class="fas fa-file-excel text-green-600 text-2xl mr-2"></i>
                                             <span class="text-sm font-medium text-gray-900">Excel</span>
                                         </div>
                                     </label>
                                     <label class="relative flex cursor-pointer rounded-lg border bg-white p-3 shadow-sm focus:outline-none" :class="exportType === 'pdf' ? 'border-blue-600 ring-2 ring-blue-600' : 'border-gray-300'">
-                                        <input type="radio" x-model="exportType" value="pdf" class="sr-only">
+                                        <input type="radio" name="exportType" x-model="exportType" value="pdf" class="sr-only">
                                         <div class="flex flex-1 items-center justify-center">
                                             <i class="fas fa-file-pdf text-red-600 text-2xl mr-2"></i>
                                             <span class="text-sm font-medium text-gray-900">PDF</span>
@@ -52,7 +52,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Periode Data</label>
                                 <select name="filter" x-model="filter" @change="updateFilter()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="bulanan">Bulan Ini</option>
-                                    <option value="tahunan">1 Tahun (2026)</option>
+                                    <option value="tahunan">1 Tahun</option>
                                     <option value="custom">Custom Range</option>
                                 </select>
                             </div>
@@ -83,11 +83,11 @@
             
             {{-- Action Buttons --}}
             <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-3">
-                <button type="button" @click="
+                <button type="button" onclick="
                     const form = document.getElementById('exportForm');
                     const formData = new FormData(form);
                     const params = new URLSearchParams(formData);
-                    const exportType = document.querySelector('input[name=\\'exportType\\']:checked')?.value || 'excel';
+                    const exportType = document.querySelector('input[name=\'exportType\']:checked')?.value || 'excel';
                     const route = exportType === 'excel' ? '{{ route('export.transaksi.excel') }}' : '{{ route('export.transaksi.pdf') }}';
                     window.location.href = route + '?' + params.toString();
                     closeExportModal();

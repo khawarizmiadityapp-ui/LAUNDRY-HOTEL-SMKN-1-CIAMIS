@@ -150,5 +150,206 @@
             </div>
         </div>
     </div>
+
+    <!-- Kategori Pengeluaran Section -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Kategori Pengeluaran
+            </h2>
+            <button type="button" onclick="openAddKategoriModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition flex items-center gap-2 shadow-md shadow-brand-500/25">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Kategori
+            </button>
+        </div>
+
+        <p class="text-sm text-slate-500 mb-4">Kelola kategori untuk pengeluaran operasional laundry. Kategori nonaktif tidak akan muncul di dropdown pengeluaran.</p>
+
+        <!-- Tabel Kategori -->
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Nama Kategori</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Deskripsi</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Digunakan</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="kategoriTableBody">
+                    @foreach($kategoriList as $kategori)
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-3 font-medium text-slate-800">{{ $kategori->nama }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600">{{ $kategori->deskripsi ?? '-' }}</td>
+                        <td class="px-4 py-3 text-center">
+                            @if($kategori->is_active)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                Aktif
+                            </span>
+                            @else
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                <span class="w-1.5 h-1.5 bg-slate-500 rounded-full mr-1.5"></span>
+                                Nonaktif
+                            </span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-center text-sm text-slate-600">
+                            {{ $kategori->pengeluarans_count ?? 0 }} kali
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editKategori({{ $kategori->id }}, '{{ $kategori->nama }}', '{{ $kategori->deskripsi }}', {{ $kategori->is_active ? 'true' : 'false' }})" 
+                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+
+                                <form action="{{ route('admin.kategori-pengeluaran.toggle-status', $kategori) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="p-1.5 {{ $kategori->is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50' }} rounded-lg transition" 
+                                            title="{{ $kategori->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                        @if($kategori->is_active)
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                        </svg>
+                                        @else
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        @endif
+                                    </button>
+                                </form>
+
+                                @if(!$kategori->isUsed())
+                                <form action="{{ route('admin.kategori-pengeluaran.destroy', $kategori) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                @else
+                                <span class="p-1.5 text-slate-300" title="Tidak bisa dihapus karena masih digunakan">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </span>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        @if($kategoriList->isEmpty())
+        <div class="text-center py-12">
+            <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p class="text-slate-500 font-medium">Belum ada kategori pengeluaran</p>
+            <p class="text-slate-400 text-sm mt-1">Klik tombol "Tambah Kategori" untuk membuat kategori baru</p>
+        </div>
+        @endif
+    </div>
+
+    <!-- Modal Tambah/Edit Kategori -->
+    <div id="kategoriModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-slate-800">Tambah Kategori</h3>
+                <button type="button" onclick="closeKategoriModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="kategoriForm" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="POST">
+
+                <div>
+                    <label for="nama" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Nama Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="nama" id="nama" required
+                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                           placeholder="Contoh: Gaji Karyawan">
+                </div>
+
+                <div>
+                    <label for="deskripsi" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Deskripsi
+                    </label>
+                    <textarea name="deskripsi" id="deskripsi" rows="3"
+                              class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                              placeholder="Opsional: Jelaskan kategori ini"></textarea>
+                </div>
+
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_active" id="is_active" value="1" checked
+                               class="w-4 h-4 text-brand-600 border-slate-300 rounded focus:ring-brand-500">
+                        <span class="ml-2 text-sm font-medium text-slate-700">Aktifkan kategori ini</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="closeKategoriModal()" class="px-4 py-2.5 bg-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-300 transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2.5 bg-brand-500 text-white font-semibold rounded-xl hover:bg-brand-600 transition shadow-md shadow-brand-500/25">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddKategoriModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Kategori';
+            document.getElementById('kategoriForm').action = '{{ route("admin.kategori-pengeluaran.store") }}';
+            document.getElementById('formMethod').value = 'POST';
+            document.getElementById('nama').value = '';
+            document.getElementById('deskripsi').value = '';
+            document.getElementById('is_active').checked = true;
+            document.getElementById('kategoriModal').classList.remove('hidden');
+        }
+
+        function editKategori(id, nama, deskripsi, isActive) {
+            document.getElementById('modalTitle').textContent = 'Edit Kategori';
+            document.getElementById('kategoriForm').action = '{{ url("admin/kategori-pengeluaran") }}/' + id;
+            document.getElementById('formMethod').value = 'PUT';
+            document.getElementById('nama').value = nama;
+            document.getElementById('deskripsi').value = deskripsi || '';
+            document.getElementById('is_active').checked = isActive;
+            document.getElementById('kategoriModal').classList.remove('hidden');
+        }
+
+        function closeKategoriModal() {
+            document.getElementById('kategoriModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('kategoriModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeKategoriModal();
+            }
+        });
+    </script>
 </div>
 @endsection

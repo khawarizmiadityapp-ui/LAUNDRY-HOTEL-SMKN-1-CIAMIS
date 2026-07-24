@@ -861,20 +861,35 @@ function posApp() {
         toggleService(id) {
             const idx = this.cart.findIndex(i => i.id === id);
             if (idx >= 0) {
+                // Jika sudah ada di cart, remove
                 this.cart.splice(idx, 1);
             } else {
                 const svc = this.services.find(s => s.id === id);
                 if (svc) {
-                    // Jika tipe layanan baru adalah kiloan:
+                    // BUSINESS RULE: Prevent mixing Express and Regular for kiloan services
                     if (svc.kategori === 'kiloan') {
-                        if (svc.needs_washing) {
-                            // Layanan Kiloan yang butuh cuci: keluarkan layanan Kiloan butuh cuci lainnya
-                            this.cart = this.cart.filter(item => !(item.kategori === 'kiloan' && item.needs_washing));
-                        } else {
-                            // Layanan Kiloan yang hanya setrika (tidak butuh cuci): keluarkan layanan Kiloan hanya setrika lainnya
-                            this.cart = this.cart.filter(item => !(item.kategori === 'kiloan' && !item.needs_washing));
+                        const hasExpress = this.cart.some(item => 
+                            item.kategori === 'kiloan' && item.nama.toLowerCase().includes('express')
+                        );
+                        const hasRegular = this.cart.some(item => 
+                            item.kategori === 'kiloan' && item.nama.toLowerCase().includes('regular')
+                        );
+                        
+                        const isAddingExpress = svc.nama.toLowerCase().includes('express');
+                        const isAddingRegular = svc.nama.toLowerCase().includes('regular');
+                        
+                        // Prevent mixing: if cart has Express, can't add Regular (and vice versa)
+                        if (hasExpress && isAddingRegular) {
+                            alert('❌ Tidak bisa mencampur layanan Express dan Regular!\n\nSilakan hapus layanan Express terlebih dahulu jika ingin menambah layanan Regular.');
+                            return;
+                        }
+                        if (hasRegular && isAddingExpress) {
+                            alert('❌ Tidak bisa mencampur layanan Regular dan Express!\n\nSilakan hapus layanan Regular terlebih dahulu jika ingin menambah layanan Express.');
+                            return;
                         }
                     }
+                    
+                    // ADD: Push ke cart
                     this.cart.push({ ...svc, qty: 1 });
                 }
             }
@@ -947,6 +962,9 @@ function posApp() {
 
         async submitOrder() {
             if (!this.selectedCustomer || this.cart.length === 0 || this.isKasirInvalid) return;
+            
+            // Prevent double submit
+            if (this.submitting) return;
             this.submitting = true;
 
             const payload = {
@@ -971,23 +989,23 @@ function posApp() {
                     body: JSON.stringify(payload),
                 });
 
+                const data = await res.json();
+
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    console.error('Server response:', errorText);
-                    throw new Error('Server returned ' + res.status);
+                    throw new Error(data.message || 'Gagal membuat pesanan');
                 }
 
-                // Jika sukses, Laravel akan mengembalikan response JSON yang berisi redirect url
-                // Tapi PosController@store saat ini mengembalikan `redirect()->route('pos.nota')`
-                // Fetch secara default akan mengikuti redirect (res.redirected === true)
-                // dan mengembalikan isi HTML dari pos.nota.
-                // Untuk amannya, kita paksa window location ke URL dari response tersebut:
-                window.location.href = res.url;
+                // Success - redirect to nota
+                if (data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    throw new Error('Response tidak valid dari server');
+                }
                 
             } catch (e) {
                 this.submitting = false;
-                alert('Terjadi kesalahan pada server. Cek console browser untuk detailnya.');
-                console.error(e);
+                console.error('Submit Order Error:', e);
+                alert(e.message || 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.');
             }
         },
 

@@ -343,7 +343,7 @@ class PetugasController extends Controller
     {
         $request->validate([
             'transaction_ids' => 'required|array',
-            'transaction_ids.*' => 'exists:transaksis,id',
+            'transaction_ids.*' => 'exists:transaksi,id',
             'stage' => 'required|in:washing,ironing,packing',
             'petugas_name' => 'required|string|max:100',
         ]);
