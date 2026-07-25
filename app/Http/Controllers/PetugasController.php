@@ -263,25 +263,16 @@ class PetugasController extends Controller
                 }
             }
 
-            // Update overall transaction status
+            // Update overall transaction status based on next step
+            // When a task is completed, set status to the NEXT stage (sedang processing next step)
             $statusMap = [
-                'washing' => 'dicuci',
-                'ironing' => 'disetrika',
-                'packing' => 'dipacking',
+                'washing' => 'disetrika',   // After washing done → now ironing
+                'ironing' => 'dipacking',   // After ironing done → now packing
+                'packing' => 'selesai',     // After packing done → ready for pickup
             ];
 
             if (isset($statusMap[$stage])) {
                 $transaksi->update(['status' => $statusMap[$stage]]);
-            }
-
-            // If packing is completed, mark transaction as 'selesai' (ready for pickup)
-            if ($stage === 'packing') {
-                // Check if all tasks are completed
-                $allTasksCompleted = $transaksi->tasks()->where('status', '!=', 'completed')->count() === 0;
-
-                if ($allTasksCompleted) {
-                    $transaksi->update(['status' => 'selesai']);
-                }
             }
 
             DB::commit();
@@ -354,10 +345,11 @@ class PetugasController extends Controller
 
         try {
             $stage = $request->stage;
+            // Update status to NEXT stage (sedang processing next step)
             $statusMap = [
-                'washing' => 'dicuci',
-                'ironing' => 'disetrika',
-                'packing' => 'dipacking',
+                'washing' => 'disetrika',   // After washing done → now ironing
+                'ironing' => 'dipacking',   // After ironing done → now packing
+                'packing' => 'selesai',     // After packing done → ready for pickup
             ];
             $stageNames = [
                 'washing' => 'Pencucian',
@@ -389,13 +381,6 @@ class PetugasController extends Controller
 
                     if (isset($statusMap[$stage])) {
                         $transaksi->update(['status' => $statusMap[$stage]]);
-                    }
-
-                    if ($stage === 'packing') {
-                        $allTasksCompleted = $transaksi->tasks()->where('status', '!=', 'completed')->count() === 0;
-                        if ($allTasksCompleted) {
-                            $transaksi->update(['status' => 'selesai']);
-                        }
                     }
 
                     $count++;

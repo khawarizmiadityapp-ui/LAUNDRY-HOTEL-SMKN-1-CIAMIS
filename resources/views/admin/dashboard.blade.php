@@ -177,19 +177,18 @@
 </div>
 
 {{-- ── Service Statistics Chart ────────────────────────────── --}}
-<div class="bg-white rounded-2xl shadow-card p-5 animate-fade-up" style="animation-delay:.25s">
-    <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+<div class="bg-white rounded-2xl shadow-card p-6 animate-fade-up" style="animation-delay:.25s">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-            <h2 class="font-display text-base font-700 text-slate-900">Layanan Paling Banyak Dipesan</h2>
+            <h2 class="font-display text-lg font-700 text-slate-900">Layanan Paling Banyak Dipesan</h2>
             <p class="text-xs text-slate-400 mt-0.5">Top 10 layanan berdasarkan jumlah pesanan</p>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="flex items-center gap-2 text-xs text-slate-500">
-                <span class="inline-block w-3 h-3 rounded-sm bg-gradient-to-r from-brand-500 to-violet-500"></span> Jumlah Pesanan
-            </span>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-brand-50 to-violet-50 rounded-lg border border-brand-100">
+            <span class="inline-block w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-brand-500 to-violet-500"></span>
+            <span class="text-xs font-semibold text-brand-600">Jumlah Pesanan</span>
         </div>
     </div>
-    <div class="relative" style="height: 400px;">
+    <div class="relative bg-slate-50/50 rounded-xl p-5 border border-slate-100" style="min-height: 450px;">
         <canvas id="serviceChart"></canvas>
     </div>
 </div>
@@ -327,17 +326,19 @@ let transactionChart = new Chart(transactionCtx, {
 // ── Service Chart (Horizontal Bar) ─────────────────────────────────────────────
 const serviceLabels = serviceStatsData.map(s => s.service_name);
 const serviceData = serviceStatsData.map(s => s.order_count);
-const serviceColors = [
-    'rgba(53, 104, 244, 0.9)',
-    'rgba(139, 92, 246, 0.9)',
-    'rgba(236, 72, 153, 0.9)',
-    'rgba(251, 146, 60, 0.9)',
-    'rgba(34, 197, 94, 0.9)',
-    'rgba(14, 165, 233, 0.9)',
-    'rgba(168, 85, 247, 0.9)',
-    'rgba(244, 63, 94, 0.9)',
-    'rgba(234, 179, 8, 0.9)',
-    'rgba(16, 185, 129, 0.9)',
+
+// Create gradient colors for modern look
+const serviceGradients = [
+    { start: 'rgba(53, 104, 244, 0.85)', end: 'rgba(99, 102, 241, 0.85)' },
+    { start: 'rgba(139, 92, 246, 0.85)', end: 'rgba(168, 85, 247, 0.85)' },
+    { start: 'rgba(236, 72, 153, 0.85)', end: 'rgba(244, 63, 94, 0.85)' },
+    { start: 'rgba(251, 146, 60, 0.85)', end: 'rgba(251, 191, 36, 0.85)' },
+    { start: 'rgba(34, 197, 94, 0.85)', end: 'rgba(16, 185, 129, 0.85)' },
+    { start: 'rgba(14, 165, 233, 0.85)', end: 'rgba(6, 182, 212, 0.85)' },
+    { start: 'rgba(168, 85, 247, 0.85)', end: 'rgba(192, 132, 252, 0.85)' },
+    { start: 'rgba(244, 63, 94, 0.85)', end: 'rgba(251, 113, 133, 0.85)' },
+    { start: 'rgba(234, 179, 8, 0.85)', end: 'rgba(250, 204, 21, 0.85)' },
+    { start: 'rgba(16, 185, 129, 0.85)', end: 'rgba(52, 211, 153, 0.85)' },
 ];
 
 let serviceChart = new Chart(serviceCtx, {
@@ -347,22 +348,41 @@ let serviceChart = new Chart(serviceCtx, {
         datasets: [{
             label: 'Jumlah Pesanan',
             data: serviceData,
-            backgroundColor: serviceColors,
-            hoverBackgroundColor: serviceColors.map(c => c.replace('0.9', '1')),
-            borderRadius: 8,
+            backgroundColor: serviceGradients.map((g, i) => {
+                const ctx = serviceCtx;
+                const gradient = ctx.createLinearGradient(0, 0, 500, 0);
+                gradient.addColorStop(0, g.start);
+                gradient.addColorStop(1, g.end);
+                return gradient;
+            }),
+            hoverBackgroundColor: serviceGradients.map(g => g.end.replace('0.85', '0.95')),
+            borderRadius: { topRight: 10, bottomRight: 10 },
             borderSkipped: false,
+            barPercentage: 0.65,
+            categoryPercentage: 0.85,
         }]
     },
     options: {
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+            padding: {
+                left: 0,
+                right: 60,
+                top: 10,
+                bottom: 10
+            }
+        },
         interaction: { intersect: false, mode: 'index' },
         plugins: {
             legend: { display: false },
             tooltip: {
                 ...tooltipOptions,
                 callbacks: {
+                    title: function(context) {
+                        return context[0].label;
+                    },
                     label: function(context) {
                         const service = serviceStatsData[context.dataIndex];
                         return [
@@ -377,12 +397,16 @@ let serviceChart = new Chart(serviceCtx, {
         scales: {
             x: {
                 beginAtZero: true,
-                grid: { color: '#f1f5f9', drawBorder: false },
+                grid: { 
+                    color: '#e2e8f0',
+                    drawBorder: false,
+                    lineWidth: 1,
+                },
                 border: { display: false },
                 ticks: {
                     color: '#94a3b8',
-                    font: { size: 11 },
-                    padding: 8,
+                    font: { size: 11, weight: '500' },
+                    padding: 10,
                     precision: 0,
                 }
             },
@@ -390,13 +414,39 @@ let serviceChart = new Chart(serviceCtx, {
                 grid: { display: false },
                 border: { display: false },
                 ticks: { 
-                    color: '#475569', 
-                    font: { size: 12, weight: '600' },
-                    padding: 10
+                    color: '#1e293b', 
+                    font: { size: 13, weight: '600' },
+                    padding: 15,
+                    callback: function(value, index) {
+                        const label = this.getLabelForValue(value);
+                        // Truncate long labels
+                        return label.length > 28 ? label.substring(0, 28) + '...' : label;
+                    }
                 }
             }
         }
-    }
+    },
+    plugins: [{
+        afterDatasetsDraw: function(chart) {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach(function(dataset, i) {
+                const meta = chart.getDatasetMeta(i);
+                if (!meta.hidden) {
+                    meta.data.forEach(function(element, index) {
+                        // Draw the count at the end of each bar
+                        ctx.fillStyle = '#475569';
+                        ctx.font = 'bold 13px sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        
+                        const dataString = dataset.data[index] + 'x';
+                        const position = element.tooltipPosition();
+                        ctx.fillText(dataString, position.x + 10, position.y);
+                    });
+                }
+            });
+        }
+    }]
 });
 
 // ── Tab Switcher Logic ─────────────────────────────────────────────
