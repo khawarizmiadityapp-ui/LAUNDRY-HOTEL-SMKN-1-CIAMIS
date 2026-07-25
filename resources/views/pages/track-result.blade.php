@@ -59,6 +59,130 @@
 
             {{-- Body --}}
             <div class="p-8 md:p-12 space-y-12">
+
+                {{-- ===================== ESTIMASI SELESAI (Shopee-style) ===================== --}}
+                @php
+                    // Calculate the longest estimasi from all services in this order
+                    $maxEstimasiJam = 0;
+                    foreach ($order->details as $detail) {
+                        if ($detail->layanan && $detail->layanan->estimasi) {
+                            $maxEstimasiJam = max($maxEstimasiJam, (int) $detail->layanan->estimasi);
+                        }
+                    }
+
+                    $estimasiSelesai = $maxEstimasiJam > 0 
+                        ? $order->created_at->copy()->addHours($maxEstimasiJam) 
+                        : null;
+
+                    $isSelesai = in_array($order->status, ['selesai', 'diambil']);
+                    
+                    // Calculate progress percentage
+                    $progressPercent = 0;
+                    $sisaDetik = 0;
+                    $statusEstimasi = 'on_time'; // on_time, almost, late
+
+                    if ($estimasiSelesai) {
+                        $totalDurasi = $order->created_at->diffInSeconds($estimasiSelesai);
+                        $elapsed = $order->created_at->diffInSeconds(now());
+                        
+                        if ($isSelesai) {
+                            $progressPercent = 100;
+                            $statusEstimasi = 'done';
+                        } else {
+                            $progressPercent = $totalDurasi > 0 ? min(100, round(($elapsed / $totalDurasi) * 100)) : 0;
+                            $sisaDetik = max(0, now()->diffInSeconds($estimasiSelesai, false));
+                            
+                            if ($progressPercent >= 100) {
+                                $statusEstimasi = 'late';
+                            } elseif ($progressPercent >= 80) {
+                                $statusEstimasi = 'almost';
+                            }
+                        }
+                    }
+                @endphp
+
+                @if($estimasiSelesai)
+                <div class="bg-gradient-to-br from-slate-50 to-sky-50/50 rounded-2xl border border-slate-100 p-6 relative overflow-hidden">
+                    {{-- Decorative circle --}}
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-sky-100/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-extrabold text-slate-800 tracking-tight">Estimasi Selesai</h3>
+                            </div>
+                            {{-- Status Badge --}}
+                            @if($statusEstimasi === 'done')
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-full">✓ Selesai</span>
+                            @elseif($statusEstimasi === 'late')
+                                <span class="px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold uppercase tracking-widest rounded-full animate-pulse">Terlambat</span>
+                            @elseif($statusEstimasi === 'almost')
+                                <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-widest rounded-full">Hampir Selesai</span>
+                            @else
+                                <span class="px-3 py-1 bg-sky-100 text-sky-700 text-[10px] font-bold uppercase tracking-widest rounded-full">Tepat Waktu</span>
+                            @endif
+                        </div>
+
+                        {{-- Estimated Date/Time --}}
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-4 mb-5">
+                            <div class="flex-1">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Perkiraan Selesai</p>
+                                <p class="text-2xl font-extrabold text-slate-800 tracking-tight">
+                                    {{ $estimasiSelesai->translatedFormat('d F Y') }}
+                                </p>
+                                <p class="text-sm font-bold text-sky-600 mt-0.5">
+                                    Pukul {{ $estimasiSelesai->format('H:i') }} WIB
+                                </p>
+                            </div>
+
+                            {{-- Countdown Timer --}}
+                            @if(!$isSelesai && $sisaDetik > 0)
+                            <div id="countdown-wrapper" class="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Sisa Waktu</p>
+                                <div class="flex items-center gap-2" id="countdown-timer" data-target="{{ $estimasiSelesai->timestamp }}">
+                                    <div class="text-center">
+                                        <span class="block text-lg font-extrabold text-slate-800 leading-none tabular-nums" id="cd-days">--</span>
+                                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Hari</span>
+                                    </div>
+                                    <span class="text-slate-200 font-bold text-lg">:</span>
+                                    <div class="text-center">
+                                        <span class="block text-lg font-extrabold text-slate-800 leading-none tabular-nums" id="cd-hours">--</span>
+                                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Jam</span>
+                                    </div>
+                                    <span class="text-slate-200 font-bold text-lg">:</span>
+                                    <div class="text-center">
+                                        <span class="block text-lg font-extrabold text-slate-800 leading-none tabular-nums" id="cd-mins">--</span>
+                                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Menit</span>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Progress Bar --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progress Waktu</p>
+                                <p class="text-[10px] font-bold {{ $statusEstimasi === 'late' ? 'text-red-500' : ($statusEstimasi === 'almost' ? 'text-amber-600' : 'text-sky-600') }}">{{ $progressPercent }}%</p>
+                            </div>
+                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-1000 ease-out {{ $statusEstimasi === 'late' ? 'bg-red-500' : ($statusEstimasi === 'almost' ? 'bg-amber-500' : 'bg-sky-500') }}"
+                                     style="width: {{ $progressPercent }}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1.5">
+                                <p class="text-[9px] font-medium text-slate-400">{{ $order->created_at->format('d M, H:i') }}</p>
+                                <p class="text-[9px] font-medium text-slate-400">{{ $estimasiSelesai->format('d M, H:i') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
                 
                 {{-- Timeline --}}
                 <div class="relative">
@@ -204,6 +328,46 @@
             <a href="https://wa.me/{{ $adminWA }}?text={{ urlencode($trackMsg) }}" target="_blank" class="px-8 py-3 bg-white text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all shadow-lg whitespace-nowrap">Hubungi Admin</a>
         </div>
     </div>
+
+    {{-- Countdown Timer Script --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timer = document.getElementById('countdown-timer');
+            if (!timer) return;
+
+            const targetTs = parseInt(timer.dataset.target) * 1000;
+            const daysEl = document.getElementById('cd-days');
+            const hoursEl = document.getElementById('cd-hours');
+            const minsEl = document.getElementById('cd-mins');
+
+            function updateCountdown() {
+                const now = Date.now();
+                const diff = targetTs - now;
+
+                if (diff <= 0) {
+                    daysEl.textContent = '0';
+                    hoursEl.textContent = '0';
+                    minsEl.textContent = '0';
+                    const wrapper = document.getElementById('countdown-wrapper');
+                    if (wrapper) {
+                        wrapper.innerHTML = '<p class="text-xs font-bold text-red-500 text-center py-2">⏰ Waktu Habis</p>';
+                    }
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                daysEl.textContent = String(days).padStart(2, '0');
+                hoursEl.textContent = String(hours).padStart(2, '0');
+                minsEl.textContent = String(mins).padStart(2, '0');
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 60000); // Update every minute
+        });
+    </script>
 
 </body>
 </html>

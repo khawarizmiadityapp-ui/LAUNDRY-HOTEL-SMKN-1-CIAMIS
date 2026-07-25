@@ -443,9 +443,13 @@
                 <div class="flex justify-between items-center text-slate-900 font-semibold">
                     <span>Diskon</span>
                     <div class="relative w-32">
-                        <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">Rp</span>
-                        <input type="number" x-model.number="discount" min="0" placeholder="0" class="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-right text-slate-800 font-semibold shadow-sm">
+                        <input type="number" x-model.number="discountPercent" min="0" max="100" placeholder="0" class="w-full pl-2 pr-8 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-right text-slate-800 font-semibold shadow-sm">
+                        <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">%</span>
                     </div>
+                </div>
+                <div x-show="discountPercent > 0" class="flex justify-between items-center text-sm text-slate-500">
+                    <span>Nominal Diskon</span>
+                    <span x-text="'- ' + formatRupiah(discountAmount)" class="text-rose-500 font-semibold"></span>
                 </div>
             </div>
 
@@ -678,8 +682,18 @@
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Estimasi</label>
-                        <input type="text" x-model="serviceForm.estimasi" placeholder="Contoh: 2-3 Hari"
-                               class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 placeholder:text-slate-300 transition bg-white">
+                        <select x-model="serviceForm.estimasi"
+                               class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition bg-white">
+                            <option value="">Pilih Estimasi</option>
+                            <option value="6">6 Jam</option>
+                            <option value="12">12 Jam</option>
+                            <option value="24">1×24 Jam (1 Hari)</option>
+                            <option value="48">2×24 Jam (2 Hari)</option>
+                            <option value="72">3×24 Jam (3 Hari)</option>
+                            <option value="96">4×24 Jam (4 Hari)</option>
+                            <option value="120">5×24 Jam (5 Hari)</option>
+                            <option value="168">7×24 Jam (7 Hari)</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -773,7 +787,7 @@ function posApp() {
         paymentMethod: 'tunai',
         paymentStatus: 'belum_bayar',
         cashReceived: '',
-        discount: 0,
+        discountPercent: 0,
         petugasList: @json($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])),
         kasirSearch: '',
         showKasirDropdown: false,
@@ -833,8 +847,12 @@ function posApp() {
         get subtotal() {
             return this.cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
         },
+        get discountAmount() {
+            const percent = Number(this.discountPercent) || 0;
+            return Math.round(this.subtotal * (percent / 100));
+        },
         get totalTagihan() {
-            return Math.max(0, this.subtotal - (Number(this.discount) || 0));
+            return Math.max(0, this.subtotal - this.discountAmount);
         },
         get changeAmount() {
             if (!this.cashReceived || this.cashReceived < this.totalTagihan) {
@@ -973,7 +991,7 @@ function posApp() {
                 payment_method: this.paymentMethod,
                 payment_status: this.paymentStatus,
                 kasir_name: this.kasirSearch,
-                discount: this.discount || 0,
+                discount: this.discountAmount || 0,
                 dibayar: this.paymentMethod === 'tunai' ? (this.cashReceived || 0) : this.totalTagihan,
                 kembalian: this.paymentMethod === 'tunai' ? this.changeAmount : 0,
             };

@@ -176,16 +176,36 @@
     </div>
 </div>
 
+{{-- ── Service Statistics Chart ────────────────────────────── --}}
+<div class="bg-white rounded-2xl shadow-card p-5 animate-fade-up" style="animation-delay:.25s">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+        <div>
+            <h2 class="font-display text-base font-700 text-slate-900">Layanan Paling Banyak Dipesan</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Top 10 layanan berdasarkan jumlah pesanan</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="inline-block w-3 h-3 rounded-sm bg-gradient-to-r from-brand-500 to-violet-500"></span> Jumlah Pesanan
+            </span>
+        </div>
+    </div>
+    <div class="relative" style="height: 400px;">
+        <canvas id="serviceChart"></canvas>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
 // ── Chart.js Data (Dynamic) ──────────────────────────────────────────
 const chartDataValues = @json($chartData);
+const serviceStatsData = @json($serviceStats);
 
 // ── Chart Init ─────────────────────────────────────────────
 const ctx = document.getElementById('revenueChart').getContext('2d');
 const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+const serviceCtx = document.getElementById('serviceChart').getContext('2d');
 
 const tooltipOptions = {
     backgroundColor: '#1e293b',
@@ -298,6 +318,81 @@ let transactionChart = new Chart(transactionCtx, {
                     font: { size: 11 },
                     padding: 8,
                     precision: 0,
+                }
+            }
+        }
+    }
+});
+
+// ── Service Chart (Horizontal Bar) ─────────────────────────────────────────────
+const serviceLabels = serviceStatsData.map(s => s.service_name);
+const serviceData = serviceStatsData.map(s => s.order_count);
+const serviceColors = [
+    'rgba(53, 104, 244, 0.9)',
+    'rgba(139, 92, 246, 0.9)',
+    'rgba(236, 72, 153, 0.9)',
+    'rgba(251, 146, 60, 0.9)',
+    'rgba(34, 197, 94, 0.9)',
+    'rgba(14, 165, 233, 0.9)',
+    'rgba(168, 85, 247, 0.9)',
+    'rgba(244, 63, 94, 0.9)',
+    'rgba(234, 179, 8, 0.9)',
+    'rgba(16, 185, 129, 0.9)',
+];
+
+let serviceChart = new Chart(serviceCtx, {
+    type: 'bar',
+    data: {
+        labels: serviceLabels,
+        datasets: [{
+            label: 'Jumlah Pesanan',
+            data: serviceData,
+            backgroundColor: serviceColors,
+            hoverBackgroundColor: serviceColors.map(c => c.replace('0.9', '1')),
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                ...tooltipOptions,
+                callbacks: {
+                    label: function(context) {
+                        const service = serviceStatsData[context.dataIndex];
+                        return [
+                            `Pesanan: ${service.order_count}x`,
+                            `Total Qty: ${parseFloat(service.total_qty).toFixed(1)}`,
+                            `Revenue: Rp ${parseInt(service.total_revenue).toLocaleString('id-ID')}`
+                        ];
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9', drawBorder: false },
+                border: { display: false },
+                ticks: {
+                    color: '#94a3b8',
+                    font: { size: 11 },
+                    padding: 8,
+                    precision: 0,
+                }
+            },
+            y: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { 
+                    color: '#475569', 
+                    font: { size: 12, weight: '600' },
+                    padding: 10
                 }
             }
         }

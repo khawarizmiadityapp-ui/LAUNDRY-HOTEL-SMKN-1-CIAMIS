@@ -162,14 +162,16 @@
                     <h3 class="text-xl font-bold text-slate-800 mb-2">{{ $svc->nama }}</h3>
                     <div class="flex items-baseline gap-1 mb-4">
                         <span class="text-2xl font-800 text-sky-500 font-extrabold">Rp{{ number_format($svc->harga, 0, ',', '.') }}</span>
-                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">/ Kg</span>
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">{{ $svc->satuan }}</span>
                     </div>
+                    @if($svc->estimasi)
                     <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Estimasi {{ $svc->estimasi }} Hari
+                        Estimasi {{ $svc->estimasi_label }}
                     </div>
+                    @endif
                 </div>
                 @empty
                 <div class="col-span-full text-center py-10 text-slate-400 font-medium italic">

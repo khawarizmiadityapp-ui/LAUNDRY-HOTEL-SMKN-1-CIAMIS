@@ -211,7 +211,23 @@ class AdminController extends Controller
                 ->get();
         });
 
-        return view('admin.dashboard', compact('stats', 'recentTransactions', 'chartData'));
+        // Cache service statistics - most ordered services
+        $serviceStats = Cache::remember('dashboard_service_stats', 300, function () {
+            return DB::table('transaksi_details')
+                ->join('layanans', 'transaksi_details.layanan_id', '=', 'layanans.id')
+                ->select(
+                    'layanans.nama as service_name',
+                    DB::raw('SUM(transaksi_details.qty) as total_qty'),
+                    DB::raw('COUNT(transaksi_details.id) as order_count'),
+                    DB::raw('SUM(transaksi_details.subtotal) as total_revenue')
+                )
+                ->groupBy('layanans.id', 'layanans.nama')
+                ->orderByDesc('order_count')
+                ->limit(10)
+                ->get();
+        });
+
+        return view('admin.dashboard', compact('stats', 'recentTransactions', 'chartData', 'serviceStats'));
     }
 
     // 2. Manajemen Transaksi (Index & Search)

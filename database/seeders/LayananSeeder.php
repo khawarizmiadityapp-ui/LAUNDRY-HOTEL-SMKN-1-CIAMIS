@@ -14,7 +14,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Cuci Kiloan Regular',
                 'kategori' => 'kiloan',
                 'harga'    => 7000,
-                'estimasi' => '2-3 hari pengerjaan',
+                'estimasi' => 72, // 3x24 Jam
                 'status'   => true,
                 'badge'    => 'Lunas',
                 'icon'     => 'hourglass',
@@ -23,7 +23,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Cuci Kiloan Express',
                 'kategori' => 'kiloan',
                 'harga'    => 12000,
-                'estimasi' => '1 hari pengerjaan',
+                'estimasi' => 24, // 1x24 Jam
                 'status'   => true,
                 'badge'    => 'Populer',
                 'icon'     => 'bolt',
@@ -32,7 +32,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Cuci Satuan - Jas',
                 'kategori' => 'satuan',
                 'harga'    => 25000,
-                'estimasi' => 'Specialist handling',
+                'estimasi' => 48, // 2x24 Jam
                 'status'   => true,
                 'badge'    => null,
                 'icon'     => 'shirt',
@@ -41,7 +41,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Cuci Satuan - Bed Cover',
                 'kategori' => 'satuan',
                 'harga'    => 45000,
-                'estimasi' => 'Standard drying time',
+                'estimasi' => 48, // 2x24 Jam
                 'status'   => true,
                 'badge'    => null,
                 'icon'     => 'bed',
@@ -50,7 +50,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Cuci Sepatu',
                 'kategori' => 'satuan',
                 'harga'    => 35000,
-                'estimasi' => '2 hari pengerjaan',
+                'estimasi' => 48, // 2x24 Jam
                 'status'   => true,
                 'badge'    => null,
                 'icon'     => 'shoe',
@@ -59,7 +59,7 @@ class LayananSeeder extends Seeder
                 'nama'     => 'Dry Cleaning',
                 'kategori' => 'satuan',
                 'harga'    => 55000,
-                'estimasi' => '3 hari pengerjaan',
+                'estimasi' => 72, // 3x24 Jam
                 'status'   => false,
                 'badge'    => null,
                 'icon'     => 'droplet',

@@ -13,7 +13,21 @@
         $itemsText = "• " . ucfirst($transaksi->service_type) . " ({$transaksi->weight} kg) @ Rp " . number_format($pricePerKg, 0, ',', '.') . " = Rp " . number_format($transaksi->total_price, 0, ',', '.') . "\n";
     }
 
-    $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. Invoice: *#" . $transaksi->transaksi_code . "*\n📅 Tanggal: " . $transaksi->created_at->format('d/m/Y H:i') . "\n\n*Rincian Layanan:*\n" . $itemsText . "\n💰 *Total Tagihan: Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n💳 Pembayaran: " . strtoupper($transaksi->payment_method) . " (" . ($transaksi->payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas') . ")\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
+    // Calculate estimated completion
+    $maxEstimasiJam = 0;
+    foreach ($transaksi->details as $detail) {
+        if ($detail->layanan && $detail->layanan->estimasi) {
+            $maxEstimasiJam = max($maxEstimasiJam, (int) $detail->layanan->estimasi);
+        }
+    }
+    $estimasiSelesai = $maxEstimasiJam > 0
+        ? $transaksi->created_at->copy()->addHours($maxEstimasiJam)
+        : null;
+    $estimasiText = $estimasiSelesai 
+        ? "\n📅 *Estimasi Selesai: " . $estimasiSelesai->format('d/m/Y H:i') . " WIB*" 
+        : "";
+
+    $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. Invoice: *#" . $transaksi->transaksi_code . "*\n📅 Tanggal: " . $transaksi->created_at->format('d/m/Y H:i') . $estimasiText . "\n\n*Rincian Layanan:*\n" . $itemsText . "\n💰 *Total Tagihan: Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n💳 Pembayaran: " . strtoupper($transaksi->payment_method) . " (" . ($transaksi->payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas') . ")\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
     $waPhone = format_whatsapp_number($transaksi->customer_phone);
 @endphp
 <!DOCTYPE html>
@@ -318,6 +332,12 @@
                     <label>Bayar</label>
                     <span>{{ $transaksi->payment_status === 'lunas' ? 'LUNAS' : 'BELUM LUNAS' }}</span>
                 </div>
+                @if($estimasiSelesai)
+                <div class="info-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #ddd;">
+                    <label>Est. Selesai</label>
+                    <span>{{ $estimasiSelesai->format('d/m/Y H:i') }}</span>
+                </div>
+                @endif
             </div>
 
             <div class="divider"></div>

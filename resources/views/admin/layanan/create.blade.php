@@ -84,13 +84,22 @@
                 </div>
             </div>
 
-            {{-- Estimasi --}}
+            {{-- Estimasi (Jam) --}}
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Estimasi Waktu</label>
-                <input type="text" name="estimasi" x-model="form.estimasi"
-                       placeholder="Contoh: 2-3 hari pengerjaan"
-                       class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl
-                              focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 transition" />
+                <select name="estimasi" x-model="form.estimasi"
+                        class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl
+                               focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 transition bg-white">
+                    <option value="">Pilih Estimasi</option>
+                    <option value="6">6 Jam</option>
+                    <option value="12">12 Jam</option>
+                    <option value="24">1×24 Jam (1 Hari)</option>
+                    <option value="48">2×24 Jam (2 Hari)</option>
+                    <option value="72">3×24 Jam (3 Hari)</option>
+                    <option value="96">4×24 Jam (4 Hari)</option>
+                    <option value="120">5×24 Jam (5 Hari)</option>
+                    <option value="168">7×24 Jam (7 Hari)</option>
+                </select>
             </div>
 
             {{-- Badge --}}
