@@ -148,13 +148,13 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-2">
-                                <a href="{{ route('admin.kategori-pengeluaran.edit', $kategori) }}" 
+                                <button type="button" onclick="openEditKategoriModal({{ $kategori->id }}, '{{ addslashes($kategori->nama) }}', '{{ preg_replace('/\r|\n/', ' ', addslashes($kategori->deskripsi)) }}', {{ $kategori->is_active ? 'true' : 'false' }})" 
                                    class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" 
                                    title="Edit">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                </a>
+                                </button>
 
                                 <form action="{{ route('admin.kategori-pengeluaran.toggle-status', $kategori) }}" method="POST" class="inline">
                                     @csrf
@@ -214,4 +214,88 @@
         @endif
     </div>
 </div>
+</div>
+
+{{-- MODAL EDIT KATEGORI --}}
+<div id="editKategoriModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-all duration-300" onclick="if(event.target === this) closeEditKategoriModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]" style="animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">Edit Kategori Pengeluaran</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Perbarui informasi kategori</p>
+            </div>
+            <button onclick="closeEditKategoriModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200/50 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto custom-scrollbar">
+            <form id="editKategoriForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Kategori <span class="text-red-500">*</span></label>
+                    <input type="text" id="edit_kategori_nama" name="nama" required
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white">
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi</label>
+                    <textarea id="edit_kategori_deskripsi" name="deskripsi" rows="3"
+                              class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white"></textarea>
+                </div>
+                <div class="mb-6 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                    <label class="flex items-start">
+                        <div class="flex items-center h-5 mt-0.5">
+                            <input type="checkbox" id="edit_kategori_is_active" name="is_active" value="1"
+                                   class="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <span class="font-bold text-slate-700 block">Aktifkan kategori ini</span>
+                            <span class="text-slate-500 text-xs mt-0.5 block">Kategori aktif akan muncul di dropdown pengeluaran</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+                    <button type="button" onclick="closeEditKategoriModal()"
+                            class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl shadow-md transition-all">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalPop {
+        0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+
 @endsection
+
+@push('scripts')
+<script>
+    function openEditKategoriModal(id, nama, deskripsi, isActive) {
+        document.getElementById('editKategoriModal').classList.remove('hidden');
+        document.getElementById('editKategoriForm').action = `/admin/kategori-pengeluaran/${id}`;
+        document.getElementById('edit_kategori_nama').value = nama;
+        document.getElementById('edit_kategori_deskripsi').value = deskripsi || '';
+        document.getElementById('edit_kategori_is_active').checked = isActive;
+    }
+
+    function closeEditKategoriModal() {
+        document.getElementById('editKategoriModal').classList.add('hidden');
+    }
+</script>
+@endpush

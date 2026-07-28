@@ -24,31 +24,25 @@ class MenuService
         $role = strtolower((string) ($user->role ?? 'staff'));
         $division = $this->normalizeDivision((string) ($user->division ?? ''));
         
-        // Cache menu for each user role, division, and route combination (prevents active state leakage)
-        $currentRoute = request()->route() ? request()->route()->getName() : request()->path();
-        $cacheKey = "menu_{$type}_{$role}_{$division}_" . md5((string)$currentRoute);
-        
-        return Cache::remember($cacheKey, 3600, function () use ($type, $role, $division) {
-            // Get menus from config
-            $configKey = $type === 'admin' ? 'admin_menus' : 'petugas_menus';
-            $allMenus = config("sidebar.{$configKey}", []);
+        // Get menus from config dynamically without caching to prevent stale menu state
+        $configKey = $type === 'admin' ? 'admin_menus' : 'petugas_menus';
+        $allMenus = config("sidebar.{$configKey}", []);
 
-            // Filter menus based on role and division
-            $filteredMenus = collect($allMenus)->filter(function ($menu) use ($role, $division) {
-                return $this->canAccessMenu($menu, $role, $division);
-            })->map(function ($menu) {
+        // Filter menus based on role and division
+        $filteredMenus = collect($allMenus)->filter(function ($menu) use ($role, $division) {
+            return $this->canAccessMenu($menu, $role, $division);
+        })->map(function ($menu) {
+            return $this->processMenu($menu);
+        })->values()->all();
+
+        // If no menus found, return all (fallback for safety)
+        if (empty($filteredMenus)) {
+            return collect($allMenus)->map(function ($menu) {
                 return $this->processMenu($menu);
             })->values()->all();
+        }
 
-            // If no menus found, return all (fallback for safety)
-            if (empty($filteredMenus)) {
-                return collect($allMenus)->map(function ($menu) {
-                    return $this->processMenu($menu);
-                })->values()->all();
-            }
-
-            return $filteredMenus;
-        });
+        return $filteredMenus;
     }
 
     /**
@@ -75,6 +69,13 @@ class MenuService
         // Check division permission for staff
         $allowedDivisions = $menu['divisions'] ?? [];
         
+        // Exclude 'Daftar Layanan' / 'Layanan' from sidebar for staff (including all_roles)
+        $label = strtolower($menu['label'] ?? '');
+        $route = strtolower($menu['route'] ?? '');
+        if (str_contains($label, 'layanan') || str_contains($route, 'layanan')) {
+            return false;
+        }
+
         // If no division restriction, allow access
         if (empty($allowedDivisions)) {
             return true;

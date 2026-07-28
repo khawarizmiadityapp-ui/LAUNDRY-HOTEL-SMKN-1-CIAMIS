@@ -766,6 +766,55 @@
         </div>
     </div>
     @endif
+    
+    {{-- ═══════════ NOTA MODAL ═══════════ --}}
+    <div x-show="showNotaModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center modal-overlay"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="bg-white shadow-2xl w-full max-w-[400px] mx-4 animate-fade-up overflow-hidden rounded-xl flex flex-col h-[85vh]">
+            {{-- Header --}}
+            <div class="px-5 py-4 flex items-center justify-between bg-[#0b172a] text-white shrink-0">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="font-bold text-xs tracking-widest uppercase">TRANSAKSI BERHASIL</h3>
+                </div>
+            </div>
+            
+            {{-- Iframe Container --}}
+            <div class="flex-1 overflow-hidden relative bg-slate-50">
+                <template x-if="notaUrl">
+                    <iframe x-ref="notaIframe" :src="notaUrl" class="w-full h-full border-0 absolute inset-0"></iframe>
+                </template>
+            </div>
+            
+            {{-- Footer / Actions --}}
+            <div class="px-5 py-4 border-t border-slate-100 flex gap-3 justify-center bg-white shrink-0">
+                <button @click="kirimWa()"
+                        class="px-6 py-2.5 bg-[#25D366] text-white text-xs font-bold rounded-full hover:bg-[#128C7E] transition shadow-md flex items-center gap-2 active:scale-95">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    KIRIM WA
+                </button>
+                <button @click="printNota()"
+                        class="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-full hover:bg-slate-800 transition shadow-md flex items-center gap-2 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    CETAK STRUK
+                </button>
+                <button @click="closeNotaModal()"
+                        class="px-8 py-2.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition active:scale-95">
+                    TUTUP
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -797,6 +846,11 @@ function posApp() {
         submitting: false,
         currentDate: '',
         newCustomer: { nama: '', no_hp: '', alamat: '' },
+        
+        // Modal Nota state
+        showNotaModal: false,
+        notaUrl: '',
+        notaIframeRef: null,
 
         // Service management state
         showServiceModal: false,
@@ -1013,9 +1067,14 @@ function posApp() {
                     throw new Error(data.message || 'Gagal membuat pesanan');
                 }
 
-                // Success - redirect to nota
+                // Success - show modal instead of redirect
                 if (data.success && data.redirect) {
-                    window.location.href = data.redirect;
+                    this.notaUrl = data.redirect;
+                    this.showNotaModal = true;
+                    // Reset cart
+                    this.cart = [];
+                    this.cashReceived = '';
+                    this.selectedCustomer = null;
                 } else {
                     throw new Error('Response tidak valid dari server');
                 }
@@ -1099,6 +1158,33 @@ function posApp() {
                 console.error(e);
             } finally {
                 this.savingService = false;
+            }
+        },
+
+        // Modal Nota Methods
+        closeNotaModal() {
+            this.showNotaModal = false;
+            this.notaUrl = '';
+            // Refresh to update siap diambil if needed
+            window.location.reload();
+        },
+
+        printNota() {
+            const iframe = this.$refs.notaIframe;
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.print();
+            }
+        },
+
+        kirimWa() {
+            const iframe = this.$refs.notaIframe;
+            if (iframe && iframe.contentDocument) {
+                const waLink = iframe.contentDocument.getElementById('waLink');
+                if (waLink) {
+                    window.open(waLink.href, '_blank');
+                } else {
+                    alert('Link WhatsApp tidak ditemukan.');
+                }
             }
         }
     };

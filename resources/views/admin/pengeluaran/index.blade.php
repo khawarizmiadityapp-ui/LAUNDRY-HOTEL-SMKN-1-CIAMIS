@@ -209,13 +209,13 @@
                                 </svg>
                                 Detail
                             </a>
-                            <a href="{{ route('admin.pengeluaran.edit', $item) }}"
-                               class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
+                            <button type="button" onclick="openEditPengeluaranModal({{ $item->id }}, '{{ addslashes($item->nama) }}', '{{ $item->kategori_id }}', '{{ optional($item->tanggal)->format('Y-m-d') }}', '{{ $item->nominal }}', '{{ preg_replace('/\r|\n/', ' ', addslashes($item->keterangan)) }}')"
+                               class="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                                 Edit
-                            </a>
+                            </button>
                             <div class="my-1 border-t border-gray-100"></div>
                             <form method="POST" action="{{ route('admin.pengeluaran.destroy', $item) }}"
                                   onsubmit="return confirm('Yakin ingin menghapus pengeluaran ini?')">
@@ -288,6 +288,74 @@
     </div>
 </div>
 
+{{-- MODAL EDIT PENGELUARAN --}}
+<div id="editPengeluaranModal" class="fixed inset-0 z-[100] hidden bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) closeEditPengeluaranModal()">
+    <div class="relative mx-auto border w-full max-w-3xl shadow-2xl rounded-2xl bg-white overflow-hidden flex flex-col max-h-[90vh]" style="animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900">Edit Pengeluaran</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Perbarui detail pengeluaran.</p>
+            </div>
+            <button onclick="closeEditPengeluaranModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200/50 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto custom-scrollbar">
+            <form id="editPengeluaranForm" method="POST" enctype="multipart/form-data" class="space-y-5">
+                @csrf
+                @method('PUT')
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Pengeluaran</label>
+                    <input type="text" id="edit_pengeluaran_nama" name="nama" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kategori <span class="text-red-500">*</span></label>
+                        <select id="edit_pengeluaran_kategori_id" name="kategori_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
+                            @foreach($kategoriList as $kategori)
+                                <option value="{{ $kategori->id }}">{{ $kategori->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal</label>
+                        <input type="date" id="edit_pengeluaran_tanggal" name="tanggal" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nominal</label>
+                    <input type="number" min="0" id="edit_pengeluaran_nominal" name="nominal" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Keterangan</label>
+                    <textarea id="edit_pengeluaran_keterangan" name="keterangan" rows="3" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">File Bon Baru (opsional)</label>
+                    <input type="file" name="bon_file" accept=".jpg,.jpeg,.png,.pdf" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none">
+                </div>
+                <div class="pt-5 flex items-center justify-end gap-3 border-t border-gray-100">
+                    <button type="button" onclick="closeEditPengeluaranModal()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-sm font-semibold transition-all">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-sm font-bold shadow-md transition-all">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalPop {
+        0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+
 @endsection
 
 @push('scripts')
@@ -312,6 +380,20 @@
     
     function closeAnggaranModal() {
         document.getElementById('anggaranModal').classList.add('hidden');
+    }
+    
+    function openEditPengeluaranModal(id, nama, kategoriId, tanggal, nominal, keterangan) {
+        document.getElementById('editPengeluaranModal').classList.remove('hidden');
+        document.getElementById('editPengeluaranForm').action = `/admin/pengeluaran/${id}`;
+        document.getElementById('edit_pengeluaran_nama').value = nama;
+        document.getElementById('edit_pengeluaran_kategori_id').value = kategoriId;
+        document.getElementById('edit_pengeluaran_tanggal').value = tanggal;
+        document.getElementById('edit_pengeluaran_nominal').value = nominal;
+        document.getElementById('edit_pengeluaran_keterangan').value = keterangan || '';
+    }
+
+    function closeEditPengeluaranModal() {
+        document.getElementById('editPengeluaranModal').classList.add('hidden');
     }
 </script>
 @endpush

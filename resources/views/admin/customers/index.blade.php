@@ -138,13 +138,13 @@
                             
                             <div id="dropdown-{{ $customer->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
                                 
-                                <a href="{{ route('admin.customers.edit', $customer->id) }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <button type="button" onclick="openEditCustomerModal({{ $customer->id }}, '{{ addslashes($customer->nama) }}', '{{ addslashes($customer->no_hp) }}', '{{ addslashes($customer->email) }}', '{{ preg_replace('/\r|\n/', ' ', addslashes($customer->alamat)) }}')" 
+                                   class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                     Edit
-                                </a>
+                                </button>
 
                                 <div class="h-px bg-slate-50 my-1"></div>
 
@@ -193,6 +193,72 @@
 
 </div>
 
+{{-- Modal Edit Customer --}}
+<div id="editCustomerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-all duration-300" onclick="if(event.target === this) closeEditCustomerModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" style="animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">Edit Data Customer</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Perbarui informasi pelanggan ini.</p>
+            </div>
+            <button onclick="closeEditCustomerModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200/50 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto custom-scrollbar">
+            <form id="editForm" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="edit_nama" class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Lengkap</label>
+                        <input type="text" id="edit_nama" name="nama" required
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white">
+                    </div>
+                    <div>
+                        <label for="edit_no_hp" class="block text-sm font-semibold text-slate-700 mb-1.5">No. Telepon (WA)</label>
+                        <input type="text" id="edit_no_hp" name="no_hp" required
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white">
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <label for="edit_email" class="block text-sm font-semibold text-slate-700 mb-1.5">Email (Opsional)</label>
+                    <input type="email" id="edit_email" name="email"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white">
+                </div>
+                <div class="mt-5">
+                    <label for="edit_alamat" class="block text-sm font-semibold text-slate-700 mb-1.5">Alamat Lengkap</label>
+                    <textarea id="edit_alamat" name="alamat" rows="3"
+                              class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none bg-slate-50 hover:bg-white focus:bg-white"></textarea>
+                </div>
+                <div class="mt-8 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+                    <button type="button" onclick="closeEditCustomerModal()"
+                            class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold text-sm rounded-xl shadow-md transition-all">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalPop {
+        0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+
 @push('scripts')
 <script>
     window.toggleDropdown = window.toggleDropdown || function(id) {
@@ -222,6 +288,19 @@
             });
         }
     });
+
+    function openEditCustomerModal(id, nama, no_hp, email, alamat) {
+        document.getElementById('editCustomerModal').classList.remove('hidden');
+        document.getElementById('editForm').action = `/admin/customers/${id}`;
+        document.getElementById('edit_nama').value = nama;
+        document.getElementById('edit_no_hp').value = no_hp;
+        document.getElementById('edit_email').value = email || '';
+        document.getElementById('edit_alamat').value = alamat || '';
+    }
+
+    function closeEditCustomerModal() {
+        document.getElementById('editCustomerModal').classList.add('hidden');
+    }
 </script>
 @endpush
 
