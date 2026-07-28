@@ -141,9 +141,7 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Payment Modal -->
 <div id="paymentModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
     <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
         <div class="flex justify-between items-center mb-4">
@@ -320,5 +318,5 @@
     });
 </script>
 
-</main>
+</div>
 @endsection

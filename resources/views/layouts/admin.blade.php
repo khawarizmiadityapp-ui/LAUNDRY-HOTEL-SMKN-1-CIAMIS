@@ -67,6 +67,7 @@
     </script>
 
     <style>
+        [x-cloak] { display: none !important; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         h1, h2, h3, .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
 
@@ -226,9 +227,12 @@
                         </svg>
                         @php
                             $recentActivities = \App\Models\ActivityLog::latest()->limit(5)->get();
+                            $latestId = $recentActivities->first() ? $recentActivities->first()->id : 0;
+                            $lastReadId = \Illuminate\Support\Facades\Cache::get('user_' . auth()->id() . '_last_read_activity', 0);
+                            $hasNew = $latestId > $lastReadId;
                         @endphp
-                        @if($recentActivities->count() > 0)
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                        @if($hasNew)
+                        <span id="notification-badge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
                         @endif
                     </button>
 
@@ -284,9 +288,6 @@
                         <p class="text-sm font-semibold text-slate-800">Admin Profile</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Super Admin</p>
                     </div>
-                    <svg class="w-4 h-4 text-slate-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
                 </div>
             </div>
         </header>
@@ -312,7 +313,23 @@
 
     function toggleNotifications() {
         const dropdown = document.getElementById('notification-dropdown');
+        const badge = document.getElementById('notification-badge');
+        
         dropdown.classList.toggle('hidden');
+        
+        if (!dropdown.classList.contains('hidden') && badge) {
+            fetch('{{ route("admin.activity.mark-read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF
+                }
+            }).then(response => {
+                if (response.ok) {
+                    badge.remove();
+                }
+            }).catch(err => console.error('Error marking notifications as read', err));
+        }
     }
 
     function toggleDropdown(id) {

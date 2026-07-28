@@ -90,6 +90,7 @@ Route::group(['middleware' => ['auth']], function () {
         // Activity Log
         Route::prefix('activity')->name('activity.')->group(function () {
             Route::get('/', [App\Http\Controllers\ActivityController::class, 'index'])->name('index');
+            Route::post('/mark-read', [App\Http\Controllers\ActivityController::class, 'markRead'])->name('mark-read');
             Route::get('/{id}', [App\Http\Controllers\ActivityController::class, 'show'])->name('show');
         });
         

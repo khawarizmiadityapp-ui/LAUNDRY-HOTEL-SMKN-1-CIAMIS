@@ -64,6 +64,17 @@ class ActivityController extends Controller
     }
 
     /**
+     * Mark notifications as read
+     */
+    public function markRead()
+    {
+        $latestId = \App\Models\ActivityLog::max('id') ?? 0;
+        \Illuminate\Support\Facades\Cache::forever('user_' . auth()->id() . '_last_read_activity', $latestId);
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Show detailed activity log
      */
     public function show($id)
