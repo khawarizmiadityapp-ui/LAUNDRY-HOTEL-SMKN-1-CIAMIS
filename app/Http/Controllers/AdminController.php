@@ -674,7 +674,7 @@ class AdminController extends Controller
             // Handle hero_image upload
             if ($request->hasFile('hero_image')) {
                 $file = $request->file('hero_image');
-                $filename = 'hero_' . time() . '.' . $file->getClientOriginalExtension();
+                $filename = 'hero_' . time() . '.' . $file->extension();
                 $file->move(public_path('images'), $filename);
                 \App\Models\Setting::setValue('hero_image', asset('images/' . $filename));
             }
@@ -682,7 +682,7 @@ class AdminController extends Controller
             // Handle logo_image upload
             if ($request->hasFile('logo_image')) {
                 $file = $request->file('logo_image');
-                $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+                $filename = 'logo_' . time() . '.' . $file->extension();
                 $file->move(public_path('images'), $filename);
                 \App\Models\Setting::setValue('logo_image', asset('images/' . $filename));
             }

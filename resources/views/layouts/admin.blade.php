@@ -226,7 +226,9 @@
                                   d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                         </svg>
                         @php
-                            $recentActivities = \App\Models\ActivityLog::latest()->limit(5)->get();
+                            $recentActivities = \Illuminate\Support\Facades\Cache::remember('dashboard_recent_activities_limit_5', 60, function () {
+                                return \App\Models\ActivityLog::with('causer')->latest()->limit(5)->get();
+                            });
                             $latestId = $recentActivities->first() ? $recentActivities->first()->id : 0;
                             $lastReadId = \Illuminate\Support\Facades\Cache::get('user_' . auth()->id() . '_last_read_activity', 0);
                             $hasNew = $latestId > $lastReadId;
@@ -242,12 +244,7 @@
                             <h3 class="font-semibold text-slate-800">Recent Activity</h3>
                         </div>
                         <div class="overflow-y-auto max-h-72">
-                            @php
-                                $recentActivities = \App\Models\ActivityLog::with('causer')
-                                    ->latest()
-                                    ->limit(5)
-                                    ->get();
-                            @endphp
+                            {{-- Data sudah di-cache dari query pertama di atas --}}
                             @if($recentActivities->count() > 0)
                                 @foreach($recentActivities as $activity)
                                 <div class="block p-4 hover:bg-slate-50 border-b border-slate-100 last:border-0 transition">

@@ -233,6 +233,8 @@ class PetugasController extends Controller
             'materials.*.quantity' => 'required_with:materials|numeric|min:0.1'
         ]);
 
+        $this->ensureStaffDivisionAccess([$request->stage]);
+
         DB::beginTransaction();
 
         try {
