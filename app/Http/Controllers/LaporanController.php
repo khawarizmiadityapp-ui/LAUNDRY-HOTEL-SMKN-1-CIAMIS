@@ -163,6 +163,33 @@ class LaporanController extends Controller
             ->take(10)
             ->get();
 
+        // ═══════════ DAILY TARGET TRACKING ═══════════
+        $today = Carbon::today();
+        $todayTarget = \App\Models\DailyTarget::getOrCreateForDate($today);
+        
+        // Calculate today's actual income and expense
+        $todayIncome = Transaksi::where('payment_status', 'lunas')
+            ->whereDate('created_at', $today)
+            ->sum('total_price');
+        
+        $todayExpense = Pengeluaran::whereDate('tanggal', $today)->sum('nominal');
+        
+        // Update today's target with actual values
+        $todayTarget->updateActuals($todayIncome, $todayExpense);
+        
+        // Get last 7 days targets for display
+        $dailyTargets = \App\Models\DailyTarget::whereBetween('date', [
+            Carbon::now()->subDays(6),
+            Carbon::now()
+        ])->orderBy('date', 'desc')->get();
+        
+        // Calculate summary stats
+        $weeklyTargetSum = $dailyTargets->sum('adjusted_target');
+        $weeklyActualSum = $dailyTargets->sum('net_income');
+        $weeklyAchievementRate = $weeklyTargetSum > 0 
+            ? round(($weeklyActualSum / $weeklyTargetSum) * 100, 1) 
+            : 0;
+
         return view('admin.laporan_keuangan.index', [
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
@@ -184,6 +211,12 @@ class LaporanController extends Controller
             'recentExpenses' => $recentExpenses,
             'persentaseMasuk' => $persentaseMasuk,
             'persentaseKeluar' => $persentaseKeluar,
+            // Daily Targets
+            'todayTarget' => $todayTarget,
+            'dailyTargets' => $dailyTargets,
+            'weeklyTargetSum' => $weeklyTargetSum,
+            'weeklyActualSum' => $weeklyActualSum,
+            'weeklyAchievementRate' => $weeklyAchievementRate,
         ]);
     }
 }

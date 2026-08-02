@@ -1,9 +1,6 @@
-{{--resources/views/admin/laporan_keuangan/index.blade.php--}}
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Laporan Keuangan - Bening Laundry'); ?>
 
-@section('title', 'Laporan Keuangan - Bening Laundry')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="space-y-6">
     <!-- Header + Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
@@ -15,14 +12,14 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan']) }}"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ ($filter ?? 'bulanan') == 'bulanan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Bulanan</a>
+                        <a href="<?php echo e(route('admin.laporan_keuangan.index', ['filter' => 'bulanan'])); ?>"
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition <?php echo e(($filter ?? 'bulanan') == 'bulanan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800'); ?>">Bulanan</a>
                         
-                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'tahunan']) }}"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Tahunan</a>
+                        <a href="<?php echo e(route('admin.laporan_keuangan.index', ['filter' => 'tahunan'])); ?>"
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition <?php echo e($filter == 'tahunan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800'); ?>">Tahunan</a>
                         
                         <button type="button" onclick="toggleCustomFilter(this)"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Custom</button>
+                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition <?php echo e($filter == 'custom' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800'); ?>">Custom</button>
                     </div>
                     <button type="button" onclick="openExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition">
                         <i class="fas fa-file-export"></i> Export Data
@@ -30,25 +27,39 @@
                 </div>
             </div>
             
-            <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" id="customFilterDiv" class="{{ $filter == 'custom' ? 'flex' : 'hidden' }} absolute right-0 top-full mt-2 z-50 flex-col gap-3 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64">
+            <form method="GET" action="<?php echo e(route('admin.laporan_keuangan.index')); ?>" id="customFilterDiv" class="<?php echo e($filter == 'custom' ? 'flex' : 'hidden'); ?> absolute right-0 top-full mt-2 z-50 flex-col gap-3 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64">
                 <input type="hidden" name="filter" value="custom">
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Dari Tanggal</label>
-                    <input type="date" name="dari" value="{{ request('dari') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
+                    <input type="date" name="dari" value="<?php echo e(request('dari')); ?>" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
                 </div>
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Sampai Tanggal</label>
-                    <input type="date" name="sampai" value="{{ request('sampai') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
+                    <input type="date" name="sampai" value="<?php echo e(request('sampai')); ?>" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" required>
                 </div>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition w-full mt-1">Terapkan Filter</button>
             </form>
 
-            @if($errors->has('dari') || $errors->has('sampai'))
+            <?php if($errors->has('dari') || $errors->has('sampai')): ?>
                 <div class="text-red-500 text-xs">
-                    @error('dari') <div>{{ $message }}</div> @enderror
-                    @error('sampai') <div>{{ $message }}</div> @enderror
+                    <?php $__errorArgs = ['dari'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                    <?php $__errorArgs = ['sampai'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -59,7 +70,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pemasukan</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pemasukan, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp <?php echo e(number_format($pemasukan, 0, ',', '.')); ?></p>
 
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl">
@@ -72,7 +83,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Pengeluaran</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp <?php echo e(number_format($pengeluaran, 0, ',', '.')); ?></p>
 
                 </div>
                 <div class="bg-red-100 p-3 rounded-xl">
@@ -85,7 +96,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-blue-100 text-sm font-medium">Laba Bersih</p>
-                    <p class="text-3xl font-bold mt-1">Rp {{ number_format($laba, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-bold mt-1">Rp <?php echo e(number_format($laba, 0, ',', '.')); ?></p>
 
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
@@ -105,18 +116,18 @@
                         <i class="fas fa-edit"></i>
                     </button>
                 </div>
-                <p class="text-sm text-gray-500">Target: Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} • Realisasi: Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500">Target: Rp <?php echo e(number_format($limitPemasukanBulanan, 0, ',', '.')); ?> • Realisasi: Rp <?php echo e(number_format($realisasiBulanIni, 0, ',', '.')); ?></p>
             </div>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                {{ number_format($persenTargetBulanIni, 2) }}%
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold <?php echo e($persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'); ?>">
+                <?php echo e(number_format($persenTargetBulanIni, 2)); ?>%
             </span>
         </div>
         <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-500' : 'bg-blue-600' }}" style="width: {{ min(100, $persenTargetBulanIni) }}%"></div>
+            <div class="h-full <?php echo e($persenTargetBulanIni >= 100 ? 'bg-emerald-500' : 'bg-blue-600'); ?>" style="width: <?php echo e(min(100, $persenTargetBulanIni)); ?>%"></div>
         </div>
     </div>
 
-    {{-- ═══════════ DAILY TARGET TRACKING ═══════════ --}}
+    
     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-md p-6 border border-blue-100">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-5">
             <div>
@@ -128,44 +139,46 @@
             </div>
             <div class="bg-white rounded-xl px-4 py-3 border border-blue-200 shadow-sm">
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pencapaian Minggu Ini</p>
-                <p class="text-2xl font-bold text-blue-600 mt-1">{{ $weeklyAchievementRate }}%</p>
-                <p class="text-xs text-gray-500 mt-1">{{ number_format($weeklyActualSum) }} / {{ number_format($weeklyTargetSum) }}</p>
+                <p class="text-2xl font-bold text-blue-600 mt-1"><?php echo e($weeklyAchievementRate); ?>%</p>
+                <p class="text-xs text-gray-500 mt-1"><?php echo e(number_format($weeklyActualSum)); ?> / <?php echo e(number_format($weeklyTargetSum)); ?></p>
             </div>
         </div>
 
-        {{-- Today's Highlight --}}
+        
         <div class="bg-white rounded-xl p-5 mb-4 border-2 border-blue-300 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Hari Ini</p>
-                    <p class="text-xs text-gray-400">{{ $todayTarget->date->translatedFormat('l, d F Y') }}</p>
+                    <p class="text-xs text-gray-400"><?php echo e($todayTarget->date->translatedFormat('l, d F Y')); ?></p>
                 </div>
                 <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                    {{ $todayTarget->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
-                       ($todayTarget->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
-                    {{ $todayTarget->is_achieved ? 'Target Tercapai ✓' : 'Belum Tercapai' }}
+                    <?php echo e($todayTarget->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
+                       ($todayTarget->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')); ?>">
+                    <?php echo e($todayTarget->is_achieved ? 'Target Tercapai ✓' : 'Belum Tercapai'); ?>
+
                 </span>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
                     <p class="text-xs text-gray-500 font-semibold">Target Dasar</p>
-                    <p class="text-lg font-bold text-gray-800">Rp {{ number_format($todayTarget->base_target, 0, ',', '.') }}</p>
+                    <p class="text-lg font-bold text-gray-800">Rp <?php echo e(number_format($todayTarget->base_target, 0, ',', '.')); ?></p>
                 </div>
-                @if($todayTarget->carry_forward > 0)
+                <?php if($todayTarget->carry_forward > 0): ?>
                 <div>
                     <p class="text-xs text-rose-500 font-semibold">+ Deficit Kemarin</p>
-                    <p class="text-lg font-bold text-rose-600">Rp {{ number_format($todayTarget->carry_forward, 0, ',', '.') }}</p>
+                    <p class="text-lg font-bold text-rose-600">Rp <?php echo e(number_format($todayTarget->carry_forward, 0, ',', '.')); ?></p>
                 </div>
-                @endif
+                <?php endif; ?>
                 <div>
                     <p class="text-xs text-gray-500 font-semibold">Target Final</p>
-                    <p class="text-lg font-bold text-blue-600">Rp {{ number_format($todayTarget->adjusted_target, 0, ',', '.') }}</p>
+                    <p class="text-lg font-bold text-blue-600">Rp <?php echo e(number_format($todayTarget->adjusted_target, 0, ',', '.')); ?></p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 font-semibold">Realisasi Bersih</p>
-                    <p class="text-lg font-bold {{ $todayTarget->net_income >= $todayTarget->adjusted_target ? 'text-emerald-600' : 'text-amber-600' }}">
-                        Rp {{ number_format($todayTarget->net_income, 0, ',', '.') }}
+                    <p class="text-lg font-bold <?php echo e($todayTarget->net_income >= $todayTarget->adjusted_target ? 'text-emerald-600' : 'text-amber-600'); ?>">
+                        Rp <?php echo e(number_format($todayTarget->net_income, 0, ',', '.')); ?>
+
                     </p>
                 </div>
             </div>
@@ -173,16 +186,16 @@
             <div class="space-y-2">
                 <div class="flex justify-between text-xs font-semibold">
                     <span class="text-gray-600">Progress</span>
-                    <span class="text-blue-600">{{ $todayTarget->achievement_percentage }}%</span>
+                    <span class="text-blue-600"><?php echo e($todayTarget->achievement_percentage); ?>%</span>
                 </div>
                 <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full transition-all duration-500 {{ $todayTarget->is_achieved ? 'bg-emerald-500' : 'bg-blue-600' }}" 
-                         style="width: {{ min(100, $todayTarget->achievement_percentage) }}%"></div>
+                    <div class="h-full transition-all duration-500 <?php echo e($todayTarget->is_achieved ? 'bg-emerald-500' : 'bg-blue-600'); ?>" 
+                         style="width: <?php echo e(min(100, $todayTarget->achievement_percentage)); ?>%"></div>
                 </div>
             </div>
         </div>
 
-        {{-- Last 7 Days Table --}}
+        
         <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -196,39 +209,41 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @foreach($dailyTargets as $target)
+                        <?php $__currentLoopData = $dailyTargets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $target): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-4 py-3">
                                 <div class="flex flex-col">
-                                    <span class="font-semibold text-gray-800">{{ $target->date->translatedFormat('D') }}</span>
-                                    <span class="text-xs text-gray-500">{{ $target->date->translatedFormat('d M') }}</span>
+                                    <span class="font-semibold text-gray-800"><?php echo e($target->date->translatedFormat('D')); ?></span>
+                                    <span class="text-xs text-gray-500"><?php echo e($target->date->translatedFormat('d M')); ?></span>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex flex-col items-end">
-                                    <span class="font-semibold text-gray-800">Rp {{ number_format($target->adjusted_target, 0, ',', '.') }}</span>
-                                    @if($target->carry_forward > 0)
-                                    <span class="text-xs text-rose-500">(+{{ number_format($target->carry_forward, 0, ',', '.') }})</span>
-                                    @endif
+                                    <span class="font-semibold text-gray-800">Rp <?php echo e(number_format($target->adjusted_target, 0, ',', '.')); ?></span>
+                                    <?php if($target->carry_forward > 0): ?>
+                                    <span class="text-xs text-rose-500">(+<?php echo e(number_format($target->carry_forward, 0, ',', '.')); ?>)</span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-right font-semibold {{ $target->net_income >= $target->adjusted_target ? 'text-emerald-600' : 'text-amber-600' }}">
-                                Rp {{ number_format($target->net_income, 0, ',', '.') }}
+                            <td class="px-4 py-3 text-right font-semibold <?php echo e($target->net_income >= $target->adjusted_target ? 'text-emerald-600' : 'text-amber-600'); ?>">
+                                Rp <?php echo e(number_format($target->net_income, 0, ',', '.')); ?>
+
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <span class="font-bold {{ $target->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                                    {{ $target->variance >= 0 ? '+' : '' }}Rp {{ number_format($target->variance, 0, ',', '.') }}
+                                <span class="font-bold <?php echo e($target->variance >= 0 ? 'text-emerald-600' : 'text-rose-600'); ?>">
+                                    <?php echo e($target->variance >= 0 ? '+' : ''); ?>Rp <?php echo e(number_format($target->variance, 0, ',', '.')); ?>
+
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                    {{ $target->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
-                                       ($target->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
-                                    {{ $target->achievement_percentage }}%
+                                    <?php echo e($target->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
+                                       ($target->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')); ?>">
+                                    <?php echo e($target->achievement_percentage); ?>%
                                 </span>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
@@ -242,14 +257,14 @@
         </div>
     </div>
 
-    {{-- ── Edit Target Modal (Hidden by default) ── --}}
+    
     <div id="targetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('targetModal').classList.add('hidden')"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form action="{{ route('admin.update_target') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('admin.update_target')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -261,7 +276,7 @@
                                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Target Bulanan</h3>
                                 <div class="mt-4">
                                     <label for="target" class="block text-sm font-medium text-gray-700">Jumlah Target (Rp)</label>
-                                    <input type="number" name="target" id="target" value="{{ $limitPemasukanBulanan }}" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <input type="number" name="target" id="target" value="<?php echo e($limitPemasukanBulanan); ?>" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                             </div>
                         </div>
@@ -291,19 +306,19 @@
             <div class="bg-white rounded-2xl shadow-md p-5">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-chart-simple text-blue-500"></i> Distribusi Pengeluaran</h3>
                 <div class="mt-4 space-y-4">
-                    @forelse($distribusiPengeluaran as $item)
+                    <?php $__empty_1 = true; $__currentLoopData = $distribusiPengeluaran; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div>
                         <div class="flex justify-between text-sm mb-1">
-                            <span class="font-medium text-gray-700">{{ $item['kategori'] }}</span>
-                            <span class="text-gray-600">{{ $item['persen'] }}%</span>
+                            <span class="font-medium text-gray-700"><?php echo e($item['kategori']); ?></span>
+                            <span class="text-gray-600"><?php echo e($item['persen']); ?>%</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $item['persen'] }}%"></div>
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: <?php echo e($item['persen']); ?>%"></div>
                         </div>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <p class="text-sm text-gray-500">Belum ada pengeluaran.</p>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -331,21 +346,24 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($laporanBulanan as $data)
+                <?php $__currentLoopData = $laporanBulanan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="border px-4 py-2">{{ $data['bulan'] }}</td>
-                    <td class="border px-4 py-2">{{ $data['tahun'] }}</td>
+                    <td class="border px-4 py-2"><?php echo e($data['bulan']); ?></td>
+                    <td class="border px-4 py-2"><?php echo e($data['tahun']); ?></td>
                     <td class="border px-4 py-2 text-green-600">
-                        Rp {{ number_format($data['pemasukan'],0,',','.') }}
+                        Rp <?php echo e(number_format($data['pemasukan'],0,',','.')); ?>
+
                     </td>
                     <td class="border px-4 py-2 text-red-600">
-                        Rp {{ number_format($data['pengeluaran'],0,',','.') }}
+                        Rp <?php echo e(number_format($data['pengeluaran'],0,',','.')); ?>
+
                     </td>
                     <td class="border px-4 py-2 font-bold">
-                        Rp {{ number_format($data['laba'],0,',','.') }}
+                        Rp <?php echo e(number_format($data['laba'],0,',','.')); ?>
+
                     </td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
 
@@ -353,7 +371,7 @@
     <div class="bg-white rounded-2xl shadow-md p-5">
         <div class="flex justify-between items-center flex-wrap mb-4">
             <h2 class="text-lg font-semibold text-gray-800">Detail Transaksi Terbaru</h2>
-            <a href="{{ route('admin.transactions.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">Lihat Semua Ledger <i class="fas fa-arrow-right text-xs"></i></a>
+            <a href="<?php echo e(route('admin.transactions.index')); ?>" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">Lihat Semua Ledger <i class="fas fa-arrow-right text-xs"></i></a>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -367,45 +385,47 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse($recentExpenses->merge($recentTransactions)->sortByDesc('created_at')->take(10) as $item)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $recentExpenses->merge($recentTransactions)->sortByDesc('created_at')->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $isExpense = $item instanceof \App\Models\Pengeluaran;
                         $date = $isExpense ? $item->tanggal : $item->created_at;
                         $description = $isExpense ? $item->nama : 'Transaksi #' . $item->transaksi_code . ' - ' . $item->customer_name;
                         $category = $isExpense ? $item->kategori : 'LAYANAN';
                         $type = $isExpense ? 'PENGELUARAN' : 'PEMASUKAN';
                         $nominal = $isExpense ? $item->nominal : $item->total_price;
-                    @endphp
+                    ?>
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-5 py-3 text-sm text-gray-700">{{ \Carbon\Carbon::parse($date)->format('d M Y') }}</td>
-                        <td class="px-5 py-3 text-sm font-medium text-gray-800">{{ $description }}</td>
-                        <td class="px-5 py-3 text-sm text-gray-600">{{ $category }}</td>
+                        <td class="px-5 py-3 text-sm text-gray-700"><?php echo e(\Carbon\Carbon::parse($date)->format('d M Y')); ?></td>
+                        <td class="px-5 py-3 text-sm font-medium text-gray-800"><?php echo e($description); ?></td>
+                        <td class="px-5 py-3 text-sm text-gray-600"><?php echo e($category); ?></td>
                         <td class="px-5 py-3">
-                            <span class="{{ $isExpense ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }} text-xs font-semibold px-2.5 py-1 rounded-full">
-                                {{ $type }}
+                            <span class="<?php echo e($isExpense ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'); ?> text-xs font-semibold px-2.5 py-1 rounded-full">
+                                <?php echo e($type); ?>
+
                             </span>
                         </td>
-                        <td class="px-5 py-3 text-right text-sm font-medium {{ $isExpense ? 'text-red-600' : 'text-green-600' }}">
-                            {{ $isExpense ? '-' : '+' }} Rp {{ number_format($nominal, 0, ',', '.') }}
+                        <td class="px-5 py-3 text-right text-sm font-medium <?php echo e($isExpense ? 'text-red-600' : 'text-green-600'); ?>">
+                            <?php echo e($isExpense ? '-' : '+'); ?> Rp <?php echo e(number_format($nominal, 0, ',', '.')); ?>
+
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="5" class="px-5 py-8 text-center text-gray-400">
                             Belum ada data transaksi
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@include('admin.laporan_keuangan.partials.export_modal')
+<?php echo $__env->make('admin.laporan_keuangan.partials.export_modal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -413,11 +433,11 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: @json($months),
+                labels: <?php echo json_encode($months, 15, 512) ?>,
                 datasets: [
                     {
                         label: 'Pendapatan',
-                        data: @json($dataMasuk),
+                        data: <?php echo json_encode($dataMasuk, 15, 512) ?>,
                         borderColor: '#2563eb',
                         backgroundColor: 'rgba(37, 99, 235, 0.05)',
                         borderWidth: 3,
@@ -430,7 +450,7 @@
                     },
                     {
                         label: 'Pengeluaran',
-                        data: @json($dataKeluar),
+                        data: <?php echo json_encode($dataKeluar, 15, 512) ?>,
                         borderColor: '#f97316',
                         backgroundColor: 'rgba(249, 115, 22, 0.02)',
                         borderWidth: 3,
@@ -514,4 +534,6 @@
         }
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/laporan_keuangan/index.blade.php ENDPATH**/ ?>
