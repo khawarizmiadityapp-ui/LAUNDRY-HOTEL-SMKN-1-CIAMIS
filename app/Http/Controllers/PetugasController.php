@@ -515,8 +515,8 @@ class PetugasController extends Controller
 
         $division = strtolower((string) $user->division);
 
-        // Admin can see all history
-        if ($user->role === 'admin') {
+        // Admin and All Roles can see all history
+        if ($user->role === 'admin' || $division === 'all_roles') {
             $completedTasks = \App\Models\LaundryTask::where('status', 'completed')
                 ->with(['transaksi'])
                 ->orderBy('completed_at', 'desc')
