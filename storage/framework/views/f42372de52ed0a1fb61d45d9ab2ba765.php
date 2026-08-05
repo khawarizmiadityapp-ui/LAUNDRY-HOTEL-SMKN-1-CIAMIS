@@ -27,15 +27,18 @@
         <tr>
             <td colspan="4" class="text-center" style="font-size: 10pt; color: #64748b;">
                 Periode: 
-                @if($filter == 'bulanan')
-                    Bulan {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
-                @elseif($filter == 'tahunan')
-                    Tahun {{ \Carbon\Carbon::now()->year }}
-                @elseif($filter == 'custom')
-                    {{ $dari ? \Carbon\Carbon::parse($dari)->format('d/m/Y') : '-' }} s/d {{ $sampai ? \Carbon\Carbon::parse($sampai)->format('d/m/Y') : '-' }}
-                @else
+                <?php if($filter == 'bulanan'): ?>
+                    Bulan <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
+                <?php elseif($filter == 'tahunan'): ?>
+                    Tahun <?php echo e(\Carbon\Carbon::now()->year); ?>
+
+                <?php elseif($filter == 'custom'): ?>
+                    <?php echo e($dari ? \Carbon\Carbon::parse($dari)->format('d/m/Y') : '-'); ?> s/d <?php echo e($sampai ? \Carbon\Carbon::parse($sampai)->format('d/m/Y') : '-'); ?>
+
+                <?php else: ?>
                     Semua Periode
-                @endif
+                <?php endif; ?>
             </td>
         </tr>
         <tr><td colspan="4"></td></tr>
@@ -52,21 +55,21 @@
         </tr>
         <tr>
             <td>Total Pendapatan / Pemasukan (Lunas)</td>
-            <td class="text-center">{{ number_format($jumlahPemasukan, 0, ',', '.') }} Transaksi</td>
-            <td class="text-right">{{ number_format($totalPemasukan, 0, ',', '.') }}</td>
+            <td class="text-center"><?php echo e(number_format($jumlahPemasukan, 0, ',', '.')); ?> Transaksi</td>
+            <td class="text-right"><?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></td>
             <td class="text-center">100.00%</td>
         </tr>
         <tr>
             <td>Total Beban / Pengeluaran Operasional</td>
-            <td class="text-center">{{ number_format($jumlahPengeluaran, 0, ',', '.') }} Item</td>
-            <td class="text-right">{{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
-            <td class="text-center">{{ $totalPemasukan > 0 ? number_format(($totalPengeluaran / $totalPemasukan) * 100, 2) : 0 }}% dari Pemasukan</td>
+            <td class="text-center"><?php echo e(number_format($jumlahPengeluaran, 0, ',', '.')); ?> Item</td>
+            <td class="text-right"><?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></td>
+            <td class="text-center"><?php echo e($totalPemasukan > 0 ? number_format(($totalPengeluaran / $totalPemasukan) * 100, 2) : 0); ?>% dari Pemasukan</td>
         </tr>
         <tr class="grand-total">
             <td class="text-bold">LABA BERSIH (SURPLUS NERACA)</td>
             <td class="text-center text-bold">-</td>
-            <td class="text-right text-bold">{{ number_format($labaBersih, 0, ',', '.') }}</td>
-            <td class="text-center text-bold">Margin {{ number_format($marginLaba, 2) }}%</td>
+            <td class="text-right text-bold"><?php echo e(number_format($labaBersih, 0, ',', '.')); ?></td>
+            <td class="text-center text-bold">Margin <?php echo e(number_format($marginLaba, 2)); ?>%</td>
         </tr>
         <tr><td colspan="4"></td></tr>
 
@@ -80,21 +83,21 @@
         </tr>
         <tr>
             <td class="text-bold">Kas Penerimaan Transaksi:</td>
-            <td class="text-right">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</td>
+            <td class="text-right">Rp <?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></td>
             <td class="text-bold">Kewajiban Pengeluaran Operasional:</td>
-            <td class="text-right">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
+            <td class="text-right">Rp <?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></td>
         </tr>
         <tr>
             <td class="text-bold">Rata-rata Nilai Transaksi:</td>
-            <td class="text-right">Rp {{ number_format($rataRataPemasukan, 0, ',', '.') }}</td>
+            <td class="text-right">Rp <?php echo e(number_format($rataRataPemasukan, 0, ',', '.')); ?></td>
             <td class="text-bold">Ekuitas Laba Bersih Operasional:</td>
-            <td class="text-right">Rp {{ number_format($labaBersih, 0, ',', '.') }}</td>
+            <td class="text-right">Rp <?php echo e(number_format($labaBersih, 0, ',', '.')); ?></td>
         </tr>
         <tr class="sub-total">
             <td class="text-bold">TOTAL AKTIVA KAS</td>
-            <td class="text-right text-bold">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</td>
+            <td class="text-right text-bold">Rp <?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></td>
             <td class="text-bold">TOTAL PASIVA &amp; EKUITAS</td>
-            <td class="text-right text-bold">Rp {{ number_format($totalPengeluaran + $labaBersih, 0, ',', '.') }}</td>
+            <td class="text-right text-bold">Rp <?php echo e(number_format($totalPengeluaran + $labaBersih, 0, ',', '.')); ?></td>
         </tr>
         <tr><td colspan="4"></td></tr>
 
@@ -107,20 +110,20 @@
             <th colspan="2">Kategori Pengeluaran</th>
             <th>Total Nominal (Rp)</th>
         </tr>
-        @forelse($distribusiPengeluaran as $index => $kat)
+        <?php $__empty_1 = true; $__currentLoopData = $distribusiPengeluaran; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $kat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
-                <td class="text-center">{{ $loop->iteration }}</td>
-                <td colspan="2">{{ $kat['kategori'] }}</td>
-                <td class="text-right">{{ number_format($kat['total'], 0, ',', '.') }}</td>
+                <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                <td colspan="2"><?php echo e($kat['kategori']); ?></td>
+                <td class="text-right"><?php echo e(number_format($kat['total'], 0, ',', '.')); ?></td>
             </tr>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="4" class="text-center" style="color: #94a3b8;">Tidak ada data pengeluaran pada periode ini.</td>
             </tr>
-        @endforelse
+        <?php endif; ?>
         <tr class="sub-total">
             <td colspan="3" class="text-bold text-center">TOTAL BEBAN PENGELUARAN</td>
-            <td class="text-right text-bold">{{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
+            <td class="text-right text-bold"><?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></td>
         </tr>
         <tr><td colspan="4"></td></tr>
         <tr><td colspan="4"></td></tr>
@@ -128,7 +131,7 @@
         <!-- LEMBAR PENGESAHAN -->
         <tr>
             <td colspan="2"></td>
-            <td colspan="2" class="text-center">Ciamis, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</td>
+            <td colspan="2" class="text-center">Ciamis, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?></td>
         </tr>
         <tr>
             <td colspan="2"></td>
@@ -144,3 +147,4 @@
 
 </body>
 </html>
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/exports/neraca_excel.blade.php ENDPATH**/ ?>

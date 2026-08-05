@@ -13,7 +13,7 @@
 <body>
     <table>
         <tr>
-            <td colspan="6" class="header-title">RINCIAN BEBAN & PENGELUARAN OPERASIONAL</td>
+            <td colspan="6" class="header-title">RINCIAN BEBAN &amp; PENGELUARAN OPERASIONAL</td>
         </tr>
         <tr>
             <td colspan="6" class="text-center" style="font-size: 10pt; color: #64748b;">
