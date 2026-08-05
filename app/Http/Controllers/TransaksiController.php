@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\TransactionsExport;
+use App\Exports\LaporanKeuanganExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Requests\StoreTransaksiRequest;
 
@@ -49,7 +49,7 @@ class TransaksiController extends Controller
 
     public function exportExcel(Request $request)
     {
-        return Excel::download(new TransactionsExport($request->filter, $request->dari, $request->sampai), 'laporan-keuangan.xlsx');
+        return Excel::download(new LaporanKeuanganExport($request->filter, $request->dari, $request->sampai), 'laporan-keuangan.xlsx');
     }
 
     public function exportPdf(Request $request)
