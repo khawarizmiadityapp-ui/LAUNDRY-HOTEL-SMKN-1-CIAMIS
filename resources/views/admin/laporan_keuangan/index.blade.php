@@ -52,8 +52,8 @@
         </div>
     </div>
 
-    <!-- Statistik Cards (3) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Statistik Cards (5) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Total Pemasukan -->
         <div class="bg-white rounded-2xl shadow-md p-6 relative overflow-hidden">
             <div class="flex justify-between items-start">
@@ -90,6 +90,30 @@
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
                     <i class="fas fa-chart-pie text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Total Piutang -->
+        <div class="bg-white rounded-2xl shadow-md p-6 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Piutang (Belum Bayar)</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($piutang ?? 0, 0, ',', '.') }}</p>
+                </div>
+                <div class="bg-orange-100 p-3 rounded-xl">
+                    <i class="fas fa-hand-holding-dollar text-orange-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Total Utang -->
+        <div class="bg-white rounded-2xl shadow-md p-6 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Utang (Kewajiban)</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($utang ?? 0, 0, ',', '.') }}</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-xl">
+                    <i class="fas fa-file-invoice-dollar text-purple-600 text-xl"></i>
                 </div>
             </div>
         </div>

@@ -98,9 +98,31 @@
         </tr>
         <tr><td colspan="4"></td></tr>
 
+        <!-- POSISI UTANG &amp; PIUTANG -->
+        <tr>
+            <td colspan="4" class="section-header"> III. POSISI UTANG &amp; PIUTANG</td>
+        </tr>
+        <tr class="table-head">
+            <th colspan="2">PIUTANG (BELUM DITERIMA)</th>
+            <th colspan="2">UTANG (BELUM DIBAYAR)</th>
+        </tr>
+        <tr>
+            <td class="text-bold">Total Transaksi Belum Lunas (Piutang):</td>
+            <td class="text-right">Rp {{ number_format($totalPiutang ?? 0, 0, ',', '.') }}</td>
+            <td class="text-bold">Total Kewajiban (Utang):</td>
+            <td class="text-right">Rp {{ number_format($totalUtang ?? 0, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td class="text-bold">Jumlah Transaksi Piutang:</td>
+            <td class="text-right">{{ $jumlahPiutang ?? 0 }} Transaksi</td>
+            <td class="text-bold">Jumlah Transaksi Utang:</td>
+            <td class="text-right">{{ $jumlahUtang ?? 0 }} Transaksi</td>
+        </tr>
+        <tr><td colspan="4"></td></tr>
+
         <!-- RINCIAN PENGELUARAN PER KATEGORI -->
         <tr>
-            <td colspan="4" class="section-header"> III. RINCIAN BIAYA &amp; PENGELUARAN PER KATEGORI</td>
+            <td colspan="4" class="section-header"> IV. RINCIAN BIAYA &amp; PENGELUARAN PER KATEGORI</td>
         </tr>
         <tr class="table-head">
             <th>No</th>

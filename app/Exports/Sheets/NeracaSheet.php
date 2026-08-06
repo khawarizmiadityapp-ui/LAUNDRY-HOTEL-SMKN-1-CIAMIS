@@ -26,16 +26,21 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
     public function view(): View
     {
         $queryPemasukan = Transaksi::where('payment_status', 'lunas');
+        $queryPiutang = Transaksi::where('payment_status', 'belum_bayar');
         $queryPengeluaran = Pengeluaran::with('kategoriPengeluaran');
 
         if ($this->filter == 'bulanan') {
             $queryPemasukan->whereMonth('created_at', now()->month)
                            ->whereYear('created_at', now()->year);
 
+            $queryPiutang->whereMonth('created_at', now()->month)
+                         ->whereYear('created_at', now()->year);
+
             $queryPengeluaran->whereMonth('tanggal', now()->month)
                              ->whereYear('tanggal', now()->year);
         } elseif ($this->filter == 'tahunan') {
             $queryPemasukan->whereYear('created_at', now()->year);
+            $queryPiutang->whereYear('created_at', now()->year);
             $queryPengeluaran->whereYear('tanggal', now()->year);
         } elseif ($this->filter == 'custom') {
             if ($this->dari && $this->sampai) {
@@ -43,6 +48,7 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
                 $end = Carbon::parse($this->sampai)->endOfDay();
 
                 $queryPemasukan->whereBetween('created_at', [$start, $end]);
+                $queryPiutang->whereBetween('created_at', [$start, $end]);
                 $queryPengeluaran->whereBetween('tanggal', [$start, $end]);
             }
         }
@@ -50,6 +56,11 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
         $totalPemasukan = (clone $queryPemasukan)->sum('total_price');
         $jumlahPemasukan = (clone $queryPemasukan)->count();
         $rataRataPemasukan = $jumlahPemasukan > 0 ? $totalPemasukan / $jumlahPemasukan : 0;
+
+        $totalPiutang = (clone $queryPiutang)->sum('total_price');
+        $jumlahPiutang = (clone $queryPiutang)->count();
+        $totalUtang = 0;
+        $jumlahUtang = 0;
 
         $totalPengeluaran = (clone $queryPengeluaran)->sum('nominal');
         $jumlahPengeluaran = (clone $queryPengeluaran)->count();
@@ -77,6 +88,10 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
             'totalPemasukan' => $totalPemasukan,
             'jumlahPemasukan' => $jumlahPemasukan,
             'rataRataPemasukan' => $rataRataPemasukan,
+            'totalPiutang' => $totalPiutang,
+            'jumlahPiutang' => $jumlahPiutang,
+            'totalUtang' => $totalUtang,
+            'jumlahUtang' => $jumlahUtang,
             'totalPengeluaran' => $totalPengeluaran,
             'jumlahPengeluaran' => $jumlahPengeluaran,
             'labaBersih' => $labaBersih,

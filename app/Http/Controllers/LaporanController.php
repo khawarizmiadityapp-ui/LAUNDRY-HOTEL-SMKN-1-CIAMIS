@@ -21,16 +21,21 @@ class LaporanController extends Controller
         $filter = $request->filter ?? 'bulanan';
 
         $query = Transaksi::where('payment_status', 'lunas');
+        $piutangQuery = Transaksi::where('payment_status', 'belum_bayar');
         $pengeluaranQuery = Pengeluaran::query();
 
         if ($filter == 'bulanan') {
             $query->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year);
 
+            $piutangQuery->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year);
+
             $pengeluaranQuery->whereMonth('tanggal', now()->month)
                 ->whereYear('tanggal', now()->year);
         } elseif ($filter == 'tahunan') {
             $query->whereYear('created_at', now()->year);
+            $piutangQuery->whereYear('created_at', now()->year);
             // BUG FIX 1: Pengeluaran juga harus terfilter per tahun
             $pengeluaranQuery->whereYear('tanggal', now()->year);
         } elseif ($filter == 'custom') {
@@ -39,6 +44,10 @@ class LaporanController extends Controller
                 $start = Carbon::parse($request->dari)->startOfDay();
                 $end = Carbon::parse($request->sampai)->endOfDay();
                 $query->whereBetween('created_at', [
+                    $start,
+                    $end
+                ]);
+                $piutangQuery->whereBetween('created_at', [
                     $start,
                     $end
                 ]);
@@ -53,6 +62,9 @@ class LaporanController extends Controller
         $pemasukan = (clone $query)->sum('total_price');
         $pengeluaran = (clone $pengeluaranQuery)->sum('nominal');
         $laba = $pemasukan - $pengeluaran;
+        
+        $piutang = (clone $piutangQuery)->sum('total_price');
+        $utang = 0; // Tidak ada data hutang pada sistem saat ini
 
         $persentaseMasuk = 0;
         $persentaseKeluar = 0;
@@ -194,6 +206,8 @@ class LaporanController extends Controller
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
             'laba' => $laba,
+            'piutang' => $piutang,
+            'utang' => $utang,
             'months' => $months,
             'dataMasuk' => $dataMasuk,
             'dataKeluar' => $dataKeluar,
