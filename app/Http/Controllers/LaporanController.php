@@ -93,8 +93,10 @@ class LaporanController extends Controller
             }
         }
 
-        $targetAnggaran = (int) env('TARGET_ANGGARAN_BULANAN', 50_000_000);
-        $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50_000_000);
+        $annualTarget = \App\Models\DailyTarget::getAnnualTarget();
+        $limitPemasukanBulanan = \App\Models\DailyTarget::getMonthlyTarget();
+        $targetAnggaran = $limitPemasukanBulanan;
+
         $realisasiBulanIni = Transaksi::where('payment_status', 'lunas')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -175,26 +177,19 @@ class LaporanController extends Controller
             ->take(10)
             ->get();
 
-        // ═══════════ DAILY TARGET TRACKING ═══════════
+        // ═══════════ DAILY TARGET TRACKING & CARRY FORWARD ═══════════
+        // Recalculate daily targets sequentially for current month
+        $monthTargets = \App\Models\DailyTarget::recalculateMonthTargets(now()->year, now()->month);
+        
         $today = Carbon::today();
-        $todayTarget = \App\Models\DailyTarget::getOrCreateForDate($today);
-        
-        // Calculate today's actual income and expense
-        $todayIncome = Transaksi::where('payment_status', 'lunas')
-            ->whereDate('created_at', $today)
-            ->sum('total_price');
-        
-        $todayExpense = Pengeluaran::whereDate('tanggal', $today)->sum('nominal');
-        
-        // Update today's target with actual values
-        $todayTarget->updateActuals($todayIncome, $todayExpense);
-        
-        // Get last 7 days targets for display
-        $dailyTargets = \App\Models\DailyTarget::whereBetween('date', [
-            Carbon::now()->subDays(6),
-            Carbon::now()
-        ])->orderBy('date', 'desc')->get();
-        
+        $todayTarget = $monthTargets->firstWhere('date', $today) ?? \App\Models\DailyTarget::getOrCreateForDate($today);
+
+        // Daily targets list for display (all days of month up to today, or all days of month)
+        $dailyTargets = \App\Models\DailyTarget::whereYear('date', now()->year)
+            ->whereMonth('date', now()->month)
+            ->orderBy('date', 'desc')
+            ->get();
+
         // Calculate summary stats
         $weeklyTargetSum = $dailyTargets->sum('adjusted_target');
         $weeklyActualSum = $dailyTargets->sum('net_income');
@@ -212,6 +207,7 @@ class LaporanController extends Controller
             'dataMasuk' => $dataMasuk,
             'dataKeluar' => $dataKeluar,
             'filter' => $filter,
+            'annualTarget' => $annualTarget,
             'targetAnggaran' => $targetAnggaran,
             'kategoriTerbesar' => $kategoriTerbesar,
             'kategoriList' => $kategoriList,

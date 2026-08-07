@@ -601,27 +601,47 @@ class AdminController extends Controller
     public function updateTarget(Request $request)
     {
         $request->validate([
-            'target' => 'required|numeric|min:0'
+            'target' => 'required|numeric|min:0',
+            'target_type' => 'nullable|in:bulanan,tahunan',
         ]);
 
         try {
+            $type = $request->target_type ?? 'bulanan';
+            $targetValue = (int) $request->target;
+
+            if ($type === 'tahunan') {
+                $annualTarget = $targetValue;
+                $monthlyTarget = (int) ceil($annualTarget / 12);
+            } else {
+                $monthlyTarget = $targetValue;
+                $annualTarget = $monthlyTarget * 12;
+            }
+
             $path = base_path('.env');
             if (file_exists($path)) {
                 $envContent = file_get_contents($path);
-                $oldValue = env('MONTHLY_INCOME_LIMIT', 50000000);
-                
+
                 if (str_contains($envContent, 'MONTHLY_INCOME_LIMIT=')) {
-                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $request->target, $envContent);
+                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $monthlyTarget, $envContent);
                 } else {
-                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $request->target;
+                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $monthlyTarget;
+                }
+
+                if (str_contains($envContent, 'ANNUAL_INCOME_LIMIT=')) {
+                    $envContent = preg_replace('/^ANNUAL_INCOME_LIMIT=.*/m', 'ANNUAL_INCOME_LIMIT=' . $annualTarget, $envContent);
+                } else {
+                    $envContent .= "\nANNUAL_INCOME_LIMIT=" . $annualTarget;
                 }
                 
                 file_put_contents($path, $envContent);
             }
+
+            // Recalculate daily targets for current month with new targets
+            \App\Models\DailyTarget::recalculateMonthTargets();
             
             return back()->with('success', 'Target pendapatan berhasil diperbarui.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memperbarui target.');
+            return back()->with('error', 'Gagal memperbarui target: ' . $e->getMessage());
         }
     }
 

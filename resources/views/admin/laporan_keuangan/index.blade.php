@@ -119,19 +119,26 @@
         </div>
     </div>
 
-    <!-- Target Pemasukan Bulanan -->
+    <!-- Target Pemasukan Bulanan & Tahunan -->
     <div class="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
             <div>
                 <div class="flex items-center gap-2">
-                    <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Bulan Ini</h3>
-                    <button onclick="document.getElementById('targetModal').classList.remove('hidden')" class="text-blue-500 hover:text-blue-700 text-sm">
-                        <i class="fas fa-edit"></i>
+                    <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Admin</h3>
+                    <button onclick="document.getElementById('targetModal').classList.remove('hidden')" class="text-blue-500 hover:text-blue-700 text-sm transition">
+                        <i class="fas fa-edit"></i> Edit Target
                     </button>
                 </div>
-                <p class="text-sm text-gray-500">Target: Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} • Realisasi: Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</p>
+                <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 mt-1">
+                    <span>Target Tahunan: <strong class="text-gray-800">Rp {{ number_format($annualTarget, 0, ',', '.') }}</strong></span>
+                    <span>•</span>
+                    <span>Target Bulanan: <strong class="text-gray-800">Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }}</strong></span>
+                    <span>•</span>
+                    <span>Target Dasar Harian: <strong class="text-blue-600">Rp {{ number_format(ceil($limitPemasukanBulanan / now()->daysInMonth), 0, ',', '.') }}</strong></span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Realisasi Bulan Ini: <strong class="text-gray-800">Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</strong> dari Target Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }}</p>
             </div>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+            <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-semibold {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                 {{ number_format($persenTargetBulanIni, 2) }}%
             </span>
         </div>
@@ -140,28 +147,34 @@
         </div>
     </div>
 
-    {{-- ═══════════ DAILY TARGET TRACKING ═══════════ --}}
+    {{-- ═══════════ DAILY TARGET & FINANCIAL REPORT ═══════════ --}}
     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-md p-6 border border-blue-100">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-5">
             <div>
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-calendar-day text-blue-600"></i>
-                    Target Harian (7 Hari Terakhir)
+                    Laporan Keuangan & Target Harian (Bulan {{ now()->translatedFormat('F Y') }})
                 </h3>
-                <p class="text-sm text-gray-600 mt-1">Tracking performa harian dengan sistem carry-forward deficit</p>
+                <p class="text-sm text-gray-600 mt-1">Sistem pencatatan harian otomatis. Jika pemasukan minus/defisit, kekurangan target otomatis ditambahkan ke target hari berikutnya.</p>
             </div>
-            <div class="bg-white rounded-xl px-4 py-3 border border-blue-200 shadow-sm">
-                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pencapaian Minggu Ini</p>
-                <p class="text-2xl font-bold text-blue-600 mt-1">{{ $weeklyAchievementRate }}%</p>
-                <p class="text-xs text-gray-500 mt-1">{{ number_format($weeklyActualSum) }} / {{ number_format($weeklyTargetSum) }}</p>
+            <div class="bg-white rounded-xl px-4 py-3 border border-blue-200 shadow-sm flex items-center gap-4">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pencapaian Bulan Ini</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-0.5">{{ $weeklyAchievementRate }}%</p>
+                </div>
+                <div class="text-right border-l border-gray-200 pl-4">
+                    <p class="text-xs text-gray-500 font-semibold">Realisasi / Target</p>
+                    <p class="text-xs font-bold text-gray-700 mt-1">Rp {{ number_format($weeklyActualSum, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500">dari Rp {{ number_format($weeklyTargetSum, 0, ',', '.') }}</p>
+                </div>
             </div>
         </div>
 
         {{-- Today's Highlight --}}
-        <div class="bg-white rounded-xl p-5 mb-4 border-2 border-blue-300 shadow-sm">
+        <div class="bg-white rounded-xl p-5 mb-5 border-2 border-blue-300 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div>
-                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Hari Ini</p>
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Target Hari Ini</p>
                     <p class="text-xs text-gray-400">{{ $todayTarget->date->translatedFormat('l, d F Y') }}</p>
                 </div>
                 <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
@@ -171,19 +184,19 @@
                 </span>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                 <div>
                     <p class="text-xs text-gray-500 font-semibold">Target Dasar</p>
                     <p class="text-lg font-bold text-gray-800">Rp {{ number_format($todayTarget->base_target, 0, ',', '.') }}</p>
                 </div>
-                @if($todayTarget->carry_forward > 0)
                 <div>
-                    <p class="text-xs text-rose-500 font-semibold">+ Deficit Kemarin</p>
-                    <p class="text-lg font-bold text-rose-600">Rp {{ number_format($todayTarget->carry_forward, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500 font-semibold">+ Defisit Kemarin</p>
+                    <p class="text-lg font-bold {{ $todayTarget->carry_forward > 0 ? 'text-rose-600' : 'text-gray-400' }}">
+                        Rp {{ number_format($todayTarget->carry_forward, 0, ',', '.') }}
+                    </p>
                 </div>
-                @endif
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">Target Final</p>
+                    <p class="text-xs text-gray-500 font-semibold">Target Final Hari Ini</p>
                     <p class="text-lg font-bold text-blue-600">Rp {{ number_format($todayTarget->adjusted_target, 0, ',', '.') }}</p>
                 </div>
                 <div>
@@ -192,11 +205,17 @@
                         Rp {{ number_format($todayTarget->net_income, 0, ',', '.') }}
                     </p>
                 </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Selisih (Defisit/Surplus)</p>
+                    <p class="text-lg font-bold {{ $todayTarget->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                        {{ $todayTarget->variance >= 0 ? '+' : '' }}Rp {{ number_format($todayTarget->variance, 0, ',', '.') }}
+                    </p>
+                </div>
             </div>
 
             <div class="space-y-2">
                 <div class="flex justify-between text-xs font-semibold">
-                    <span class="text-gray-600">Progress</span>
+                    <span class="text-gray-600">Progress Hari Ini</span>
                     <span class="text-blue-600">{{ $todayTarget->achievement_percentage }}%</span>
                 </div>
                 <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
@@ -206,45 +225,78 @@
             </div>
         </div>
 
-        {{-- Last 7 Days Table --}}
-        <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
+        {{-- Laporan Per Hari Table --}}
+        <div class="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+            <div class="px-5 py-3.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fas fa-list text-blue-600"></i> Rincian Per Hari (Bulan {{ now()->translatedFormat('F Y') }})
+                </h4>
+                <span class="text-xs text-gray-500 font-medium">Total: {{ $dailyTargets->count() }} Hari</span>
+            </div>
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                    <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Target</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Realisasi</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Target Dasar</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Defisit Kemarin</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Target Final</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Pemasukan</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Pengeluaran</th>
+                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Realisasi Bersih</th>
                             <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Selisih</th>
                             <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($dailyTargets as $target)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-3">
-                                <div class="flex flex-col">
-                                    <span class="font-semibold text-gray-800">{{ $target->date->translatedFormat('D') }}</span>
-                                    <span class="text-xs text-gray-500">{{ $target->date->translatedFormat('d M') }}</span>
+                        @php
+                            $isToday = $target->date->isToday();
+                        @endphp
+                        <tr class="hover:bg-blue-50/50 transition-colors {{ $isToday ? 'bg-blue-50/80 font-medium' : '' }}">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex flex-col">
+                                        <span class="font-semibold text-gray-800">
+                                            {{ $target->date->translatedFormat('l') }}
+                                            @if($isToday)
+                                                <span class="ml-1 text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">Hari Ini</span>
+                                            @endif
+                                        </span>
+                                        <span class="text-xs text-gray-500">{{ $target->date->translatedFormat('d M Y') }}</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex flex-col items-end">
-                                    <span class="font-semibold text-gray-800">Rp {{ number_format($target->adjusted_target, 0, ',', '.') }}</span>
-                                    @if($target->carry_forward > 0)
-                                    <span class="text-xs text-rose-500">(+{{ number_format($target->carry_forward, 0, ',', '.') }})</span>
-                                    @endif
-                                </div>
+                            <td class="px-4 py-3 text-right font-medium text-gray-700 whitespace-nowrap">
+                                Rp {{ number_format($target->base_target, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-right font-semibold {{ $target->net_income >= $target->adjusted_target ? 'text-emerald-600' : 'text-amber-600' }}">
+                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                @if($target->carry_forward > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-700">
+                                    +Rp {{ number_format($target->carry_forward, 0, ',', '.') }}
+                                </span>
+                                @else
+                                <span class="text-xs text-gray-400">Rp 0</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-blue-700 whitespace-nowrap">
+                                Rp {{ number_format($target->adjusted_target, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-semibold text-emerald-600 whitespace-nowrap">
+                                Rp {{ number_format($target->actual_income, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-semibold text-rose-600 whitespace-nowrap">
+                                Rp {{ number_format($target->actual_expense, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold {{ $target->net_income >= $target->adjusted_target ? 'text-emerald-700' : ($target->net_income >= 0 ? 'text-amber-700' : 'text-rose-700') }} whitespace-nowrap">
                                 Rp {{ number_format($target->net_income, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="px-4 py-3 text-right whitespace-nowrap">
                                 <span class="font-bold {{ $target->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
                                     {{ $target->variance >= 0 ? '+' : '' }}Rp {{ number_format($target->variance, 0, ',', '.') }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
                                     {{ $target->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
                                        ($target->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
@@ -259,9 +311,9 @@
         </div>
 
         <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p class="text-xs text-gray-600">
+            <p class="text-xs text-gray-600 leading-relaxed">
                 <i class="fas fa-info-circle text-blue-600 mr-1"></i>
-                <strong>Sistem Carry-Forward:</strong> Jika hari ini pemasukan bersih kurang dari target, defisit akan ditambahkan ke target hari berikutnya secara otomatis.
+                <strong>Sistem Carry-Forward Defisit:</strong> Target harian dihitung dari Target Bulanan ÷ Jumlah Hari. Jika realisasi bersih harian mengalami defisit (minus dari target final), defisit tersebut secara otomatis ditambahkan ke target hari berikutnya agar target keseluruhan admin tetap berlanjut secara konsisten.
             </p>
         </div>
     </div>
@@ -277,27 +329,61 @@
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-3-2.818l.879.659c1.171.33 2.51-.645 2.51-1.857v-1a2 2 0 011.01-1.756l.291-.16c1.043-.614 1.043-2.07 0-2.684L13.51 9.24a2 2 0 01-1.01-1.756V6.5a1.5 1.5 0 013 0v.5" />
-                                </svg>
+                                <i class="fas fa-bullseye text-blue-600 text-xl"></i>
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Target Bulanan</h3>
-                                <div class="mt-4">
-                                    <label for="target" class="block text-sm font-medium text-gray-700">Jumlah Target (Rp)</label>
-                                    <input type="number" name="target" id="target" value="{{ $limitPemasukanBulanan }}" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Edit Target Admin</h3>
+                                <p class="text-xs text-gray-500 mt-1">Mengatur target pendapatan admin per tahun atau per bulan.</p>
+                                
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Target</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
+                                                <input type="radio" name="target_type" value="tahunan" onchange="toggleTargetLabel('tahunan')" class="text-blue-600 focus:ring-blue-500">
+                                                <span class="text-xs font-semibold text-gray-700">Target Tahunan</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
+                                                <input type="radio" name="target_type" value="bulanan" checked onchange="toggleTargetLabel('bulanan')" class="text-blue-600 focus:ring-blue-500">
+                                                <span class="text-xs font-semibold text-gray-700">Target Bulanan</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="targetInput" id="targetInputLabel" class="block text-sm font-medium text-gray-700">Nominal Target Bulanan (Rp)</label>
+                                        <input type="number" name="target" id="targetInput" value="{{ $limitPemasukanBulanan }}" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold" required>
+                                        <p class="text-xs text-gray-400 mt-1" id="targetHelpText">Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                        <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm shadow-md">Simpan Target</button>
                         <button type="button" onclick="document.getElementById('targetModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleTargetLabel(type) {
+            const label = document.getElementById('targetInputLabel');
+            const input = document.getElementById('targetInput');
+            const help = document.getElementById('targetHelpText');
+            if (type === 'tahunan') {
+                label.innerText = 'Nominal Target Tahunan (Rp)';
+                input.value = {{ $annualTarget }};
+                help.innerText = 'Target bulanan akan dihitung (Target Tahunan ÷ 12) & target harian otomatis disesuaikan.';
+            } else {
+                label.innerText = 'Nominal Target Bulanan (Rp)';
+                input.value = {{ $limitPemasukanBulanan }};
+                help.innerText = 'Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.';
+            }
+        }
+    </script>
 
     <!-- Grafik Tren & Distribusi Pengeluaran (2 kolom + 1 kolom kanan) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

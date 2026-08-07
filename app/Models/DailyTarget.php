@@ -51,12 +51,101 @@ class DailyTarget extends Model
     /**
      * Calculate base daily target from monthly target
      */
-    public static function calculateBaseTarget()
+    public static function calculateBaseTarget($date = null)
     {
-        $monthlyTarget = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
-        $daysInMonth = Carbon::now()->daysInMonth;
+        $date = $date ? Carbon::parse($date) : Carbon::now();
+        $monthlyTarget = self::getMonthlyTarget();
+        $daysInMonth = $date->daysInMonth;
         
         return (int) ceil($monthlyTarget / $daysInMonth);
+    }
+
+    /**
+     * Get configured monthly target
+     */
+    public static function getMonthlyTarget()
+    {
+        if (env('MONTHLY_INCOME_LIMIT')) {
+            return (int) env('MONTHLY_INCOME_LIMIT');
+        }
+        if (env('ANNUAL_INCOME_LIMIT')) {
+            return (int) ceil(((int) env('ANNUAL_INCOME_LIMIT')) / 12);
+        }
+        return 50000000;
+    }
+
+    /**
+     * Get configured annual target
+     */
+    public static function getAnnualTarget()
+    {
+        if (env('ANNUAL_INCOME_LIMIT')) {
+            return (int) env('ANNUAL_INCOME_LIMIT');
+        }
+        return self::getMonthlyTarget() * 12;
+    }
+
+    /**
+     * Recalculate daily targets for a given month sequentially
+     * to apply carry-forward deficits accurately.
+     */
+    public static function recalculateMonthTargets($year = null, $month = null)
+    {
+        $year = $year ?? Carbon::now()->year;
+        $month = $month ?? Carbon::now()->month;
+
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfDay();
+        $daysInMonth = $startDate->daysInMonth;
+        
+        $monthlyTarget = self::getMonthlyTarget();
+        $baseDailyTarget = (int) ceil($monthlyTarget / $daysInMonth);
+
+        $runningDeficit = 0;
+        $results = collect();
+
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $currentDate = Carbon::createFromDate($year, $month, $day)->startOfDay();
+            $dateString = $currentDate->toDateString();
+
+            // Fetch actual income and expenses for current date
+            $income = Transaksi::where('payment_status', 'lunas')
+                ->whereDate('created_at', $currentDate)
+                ->sum('total_price');
+
+            $expense = Pengeluaran::whereDate('tanggal', $currentDate)
+                ->sum('nominal');
+
+            $carryForward = $runningDeficit;
+            $adjustedTarget = $baseDailyTarget + $carryForward;
+            $netIncome = $income - $expense;
+            $variance = $netIncome - $adjustedTarget;
+            $isAchieved = $netIncome >= $adjustedTarget;
+
+            // Carry forward deficit to next day if net income is below adjusted target
+            if ($variance < 0) {
+                $runningDeficit = abs($variance);
+            } else {
+                $runningDeficit = 0; // Reset deficit when target achieved or surplus
+            }
+
+            $targetRecord = self::updateOrCreate(
+                ['date' => $dateString],
+                [
+                    'base_target' => $baseDailyTarget,
+                    'carry_forward' => $carryForward,
+                    'adjusted_target' => $adjustedTarget,
+                    'actual_income' => $income,
+                    'actual_expense' => $expense,
+                    'net_income' => $netIncome,
+                    'variance' => $variance,
+                    'is_achieved' => $isAchieved,
+                ]
+            );
+
+            $results->push($targetRecord);
+        }
+
+        return $results;
     }
 
     /**
