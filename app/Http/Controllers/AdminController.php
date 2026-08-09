@@ -603,6 +603,8 @@ class AdminController extends Controller
         $request->validate([
             'target' => 'required|numeric|min:0',
             'target_type' => 'nullable|in:bulanan,tahunan',
+            'days_mode' => 'nullable|in:auto,custom',
+            'custom_days' => 'nullable|numeric|min:1|max:31',
         ]);
 
         try {
@@ -616,6 +618,8 @@ class AdminController extends Controller
                 $monthlyTarget = $targetValue;
                 $annualTarget = $monthlyTarget * 12;
             }
+
+            $targetDays = ($request->days_mode === 'custom' && $request->custom_days) ? (int) $request->custom_days : 'auto';
 
             $path = base_path('.env');
             if (file_exists($path)) {
@@ -631,6 +635,12 @@ class AdminController extends Controller
                     $envContent = preg_replace('/^ANNUAL_INCOME_LIMIT=.*/m', 'ANNUAL_INCOME_LIMIT=' . $annualTarget, $envContent);
                 } else {
                     $envContent .= "\nANNUAL_INCOME_LIMIT=" . $annualTarget;
+                }
+
+                if (str_contains($envContent, 'TARGET_DAYS_PER_MONTH=')) {
+                    $envContent = preg_replace('/^TARGET_DAYS_PER_MONTH=.*/m', 'TARGET_DAYS_PER_MONTH=' . $targetDays, $envContent);
+                } else {
+                    $envContent .= "\nTARGET_DAYS_PER_MONTH=" . $targetDays;
                 }
                 
                 file_put_contents($path, $envContent);

@@ -49,13 +49,26 @@ class DailyTarget extends Model
     }
 
     /**
+     * Get target days in month (custom setting or actual days in month)
+     */
+    public static function getTargetDaysInMonth($date = null)
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::now();
+        $customDays = env('TARGET_DAYS_PER_MONTH');
+        if ($customDays && is_numeric($customDays) && (int) $customDays > 0) {
+            return (int) $customDays;
+        }
+        return $date->daysInMonth;
+    }
+
+    /**
      * Calculate base daily target from monthly target
      */
     public static function calculateBaseTarget($date = null)
     {
         $date = $date ? Carbon::parse($date) : Carbon::now();
         $monthlyTarget = self::getMonthlyTarget();
-        $daysInMonth = $date->daysInMonth;
+        $daysInMonth = self::getTargetDaysInMonth($date);
         
         return (int) ceil($monthlyTarget / $daysInMonth);
     }
@@ -95,15 +108,16 @@ class DailyTarget extends Model
         $month = $month ?? Carbon::now()->month;
 
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfDay();
-        $daysInMonth = $startDate->daysInMonth;
+        $calendarDaysInMonth = $startDate->daysInMonth;
+        $targetDaysInMonth = self::getTargetDaysInMonth($startDate);
         
         $monthlyTarget = self::getMonthlyTarget();
-        $baseDailyTarget = (int) ceil($monthlyTarget / $daysInMonth);
+        $baseDailyTarget = (int) ceil($monthlyTarget / $targetDaysInMonth);
 
         $runningDeficit = 0;
         $results = collect();
 
-        for ($day = 1; $day <= $daysInMonth; $day++) {
+        for ($day = 1; $day <= $calendarDaysInMonth; $day++) {
             $currentDate = Carbon::createFromDate($year, $month, $day)->startOfDay();
             $dateString = $currentDate->toDateString();
 

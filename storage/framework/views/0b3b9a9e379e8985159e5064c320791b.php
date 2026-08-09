@@ -130,31 +130,97 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
 
-    <!-- Target Pemasukan Bulanan & Tahunan -->
-    <div class="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
-            <div>
-                <div class="flex items-center gap-2">
-                    <h3 class="text-base font-semibold text-gray-800">Target Pemasukan Admin</h3>
-                    <button onclick="document.getElementById('targetModal').classList.remove('hidden')" class="text-blue-500 hover:text-blue-700 text-sm transition">
-                        <i class="fas fa-edit"></i> Edit Target
-                    </button>
+    <!-- Target Pemasukan Bulanan & Tahunan (Modernized Layout) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden transition-all duration-300 hover:shadow-md">
+        <!-- Top Accent Gradient Line -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500"></div>
+
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs shrink-0">
+                    <i class="fas fa-bullseye text-lg"></i>
                 </div>
-                <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 mt-1">
-                    <span>Target Tahunan: <strong class="text-gray-800">Rp <?php echo e(number_format($annualTarget, 0, ',', '.')); ?></strong></span>
-                    <span>•</span>
-                    <span>Target Bulanan: <strong class="text-gray-800">Rp <?php echo e(number_format($limitPemasukanBulanan, 0, ',', '.')); ?></strong></span>
-                    <span>•</span>
-                    <span>Target Dasar Harian: <strong class="text-blue-600">Rp <?php echo e(number_format(ceil($limitPemasukanBulanan / now()->daysInMonth), 0, ',', '.')); ?></strong></span>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h3 class="text-base font-bold text-gray-800 tracking-tight">Target Pemasukan Admin</h3>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Target Aktif
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-0.5">Monitoring target finansial bulanan & tahunan secara realtime</p>
                 </div>
-                <p class="text-sm text-gray-500 mt-2">Realisasi Bulan Ini: <strong class="text-gray-800">Rp <?php echo e(number_format($realisasiBulanIni, 0, ',', '.')); ?></strong> dari Target Rp <?php echo e(number_format($limitPemasukanBulanan, 0, ',', '.')); ?></p>
             </div>
-            <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-semibold <?php echo e($persenTargetBulanIni >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'); ?>">
-                <?php echo e(number_format($persenTargetBulanIni, 2)); ?>%
-            </span>
+
+            <div class="flex items-center gap-3 self-start md:self-auto">
+                <button onclick="document.getElementById('targetModal').classList.remove('hidden')" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 rounded-xl transition-all duration-200 shadow-2xs group">
+                    <i class="fas fa-edit text-blue-500 group-hover:scale-110 transition-transform"></i>
+                    <span>Edit Target</span>
+                </button>
+
+                <div class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-bold shadow-2xs <?php echo e($persenTargetBulanIni >= 100 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'); ?>">
+                    <i class="fas <?php echo e($persenTargetBulanIni >= 100 ? 'fa-circle-check text-emerald-600' : 'fa-chart-line text-amber-600'); ?>"></i>
+                    <span><?php echo e(number_format($persenTargetBulanIni, 2)); ?>% Target</span>
+                </div>
+            </div>
         </div>
-        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full <?php echo e($persenTargetBulanIni >= 100 ? 'bg-emerald-500' : 'bg-blue-600'); ?>" style="width: <?php echo e(min(100, $persenTargetBulanIni)); ?>%"></div>
+
+        <!-- Target Cards Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <!-- Target Tahunan -->
+            <div class="bg-gray-50/70 border border-gray-100 rounded-xl p-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                <div class="w-9 h-9 rounded-lg bg-white border border-gray-200/60 text-gray-600 flex items-center justify-center shadow-2xs shrink-0">
+                    <i class="fas fa-calendar-alt text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Target Tahunan</p>
+                    <p class="text-sm font-bold text-gray-800 mt-0.5 truncate">Rp <?php echo e(number_format($annualTarget, 0, ',', '.')); ?></p>
+                </div>
+            </div>
+
+            <!-- Target Bulanan -->
+            <div class="bg-indigo-50/40 border border-indigo-100/60 rounded-xl p-3.5 flex items-center gap-3 hover:bg-indigo-50/60 transition-colors">
+                <div class="w-9 h-9 rounded-lg bg-white border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-2xs shrink-0">
+                    <i class="fas fa-calendar-check text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider font-semibold text-indigo-500">Target Bulanan</p>
+                    <p class="text-sm font-bold text-gray-800 mt-0.5 truncate">Rp <?php echo e(number_format($limitPemasukanBulanan, 0, ',', '.')); ?></p>
+                </div>
+            </div>
+
+            <!-- Target Dasar Harian -->
+            <div class="bg-blue-50/40 border border-blue-100/60 rounded-xl p-3.5 flex items-center gap-3 hover:bg-blue-50/60 transition-colors">
+                <div class="w-9 h-9 rounded-lg bg-white border border-blue-100 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
+                    <i class="fas fa-clock text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider font-semibold text-blue-500">
+                        Target Harian (<?php echo e(\App\Models\DailyTarget::getTargetDaysInMonth()); ?> Hari)
+                    </p>
+                    <p class="text-sm font-bold text-blue-700 mt-0.5 truncate">Rp <?php echo e(number_format(\App\Models\DailyTarget::calculateBaseTarget(), 0, ',', '.')); ?></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar & Realization Info -->
+        <div class="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-semibold gap-1.5 mb-2.5">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-gray-500">Realisasi Bulan Ini:</span>
+                    <span class="text-gray-900 font-bold text-sm">Rp <?php echo e(number_format($realisasiBulanIni, 0, ',', '.')); ?></span>
+                </div>
+                <div class="text-gray-500 text-xs">
+                    Target: <span class="font-semibold text-gray-700">Rp <?php echo e(number_format($limitPemasukanBulanan, 0, ',', '.')); ?></span>
+                </div>
+            </div>
+
+            <!-- Sleek Bar -->
+            <div class="w-full h-3.5 bg-gray-200/70 rounded-full overflow-hidden p-0.5 relative shadow-inner">
+                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r <?php echo e($persenTargetBulanIni >= 100 ? 'from-emerald-500 to-teal-400' : 'from-blue-600 via-indigo-600 to-blue-500'); ?> shadow-xs" 
+                     style="width: <?php echo e(min(100, max(2, $persenTargetBulanIni))); ?>%"></div>
+            </div>
         </div>
     </div>
 
@@ -263,67 +329,38 @@ unset($__errorArgs, $__bag); ?>
                             <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <?php $__currentLoopData = $dailyTargets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $target): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php
-                            $isToday = $target->date->isToday();
-                        ?>
-                        <tr class="hover:bg-blue-50/50 transition-colors <?php echo e($isToday ? 'bg-blue-50/80 font-medium' : ''); ?>">
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="flex items-center gap-2">
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold text-gray-800">
-                                            <?php echo e($target->date->translatedFormat('l')); ?>
+                    <tbody class="divide-y divide-gray-200">
+                        <?php $__currentLoopData = $dailyTargets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <tr class="hover:bg-gray-50 <?php echo e($dt->date->isToday() ? 'bg-blue-50/60 font-semibold' : ''); ?>">
+                            <td class="px-4 py-3 text-xs text-gray-800 font-medium">
+                                <?php echo e($dt->date->translatedFormat('d M Y (D)')); ?>
 
-                                            <?php if($isToday): ?>
-                                                <span class="ml-1 text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">Hari Ini</span>
-                                            <?php endif; ?>
-                                        </span>
-                                        <span class="text-xs text-gray-500"><?php echo e($target->date->translatedFormat('d M Y')); ?></span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-right font-medium text-gray-700 whitespace-nowrap">
-                                Rp <?php echo e(number_format($target->base_target, 0, ',', '.')); ?>
-
-                            </td>
-                            <td class="px-4 py-3 text-right whitespace-nowrap">
-                                <?php if($target->carry_forward > 0): ?>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-700">
-                                    +Rp <?php echo e(number_format($target->carry_forward, 0, ',', '.')); ?>
-
-                                </span>
-                                <?php else: ?>
-                                <span class="text-xs text-gray-400">Rp 0</span>
+                                <?php if($dt->date->isToday()): ?>
+                                    <span class="ml-1 text-3xs bg-blue-600 text-white px-1.5 py-0.5 rounded-full uppercase">Hari Ini</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-right font-bold text-blue-700 whitespace-nowrap">
-                                Rp <?php echo e(number_format($target->adjusted_target, 0, ',', '.')); ?>
+                            <td class="px-4 py-3 text-xs text-gray-600 text-right">Rp <?php echo e(number_format($dt->base_target, 0, ',', '.')); ?></td>
+                            <td class="px-4 py-3 text-xs text-right <?php echo e($dt->carry_forward > 0 ? 'text-rose-600 font-semibold' : 'text-gray-400'); ?>">
+                                Rp <?php echo e(number_format($dt->carry_forward, 0, ',', '.')); ?>
 
                             </td>
-                            <td class="px-4 py-3 text-right font-semibold text-emerald-600 whitespace-nowrap">
-                                Rp <?php echo e(number_format($target->actual_income, 0, ',', '.')); ?>
+                            <td class="px-4 py-3 text-xs text-blue-600 font-semibold text-right">Rp <?php echo e(number_format($dt->adjusted_target, 0, ',', '.')); ?></td>
+                            <td class="px-4 py-3 text-xs text-emerald-600 font-medium text-right">Rp <?php echo e(number_format($dt->actual_income, 0, ',', '.')); ?></td>
+                            <td class="px-4 py-3 text-xs text-rose-600 font-medium text-right">Rp <?php echo e(number_format($dt->actual_expense, 0, ',', '.')); ?></td>
+                            <td class="px-4 py-3 text-xs font-bold text-right <?php echo e($dt->net_income >= $dt->adjusted_target ? 'text-emerald-600' : 'text-amber-600'); ?>">
+                                Rp <?php echo e(number_format($dt->net_income, 0, ',', '.')); ?>
 
                             </td>
-                            <td class="px-4 py-3 text-right font-semibold text-rose-600 whitespace-nowrap">
-                                Rp <?php echo e(number_format($target->actual_expense, 0, ',', '.')); ?>
+                            <td class="px-4 py-3 text-xs font-bold text-right <?php echo e($dt->variance >= 0 ? 'text-emerald-600' : 'text-rose-600'); ?>">
+                                <?php echo e($dt->variance >= 0 ? '+' : ''); ?>Rp <?php echo e(number_format($dt->variance, 0, ',', '.')); ?>
 
                             </td>
-                            <td class="px-4 py-3 text-right font-bold <?php echo e($target->net_income >= $target->adjusted_target ? 'text-emerald-700' : ($target->net_income >= 0 ? 'text-amber-700' : 'text-rose-700')); ?> whitespace-nowrap">
-                                Rp <?php echo e(number_format($target->net_income, 0, ',', '.')); ?>
+                            <td class="px-4 py-3 text-center">
+                                <span class="px-2 py-1 rounded-full text-3xs font-bold uppercase tracking-wider
+                                    <?php echo e($dt->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
+                                       ($dt->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')); ?>">
+                                    <?php echo e($dt->is_achieved ? 'Tercapai' : 'Belum'); ?>
 
-                            </td>
-                            <td class="px-4 py-3 text-right whitespace-nowrap">
-                                <span class="font-bold <?php echo e($target->variance >= 0 ? 'text-emerald-600' : 'text-rose-600'); ?>">
-                                    <?php echo e($target->variance >= 0 ? '+' : ''); ?>Rp <?php echo e(number_format($target->variance, 0, ',', '.')); ?>
-
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                    <?php echo e($target->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
-                                       ($target->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')); ?>">
-                                    <?php echo e($target->achievement_percentage); ?>%
                                 </span>
                             </td>
                         </tr>
@@ -336,7 +373,7 @@ unset($__errorArgs, $__bag); ?>
         <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p class="text-xs text-gray-600 leading-relaxed">
                 <i class="fas fa-info-circle text-blue-600 mr-1"></i>
-                <strong>Sistem Carry-Forward Defisit:</strong> Target harian dihitung dari Target Bulanan ÷ Jumlah Hari. Jika realisasi bersih harian mengalami defisit (minus dari target final), defisit tersebut secara otomatis ditambahkan ke target hari berikutnya agar target keseluruhan admin tetap berlanjut secara konsisten.
+                <strong>Sistem Carry-Forward Defisit:</strong> Target harian dihitung dari Target Bulanan ÷ Jumlah Hari Target. Jika realisasi bersih harian mengalami defisit (minus dari target final), defisit tersebut secara otomatis ditambahkan ke target hari berikutnya agar target keseluruhan admin tetap berlanjut secara konsisten.
             </p>
         </div>
     </div>
@@ -356,7 +393,7 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                                 <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Edit Target Admin</h3>
-                                <p class="text-xs text-gray-500 mt-1">Mengatur target pendapatan admin per tahun atau per bulan.</p>
+                                <p class="text-xs text-gray-500 mt-1">Mengatur target pendapatan admin per tahun atau per bulan & hari target.</p>
                                 
                                 <div class="mt-4 space-y-4">
                                     <div>
@@ -377,6 +414,31 @@ unset($__errorArgs, $__bag); ?>
                                         <label for="targetInput" id="targetInputLabel" class="block text-sm font-medium text-gray-700">Nominal Target Bulanan (Rp)</label>
                                         <input type="number" name="target" id="targetInput" value="<?php echo e($limitPemasukanBulanan); ?>" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold" required>
                                         <p class="text-xs text-gray-400 mt-1" id="targetHelpText">Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.</p>
+                                    </div>
+
+                                    <div class="border-t border-gray-100 pt-3">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Pembagi Hari Dalam Bulan</label>
+                                        <div class="grid grid-cols-2 gap-3 mb-2">
+                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
+                                                <input type="radio" name="days_mode" value="auto" <?php echo e(env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? '' : 'checked'); ?> onchange="toggleDaysMode('auto')" class="text-blue-600 focus:ring-blue-500">
+                                                <div>
+                                                    <span class="block text-xs font-semibold text-gray-700">Otomatis Kalender</span>
+                                                    <span class="block text-[10px] text-gray-500">Sesuai bulan (28/30/31 hari)</span>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
+                                                <input type="radio" name="days_mode" value="custom" <?php echo e(env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? 'checked' : ''); ?> onchange="toggleDaysMode('custom')" class="text-blue-600 focus:ring-blue-500">
+                                                <div>
+                                                    <span class="block text-xs font-semibold text-gray-700">Custom Hari Kerja</span>
+                                                    <span class="block text-[10px] text-gray-500">Tentukan jumlah hari</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div id="customDaysWrapper" class="<?php echo e(env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? '' : 'hidden'); ?>">
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Jumlah Hari Target Per Bulan</label>
+                                            <input type="number" name="custom_days" id="customDaysInput" min="1" max="31" value="<?php echo e(is_numeric(env('TARGET_DAYS_PER_MONTH')) ? env('TARGET_DAYS_PER_MONTH') : 26); ?>" placeholder="Contoh: 26" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                            <p class="text-[11px] text-gray-400 mt-1">Misalnya set 26 hari kerja per bulan. Target harian = Target Bulanan ÷ jumlah hari kerja.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -404,6 +466,15 @@ unset($__errorArgs, $__bag); ?>
                 label.innerText = 'Nominal Target Bulanan (Rp)';
                 input.value = <?php echo e($limitPemasukanBulanan); ?>;
                 help.innerText = 'Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.';
+            }
+        }
+
+        function toggleDaysMode(mode) {
+            const wrapper = document.getElementById('customDaysWrapper');
+            if (mode === 'custom') {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
             }
         }
     </script>
