@@ -30,7 +30,7 @@
                         @endforeach
                     </select>
                     <p class="text-xs text-gray-500 mt-1">
-                        <a href="{{ route('admin.kategori-pengeluaran.index') }}" class="text-indigo-600 hover:underline">Kelola kategori</a>
+                        <a href="{{ route('admin.settings') }}" class="text-indigo-600 hover:underline">Kelola kategori</a>
                     </p>
                 </div>
                 <div>

@@ -10,31 +10,13 @@ class KategoriPengeluaranController extends Controller
     // ─── INDEX ──────────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $search = trim((string) $request->get('search', ''));
-        
-        $kategoris = KategoriPengeluaran::query()
-            ->when($search !== '', function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
-            })
-            ->withCount('pengeluarans')
-            ->orderBy('nama')
-            ->paginate(15)
-            ->withQueryString();
-
-        $stats = [
-            'total' => KategoriPengeluaran::count(),
-            'aktif' => KategoriPengeluaran::where('is_active', true)->count(),
-            'tidak_aktif' => KategoriPengeluaran::where('is_active', false)->count(),
-        ];
-
-        return view('admin.kategori_pengeluaran.index', compact('kategoris', 'stats'));
+        return redirect()->route('admin.settings');
     }
 
     // ─── CREATE ─────────────────────────────────────────────────────────
     public function create()
     {
-        return view('admin.kategori_pengeluaran.create');
+        return redirect()->route('admin.settings');
     }
 
     // ─── STORE ──────────────────────────────────────────────────────────
@@ -50,14 +32,14 @@ class KategoriPengeluaranController extends Controller
 
         KategoriPengeluaran::create($validated);
 
-        return redirect()->route('admin.kategori-pengeluaran.index')
+        return redirect()->route('admin.settings')
                          ->with('success', 'Kategori pengeluaran berhasil ditambahkan.');
     }
 
     // ─── EDIT ───────────────────────────────────────────────────────────
     public function edit(KategoriPengeluaran $kategoriPengeluaran)
     {
-        return view('admin.kategori_pengeluaran.edit', compact('kategoriPengeluaran'));
+        return redirect()->route('admin.settings');
     }
 
     // ─── UPDATE ─────────────────────────────────────────────────────────
@@ -73,7 +55,7 @@ class KategoriPengeluaranController extends Controller
 
         $kategoriPengeluaran->update($validated);
 
-        return redirect()->route('admin.kategori-pengeluaran.index')
+        return redirect()->route('admin.settings')
                          ->with('success', 'Kategori pengeluaran berhasil diperbarui.');
     }
 
@@ -82,13 +64,13 @@ class KategoriPengeluaranController extends Controller
     {
         // Cek apakah kategori masih digunakan
         if ($kategoriPengeluaran->isUsed()) {
-            return redirect()->route('admin.kategori-pengeluaran.index')
+            return redirect()->route('admin.settings')
                              ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh ' . $kategoriPengeluaran->pengeluarans()->count() . ' pengeluaran.');
         }
 
         $kategoriPengeluaran->delete();
 
-        return redirect()->route('admin.kategori-pengeluaran.index')
+        return redirect()->route('admin.settings')
                          ->with('success', 'Kategori pengeluaran berhasil dihapus.');
     }
 
@@ -101,7 +83,7 @@ class KategoriPengeluaranController extends Controller
 
         $status = $kategoriPengeluaran->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
-        return redirect()->route('admin.kategori-pengeluaran.index')
+        return redirect()->route('admin.settings')
                          ->with('success', "Kategori berhasil {$status}.");
     }
 }
