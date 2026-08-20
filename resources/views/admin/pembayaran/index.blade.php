@@ -1,213 +1,546 @@
 {{-- resources/views/admin/pembayaran/index.blade.php --}}
 @extends('layouts.admin')
-@section('title', 'Manajemen Pembayaran - Bening Laundry')
+@section('title', 'Manajemen & Rekapan Pembayaran - Bening Laundry')
 @section('content')
 
 <div class="p-6 md:p-8" x-data="pembayaranApp()">
     <div class="max-w-7xl mx-auto">
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-6">
+
+        {{-- HEADER --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">Manajemen Pembayaran</h1>
-                <p class="text-gray-500 text-sm mt-1">Kelola seluruh transaksi masuk, status pelunasan pelanggan, dan riwayat metode pembayaran dalam satu alur yang jernih.</p>
+                <h1 class="text-2xl font-bold text-slate-800">Manajemen & Rekapan Pembayaran</h1>
+                <p class="text-slate-500 text-xs md:text-sm mt-0.5">Kelola pelunasan transaksi, rekapan harian & bulanan beserta rincian pelayanan laundry.</p>
+            </div>
+
+            {{-- Tab Switcher --}}
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto">
+                <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar']) }}"
+                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'daftar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <i class="fas fa-list mr-1"></i> Daftar Transaksi
+                </a>
+                <a href="{{ route('admin.pembayaran.index', ['tab' => 'harian']) }}"
+                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'harian' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <i class="fas fa-calendar-day mr-1"></i> Rekapan Harian
+                </a>
+                <a href="{{ route('admin.pembayaran.index', ['tab' => 'bulanan']) }}"
+                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'bulanan' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <i class="fas fa-calendar-alt mr-1"></i> Rekapan Bulanan
+                </a>
             </div>
         </div>
 
-        <!-- STATISTIK CARDS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Card 1 -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Total Pendapatan Hari Ini</p>
-                        <p class="text-2xl font-bold mt-1">Rp {{ number_format($totalPendapatanHariIni, 0, ',', '.') }}</p>
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        {{-- TAB 1: DAFTAR TRANSAKSI & STATUS PEMBAYARAN                         --}}
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        @if($tab === 'daftar')
+            {{-- STATISTIK CARDS --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {{-- Card 1 --}}
+                <div class="bg-white rounded-2xl shadow-card p-6 border-l-4 border-blue-500 border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-400 text-xs uppercase font-semibold">Total Pendapatan Diterima Hari Ini</p>
+                            <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($totalPendapatanHariIni, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fas fa-wallet text-lg"></i>
+                        </span>
                     </div>
-                    <span class="text-green-500 text-sm bg-green-100 px-2 py-1 rounded-full">+12%</span>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
+                        <span>Pemasukan kas langsung hari ini</span>
+                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'harian']) }}" class="text-blue-600 font-semibold hover:underline">
+                            Lihat Rincian Harian <i class="fas fa-arrow-right ml-1 text-[10px]"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: 70%"></div>
+
+                {{-- Card 2 --}}
+                <div class="bg-white rounded-2xl shadow-card p-6 border-l-4 border-rose-500 border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-400 text-xs uppercase font-semibold">Transaksi Belum Lunas (Piutang)</p>
+                            <p class="text-2xl font-bold text-rose-600 mt-1">{{ $transaksiBelumLunas }} Transaksi</p>
+                        </div>
+                        <span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                            <i class="fas fa-clock text-lg"></i>
+                        </span>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">↑ 12% dari kemarin</p>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
+                        <span>Menunggu pembayaran pelanggan</span>
+                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar']) }}" class="text-rose-600 font-semibold hover:underline">
+                            Filter Belum Lunas <i class="fas fa-filter ml-1 text-[10px]"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Card 2 -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm">Transaksi Belum Lunas</p>
-                        <p class="text-2xl font-bold mt-1">{{ $transaksiBelumLunas }} Transaksi</p>
-                    </div>
-                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
-                </div>
-                <div class="mt-4">
-                    <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'belum_bayar'])) }}" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                        <i class="fas fa-arrow-right mr-1"></i> Lihat Transaksi
+            {{-- FILTER TABS & SEARCH --}}
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex space-x-2">
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar']) }}" 
+                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ !request('status') ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Semua Status
+                    </a>
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'lunas']) }}" 
+                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'lunas' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Lunas
+                    </a>
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar']) }}" 
+                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'belum_bayar' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Belum Lunas
                     </a>
                 </div>
+
+                <form action="{{ route('admin.pembayaran.index') }}" method="GET" class="flex items-center gap-2">
+                    <input type="hidden" name="tab" value="daftar">
+                    @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
+                    <div class="relative w-64">
+                        <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search text-xs"></i>
+                        </span>
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="Cari pelanggan / kode..."
+                               class="w-full pl-9 pr-4 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition h-9">
+                    </div>
+                </form>
             </div>
-        </div>
 
-        <!-- FILTER TABS -->
-        <div class="flex space-x-2 border-b mb-6">
-            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => null])) }}" 
-               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ !request('status') ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
-                Semua
-            </a>
-            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'lunas'])) }}" 
-               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'lunas' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
-                Lunas
-            </a>
-            <a href="{{ route('admin.pembayaran.index', array_merge(request()->except('status'), ['status' => 'belum_bayar'])) }}" 
-               class="px-5 py-2 text-sm font-medium rounded-t-lg transition {{ request('status') == 'belum_bayar' ? 'bg-white text-blue-700 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
-                Belum Lunas
-            </a>
-        </div>
-
-        <!-- TABEL TRANSAKSI -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Transaksi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($transactions as $trx)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-gray-900">{{ $trx->transaksi_code }}</td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $trx->customer_name }}</div>
-                                <div class="text-xs text-gray-500">{{ ucfirst($trx->service_type) }} - {{ $trx->weight }} kg</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if($trx->payment_status == 'lunas')
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        <i class="fas fa-check-circle mr-1 text-xs"></i> Lunas
-                                    </span>
-                                @else
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        <i class="fas fa-hourglass-half mr-1"></i> Belum Lunas
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div class="relative inline-block text-left">
-                                    <button onclick="toggleDropdown('dropdown-pembayaran-{{ $trx->id }}')"
-                                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 
-                                                   hover:bg-slate-100 text-slate-500 transition-all duration-200 focus:outline-none">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
-                                        </svg>
-                                    </button>
-                                    
-                                    <div id="dropdown-pembayaran-{{ $trx->id }}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5">
+            {{-- TABEL TRANSAKSI --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-4">ID Transaksi</th>
+                                <th class="px-6 py-4">Pelanggan & Rincian Layanan</th>
+                                <th class="px-6 py-4">Total Tagihan</th>
+                                <th class="px-6 py-4">Metode Bayar</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @forelse($transactions as $trx)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-4 whitespace-nowrap font-mono font-bold text-xs text-slate-900">
+                                    {{ $trx->transaksi_code }}
+                                    <div class="text-[10px] text-slate-400 font-sans mt-0.5">{{ $trx->created_at->format('d/m/Y H:i') }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900">{{ $trx->customer_name }}</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        @if($trx->details && $trx->details->count() > 0)
+                                            {{ $trx->details->map(fn($d) => ($d->layanan->nama ?? 'Layanan') . ' (' . $d->qty . 'x)')->join(', ') }}
+                                        @else
+                                            {{ ucfirst($trx->service_type) }} - {{ $trx->weight }} kg
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap font-bold text-slate-900 font-mono">
+                                    Rp {{ number_format($trx->total_price, 0, ',', '.') }}
+                                    @if($trx->dibayar > 0)
+                                        <div class="text-[10px] text-slate-400 font-sans mt-0.5">
+                                            Bayar: Rp {{ number_format($trx->dibayar, 0, ',', '.') }}
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap uppercase text-xs font-semibold text-slate-600">
+                                    {{ str_replace('_', ' ', $trx->payment_method ?: 'Tunai') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($trx->payment_status == 'lunas')
+                                        <span class="px-2.5 py-1 inline-flex text-xs font-bold rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            <i class="fas fa-check-circle mr-1 mt-0.5"></i> Lunas
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 inline-flex text-xs font-bold rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
+                                            <i class="fas fa-hourglass-half mr-1 mt-0.5"></i> Belum Lunas
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-2">
                                         @if($trx->payment_status != 'lunas')
                                         <button onclick="openPaymentModal('{{ $trx->transaksi_code }}', {{ $trx->total_price }})"
-                                           class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                                            </svg>
-                                            Bayar
+                                                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
+                                            <i class="fas fa-cash-register"></i> Bayar
                                         </button>
                                         @endif
-                                        <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}'); toggleDropdown('dropdown-pembayaran-{{ $trx->id }}')"
-                                           class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            Cek Nota
+                                        <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}')"
+                                                class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition flex items-center gap-1">
+                                            <i class="fas fa-receipt text-slate-400"></i> Struk
                                         </button>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">Tidak ada transaksi ditemukan</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">Tidak ada data transaksi ditemukan.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                {{-- Pagination --}}
+                <div class="px-6 py-4 border-t border-slate-100">
+                    {{ $transactions->links('vendor.pagination.custom') }}
+                </div>
             </div>
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $transactions->appends(request()->query())->onEachSide(1)->links('vendor.pagination.custom') }}
+
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        {{-- TAB 2: REKAPAN HARIAN & DETAIL PELAYANAN                             --}}
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        @elseif($tab === 'harian')
+            {{-- DATE FILTER & PRINT BAR --}}
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <form action="{{ route('admin.pembayaran.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                    <input type="hidden" name="tab" value="harian">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Pilih Tanggal:</label>
+                        <input type="date" name="tanggal" value="{{ $tanggalHarian }}" onchange="this.form.submit()"
+                               class="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer">
+                    </div>
+                </form>
+
+                <a href="{{ route('admin.pembayaran.rekap_harian.pdf', ['tanggal' => $tanggalHarian]) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl shadow-md transition active:scale-95">
+                    <i class="fas fa-file-pdf text-rose-400"></i> Cetak Rekapan Harian (PDF)
+                </a>
             </div>
-        </div>
+
+            {{-- STATISTIK HARIAN CARDS --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Omzet Hari Ini</p>
+                    <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($harianTotalPendapatan, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($tanggalHarian)->translatedFormat('d F Y') }}</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jumlah Transaksi Lunas</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $harianTotalTransaksi }} Order</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Selesai / Lunas</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Penerimaan Tunai (Cash)</p>
+                    <p class="text-2xl font-bold text-emerald-600 mt-1">Rp {{ number_format($harianTotalTunai, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Fisik di laci kasir</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Penerimaan Non-Tunai</p>
+                    <p class="text-2xl font-bold text-indigo-600 mt-1">Rp {{ number_format($harianTotalNonTunai, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">QRIS & Transfer Bank</p>
+                </div>
+            </div>
+
+            {{-- 1. RINCIAN BREAKDOWN PELAYANAN --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-blue-600"></i>
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rincian Performa Jenis Pelayanan (Hari Ini)</h2>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Nama Layanan Laundry</th>
+                                <th class="px-6 py-3">Kategori</th>
+                                <th class="px-6 py-3">Total Qty / Berat</th>
+                                <th class="px-6 py-3">Jumlah Transaksi</th>
+                                <th class="px-6 py-3">Total Pendapatan</th>
+                                <th class="px-6 py-3">Kontribusi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @forelse($harianServiceBreakdown as $srv)
+                            @php
+                                $percent = $harianTotalPendapatan > 0 ? round(($srv['total'] / $harianTotalPendapatan) * 100, 1) : 0;
+                            @endphp
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $srv['nama'] }}</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap uppercase text-xs text-slate-600 font-semibold">{{ $srv['kategori'] }}</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap font-mono font-bold text-slate-800">
+                                    {{ $srv['qty'] }} {{ $srv['kategori'] == 'kiloan' ? 'kg' : 'pcs' }}
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-xs font-semibold text-slate-600">{{ $srv['count'] }}x order</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap font-mono font-bold text-slate-900">
+                                    Rp {{ number_format($srv['total'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $percent }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600">{{ $percent }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Tidak ada transaksi layanan pada tanggal ini.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- 2. TABEL TRANSAKSI PADA HARI TERSEBUT --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Daftar Transaksi Pelanggan ({{ $tanggalHarian }})</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">No. Transaksi</th>
+                                <th class="px-6 py-3">Pelanggan</th>
+                                <th class="px-6 py-3">Rincian Layanan</th>
+                                <th class="px-6 py-3">Metode Bayar</th>
+                                <th class="px-6 py-3">Nominal</th>
+                                <th class="px-6 py-3 text-right">Struk</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @forelse($harianTrx as $trx)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-3 whitespace-nowrap font-mono font-bold text-xs text-slate-900">{{ $trx->transaksi_code }}</td>
+                                <td class="px-6 py-3 whitespace-nowrap font-semibold text-slate-900">{{ $trx->customer_name }}</td>
+                                <td class="px-6 py-3 text-xs text-slate-600">
+                                    @if($trx->details && $trx->details->count() > 0)
+                                        {{ $trx->details->map(fn($d) => ($d->layanan->nama ?? 'Layanan') . ' (' . $d->qty . 'x)')->join(', ') }}
+                                    @else
+                                        {{ ucfirst($trx->service_type) }} ({{ $trx->weight }} kg)
+                                    @endif
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap uppercase text-xs font-semibold text-slate-600">
+                                    {{ str_replace('_', ' ', $trx->payment_method ?: 'Tunai') }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap font-mono font-bold text-slate-900">
+                                    Rp {{ number_format($trx->total_price, 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap text-right">
+                                    <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}')"
+                                            class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+                                        <i class="fas fa-receipt mr-1 text-slate-400"></i> Nota
+                                    </button>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Belum ada transaksi pada tanggal ini.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        {{-- TAB 3: REKAPAN BULANAN                                              --}}
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        @elseif($tab === 'bulanan')
+            {{-- MONTH FILTER & PRINT BAR --}}
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <form action="{{ route('admin.pembayaran.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                    <input type="hidden" name="tab" value="bulanan">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Pilih Bulan & Tahun:</label>
+                        <select name="bulan" onchange="this.form.submit()"
+                                class="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer">
+                            @for($m = 1; $m <= 12; $m++)
+                                <option value="{{ $m }}" {{ $bulanBulanan == $m ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create(2026, $m, 1)->translatedFormat('F') }}
+                                </option>
+                            @endfor
+                        </select>
+                        <select name="tahun" onchange="this.form.submit()"
+                                class="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer">
+                            @for($y = now()->year - 2; $y <= now()->year + 1; $y++)
+                                <option value="{{ $y }}" {{ $tahunBulanan == $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </form>
+
+                <a href="{{ route('admin.pembayaran.rekap_bulanan.pdf', ['bulan' => $bulanBulanan, 'tahun' => $tahunBulanan]) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl shadow-md transition active:scale-95">
+                    <i class="fas fa-file-pdf text-rose-400"></i> Cetak Rekapan Bulanan (PDF)
+                </a>
+            </div>
+
+            {{-- STATISTIK BULANAN CARDS --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Omzet Bulan Ini</p>
+                    <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($bulananTotalPendapatan, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ \Carbon\Carbon::create($tahunBulanan, $bulanBulanan, 1)->translatedFormat('F Y') }}</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transaksi</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $bulananTotalTransaksi }} Order</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Sepanjang bulan ini</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Omzet Harian</p>
+                    <p class="text-2xl font-bold text-emerald-600 mt-1">Rp {{ number_format($rataRataHarian, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Per hari kerja</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Layanan Terlaris</p>
+                    <p class="text-xl font-bold text-indigo-600 mt-1 truncate">{{ $layananTerlaris }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Paling diminati pelanggan</p>
+                </div>
+            </div>
+
+            {{-- 1. RINCIAN PERFORMA LAYANAN BULANAN --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">1. Ringkasan Performa Seluruh Jenis Layanan</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Nama Layanan Laundry</th>
+                                <th class="px-6 py-3">Kategori</th>
+                                <th class="px-6 py-3">Total Volume (Kg/Pcs)</th>
+                                <th class="px-6 py-3">Total Order</th>
+                                <th class="px-6 py-3">Total Omzet</th>
+                                <th class="px-6 py-3">Porsi %</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @forelse($bulananServiceBreakdown as $srv)
+                            @php
+                                $percent = $bulananTotalPendapatan > 0 ? round(($srv['total'] / $bulananTotalPendapatan) * 100, 1) : 0;
+                            @endphp
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $srv['nama'] }}</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap uppercase text-xs font-semibold text-slate-600">{{ $srv['kategori'] }}</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap font-mono font-bold text-slate-800">
+                                    {{ $srv['qty'] }} {{ $srv['kategori'] == 'kiloan' ? 'kg' : 'pcs' }}
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-xs font-semibold text-slate-600">{{ $srv['count'] }}x</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap font-mono font-bold text-slate-900">
+                                    Rp {{ number_format($srv['total'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $percent }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600">{{ $percent }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Tidak ada transaksi layanan pada bulan ini.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- 2. TABEL REKAPAN OMZET HARIAN (Harian 1 s.d. 31) --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">2. Rincian Penerimaan Kas Harian (1 - {{ count($dailyBreakdown) }})</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Tanggal</th>
+                                <th class="px-6 py-3">Hari</th>
+                                <th class="px-6 py-3">Jumlah Transaksi</th>
+                                <th class="px-6 py-3">Tunai (Cash)</th>
+                                <th class="px-6 py-3">Non-Tunai</th>
+                                <th class="px-6 py-3">Total Omzet Harian</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @foreach($dailyBreakdown as $day)
+                            <tr class="hover:bg-slate-50/70 transition {{ $day['total'] > 0 ? '' : 'text-slate-400' }}">
+                                <td class="px-6 py-3 whitespace-nowrap font-mono font-semibold">{{ $day['tanggal'] }}</td>
+                                <td class="px-6 py-3 whitespace-nowrap">{{ $day['hari'] }}</td>
+                                <td class="px-6 py-3 whitespace-nowrap">{{ $day['count'] > 0 ? $day['count'] . ' order' : '-' }}</td>
+                                <td class="px-6 py-3 whitespace-nowrap font-mono">
+                                    {{ $day['tunai'] > 0 ? 'Rp ' . number_format($day['tunai'], 0, ',', '.') : '-' }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap font-mono">
+                                    {{ $day['non_tunai'] > 0 ? 'Rp ' . number_format($day['non_tunai'], 0, ',', '.') : '-' }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap font-mono font-bold {{ $day['total'] > 0 ? 'text-slate-900' : 'text-slate-400' }}">
+                                    {{ $day['total'] > 0 ? 'Rp ' . number_format($day['total'], 0, ',', '.') : 'Rp 0' }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
     </div>
 
-<div id="paymentModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-    <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Proses Pembayaran</h3>
-            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <form id="paymentForm" action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="transaksi_id" id="modal_transaksi_id">
-            <input type="hidden" name="tanggal_bayar" value="{{ date('Y-m-d') }}">
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">ID Transaksi</label>
-                <input type="text" id="modal_transaksi_code_display" class="w-full border border-gray-300 rounded-lg bg-gray-50 p-2.5 text-sm font-mono" readonly>
+    {{-- ═══════════ PAYMENT MODAL (UNTUK PELUNASAN KASIR) ═══════════ --}}
+    <div id="paymentModal" class="fixed inset-0 z-50 hidden bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative mx-auto p-6 border w-full max-w-md shadow-2xl rounded-2xl bg-white animate-fade-up">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-slate-900">Proses Pelunasan Pembayaran</h3>
+                <button onclick="closePaymentModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Total Tagihan</label>
-                <div class="flex items-center">
-                    <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-lg text-gray-500 font-medium">Rp</span>
-                    <input type="text" id="modal_total_price_display" class="w-full border border-gray-300 rounded-r-lg bg-gray-50 p-2.5 text-sm font-bold text-gray-800" readonly>
+            <form id="paymentForm" action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="transaksi_id" id="modal_transaksi_id">
+                <input type="hidden" name="tanggal_bayar" value="{{ date('Y-m-d') }}">
+                
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ID Transaksi</label>
+                    <input type="text" id="modal_transaksi_code_display" class="w-full border border-slate-200 rounded-xl bg-slate-50 p-2.5 text-xs font-mono font-bold" readonly>
                 </div>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nominal Uang Pelanggan <span class="text-red-500">*</span></label>
-                <div class="flex items-center">
-                    <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-lg text-gray-500 font-medium">Rp</span>
-                    <input type="number" name="jumlah_bayar" id="modal_jumlah_bayar" class="w-full border border-gray-300 rounded-r-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none" required min="0">
+                
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Total Tagihan</label>
+                    <div class="flex items-center">
+                        <span class="bg-slate-100 border border-slate-200 border-r-0 px-3 py-2.5 rounded-l-xl text-slate-500 font-bold text-xs">Rp</span>
+                        <input type="text" id="modal_total_price_display" class="w-full border border-slate-200 rounded-r-xl bg-slate-50 p-2.5 text-xs font-bold text-slate-900" readonly>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Masukkan nominal sama atau lebih besar dari tagihan.</p>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <select name="metode_pembayaran" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm appearance-none focus:ring-blue-500 focus:border-blue-500 outline-none" required>
-                        <option value="Tunai">Tunai</option>
+                
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nominal Uang Pelanggan (Rp) <span class="text-rose-500">*</span></label>
+                    <input type="number" name="jumlah_bayar" id="modal_jumlah_bayar" required min="0"
+                           class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Metode Pembayaran <span class="text-rose-500">*</span></label>
+                    <select name="metode_pembayaran" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer" required>
+                        <option value="Tunai">Tunai (Cash)</option>
                         <option value="QRIS">QRIS</option>
                         <option value="Transfer BCA">Transfer BCA</option>
                         <option value="Transfer Mandiri">Transfer Mandiri</option>
                         <option value="Transfer BRI">Transfer BRI</option>
                         <option value="E-Wallet">E-Wallet</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
                 </div>
-            </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bukti Pembayaran <span class="text-gray-400 text-xs font-normal">(Opsional)</span></label>
-                <input type="file" name="bukti_pembayaran" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-            </div>
-            
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" onclick="closePaymentModal()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">Batal</button>
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 shadow-sm transition-colors">
-                    <i class="fas fa-check"></i> Proses Pembayaran
-                </button>
-            </div>
-        </form>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Bukti Transfer (Opsional)</label>
+                    <input type="file" name="bukti_pembayaran" accept=".jpg,.jpeg,.png"
+                           class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closePaymentModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-xs font-bold transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                        <i class="fas fa-check"></i> Proses Pelunasan
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
     {{-- ═══════════ NOTA MODAL ═══════════ --}}
     <div x-show="showNotaModal" x-cloak
@@ -218,56 +551,49 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
-        <div @click.outside="closeNotaModal()" class="bg-white shadow-2xl w-full max-w-[400px] mx-4 animate-fade-up overflow-hidden rounded-xl flex flex-col h-[85vh]">
-            {{-- Header --}}
+        <div @click.outside="closeNotaModal()" class="bg-white shadow-2xl w-full max-w-[400px] mx-4 animate-fade-up overflow-hidden rounded-2xl flex flex-col h-[85vh]">
             <div class="px-5 py-4 flex items-center justify-between bg-[#0b172a] text-white shrink-0">
                 <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 class="font-bold text-xs tracking-widest uppercase">DETAIL TRANSAKSI</h3>
+                    <i class="fas fa-receipt text-emerald-400"></i>
+                    <h3 class="font-bold text-xs tracking-widest uppercase">STRUK NOTA TRANSAKSI</h3>
                 </div>
                 <button @click="closeNotaModal()" class="text-slate-400 hover:text-white transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            {{-- Iframe Container --}}
             <div class="flex-1 overflow-hidden relative bg-slate-50">
                 <template x-if="notaUrl">
                     <iframe x-ref="notaIframe" :src="notaUrl" class="w-full h-full border-0 absolute inset-0"></iframe>
                 </template>
             </div>
             
-            {{-- Footer / Actions --}}
-            <div class="px-5 py-4 border-t border-slate-100 flex gap-3 justify-center bg-white shrink-0">
+            <div class="px-5 py-3.5 border-t border-slate-100 flex gap-2 justify-center bg-white shrink-0">
                 <button @click="kirimWa()"
-                        class="px-6 py-2.5 bg-[#25D366] text-white text-xs font-bold rounded-full hover:bg-[#128C7E] transition shadow-md flex items-center gap-2 active:scale-95">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    KIRIM WA
+                        class="px-4 py-2 bg-[#25D366] text-white text-xs font-bold rounded-full hover:bg-[#128C7E] transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                    <i class="fab fa-whatsapp"></i> WA
                 </button>
                 <button @click="printNota()"
-                        class="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-full hover:bg-slate-800 transition shadow-md flex items-center gap-2 active:scale-95">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    CETAK STRUK
+                        class="px-5 py-2 bg-black text-white text-xs font-bold rounded-full hover:bg-slate-800 transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                    <i class="fas fa-print"></i> Cetak
                 </button>
                 <button @click="closeNotaModal()"
-                        class="px-8 py-2.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition active:scale-95">
-                    TUTUP
+                        class="px-5 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition active:scale-95">
+                    Tutup
                 </button>
             </div>
         </div>
     </div>
 
+</div>
+
+@push('scripts')
 <script>
     function openPaymentModal(transaksiCode, totalPrice) {
         document.getElementById('modal_transaksi_id').value = transaksiCode;
         document.getElementById('modal_transaksi_code_display').value = transaksiCode;
         document.getElementById('modal_total_price_display').value = new Intl.NumberFormat('id-ID').format(totalPrice);
         
-        // Default jumlah bayar to total price
         let jumlahBayarInput = document.getElementById('modal_jumlah_bayar');
         jumlahBayarInput.value = totalPrice;
         jumlahBayarInput.min = totalPrice;
@@ -317,6 +643,6 @@
         }));
     });
 </script>
+@endpush
 
-</div>
 @endsection

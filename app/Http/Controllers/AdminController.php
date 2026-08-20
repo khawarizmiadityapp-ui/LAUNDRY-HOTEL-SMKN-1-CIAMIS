@@ -258,6 +258,78 @@ class AdminController extends Controller
         return view('admin.transaksi.index', compact('transactions'));
     }
 
+    /**
+     * Endpoint API JSON Detail Transaksi Lengkap
+     */
+    public function getTransactionDetail($id)
+    {
+        $transaksi = Transaksi::with(['user', 'customer', 'details.layanan', 'tasks'])->findOrFail($id);
+
+        $phone = $transaksi->customer_phone ?: ($transaksi->customer?->no_hp ?? '');
+        $waNumber = format_whatsapp_number($phone);
+        
+        $pesanWa = urlencode("Halo Kak {$transaksi->customer_name}, kami dari Laundry Hotel SMKN 1 Ciamis ingin menginformasikan status pesanan laundry Anda dengan No. Transaksi *{$transaksi->transaksi_code}*. Status saat ini: *" . strtoupper($transaksi->status) . "*. Total tagihan: *Rp " . number_format($transaksi->total_price, 0, ',', '.') . " (" . strtoupper($transaksi->payment_status) . ")*. Terima kasih!");
+        $waUrl = $waNumber ? "https://wa.me/{$waNumber}?text={$pesanWa}" : null;
+
+        $items = [];
+        if ($transaksi->details && $transaksi->details->count() > 0) {
+            foreach ($transaksi->details as $d) {
+                $items[] = [
+                    'nama' => $d->layanan?->nama ?? 'Layanan Laundry',
+                    'kategori' => $d->layanan?->kategori ?? 'kiloan',
+                    'qty' => $d->qty,
+                    'satuan' => ($d->layanan?->kategori ?? 'kiloan') === 'kiloan' ? 'kg' : 'pcs',
+                    'harga' => (int) $d->price,
+                    'subtotal' => (int) $d->subtotal,
+                ];
+            }
+        } else {
+            $items[] = [
+                'nama' => 'Layanan ' . ucfirst($transaksi->service_type ?: 'Regular'),
+                'kategori' => 'kiloan',
+                'qty' => $transaksi->weight,
+                'satuan' => 'kg',
+                'harga' => (int) $transaksi->price_per_kg,
+                'subtotal' => (int) $transaksi->total_price,
+            ];
+        }
+
+        $tasks = $transaksi->tasks->map(function($t) {
+            return [
+                'stage' => $t->stage,
+                'status' => $t->status,
+                'petugas' => $t->petugas_name ?: '-',
+                'updated_at' => $t->updated_at ? $t->updated_at->format('d/m/Y H:i') : '-',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $transaksi->id,
+                'transaksi_code' => $transaksi->transaksi_code,
+                'created_at' => $transaksi->created_at->format('d M Y, H:i'),
+                'status' => $transaksi->status,
+                'payment_status' => $transaksi->payment_status,
+                'payment_method' => strtoupper(str_replace('_', ' ', $transaksi->payment_method ?: 'Tunai')),
+                'customer_name' => $transaksi->customer_name,
+                'customer_phone' => $phone,
+                'customer_address' => $transaksi->customer?->alamat ?: '-',
+                'wa_url' => $waUrl,
+                'weight' => $transaksi->weight,
+                'total_price' => (int) $transaksi->total_price,
+                'dibayar' => (int) ($transaksi->dibayar ?? 0),
+                'kembalian' => (int) ($transaksi->kembalian ?? 0),
+                'notes' => $transaksi->notes,
+                'kasir_name' => $transaksi->user?->name ?? 'Kasir',
+                'bukti_pembayaran_url' => $transaksi->bukti_pembayaran ? asset('storage/' . $transaksi->bukti_pembayaran) : null,
+                'items' => $items,
+                'tasks' => $tasks,
+                'nota_url' => route('pos.nota', $transaksi->id),
+            ]
+        ]);
+    }
+
     // 3. Simpan Transaksi Baru
     public function storeTransaction(Request $request)
     {

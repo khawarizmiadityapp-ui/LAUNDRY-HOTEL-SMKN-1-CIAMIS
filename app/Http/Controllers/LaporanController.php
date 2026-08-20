@@ -229,4 +229,113 @@ class LaporanController extends Controller
             'weeklyAchievementRate' => $weeklyAchievementRate,
         ]);
     }
+
+    /**
+     * Ekspor Laporan Keuangan BKU (Buku Kas Umum) berbentuk PDF resmi.
+     */
+    public function exportBkuPdf(Request $request)
+    {
+        $filter = $request->filter ?? 'bulanan';
+
+        if ($filter === 'bulanan') {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+            $periodeLabel = 'Bulan ' . now()->translatedFormat('F Y');
+        } elseif ($filter === 'tahunan') {
+            $start = Carbon::now()->startOfYear();
+            $end = Carbon::now()->endOfYear();
+            $periodeLabel = 'Tahun ' . now()->year;
+        } elseif ($filter === 'custom' && $request->dari && $request->sampai) {
+            $start = Carbon::parse($request->dari)->startOfDay();
+            $end = Carbon::parse($request->sampai)->endOfDay();
+            $periodeLabel = Carbon::parse($request->dari)->translatedFormat('d F Y') . ' s.d. ' . Carbon::parse($request->sampai)->translatedFormat('d F Y');
+        } else {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+            $periodeLabel = 'Bulan ' . now()->translatedFormat('F Y');
+        }
+
+        // 1. Hitung Saldo Awal (semua penerimaan - pengeluaran sebelum tanggal start)
+        $pemasukanSebelumnya = Transaksi::where('payment_status', 'lunas')
+            ->where('created_at', '<', $start)
+            ->sum('total_price');
+
+        $pengeluaranSebelumnya = Pengeluaran::where('tanggal', '<', $start->format('Y-m-d'))
+            ->sum('nominal');
+
+        $saldoAwal = (int) ($pemasukanSebelumnya - $pengeluaranSebelumnya);
+
+        // 2. Ambil Transaksi Pemasukan (Lunas) dalam periode
+        $transaksis = Transaksi::with(['customer', 'details.layanan'])
+            ->where('payment_status', 'lunas')
+            ->whereBetween('created_at', [$start, $end])
+            ->get()
+            ->map(function ($trx) {
+                $detailNama = $trx->details->pluck('layanan.nama')->filter()->join(', ');
+                $subInfo = $detailNama ?: ucfirst($trx->service_type) . " ({$trx->weight} kg)";
+
+                return [
+                    'timestamp' => $trx->created_at->timestamp,
+                    'tanggal' => $trx->created_at->format('d/m/Y'),
+                    'no_bukti' => $trx->transaksi_code,
+                    'uraian' => 'Penerimaan Jasa Laundry - ' . ($trx->customer_name ?: 'Pelanggan'),
+                    'sub_info' => $subInfo . ' [Metode: ' . strtoupper($trx->payment_method ?: 'Tunai') . ']',
+                    'debet' => (int) $trx->total_price,
+                    'kredit' => 0,
+                    'type' => 'masuk',
+                ];
+            });
+
+        // 3. Ambil Pengeluaran dalam periode
+        $pengeluarans = Pengeluaran::with(['kategoriPengeluaran'])
+            ->whereBetween('tanggal', [$start->format('Y-m-d'), $end->format('Y-m-d')])
+            ->get()
+            ->map(function ($exp) {
+                $kategoriNama = $exp->kategoriPengeluaran?->nama ?? $exp->kategori;
+
+                return [
+                    'timestamp' => $exp->tanggal->startOfDay()->timestamp + 3600, // slightly offset for sequential ordering
+                    'tanggal' => $exp->tanggal->format('d/m/Y'),
+                    'no_bukti' => $exp->id_transaksi,
+                    'uraian' => 'Pengeluaran: ' . $exp->nama,
+                    'sub_info' => 'Kategori: ' . $kategoriNama . ($exp->keterangan ? ' | ' . $exp->keterangan : ''),
+                    'debet' => 0,
+                    'kredit' => (int) $exp->nominal,
+                    'type' => 'keluar',
+                ];
+            });
+
+        // 4. Gabungkan dan Urutkan Kronologis Ascending
+        $allEntries = $transaksis->concat($pengeluarans)->sortBy('timestamp')->values();
+
+        // 5. Kalkulasi Saldo Berjalan (Running Balance)
+        $runningSaldo = $saldoAwal;
+        $totalDebet = 0;
+        $totalKredit = 0;
+        $ledgerItems = [];
+
+        foreach ($allEntries as $entry) {
+            $totalDebet += $entry['debet'];
+            $totalKredit += $entry['kredit'];
+            $runningSaldo += ($entry['debet'] - $entry['kredit']);
+
+            $entry['saldo'] = $runningSaldo;
+            $ledgerItems[] = $entry;
+        }
+
+        $saldoAkhir = $runningSaldo;
+        $tanggalAwalFormatted = $start->format('d/m/Y');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf.bku', compact(
+            'periodeLabel',
+            'saldoAwal',
+            'ledgerItems',
+            'totalDebet',
+            'totalKredit',
+            'saldoAkhir',
+            'tanggalAwalFormatted'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->download('BKU-Laundry-Hotel-' . now()->format('Ymd_His') . '.pdf');
+    }
 }

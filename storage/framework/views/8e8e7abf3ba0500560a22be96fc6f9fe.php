@@ -1,31 +1,28 @@
-{{-- resources/views/admin/pengeluaran/index.blade.php --}}
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Manajemen Pengeluaran'); ?>
+<?php $__env->startSection('page-title', 'Manajemen Pengeluaran'); ?>
 
-@section('title', 'Manajemen Pengeluaran')
-@section('page-title', 'Manajemen Pengeluaran')
+<?php $__env->startSection('content'); ?>
 
-@section('content')
 
-{{-- ===== SUB-NAVIGATION TABS ===== --}}
 <div class="flex items-center gap-2 border-b border-slate-200 mb-6">
-    <a href="{{ route('admin.pengeluaran.index') }}"
+    <a href="<?php echo e(route('admin.pengeluaran.index')); ?>"
        class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg transition flex items-center gap-2">
         <i class="fas fa-receipt text-blue-600"></i> Pengeluaran Riil
     </a>
-    <a href="{{ route('admin.pengajuan_belanja.index') }}"
+    <a href="<?php echo e(route('admin.pengajuan_belanja.index')); ?>"
        class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
         <i class="fas fa-file-invoice-dollar mr-1.5 text-slate-400"></i> Pengajuan Belanja
     </a>
-    <a href="{{ route('admin.pengeluaran.bhp') }}"
+    <a href="<?php echo e(route('admin.pengeluaran.bhp')); ?>"
        class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
         <i class="fas fa-boxes mr-1.5 text-slate-400"></i> Laporan Barang Habis Pakai (BHP)
     </a>
 </div>
 
-{{-- ===== STAT CARDS ===== --}}
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
 
-    {{-- Card 1: Total Pengeluaran --}}
+    
     <div class="card-stat bg-white rounded-2xl shadow-card p-6 border border-gray-100 fade-in">
         <div class="flex items-start justify-between mb-4">
             <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -35,10 +32,10 @@
             </div>
         </div>
         <p class="text-xs font-500 text-gray-400 uppercase tracking-wider mb-1">Total Pengeluaran Bulan Ini</p>
-        <p class="font-display text-2xl font-700 text-gray-900 tracking-tight">{{ rupiah($totalBulanIni) }}</p>
+        <p class="font-display text-2xl font-700 text-gray-900 tracking-tight"><?php echo e(rupiah($totalBulanIni)); ?></p>
     </div>
 
-    {{-- Card 2: Sisa Anggaran --}}
+    
     <div class="card-stat bg-white rounded-2xl shadow-card p-6 border border-gray-100 fade-in delay-1">
         <div class="flex items-start justify-between mb-4">
             <div class="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center">
@@ -48,22 +45,22 @@
             </div>
         </div>
         <p class="text-xs font-500 text-gray-400 uppercase tracking-wider mb-1">Sisa Anggaran Operasional</p>
-        <p class="font-display text-2xl font-700 text-gray-900 tracking-tight mb-3">{{ rupiah($sisaAnggaran) }}</p>
-        {{-- Progress bar --}}
+        <p class="font-display text-2xl font-700 text-gray-900 tracking-tight mb-3"><?php echo e(rupiah($sisaAnggaran)); ?></p>
+        
         <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            @php
+            <?php
                 $target = $targetAnggaran ?? 0;
                 $nilai = $sisaAnggaran ?? 0;
 
                 $pct = $target > 0 ? round(($nilai / $target) * 100) : 0;
-            @endphp
+            ?>
             <div class="progress-bar-inner h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
-                 style="width: {{ $pct }}%"></div>
+                 style="width: <?php echo e($pct); ?>%"></div>
         </div>
-        <p class="text-[11px] text-gray-400 mt-1.5">Anggaran Bulanan: {{ rupiah($targetAnggaran) }}</p>
+        <p class="text-[11px] text-gray-400 mt-1.5">Anggaran Bulanan: <?php echo e(rupiah($targetAnggaran)); ?></p>
     </div>
 
-    {{-- Card 3: Kategori Terbesar --}}
+    
     <div class="card-stat bg-white rounded-2xl shadow-card p-6 border border-gray-100 fade-in delay-2">
         <div class="flex items-start justify-between mb-4">
             <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center">
@@ -74,18 +71,18 @@
             <span class="badge-terbesar text-[10px] font-700 uppercase tracking-wider px-2.5 py-1 rounded-full">Terbesar</span>
         </div>
         <p class="text-xs font-500 text-gray-400 uppercase tracking-wider mb-1">Kategori Terbesar</p>
-        <p class="font-display text-xl font-700 text-gray-900 tracking-tight leading-tight">{{ $kategoriTerbesar['nama'] }}</p>
-        <p class="text-xs text-gray-500 mt-1">Kontribusi <span class="font-700 text-red-500">{{ $kategoriTerbesar['persen'] }}%</span> dari total pengeluaran.</p>
+        <p class="font-display text-xl font-700 text-gray-900 tracking-tight leading-tight"><?php echo e($kategoriTerbesar['nama']); ?></p>
+        <p class="text-xs text-gray-500 mt-1">Kontribusi <span class="font-700 text-red-500"><?php echo e($kategoriTerbesar['persen']); ?>%</span> dari total pengeluaran.</p>
     </div>
 
-</div>{{-- end stat cards --}}
+</div>
 
 
-{{-- ===== ACTION BAR ===== --}}
+
 <div class="flex items-center justify-between mb-5">
     <div class="flex items-center gap-2">
 
-        {{-- Filter --}}
+        
         <button onclick="toggleFilterPanel()"
             class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-500 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-card">
             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +95,7 @@
     </div>
 
     <div class="flex items-center gap-3">
-        {{-- Atur Anggaran --}}
+        
         <button onclick="openAnggaranModal()"
             class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,8 +104,8 @@
             Atur Anggaran
         </button>
 
-        {{-- Tambah Baru --}}
-        <a href="{{ route('admin.pengeluaran.create') }}"
+        
+        <a href="<?php echo e(route('admin.pengeluaran.create')); ?>"
             class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-600 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow-md hover:-translate-y-px active:translate-y-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -118,38 +115,38 @@
     </div>
 </div>
 
-{{-- ===== FILTER PANEL (hidden by default) ===== --}}
+
 <div id="filterPanel" class="hidden bg-white border border-gray-200 rounded-2xl shadow-card p-5 mb-5">
-    <form method="GET" action="{{ route('admin.pengeluaran.index') }}" class="flex flex-wrap gap-4 items-end">
+    <form method="GET" action="<?php echo e(route('admin.pengeluaran.index')); ?>" class="flex flex-wrap gap-4 items-end">
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Kategori</label>
             <select name="kategori" class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white">
                 <option value="">Semua Kategori</option>
-                @foreach($kategoriList as $kat)
-                    <option value="{{ $kat->id }}" {{ request('kategori') == $kat->id ? 'selected' : '' }}>{{ $kat->nama }}</option>
-                @endforeach
+                <?php $__currentLoopData = $kategoriList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($kat->id); ?>" <?php echo e(request('kategori') == $kat->id ? 'selected' : ''); ?>><?php echo e($kat->nama); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </div>
 
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Dari Tanggal</label>
-            <input type="date" name="dari" value="{{ request('dari') }}"
+            <input type="date" name="dari" value="<?php echo e(request('dari')); ?>"
                 class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200">
         </div>
         <div>
             <label class="block text-xs font-600 text-gray-500 mb-1.5 uppercase tracking-wider">Sampai Tanggal</label>
-            <input type="date" name="sampai" value="{{ request('sampai') }}"
+            <input type="date" name="sampai" value="<?php echo e(request('sampai')); ?>"
                 class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-200">
         </div>
         <div class="flex gap-2 mt-auto">
             <button type="submit" class="px-4 py-2.5 text-sm font-600 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">Terapkan</button>
-            <a href="{{ route('admin.pengeluaran.index') }}" class="px-4 py-2.5 text-sm font-600 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
+            <a href="<?php echo e(route('admin.pengeluaran.index')); ?>" class="px-4 py-2.5 text-sm font-600 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
         </div>
     </form>
 </div>
 
 
-{{-- ===== TABLE ===== --}}
+
 <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden fade-in delay-3">
     <div class="overflow-x-auto min-h-[320px]">
         <table class="w-full text-sm" id="pengeluaranTable">
@@ -166,58 +163,60 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-                @forelse($pengeluarans as $item)
-                <tr class="table-row transition-colors" data-search="{{ strtolower($item->nama . ' ' . $item->kategori_nama . ' ' . $item->id_transaksi) }}">
+                <?php $__empty_1 = true; $__currentLoopData = $pengeluarans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr class="table-row transition-colors" data-search="<?php echo e(strtolower($item->nama . ' ' . $item->kategori_nama . ' ' . $item->id_transaksi)); ?>">
 
-                    {{-- ID Transaksi --}}
+                    
                     <td class="px-6 py-4">
-                        <a href="{{ route('admin.pengeluaran.show', $item) }}"
-                           class="text-blue-600 font-600 hover:text-blue-700 hover:underline transition">#{{ $item->id_transaksi }}</a>
+                        <a href="<?php echo e(route('admin.pengeluaran.show', $item)); ?>"
+                           class="text-blue-600 font-600 hover:text-blue-700 hover:underline transition">#<?php echo e($item->id_transaksi); ?></a>
                     </td>
 
-                    {{-- Nama --}}
+                    
                     <td class="px-4 py-4">
-                        <p class="font-500 text-gray-800">{{ $item->nama }}</p>
-                        @if($item->keterangan)
-                            <p class="text-xs text-gray-400 uppercase tracking-wider mt-0.5">{{ $item->keterangan }}</p>
-                        @endif
+                        <p class="font-500 text-gray-800"><?php echo e($item->nama); ?></p>
+                        <?php if($item->keterangan): ?>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mt-0.5"><?php echo e($item->keterangan); ?></p>
+                        <?php endif; ?>
                     </td>
 
-                    {{-- Kategori --}}
+                    
                     <td class="px-4 py-4">
-                        <span class="inline-block text-xs font-500 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg">{{ $item->kategori_nama }}</span>
+                        <span class="inline-block text-xs font-500 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg"><?php echo e($item->kategori_nama); ?></span>
                     </td>
 
-                    {{-- Tanggal --}}
+                    
                     <td class="px-4 py-4 text-gray-600 tabular-nums">
-                        {{ \Carbon\Carbon::parse($item->tanggal)->isoFormat('D MMM YYYY') }}
+                        <?php echo e(\Carbon\Carbon::parse($item->tanggal)->isoFormat('D MMM YYYY')); ?>
+
                     </td>
 
-                    {{-- Nominal --}}
+                    
                     <td class="px-4 py-4 text-right font-600 text-gray-800 tabular-nums">
-                        {{ rupiah($item->nominal) }}
+                        <?php echo e(rupiah($item->nominal)); ?>
+
                     </td>
 
-                    {{-- Bon --}}
+                    
                     <td class="px-4 py-4">
-                        @if($item->bon_file)
-                            <a href="{{ asset('storage/' . $item->bon_file) }}" target="_blank" class="text-xs font-600 text-blue-600 hover:underline">Lihat Bon</a>
-                        @else
+                        <?php if($item->bon_file): ?>
+                            <a href="<?php echo e(asset('storage/' . $item->bon_file)); ?>" target="_blank" class="text-xs font-600 text-blue-600 hover:underline">Lihat Bon</a>
+                        <?php else: ?>
                             <span class="text-xs text-gray-400">-</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
 
 
-                    {{-- Aksi Dropdown --}}
+                    
                     <td class="px-6 py-4 text-center relative">
-                        <button onclick="toggleDropdown('dropdown-{{ $item->id }}')"
+                        <button onclick="toggleDropdown('dropdown-<?php echo e($item->id); ?>')"
                             class="btn-action w-8 h-8 rounded-lg flex items-center justify-center mx-auto text-gray-400 hover:text-gray-700 transition">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                             </svg>
                         </button>
-                        <div id="dropdown-{{ $item->id }}" class="hidden z-50 dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1 absolute right-0 top-full mt-1">
-                            <a href="{{ route('admin.pengeluaran.show', $item) }}"
+                        <div id="dropdown-<?php echo e($item->id); ?>" class="hidden z-50 dropdown-menu bg-white border border-gray-100 rounded-xl shadow-card-hover py-1 absolute right-0 top-full mt-1">
+                            <a href="<?php echo e(route('admin.pengeluaran.show', $item)); ?>"
                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -225,7 +224,7 @@
                                 </svg>
                                 Detail
                             </a>
-                            <button type="button" onclick="openEditPengeluaranModal({{ $item->id }}, '{{ addslashes($item->nama) }}', '{{ $item->kategori_id }}', '{{ optional($item->tanggal)->format('Y-m-d') }}', '{{ $item->nominal }}', '{{ preg_replace('/\r|\n/', ' ', addslashes($item->keterangan)) }}')"
+                            <button type="button" onclick="openEditPengeluaranModal(<?php echo e($item->id); ?>, '<?php echo e(addslashes($item->nama)); ?>', '<?php echo e($item->kategori_id); ?>', '<?php echo e(optional($item->tanggal)->format('Y-m-d')); ?>', '<?php echo e($item->nominal); ?>', '<?php echo e(preg_replace('/\r|\n/', ' ', addslashes($item->keterangan))); ?>')"
                                class="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -233,9 +232,9 @@
                                 Edit
                             </button>
                             <div class="my-1 border-t border-gray-100"></div>
-                            <form method="POST" action="{{ route('admin.pengeluaran.destroy', $item) }}"
+                            <form method="POST" action="<?php echo e(route('admin.pengeluaran.destroy', $item)); ?>"
                                   onsubmit="return confirm('Yakin ingin menghapus pengeluaran ini?')">
-                                @csrf @method('DELETE')
+                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                 <button type="submit"
                                     class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,35 +246,36 @@
                         </div>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="7" class="text-center py-16 text-gray-400">
                         <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                         <p class="font-500">Belum ada data pengeluaran</p>
-                        <a href="{{ route('admin.pengeluaran.create') }}" class="text-blue-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
+                        <a href="<?php echo e(route('admin.pengeluaran.create')); ?>" class="text-blue-600 text-sm hover:underline mt-1 inline-block">+ Tambah sekarang</a>
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    {{-- Table Footer: count + pagination --}}
+    
     <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/40">
         <p class="text-xs text-gray-400">
-            Menampilkan <span class="font-600 text-gray-600">{{ $pengeluarans->firstItem() }}–{{ $pengeluarans->lastItem() }}</span>
-            dari <span class="font-600 text-gray-600">{{ $pengeluarans->total() }}</span> pengeluaran
+            Menampilkan <span class="font-600 text-gray-600"><?php echo e($pengeluarans->firstItem()); ?>–<?php echo e($pengeluarans->lastItem()); ?></span>
+            dari <span class="font-600 text-gray-600"><?php echo e($pengeluarans->total()); ?></span> pengeluaran
         </p>
         <div>
-            {{ $pengeluarans->onEachSide(1)->links('vendor.pagination.custom') }}
+            <?php echo e($pengeluarans->onEachSide(1)->links('vendor.pagination.custom')); ?>
+
         </div>
     </div>
 
-</div>{{-- end table card --}}
+</div>
 
-{{-- MODAL ANGGARAN --}}
+
 <div id="anggaranModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
     <div class="relative mx-auto p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-5">
@@ -284,13 +284,13 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        <form action="{{ route('admin.pengeluaran.anggaran.update') }}" method="POST">
-            @csrf
+        <form action="<?php echo e(route('admin.pengeluaran.anggaran.update')); ?>" method="POST">
+            <?php echo csrf_field(); ?>
             <div class="mb-5">
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Nominal Anggaran</label>
                 <div class="flex items-center">
                     <span class="bg-gray-100 border border-gray-300 border-r-0 px-4 py-2.5 rounded-l-xl text-gray-500 font-medium">Rp</span>
-                    <input type="number" name="anggaran_bulanan" value="{{ $targetAnggaran }}" class="w-full border border-gray-300 rounded-r-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none" required min="0">
+                    <input type="number" name="anggaran_bulanan" value="<?php echo e($targetAnggaran); ?>" class="w-full border border-gray-300 rounded-r-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none" required min="0">
                 </div>
             </div>
             
@@ -304,7 +304,7 @@
     </div>
 </div>
 
-{{-- MODAL EDIT PENGELUARAN --}}
+
 <div id="editPengeluaranModal" class="fixed inset-0 z-[100] hidden bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) closeEditPengeluaranModal()">
     <div class="relative mx-auto border w-full max-w-3xl shadow-2xl rounded-2xl bg-white overflow-hidden flex flex-col max-h-[90vh]" style="animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
@@ -318,8 +318,8 @@
         </div>
         <div class="p-6 overflow-y-auto custom-scrollbar">
             <form id="editPengeluaranForm" method="POST" enctype="multipart/form-data" class="space-y-5">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Pengeluaran</label>
                     <input type="text" id="edit_pengeluaran_nama" name="nama" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
@@ -328,9 +328,9 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kategori <span class="text-red-500">*</span></label>
                         <select id="edit_pengeluaran_kategori_id" name="kategori_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 bg-gray-50 hover:bg-white focus:bg-white transition-all outline-none" required>
-                            @foreach($kategoriList as $kategori)
-                                <option value="{{ $kategori->id }}">{{ $kategori->nama }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $kategoriList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($kategori->id); ?>"><?php echo e($kategori->nama); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div>
@@ -372,9 +372,9 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     // Frontend search
     const searchInput = document.getElementById('searchInput');
@@ -412,4 +412,6 @@
         document.getElementById('editPengeluaranModal').classList.add('hidden');
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/pengeluaran/index.blade.php ENDPATH**/ ?>

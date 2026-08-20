@@ -19,6 +19,8 @@ use App\Http\Controllers\ReportController;
 use App\Exports\TransactionsExport;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ErrorLogController;
+use App\Http\Controllers\PengajuanBelanjaController;
+use App\Http\Controllers\LaporanBhpController;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ServicePrice;
@@ -55,14 +57,13 @@ Route::group(['middleware' => ['auth']], function () {
         // Transaksi Management
         Route::prefix('transaksi')->name('transactions.')->group(function () {
             Route::get('/', [AdminController::class, 'transactions'])->name('index');
+            Route::get('/{id}/detail', [AdminController::class, 'getTransactionDetail'])->name('detail');
             Route::post('/', [AdminController::class, 'storeTransaction'])->middleware('throttle:30,1')->name('store');
             Route::put('/{id}', [AdminController::class, 'updateTransaction'])->middleware('throttle:30,1')->name('update');
             Route::patch('/{id}/status', [AdminController::class, 'updateStatus'])->middleware('throttle:60,1')->name('status');
             Route::patch('/{id}/payment', [AdminController::class, 'updatePayment'])->middleware('throttle:60,1')->name('payment');
             Route::delete('/{id}', [AdminController::class, 'destroyTransaction'])->middleware('throttle:20,1')->name('destroy');
         });
-        
-
         
         // Layanan Management
         Route::resource('layanan', LayananController::class)->except(['show', 'create', 'edit'])->middleware('throttle:30,1');
@@ -76,8 +77,9 @@ Route::group(['middleware' => ['auth']], function () {
             Route::delete('/{id}', [PetugasController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
         });
         
-        // Laporan Keuangan
+        // Laporan Keuangan & BKU PDF
         Route::get('/laporan_keuangan', [LaporanController::class, 'index'])->name('laporan_keuangan.index');
+        Route::get('/laporan_keuangan/bku/pdf', [LaporanController::class, 'exportBkuPdf'])->name('laporan_keuangan.bku_pdf');
         
         // Prices Management
         Route::get('/prices', [AdminController::class, 'prices'])->name('prices');
@@ -97,6 +99,8 @@ Route::group(['middleware' => ['auth']], function () {
         // Pembayaran
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/', [PembayaranController::class, 'index'])->name('index');
+            Route::get('/rekap-harian/pdf', [PembayaranController::class, 'exportRekapHarianPdf'])->name('rekap_harian.pdf');
+            Route::get('/rekap-bulanan/pdf', [PembayaranController::class, 'exportRekapBulananPdf'])->name('rekap_bulanan.pdf');
             Route::get('/create', [PembayaranController::class, 'create'])->name('create');
             Route::post('/', [PembayaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
         });
@@ -104,6 +108,8 @@ Route::group(['middleware' => ['auth']], function () {
         // Pengeluaran
         Route::prefix('pengeluaran')->name('pengeluaran.')->group(function () {
             Route::get('/', [PengeluaranController::class, 'index'])->name('index');
+            Route::get('/laporan-bhp', [LaporanBhpController::class, 'index'])->name('bhp');
+            Route::get('/laporan-bhp/pdf', [LaporanBhpController::class, 'exportPdf'])->name('bhp.pdf');
             Route::post('/anggaran', [PengeluaranController::class, 'updateAnggaran'])->name('anggaran.update');
             Route::get('/create', [PengeluaranController::class, 'create'])->name('create');
             Route::post('/', [PengeluaranController::class, 'store'])->middleware('throttle:30,1')->name('store');
@@ -112,6 +118,17 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/{pengeluaran}/edit', [PengeluaranController::class, 'edit'])->name('edit');
             Route::put('/{pengeluaran}', [PengeluaranController::class, 'update'])->middleware('throttle:30,1')->name('update');
             Route::delete('/{pengeluaran}', [PengeluaranController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
+        });
+        
+        // Pengajuan Belanja
+        Route::prefix('pengajuan-belanja')->name('pengajuan_belanja.')->group(function () {
+            Route::get('/', [PengajuanBelanjaController::class, 'index'])->name('index');
+            Route::get('/create', [PengajuanBelanjaController::class, 'create'])->name('create');
+            Route::post('/', [PengajuanBelanjaController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/{pengajuanBelanja}', [PengajuanBelanjaController::class, 'show'])->name('show');
+            Route::patch('/{pengajuanBelanja}/status', [PengajuanBelanjaController::class, 'updateStatus'])->middleware('throttle:30,1')->name('update_status');
+            Route::post('/{pengajuanBelanja}/convert', [PengajuanBelanjaController::class, 'convertToPengeluaran'])->middleware('throttle:30,1')->name('convert');
+            Route::delete('/{pengajuanBelanja}', [PengajuanBelanjaController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
         });
         
         // Kategori Pengeluaran

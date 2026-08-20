@@ -1,10 +1,10 @@
-{{-- Export Filter Modal --}}
+
 <div id="exportModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        {{-- Background overlay --}}
+        
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeExportModal()"></div>
         
-        {{-- Center modal --}}
+        
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
         <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -26,7 +26,7 @@
                                 this.showCustomDate = this.filter === 'custom';
                             }
                         }">
-                            {{-- Export Type Selection --}}
+                            
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Laporan Export</label>
                                 <div class="grid grid-cols-3 gap-2.5">
@@ -51,7 +51,7 @@
                                 </div>
                             </div>
 
-                            {{-- Filter Period Selection --}}
+                            
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Periode Data</label>
                                 <select name="filter" x-model="filter" @change="updateFilter()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
@@ -61,7 +61,7 @@
                                 </select>
                             </div>
 
-                            {{-- Custom Date Range --}}
+                            
                             <div x-show="showCustomDate" x-cloak class="mb-4 space-y-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Dari Tanggal</label>
@@ -73,7 +73,7 @@
                                 </div>
                             </div>
 
-                            {{-- Info Box --}}
+                            
                             <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                 <p class="text-xs text-blue-700 flex items-start">
                                     <i class="fas fa-info-circle mt-0.5 mr-2 shrink-0"></i>
@@ -85,7 +85,7 @@
                 </div>
             </div>
             
-            {{-- Action Buttons --}}
+            
             <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-3">
                 <button type="button" onclick="
                     const form = document.getElementById('exportForm');
@@ -93,11 +93,11 @@
                     const params = new URLSearchParams(formData);
                     const exportType = document.querySelector('input[name=\'exportType\']:checked')?.value || 'bku_pdf';
                     
-                    let route = '{{ route('admin.laporan_keuangan.bku_pdf') }}';
+                    let route = '<?php echo e(route('admin.laporan_keuangan.bku_pdf')); ?>';
                     if (exportType === 'excel') {
-                        route = '{{ route('export.transaksi.excel') }}';
+                        route = '<?php echo e(route('export.transaksi.excel')); ?>';
                     } else if (exportType === 'pdf') {
-                        route = '{{ route('export.transaksi.pdf') }}';
+                        route = '<?php echo e(route('export.transaksi.pdf')); ?>';
                     }
                     
                     window.location.href = route + '?' + params.toString();
@@ -129,3 +129,4 @@ document.addEventListener('keydown', function(e) {
     }
 });
 </script>
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/laporan_keuangan/partials/export_modal.blade.php ENDPATH**/ ?>
