@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard petugas_piket') - beninglaundry</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title><?php echo $__env->yieldContent('title', 'Dashboard petugas_piket'); ?> - beninglaundry</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,7 +31,7 @@
     </script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
 
@@ -167,29 +167,21 @@
 <!-- Toast Container -->
 <div id="toast-container" class="toast-container"></div>
 
-{{-- ======================================================
-     MOBILE OVERLAY
-     ====================================================== --}}
+
 <div id="sidebar-overlay"
      class="fixed inset-0 bg-black/30 z-20 hidden md:hidden"
      onclick="toggleSidebar()"></div>
 
-{{-- ======================================================
-     LAYOUT WRAPPER
-     ====================================================== --}}
+
 <div class="flex min-h-screen">
 
-    {{-- ====================================================
-         SIDEBAR
-         ==================================================== --}}
-    @include('petugas_piket.sidebar')
+    
+    <?php echo $__env->make('petugas_piket.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-    {{-- ====================================================
-         MAIN CONTENT
-         ==================================================== --}}
+    
     <main class="flex-1 md:ml-64 min-h-screen">
 
-        {{-- Mobile top bar --}}
+        
         <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100">
             <span class="text-xl font-extrabold tracking-tight text-slate-900">Orchestra</span>
             <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600">
@@ -201,12 +193,12 @@
             </button>
         </div>
 
-        @yield('sticky_topbar')
+        <?php echo $__env->yieldContent('sticky_topbar'); ?>
 
         <div class="p-4 md:p-8 space-y-6 max-w-screen-xl mx-auto">
             <div class="p-6">
-                {{-- INI YANG DIGANTI-GANTI --}}
-                @yield('content')
+                
+                <?php echo $__env->yieldContent('content'); ?>
             </div>
 <script>
     function toggleSidebar() {
@@ -218,13 +210,13 @@
     }
 
     // Otomatis buka link WA jika ada
-    @if(session('notification_link'))
+    <?php if(session('notification_link')): ?>
         window.onload = function() {
             setTimeout(function() {
-                window.location.href = "{!! session('notification_link') !!}";
+                window.location.href = "<?php echo session('notification_link'); ?>";
             }, 1000);
         };
-    @endif
+    <?php endif; ?>
 
     // Sinkronisasi dan persistence nama petugas piket menggunakan localStorage
     document.addEventListener('DOMContentLoaded', function () {
@@ -319,23 +311,23 @@
     }
 
     // Show Laravel flash messages as toasts
-    @if(session('success'))
-        showToast('{{ session('success') }}', 'success');
-    @endif
-    @if(session('error'))
-        showToast('{{ session('error') }}', 'error');
-    @endif
-    @if($errors->any())
-        @foreach($errors->all() as $error)
-            showToast('{{ $error }}', 'error');
-        @endforeach
-    @endif
-    @if(session('warning'))
-        showToast('{{ session('warning') }}', 'warning');
-    @endif
-    @if(session('info'))
-        showToast('{{ session('info') }}', 'info');
-    @endif
+    <?php if(session('success')): ?>
+        showToast('<?php echo e(session('success')); ?>', 'success');
+    <?php endif; ?>
+    <?php if(session('error')): ?>
+        showToast('<?php echo e(session('error')); ?>', 'error');
+    <?php endif; ?>
+    <?php if($errors->any()): ?>
+        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            showToast('<?php echo e($error); ?>', 'error');
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php endif; ?>
+    <?php if(session('warning')): ?>
+        showToast('<?php echo e(session('warning')); ?>', 'warning');
+    <?php endif; ?>
+    <?php if(session('info')): ?>
+        showToast('<?php echo e(session('info')); ?>', 'info');
+    <?php endif; ?>
 
     // Alpine component for searchable petugas input
     window.petugasSearchComponent = function(petugasList) {
@@ -407,7 +399,7 @@
     }
 </script>
 
-@stack('scripts')
+<?php echo $__env->yieldPushContent('scripts'); ?>
 
 </body>
-</html>
+</html><?php /**PATH D:\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/layouts/petugas_piket.blade.php ENDPATH**/ ?>

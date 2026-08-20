@@ -279,7 +279,6 @@ class PetugasController extends Controller
 
             DB::commit();
 
-            // Send WhatsApp notification with customer name
             $stageNames = [
                 'washing' => 'Pencucian',
                 'ironing' => 'Setrika',
@@ -289,30 +288,6 @@ class PetugasController extends Controller
             $stageName = $stageNames[$stage] ?? ucfirst($stage);
             $customerName = $transaksi->customer_name;
             
-            // Build WhatsApp message
-            $waMessage = "Halo *{$customerName}*,\n\n";
-            $waMessage .= "Proses *{$stageName}* untuk pesanan Anda telah selesai! ✅\n\n";
-            $waMessage .= "📌 No. Invoice: *#{$transaksi->transaksi_code}*\n";
-            $waMessage .= "📅 Selesai: " . now()->format('d/m/Y H:i') . "\n\n";
-            
-            if ($stage === 'packing') {
-                $waMessage .= "🎉 *Cucian Anda sudah siap diambil!*\n\n";
-                $waMessage .= "Silakan ambil di Bening Laundry pada jam operasional.\n\n";
-            } else {
-                $waMessage .= "Cucian Anda sedang dilanjutkan ke tahap berikutnya.\n\n";
-            }
-            
-            $waMessage .= "Lacak status laundry Anda secara real-time:\n";
-            $waMessage .= route('track.status', ['nota_number' => $transaksi->transaksi_code]);
-            
-            // Format phone number for WhatsApp
-            $waPhone = format_whatsapp_number($transaksi->customer_phone);
-            
-            $waLink = "https://wa.me/{$waPhone}?text=" . urlencode($waMessage);
-            
-            session()->flash('notification_link', $waLink);
-            session()->flash('customer_name', $customerName);
-
             return redirect()->back()->with('success', 'Tugas ' . $stageName . ' untuk pelanggan *' . $customerName . '* berhasil diselesaikan!');
 
         } catch (\Exception $e) {

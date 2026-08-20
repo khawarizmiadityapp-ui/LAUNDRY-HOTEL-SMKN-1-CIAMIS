@@ -1,27 +1,26 @@
-@extends('layouts.petugas_piket')
-@section('title', 'Setrika Operations')
-@section('content')
+<?php $__env->startSection('title', 'Packing Operations'); ?>
+<?php $__env->startSection('content'); ?>
 
 <div class="p-6 max-w-5xl mx-auto animate-fade-in">
-    {{-- Header --}}
+    
     <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Operasi Setrika</h1>
-        <p class="text-slate-500 mt-1">Selesaikan tugas penyetrikaan yang berada di antrean.</p>
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Operasi Packing</h1>
+        <p class="text-slate-500 mt-1">Selesaikan tugas pengemasan yang berada di antrean.</p>
     </div>
 
-    {{-- Main Content --}}
+    
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
         <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
-            <h2 class="text-lg font-bold text-slate-800">Antrean Setrika</h2>
+            <h2 class="text-lg font-bold text-slate-800">Antrean Packing</h2>
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
-                {{ count($transactions) }} Menunggu
+                <?php echo e(count($transactions)); ?> Menunggu
             </span>
         </div>
 
         <div class="p-6" x-data="{ 
             selectedIds: [], 
             allSelected: false,
-            transactionIds: {{ json_encode($transactions->pluck('id')->map(fn($id) => (string)$id)) }},
+            transactionIds: <?php echo e(json_encode($transactions->pluck('id')->map(fn($id) => (string)$id))); ?>,
             toggleAll() {
                 if (this.allSelected) {
                     this.selectedIds = [...this.transactionIds];
@@ -45,52 +44,53 @@
                 form.submit();
             }
         }">
-            @if(count($transactions) > 0)
+            <?php if(count($transactions) > 0): ?>
                 <div class="overflow-visible">
                     <table class="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
-                                <th class="px-4 py-3 rounded-tl-xl w-14 text-center">
+                                <th class="px-5 py-3 rounded-tl-xl w-14 text-center">
                                     <input type="checkbox" x-model="allSelected" @change="toggleAll()" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
                                 </th>
-                                <th class="px-4 py-3 w-40">Invoice / Masuk</th>
-                                <th class="px-4 py-3">Pelanggan</th>
-                                <th class="px-4 py-3 w-48">Detail Layanan</th>
-                                <th class="px-4 py-3 w-72">Form Petugas</th>
-                                <th class="px-4 py-3 rounded-tr-xl w-32">Aksi</th>
+                                <th class="px-5 py-3 w-32">Invoice / Masuk</th>
+                                <th class="px-5 py-3">Pelanggan</th>
+                                <th class="px-5 py-3 w-48">Detail Layanan</th>
+                                <th class="px-5 py-3 w-72">Form Petugas</th>
+                                <th class="px-5 py-3 rounded-tr-xl w-32">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach($transactions as $trx)
-                                <tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer" :class="{ 'bg-blue-50/50': selectedIds.includes({{ $trx->id }}) }" @click="const cb = $el.querySelector('input[type=checkbox]'); if(cb && $event.target.tagName !== 'INPUT' && $event.target.tagName !== 'BUTTON' && $event.target.tagName !== 'SELECT') { cb.click(); }">
-                                    <td class="px-4 py-3 align-top text-center" @click.stop>
-                                        <input type="checkbox" value="{{ $trx->id }}" x-model="selectedIds" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-1">
+                            <?php $__currentLoopData = $transactions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $trx): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer" :class="{ 'bg-blue-50/50': selectedIds.includes(<?php echo e($trx->id); ?>) }" @click="const cb = $el.querySelector('input[type=checkbox]'); if(cb && $event.target.tagName !== 'INPUT' && $event.target.tagName !== 'BUTTON' && $event.target.tagName !== 'SELECT') { cb.click(); }">
+                                    <td class="px-5 py-4 align-top text-center" @click.stop>
+                                        <input type="checkbox" value="<?php echo e($trx->id); ?>" x-model="selectedIds" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-1">
                                     </td>
-                                    <td class="px-4 py-3 align-top">
+                                    <td class="px-5 py-4 align-top">
                                         <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg mb-1.5">
-                                            #{{ $trx->transaksi_code }}
+                                            #<?php echo e($trx->transaksi_code); ?>
+
                                         </span>
-                                        <div class="text-xs font-bold text-slate-500">{{ $trx->created_at->diffForHumans() }}</div>
+                                        <div class="text-xs font-bold text-slate-500"><?php echo e($trx->created_at->diffForHumans()); ?></div>
                                     </td>
-                                    <td class="px-4 py-3 align-top">
-                                        <div class="font-bold text-sm text-slate-800">{{ $trx->customer_name }}</div>
+                                    <td class="px-5 py-4 align-top">
+                                        <div class="font-bold text-sm text-slate-800"><?php echo e($trx->customer_name); ?></div>
                                     </td>
-                                    <td class="px-4 py-3 align-top">
+                                    <td class="px-5 py-4 align-top">
                                         <ul class="space-y-1.5">
-                                            @foreach($trx->details as $detail)
+                                            <?php $__currentLoopData = $trx->details; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $detail): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <li class="text-xs flex flex-col">
-                                                    <span class="text-slate-600 font-medium">{{ $detail->layanan->nama ?? 'Layanan' }}</span>
-                                                    <span class="font-bold text-slate-800 text-[11px]">({{ $detail->qty }} {{ $detail->layanan->satuan ?? 'kg' }})</span>
+                                                    <span class="text-slate-600 font-medium"><?php echo e($detail->layanan->nama ?? 'Layanan'); ?></span>
+                                                    <span class="font-bold text-slate-800 text-[11px]">(<?php echo e($detail->qty); ?> <?php echo e($detail->layanan->satuan ?? 'kg'); ?>)</span>
                                                 </li>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </ul>
                                     </td>
-                                    <td class="px-4 py-3 align-top">
-                                        <form id="form-{{ $trx->id }}" action="{{ route('petugas_piket.tasks.complete', $trx->id) }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="stage" value="ironing">
+                                    <td class="px-5 py-4 align-top">
+                                        <form id="form-<?php echo e($trx->id); ?>" action="<?php echo e(route('petugas_piket.tasks.complete', $trx->id)); ?>" method="POST">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="stage" value="packing">
                                             
-                                            <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])) }})" @click.outside="showDropdown = false">
+                                            <div class="mb-3" x-data="petugasSearchComponent(<?php echo e(json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas]))); ?>)" @click.outside="showDropdown = false">
                                                 <div class="relative">
                                                     <span class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
                                                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -100,7 +100,7 @@
                                                     <input type="text" name="petugas_name" x-model="search" @input="filterPetugas()" @focus="showDropdown = true" required placeholder="Petugas Piket..."
                                                            class="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white">
                                                     
-                                                    {{-- Autocomplete Dropdown --}}
+                                                    
                                                     <div x-show="showDropdown && filteredList.length > 0" x-cloak
                                                          class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
                                                         <template x-for="p in filteredList" :key="p.id_petugas">
@@ -120,8 +120,8 @@
                                             </div>
                                         </form>
                                     </td>
-                                    <td class="px-4 py-3 align-top">
-                                        <button type="submit" form="form-{{ $trx->id }}"
+                                    <td class="px-5 py-4 align-top">
+                                        <button type="submit" form="form-<?php echo e($trx->id); ?>"
                                                 class="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold py-2 px-3 rounded-lg transition-all shadow-sm shadow-blue-200 active:scale-[0.98]">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
@@ -130,23 +130,23 @@
                                         </button>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="py-16 flex flex-col items-center justify-center text-center">
                     <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4">
                         <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-1">Tidak ada antrean setrika</h3>
-                    <p class="text-slate-500 text-sm">Semua pakaian telah selesai disetrika. Kerja bagus!</p>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Tidak ada antrean packing</h3>
+                    <p class="text-slate-500 text-sm">Semua pakaian telah selesai dipacking. Kerja bagus!</p>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- Bulk Action Bar --}}
+            
             <div x-show="selectedIds.length > 0" x-transition.opacity
                  class="fixed bottom-6 inset-x-0 mx-auto w-[90%] max-w-3xl bg-slate-900 text-white rounded-2xl shadow-2xl p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-4 z-50 border border-slate-700/50">
                 <div class="flex items-center gap-3 w-full md:w-auto">
@@ -159,11 +159,11 @@
                     </div>
                 </div>
                 
-                <form action="{{ route('petugas_piket.tasks.completeBulk') }}" method="POST" class="flex items-center gap-2" @submit.prevent="submitBulk($event)">
-                    @csrf
-                    <input type="hidden" name="stage" value="ironing">
+                <form action="<?php echo e(route('petugas_piket.tasks.completeBulk')); ?>" method="POST" class="flex items-center gap-2" @submit.prevent="submitBulk($event)">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="stage" value="packing">
                     
-                    <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])) }})" @click.outside="showDropdown = false" class="relative min-w-[200px]">
+                    <div x-data="petugasSearchComponent(<?php echo e(json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas]))); ?>)" @click.outside="showDropdown = false" class="relative min-w-[200px]">
                         <input type="text" name="petugas_name" x-model="search" @input="filterPetugas()" @focus="showDropdown = true" required placeholder="Nama petugas..."
                                class="w-full pl-3 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                         
@@ -188,9 +188,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -200,4 +200,6 @@
         overlay.classList.toggle('hidden', !isHidden);
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.petugas_piket', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/petugas_piket/packing/index.blade.php ENDPATH**/ ?>
