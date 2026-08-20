@@ -240,112 +240,232 @@
             </div>
         </div>
 
-        {{-- Today's Highlight --}}
-        <div class="bg-white rounded-xl p-5 mb-5 border-2 border-blue-300 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
+        {{-- Today's Highlight & Workdays Configuration Info --}}
+        <div class="bg-white rounded-2xl p-5 mb-6 border-2 border-blue-200 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
                 <div>
-                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Target Hari Ini</p>
-                    <p class="text-xs text-gray-400">{{ $todayTarget->date->translatedFormat('l, d F Y') }}</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Hari Ini</span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md {{ $todayTarget->is_workday ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600' }}">
+                            {{ $todayTarget->is_workday ? 'Hari Kerja Aktif' : 'Hari Libur / Weekend' }}
+                        </span>
+                    </div>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5">{{ $todayTarget->date->translatedFormat('l, d F Y') }}</p>
                 </div>
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                    {{ $todayTarget->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
-                       ($todayTarget->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
-                    {{ $todayTarget->is_achieved ? 'Target Tercapai ✓' : 'Belum Tercapai' }}
-                </span>
+                
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <span class="text-[11px] text-slate-400 block uppercase font-semibold">Skema Operasional</span>
+                        <span class="text-xs font-bold text-slate-700">
+                            @if($workdaysMode === 'senin_jumat')
+                                <i class="fas fa-calendar-check text-blue-600 mr-1"></i> Senin - Jumat ({{ $activeWorkDaysCount }} Hari Kerja Aktif)
+                            @elseif($workdaysMode === 'senin_sabtu')
+                                <i class="fas fa-calendar-check text-indigo-600 mr-1"></i> Senin - Sabtu ({{ $activeWorkDaysCount }} Hari Kerja Aktif)
+                            @elseif($workdaysMode === 'custom')
+                                <i class="fas fa-sliders-h text-amber-600 mr-1"></i> Custom ({{ $activeWorkDaysCount }} Hari Kerja)
+                            @else
+                                <i class="fas fa-calendar text-emerald-600 mr-1"></i> Setiap Hari ({{ $activeWorkDaysCount }} Hari Kalender)
+                            @endif
+                        </span>
+                    </div>
+                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm
+                        @if(!$todayTarget->is_workday)
+                            bg-slate-100 text-slate-600 border border-slate-200
+                        @elseif($todayTarget->is_achieved)
+                            bg-emerald-100 text-emerald-700 border border-emerald-200
+                        @elseif($todayTarget->status_color === 'yellow')
+                            bg-amber-100 text-amber-700 border border-amber-200
+                        @else
+                            bg-rose-100 text-rose-700 border border-rose-200
+                        @endif">
+                        @if(!$todayTarget->is_workday)
+                            <i class="fas fa-bed mr-1"></i> Non-Operasional
+                        @elseif($todayTarget->is_achieved)
+                            <i class="fas fa-check-circle mr-1"></i> Target Tercapai
+                        @else
+                            <i class="fas fa-hourglass-half mr-1"></i> Belum Tercapai
+                        @endif
+                    </span>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">Target Dasar</p>
-                    <p class="text-lg font-bold text-gray-800">Rp {{ number_format($todayTarget->base_target, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-400 font-semibold uppercase">Target Dasar</p>
+                    <p class="text-lg font-bold text-slate-800 mt-0.5">
+                        @if($todayTarget->is_workday)
+                            Rp {{ number_format($todayTarget->base_target, 0, ',', '.') }}
+                        @else
+                            <span class="text-slate-400 font-normal text-sm">Rp 0 (Libur)</span>
+                        @endif
+                    </p>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">+ Defisit Kemarin</p>
-                    <p class="text-lg font-bold {{ $todayTarget->carry_forward > 0 ? 'text-rose-600' : 'text-gray-400' }}">
+                    <p class="text-xs text-slate-400 font-semibold uppercase">+ Defisit Berjalan</p>
+                    <p class="text-lg font-bold mt-0.5 {{ $todayTarget->carry_forward > 0 ? 'text-rose-600' : 'text-slate-400' }}">
                         Rp {{ number_format($todayTarget->carry_forward, 0, ',', '.') }}
                     </p>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">Target Final Hari Ini</p>
-                    <p class="text-lg font-bold text-blue-600">Rp {{ number_format($todayTarget->adjusted_target, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-400 font-semibold uppercase">Target Final Hari Ini</p>
+                    <p class="text-lg font-bold text-blue-600 mt-0.5">
+                        @if($todayTarget->is_workday)
+                            Rp {{ number_format($todayTarget->adjusted_target, 0, ',', '.') }}
+                        @else
+                            <span class="text-slate-400 font-normal text-sm">Rp 0 (Libur)</span>
+                        @endif
+                    </p>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">Realisasi Bersih</p>
-                    <p class="text-lg font-bold {{ $todayTarget->net_income >= $todayTarget->adjusted_target ? 'text-emerald-600' : 'text-amber-600' }}">
+                    <p class="text-xs text-slate-400 font-semibold uppercase">Realisasi Bersih</p>
+                    <p class="text-lg font-bold mt-0.5 {{ $todayTarget->net_income >= $todayTarget->adjusted_target && $todayTarget->is_workday ? 'text-emerald-600' : ($todayTarget->net_income > 0 ? 'text-blue-600' : 'text-slate-800') }}">
                         Rp {{ number_format($todayTarget->net_income, 0, ',', '.') }}
                     </p>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 font-semibold">Selisih (Defisit/Surplus)</p>
-                    <p class="text-lg font-bold {{ $todayTarget->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                    <p class="text-xs text-slate-400 font-semibold uppercase">Selisih Capaian</p>
+                    <p class="text-lg font-bold mt-0.5 {{ $todayTarget->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
                         {{ $todayTarget->variance >= 0 ? '+' : '' }}Rp {{ number_format($todayTarget->variance, 0, ',', '.') }}
                     </p>
                 </div>
             </div>
 
-            <div class="space-y-2">
+            @if($todayTarget->is_workday)
+            <div class="space-y-1.5 pt-2 border-t border-slate-100">
                 <div class="flex justify-between text-xs font-semibold">
-                    <span class="text-gray-600">Progress Hari Ini</span>
-                    <span class="text-blue-600">{{ $todayTarget->achievement_percentage }}%</span>
+                    <span class="text-slate-500">Progress Capaian Hari Ini</span>
+                    <span class="text-blue-600 font-bold">{{ $todayTarget->achievement_percentage }}%</span>
                 </div>
-                <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full transition-all duration-500 {{ $todayTarget->is_achieved ? 'bg-emerald-500' : 'bg-blue-600' }}" 
                          style="width: {{ min(100, $todayTarget->achievement_percentage) }}%"></div>
                 </div>
             </div>
+            @endif
         </div>
 
         {{-- Laporan Per Hari Table --}}
-        <div class="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-            <div class="px-5 py-3.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
-                    <i class="fas fa-list text-blue-600"></i> Rincian Per Hari (Bulan {{ now()->translatedFormat('F Y') }})
-                </h4>
-                <span class="text-xs text-gray-500 font-medium">Total: {{ $dailyTargets->count() }} Hari</span>
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-blue-600"></i> Rincian Target Harian (Bulan {{ now()->translatedFormat('F Y') }})
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        Target bulanan Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} dibagi {{ $activeWorkDaysCount }} hari kerja aktif (Rp {{ number_format($baseDailyTarget, 0, ',', '.') }}/hari).
+                    </p>
+                </div>
+                <span class="text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                    {{ $activeWorkDaysCount }} Hari Kerja Aktif
+                </span>
             </div>
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-100 border-b border-slate-200 sticky top-0 z-10 text-xs font-semibold text-slate-600 uppercase">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Target Dasar</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Defisit Kemarin</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Target Final</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Pemasukan</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Pengeluaran</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Realisasi Bersih</th>
-                            <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Selisih</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-3">Tanggal & Hari</th>
+                            <th class="px-4 py-3 text-right">Target Dasar</th>
+                            <th class="px-4 py-3 text-right">Defisit Kemarin</th>
+                            <th class="px-4 py-3 text-right">Target Final</th>
+                            <th class="px-4 py-3 text-right">Pemasukan</th>
+                            <th class="px-4 py-3 text-right">Pengeluaran</th>
+                            <th class="px-4 py-3 text-right">Realisasi Bersih</th>
+                            <th class="px-4 py-3 text-right">Selisih</th>
+                            <th class="px-4 py-3 text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-slate-100 text-xs">
                         @foreach($dailyTargets as $dt)
-                        <tr class="hover:bg-gray-50 {{ $dt->date->isToday() ? 'bg-blue-50/60 font-semibold' : '' }}">
-                            <td class="px-4 py-3 text-xs text-gray-800 font-medium">
-                                {{ $dt->date->translatedFormat('d M Y (D)') }}
+                        @php
+                            $isWorkday = $dt->is_workday;
+                        @endphp
+                        <tr class="hover:bg-slate-50/80 transition {{ $dt->date->isToday() ? 'bg-blue-50/70 font-semibold' : (!$isWorkday ? 'bg-slate-50/40 text-slate-500' : '') }}">
+                            {{-- Tanggal --}}
+                            <td class="px-4 py-3 font-medium whitespace-nowrap">
+                                <span class="{{ $isWorkday ? 'text-slate-800' : 'text-slate-500' }}">
+                                    {{ $dt->date->translatedFormat('d M Y (D)') }}
+                                </span>
                                 @if($dt->date->isToday())
-                                    <span class="ml-1 text-3xs bg-blue-600 text-white px-1.5 py-0.5 rounded-full uppercase">Hari Ini</span>
+                                    <span class="ml-1 text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase font-bold">Hari Ini</span>
+                                @elseif(!$isWorkday)
+                                    <span class="ml-1 text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md font-semibold">Libur</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-xs text-gray-600 text-right">Rp {{ number_format($dt->base_target, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-xs text-right {{ $dt->carry_forward > 0 ? 'text-rose-600 font-semibold' : 'text-gray-400' }}">
-                                Rp {{ number_format($dt->carry_forward, 0, ',', '.') }}
+
+                            {{-- Target Dasar --}}
+                            <td class="px-4 py-3 text-right font-mono">
+                                @if($isWorkday)
+                                    Rp {{ number_format($dt->base_target, 0, ',', '.') }}
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
                             </td>
-                            <td class="px-4 py-3 text-xs text-blue-600 font-semibold text-right">Rp {{ number_format($dt->adjusted_target, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-xs text-emerald-600 font-medium text-right">Rp {{ number_format($dt->actual_income, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-xs text-rose-600 font-medium text-right">Rp {{ number_format($dt->actual_expense, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-xs font-bold text-right {{ $dt->net_income >= $dt->adjusted_target ? 'text-emerald-600' : 'text-amber-600' }}">
+
+                            {{-- Defisit Kemarin --}}
+                            <td class="px-4 py-3 text-right font-mono {{ $dt->carry_forward > 0 ? 'text-rose-600 font-bold' : 'text-slate-400' }}">
+                                @if($isWorkday && $dt->carry_forward > 0)
+                                    Rp {{ number_format($dt->carry_forward, 0, ',', '.') }}
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
+
+                            {{-- Target Final --}}
+                            <td class="px-4 py-3 text-right font-mono font-bold {{ $isWorkday ? 'text-blue-600' : 'text-slate-400' }}">
+                                @if($isWorkday)
+                                    Rp {{ number_format($dt->adjusted_target, 0, ',', '.') }}
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
+
+                            {{-- Pemasukan --}}
+                            <td class="px-4 py-3 text-right font-mono text-emerald-600 font-medium">
+                                Rp {{ number_format($dt->actual_income, 0, ',', '.') }}
+                            </td>
+
+                            {{-- Pengeluaran --}}
+                            <td class="px-4 py-3 text-right font-mono text-rose-600 font-medium">
+                                Rp {{ number_format($dt->actual_expense, 0, ',', '.') }}
+                            </td>
+
+                            {{-- Realisasi Bersih --}}
+                            <td class="px-4 py-3 text-right font-mono font-bold {{ $dt->net_income >= $dt->adjusted_target && $isWorkday ? 'text-emerald-600' : ($dt->net_income > 0 ? 'text-blue-600' : 'text-slate-700') }}">
                                 Rp {{ number_format($dt->net_income, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-xs font-bold text-right {{ $dt->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                                {{ $dt->variance >= 0 ? '+' : '' }}Rp {{ number_format($dt->variance, 0, ',', '.') }}
+
+                            {{-- Selisih --}}
+                            <td class="px-4 py-3 text-right font-mono font-bold {{ $dt->variance >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                                @if($isWorkday)
+                                    {{ $dt->variance >= 0 ? '+' : '' }}Rp {{ number_format($dt->variance, 0, ',', '.') }}
+                                @else
+                                    @if($dt->net_income > 0)
+                                        <span class="text-emerald-600">+Rp {{ number_format($dt->net_income, 0, ',', '.') }} (Bonus)</span>
+                                    @else
+                                        <span class="text-slate-400">-</span>
+                                    @endif
+                                @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-1 rounded-full text-3xs font-bold uppercase tracking-wider
-                                    {{ $dt->status_color === 'green' ? 'bg-emerald-100 text-emerald-700' : 
-                                       ($dt->status_color === 'yellow' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
-                                    {{ $dt->is_achieved ? 'Tercapai' : 'Belum' }}
-                                </span>
+
+                            {{-- Status --}}
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                                @if(!$isWorkday)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                        Non-Operasional
+                                    </span>
+                                @elseif($dt->is_achieved)
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                        Tercapai ✓
+                                    </span>
+                                @elseif($dt->status_color === 'yellow')
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                                        Mendekati
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                                        Belum
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -354,83 +474,168 @@
             </div>
         </div>
 
-        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p class="text-xs text-gray-600 leading-relaxed">
-                <i class="fas fa-info-circle text-blue-600 mr-1"></i>
-                <strong>Sistem Carry-Forward Defisit:</strong> Target harian dihitung dari Target Bulanan ÷ Jumlah Hari Target. Jika realisasi bersih harian mengalami defisit (minus dari target final), defisit tersebut secara otomatis ditambahkan ke target hari berikutnya agar target keseluruhan admin tetap berlanjut secara konsisten.
+        <div class="mt-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-200/60">
+            <p class="text-xs text-slate-600 leading-relaxed">
+                <i class="fas fa-info-circle text-blue-600 mr-1.5"></i>
+                <strong>Sistem Carry-Forward Defisit & Hari Kerja Kustom:</strong> Target harian hanya dibebankan pada hari kerja aktif operasional (default: <strong>Senin s/d Jumat</strong>). Hari libur / akhir pekan berstatus non-operasional (Target Rp 0). Jika realisasi bersih harian mengalami defisit, defisit tersebut secara otomatis dialihkan dan ditambahkan ke target hari kerja aktif berikutnya.
             </p>
         </div>
     </div>
 
-    {{-- ── Edit Target Modal (Hidden by default) ── --}}
+    {{-- ── Edit Target Modal (Custom Workdays & Holidays) ── --}}
     <div id="targetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('targetModal').classList.add('hidden')"></div>
+            <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('targetModal').classList.add('hidden')"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form action="{{ route('admin.update_target') }}" method="POST">
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-100 animate-fade-up">
+                <form action="{{ route('admin.update_target') }}" method="POST" id="targetForm">
                     @csrf
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <i class="fas fa-bullseye text-blue-600 text-xl"></i>
+                    <div class="bg-white px-6 pt-6 pb-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-bullseye text-xl"></i>
                             </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Edit Target Admin</h3>
-                                <p class="text-xs text-gray-500 mt-1">Mengatur target pendapatan admin per tahun atau per bulan & hari target.</p>
-                                
-                                <div class="mt-4 space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Target</label>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
-                                                <input type="radio" name="target_type" value="tahunan" onchange="toggleTargetLabel('tahunan')" class="text-blue-600 focus:ring-blue-500">
-                                                <span class="text-xs font-semibold text-gray-700">Target Tahunan</span>
-                                            </label>
-                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
-                                                <input type="radio" name="target_type" value="bulanan" checked onchange="toggleTargetLabel('bulanan')" class="text-blue-600 focus:ring-blue-500">
-                                                <span class="text-xs font-semibold text-gray-700">Target Bulanan</span>
-                                            </label>
+                            <div class="w-full">
+                                <h3 class="text-base font-bold text-slate-900" id="modal-title">Konfigurasi Target & Jadwal Hari Kerja</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Atur target bulanan dan skema hari kerja aktif operasional laundry (Senin - Jumat / Hari Libur).</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 space-y-4">
+                            {{-- Tipe Target --}}
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Tipe Target</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="target_type" value="bulanan" checked onchange="toggleTargetLabel('bulanan')" class="text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="text-xs font-bold text-slate-800 block">Target Bulanan</span>
+                                            <span class="text-[10px] text-slate-400">Target per bulan</span>
                                         </div>
+                                    </label>
+                                    <label class="flex items-center gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="target_type" value="tahunan" onchange="toggleTargetLabel('tahunan')" class="text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="text-xs font-bold text-slate-800 block">Target Tahunan</span>
+                                            <span class="text-[10px] text-slate-400">Target per tahun</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {{-- Nominal Target --}}
+                            <div>
+                                <label for="targetInput" id="targetInputLabel" class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Target Bulanan (Rp) <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 font-bold text-xs">Rp</span>
+                                    <input type="number" name="target" id="targetInput" value="{{ $limitPemasukanBulanan }}" required min="0"
+                                           oninput="recalculatePreview()"
+                                           class="w-full pl-9 pr-4 py-2.5 text-xs font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-900">
+                                </div>
+                            </div>
+
+                            {{-- Skema Hari Kerja Operasional --}}
+                            <div class="border-t border-slate-100 pt-4">
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Skema Hari Kerja Operasional</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
+                                    {{-- Opsi 1: Senin - Jumat --}}
+                                    <label class="flex items-start gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="workdays_mode" value="senin_jumat" {{ $workdaysMode === 'senin_jumat' ? 'checked' : '' }} onchange="toggleWorkdaysMode('senin_jumat')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="block text-xs font-bold text-slate-800">Senin - Jumat (5 Hari)</span>
+                                            <span class="block text-[10px] text-slate-400">Sabtu & Minggu libur otomatis</span>
+                                        </div>
+                                    </label>
+
+                                    {{-- Opsi 2: Senin - Sabtu --}}
+                                    <label class="flex items-start gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="workdays_mode" value="senin_sabtu" {{ $workdaysMode === 'senin_sabtu' ? 'checked' : '' }} onchange="toggleWorkdaysMode('senin_sabtu')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="block text-xs font-bold text-slate-800">Senin - Sabtu (6 Hari)</span>
+                                            <span class="block text-[10px] text-slate-400">Hanya Minggu yang libur</span>
+                                        </div>
+                                    </label>
+
+                                    {{-- Opsi 3: Setiap Hari --}}
+                                    <label class="flex items-start gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="workdays_mode" value="setiap_hari" {{ $workdaysMode === 'setiap_hari' ? 'checked' : '' }} onchange="toggleWorkdaysMode('setiap_hari')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="block text-xs font-bold text-slate-800">Setiap Hari (7 Hari)</span>
+                                            <span class="block text-[10px] text-slate-400">Kalender penuh tanpa libur</span>
+                                        </div>
+                                    </label>
+
+                                    {{-- Opsi 4: Custom Jumlah Hari --}}
+                                    <label class="flex items-start gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="workdays_mode" value="custom" {{ $workdaysMode === 'custom' ? 'checked' : '' }} onchange="toggleWorkdaysMode('custom')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="block text-xs font-bold text-slate-800">Manual / Custom Hari</span>
+                                            <span class="block text-[10px] text-slate-400">Tentukan angka hari sendiri</span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {{-- Input Tambahan: Custom Jumlah Hari --}}
+                                <div id="customDaysWrapper" class="mb-3 {{ $workdaysMode === 'custom' ? '' : 'hidden' }}">
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Hari Kerja Target Per Bulan</label>
+                                    <input type="number" name="custom_days" id="customDaysInput" min="1" max="31" value="{{ $customDays }}" placeholder="Contoh: 21"
+                                           oninput="recalculatePreview()"
+                                           class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                                    <p class="text-[10px] text-slate-400 mt-1">Misal 21 hari kerja aktif dalam sebulan.</p>
+                                </div>
+
+                                {{-- Pengaturan Hari Libur / Tanggal Merah Tambahan --}}
+                                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                                            <i class="fas fa-umbrella-beach text-amber-500 mr-1"></i> Jumlah Hari Libur Nasional / Cuti di Bulan Ini
+                                        </label>
+                                        <input type="number" name="holidays_count" id="holidaysCountInput" min="0" max="31" value="{{ $holidaysCount }}"
+                                               oninput="recalculatePreview()"
+                                               class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                               placeholder="0 (jika tidak ada libur tambahan)">
+                                        <p class="text-[10px] text-slate-400 mt-1">Jumlah hari libur nasional pada hari kerja (contoh: 1 atau 2 hari) yang akan dikurangi dari pembagi target.</p>
                                     </div>
 
                                     <div>
-                                        <label for="targetInput" id="targetInputLabel" class="block text-sm font-medium text-gray-700">Nominal Target Bulanan (Rp)</label>
-                                        <input type="number" name="target" id="targetInput" value="{{ $limitPemasukanBulanan }}" class="mt-1 w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold" required>
-                                        <p class="text-xs text-gray-400 mt-1" id="targetHelpText">Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.</p>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                            Daftar Tanggal Libur Spesifik (Opsional)
+                                        </label>
+                                        <input type="text" name="holiday_dates" id="holidayDatesInput" value="{{ $holidayDatesString }}"
+                                               class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono"
+                                               placeholder="Contoh: 2026-08-17, 2026-08-18">
+                                        <p class="text-[10px] text-slate-400 mt-1">Format YYYY-MM-DD dipisahkan koma untuk otomatis membebaskan target pada tanggal tersebut.</p>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div class="border-t border-gray-100 pt-3">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Pembagi Hari Dalam Bulan</label>
-                                        <div class="grid grid-cols-2 gap-3 mb-2">
-                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
-                                                <input type="radio" name="days_mode" value="auto" {{ env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? '' : 'checked' }} onchange="toggleDaysMode('auto')" class="text-blue-600 focus:ring-blue-500">
-                                                <div>
-                                                    <span class="block text-xs font-semibold text-gray-700">Otomatis Kalender</span>
-                                                    <span class="block text-[10px] text-gray-500">Sesuai bulan (28/30/31 hari)</span>
-                                                </div>
-                                            </label>
-                                            <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50">
-                                                <input type="radio" name="days_mode" value="custom" {{ env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? 'checked' : '' }} onchange="toggleDaysMode('custom')" class="text-blue-600 focus:ring-blue-500">
-                                                <div>
-                                                    <span class="block text-xs font-semibold text-gray-700">Custom Hari Kerja</span>
-                                                    <span class="block text-[10px] text-gray-500">Tentukan jumlah hari</span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div id="customDaysWrapper" class="{{ env('TARGET_DAYS_PER_MONTH') && env('TARGET_DAYS_PER_MONTH') !== 'auto' ? '' : 'hidden' }}">
-                                            <label class="block text-xs font-medium text-gray-600 mb-1">Jumlah Hari Target Per Bulan</label>
-                                            <input type="number" name="custom_days" id="customDaysInput" min="1" max="31" value="{{ is_numeric(env('TARGET_DAYS_PER_MONTH')) ? env('TARGET_DAYS_PER_MONTH') : 26 }}" placeholder="Contoh: 26" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
-                                            <p class="text-[11px] text-gray-400 mt-1">Misalnya set 26 hari kerja per bulan. Target harian = Target Bulanan ÷ jumlah hari kerja.</p>
-                                        </div>
-                                    </div>
+                            {{-- Live Estimation Preview Card --}}
+                            <div class="bg-blue-50/70 p-3.5 rounded-xl border border-blue-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] text-blue-600 font-bold uppercase block">Estimasi Target Harian</span>
+                                    <span class="text-xs text-slate-600 font-medium" id="previewFormulaText">
+                                        Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} ÷ {{ $activeWorkDaysCount }} hari
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-extrabold text-blue-700 font-mono" id="previewDailyTargetText">
+                                        Rp {{ number_format($baseDailyTarget, 0, ',', '.') }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 block">/ hari kerja aktif</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm shadow-md">Simpan Target</button>
-                        <button type="button" onclick="document.getElementById('targetModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+
+                    <div class="bg-slate-50 px-6 py-4 flex items-center justify-end gap-2 border-t border-slate-100">
+                        <button type="button" onclick="document.getElementById('targetModal').classList.add('hidden')"
+                                class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition">
+                            Batal
+                        </button>
+                        <button type="submit"
+                                class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
+                            <i class="fas fa-save"></i> Simpan Target & Jadwal
+                        </button>
                     </div>
                 </form>
             </div>
@@ -438,28 +643,62 @@
     </div>
 
     <script>
+        let currentTargetType = 'bulanan';
+        const annualTargetVal = {{ $annualTarget }};
+        const monthlyTargetVal = {{ $limitPemasukanBulanan }};
+        let currentDaysInMonth = {{ now()->daysInMonth }};
+        let currentWeekdaysInMonth = 22; // default approx
+
         function toggleTargetLabel(type) {
+            currentTargetType = type;
             const label = document.getElementById('targetInputLabel');
             const input = document.getElementById('targetInput');
-            const help = document.getElementById('targetHelpText');
             if (type === 'tahunan') {
-                label.innerText = 'Nominal Target Tahunan (Rp)';
-                input.value = {{ $annualTarget }};
-                help.innerText = 'Target bulanan akan dihitung (Target Tahunan ÷ 12) & target harian otomatis disesuaikan.';
+                label.innerText = 'Nominal Target Tahunan (Rp) *';
+                input.value = annualTargetVal;
             } else {
-                label.innerText = 'Nominal Target Bulanan (Rp)';
-                input.value = {{ $limitPemasukanBulanan }};
-                help.innerText = 'Target harian dasar akan dihitung otomatis: Target ÷ Jumlah Hari.';
+                label.innerText = 'Nominal Target Bulanan (Rp) *';
+                input.value = monthlyTargetVal;
             }
+            recalculatePreview();
         }
 
-        function toggleDaysMode(mode) {
+        function toggleWorkdaysMode(mode) {
             const wrapper = document.getElementById('customDaysWrapper');
             if (mode === 'custom') {
                 wrapper.classList.remove('hidden');
             } else {
                 wrapper.classList.add('hidden');
             }
+            recalculatePreview();
+        }
+
+        function recalculatePreview() {
+            const targetInput = parseFloat(document.getElementById('targetInput').value) || 0;
+            let monthlyVal = currentTargetType === 'tahunan' ? Math.ceil(targetInput / 12) : targetInput;
+
+            const mode = document.querySelector('input[name="workdays_mode"]:checked')?.value || 'senin_jumat';
+            let workdays = 22;
+
+            if (mode === 'senin_jumat') {
+                workdays = 21; // estimated weekdays
+            } else if (mode === 'senin_sabtu') {
+                workdays = 26;
+            } else if (mode === 'setiap_hari') {
+                workdays = currentDaysInMonth;
+            } else if (mode === 'custom') {
+                workdays = parseInt(document.getElementById('customDaysInput').value) || 22;
+            }
+
+            const holidaysCount = parseInt(document.getElementById('holidaysCountInput').value) || 0;
+            const finalDays = Math.max(1, workdays - holidaysCount);
+
+            const dailyVal = Math.ceil(monthlyVal / finalDays);
+
+            document.getElementById('previewFormulaText').innerText = 
+                'Rp ' + new Intl.NumberFormat('id-ID').format(monthlyVal) + ' ÷ ' + finalDays + ' hari kerja';
+            document.getElementById('previewDailyTargetText').innerText = 
+                'Rp ' + new Intl.NumberFormat('id-ID').format(dailyVal);
         }
     </script>
 

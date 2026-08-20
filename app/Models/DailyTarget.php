@@ -9,6 +9,7 @@ class DailyTarget extends Model
 {
     protected $fillable = [
         'date',
+        'is_workday',
         'base_target',
         'carry_forward',
         'adjusted_target',
@@ -21,6 +22,7 @@ class DailyTarget extends Model
 
     protected $casts = [
         'date' => 'date',
+        'is_workday' => 'boolean',
         'is_achieved' => 'boolean',
     ];
 
@@ -30,13 +32,16 @@ class DailyTarget extends Model
     public static function getOrCreateForDate(Carbon $date)
     {
         $dateString = $date->toDateString();
+        $isWorkday = self::isWorkDay($date);
+        $baseTarget = $isWorkday ? self::calculateBaseTarget($date) : 0;
         
         $target = self::firstOrCreate(
             ['date' => $dateString],
             [
-                'base_target' => self::calculateBaseTarget(),
+                'is_workday' => $isWorkday,
+                'base_target' => $baseTarget,
                 'carry_forward' => 0,
-                'adjusted_target' => self::calculateBaseTarget(),
+                'adjusted_target' => $baseTarget,
                 'actual_income' => 0,
                 'actual_expense' => 0,
                 'net_income' => 0,
@@ -49,58 +54,150 @@ class DailyTarget extends Model
     }
 
     /**
-     * Get target days in month (custom setting or actual days in month)
+     * Get workdays mode from settings (default: 'senin_jumat')
      */
-    public static function getTargetDaysInMonth($date = null)
+    public static function getWorkdaysMode(): string
     {
-        $date = $date ? Carbon::parse($date) : Carbon::now();
-        $customDays = env('TARGET_DAYS_PER_MONTH');
-        if ($customDays && is_numeric($customDays) && (int) $customDays > 0) {
-            return (int) $customDays;
-        }
-        return $date->daysInMonth;
+        return Setting::getValue('target_workdays_mode', 'senin_jumat');
     }
 
     /**
-     * Calculate base daily target from monthly target
+     * Get custom holiday dates from settings
      */
-    public static function calculateBaseTarget($date = null)
+    public static function getHolidayDates(): array
+    {
+        $raw = Setting::getValue('target_holiday_dates', '');
+        if (empty($raw)) {
+            return [];
+        }
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        return array_map('trim', explode(',', $raw));
+    }
+
+    /**
+     * Check if a specific date is a working day based on mode & holidays
+     */
+    public static function isWorkDay(Carbon $date): bool
+    {
+        $dateStr = $date->toDateString();
+        $holidays = self::getHolidayDates();
+
+        // If date is in custom holidays list -> not a working day
+        if (in_array($dateStr, $holidays, true)) {
+            return false;
+        }
+
+        $mode = self::getWorkdaysMode();
+
+        return match ($mode) {
+            'senin_jumat' => $date->isWeekday(), // Monday through Friday only
+            'senin_sabtu' => !$date->isSunday(), // Monday through Saturday
+            'setiap_hari' => true,                // All days
+            'custom'      => $date->isWeekday(), // Default to weekday if custom count mode
+            default       => $date->isWeekday(),
+        };
+    }
+
+    /**
+     * Get active work days count in a given month
+     */
+    public static function getTargetDaysInMonth($date = null): int
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::now();
+        $year = $date->year;
+        $month = $date->month;
+
+        $mode = self::getWorkdaysMode();
+
+        // If mode is 'custom' and specific number of days is configured
+        if ($mode === 'custom') {
+            $customDays = (int) Setting::getValue('target_custom_days', 22);
+            if ($customDays > 0) {
+                return $customDays;
+            }
+        }
+
+        // Count dynamically by inspecting each day of the month
+        $calendarDays = $date->daysInMonth;
+        $workdaysCount = 0;
+
+        for ($d = 1; $d <= $calendarDays; $d++) {
+            $current = Carbon::create($year, $month, $d);
+            if (self::isWorkDay($current)) {
+                $workdaysCount++;
+            }
+        }
+
+        // Subtract additional holiday count if set without specific dates
+        $holidayCount = (int) Setting::getValue('target_holidays_count', 0);
+        $finalDays = max(1, $workdaysCount - $holidayCount);
+
+        return $finalDays;
+    }
+
+    /**
+     * Calculate base daily target from monthly target divided by active work days
+     */
+    public static function calculateBaseTarget($date = null): int
     {
         $date = $date ? Carbon::parse($date) : Carbon::now();
         $monthlyTarget = self::getMonthlyTarget();
-        $daysInMonth = self::getTargetDaysInMonth($date);
+        $activeWorkDays = self::getTargetDaysInMonth($date);
         
-        return (int) ceil($monthlyTarget / $daysInMonth);
+        return $activeWorkDays > 0 ? (int) ceil($monthlyTarget / $activeWorkDays) : 0;
     }
 
     /**
      * Get configured monthly target
      */
-    public static function getMonthlyTarget()
+    public static function getMonthlyTarget(): int
     {
+        // 1. Check database setting first (most flexible)
+        $dbTarget = Setting::getValue('target_monthly');
+        if ($dbTarget && is_numeric($dbTarget) && (int) $dbTarget > 0) {
+            return (int) $dbTarget;
+        }
+
+        // 2. Check environment variables
         if (env('MONTHLY_INCOME_LIMIT')) {
             return (int) env('MONTHLY_INCOME_LIMIT');
         }
         if (env('ANNUAL_INCOME_LIMIT')) {
             return (int) ceil(((int) env('ANNUAL_INCOME_LIMIT')) / 12);
         }
+
         return 50000000;
     }
 
     /**
      * Get configured annual target
      */
-    public static function getAnnualTarget()
+    public static function getAnnualTarget(): int
     {
+        $dbAnnual = Setting::getValue('target_annual');
+        if ($dbAnnual && is_numeric($dbAnnual) && (int) $dbAnnual > 0) {
+            return (int) $dbAnnual;
+        }
+
         if (env('ANNUAL_INCOME_LIMIT')) {
             return (int) env('ANNUAL_INCOME_LIMIT');
         }
+
         return self::getMonthlyTarget() * 12;
     }
 
     /**
      * Recalculate daily targets for a given month sequentially
-     * to apply carry-forward deficits accurately.
+     * to apply workdays filter and carry-forward deficits accurately.
      */
     public static function recalculateMonthTargets($year = null, $month = null)
     {
@@ -112,7 +209,7 @@ class DailyTarget extends Model
         $targetDaysInMonth = self::getTargetDaysInMonth($startDate);
         
         $monthlyTarget = self::getMonthlyTarget();
-        $baseDailyTarget = (int) ceil($monthlyTarget / $targetDaysInMonth);
+        $baseDailyTarget = $targetDaysInMonth > 0 ? (int) ceil($monthlyTarget / $targetDaysInMonth) : 0;
 
         $runningDeficit = 0;
         $results = collect();
@@ -120,6 +217,7 @@ class DailyTarget extends Model
         for ($day = 1; $day <= $calendarDaysInMonth; $day++) {
             $currentDate = Carbon::createFromDate($year, $month, $day)->startOfDay();
             $dateString = $currentDate->toDateString();
+            $isWorkday = self::isWorkDay($currentDate);
 
             // Fetch actual income and expenses for current date
             $income = Transaksi::where('payment_status', 'lunas')
@@ -129,23 +227,41 @@ class DailyTarget extends Model
             $expense = Pengeluaran::whereDate('tanggal', $currentDate)
                 ->sum('nominal');
 
-            $carryForward = $runningDeficit;
-            $adjustedTarget = $baseDailyTarget + $carryForward;
             $netIncome = $income - $expense;
-            $variance = $netIncome - $adjustedTarget;
-            $isAchieved = $netIncome >= $adjustedTarget;
 
-            // Carry forward deficit to next day if net income is below adjusted target
-            if ($variance < 0) {
-                $runningDeficit = abs($variance);
+            if ($isWorkday) {
+                // Working day: target applies
+                $dayBaseTarget = $baseDailyTarget;
+                $carryForward = $runningDeficit;
+                $adjustedTarget = $dayBaseTarget + $carryForward;
+                $variance = $netIncome - $adjustedTarget;
+                $isAchieved = $netIncome >= $adjustedTarget;
+
+                // Carry forward deficit to next day if net income is below adjusted target
+                if ($variance < 0) {
+                    $runningDeficit = abs($variance);
+                } else {
+                    $runningDeficit = 0; // Reset deficit when target achieved
+                }
             } else {
-                $runningDeficit = 0; // Reset deficit when target achieved or surplus
+                // Non-working day (Weekend / Hari Libur): no mandatory target
+                $dayBaseTarget = 0;
+                $carryForward = 0;
+                $adjustedTarget = 0;
+                $variance = $netIncome; // Any income is bonus
+                $isAchieved = $netIncome > 0;
+
+                // If bonus income occurs on a weekend/holiday, reduce existing deficit for Monday!
+                if ($netIncome > 0 && $runningDeficit > 0) {
+                    $runningDeficit = max(0, $runningDeficit - $netIncome);
+                }
             }
 
             $targetRecord = self::updateOrCreate(
                 ['date' => $dateString],
                 [
-                    'base_target' => $baseDailyTarget,
+                    'is_workday' => $isWorkday,
+                    'base_target' => $dayBaseTarget,
                     'carry_forward' => $carryForward,
                     'adjusted_target' => $adjustedTarget,
                     'actual_income' => $income,
@@ -163,59 +279,12 @@ class DailyTarget extends Model
     }
 
     /**
-     * Update today's actual values and calculate variance
-     */
-    public function updateActuals($income, $expense)
-    {
-        $netIncome = $income - $expense;
-        $variance = $netIncome - $this->adjusted_target;
-        
-        $this->update([
-            'actual_income' => $income,
-            'actual_expense' => $expense,
-            'net_income' => $netIncome,
-            'variance' => $variance,
-            'is_achieved' => $netIncome >= $this->adjusted_target,
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * Carry forward deficit/surplus to next day
-     */
-    public function carryForwardToNextDay()
-    {
-        $nextDate = Carbon::parse($this->date)->addDay();
-        
-        // Don't carry forward to next month
-        if ($nextDate->month !== Carbon::parse($this->date)->month) {
-            return null;
-        }
-
-        $nextDayTarget = self::getOrCreateForDate($nextDate);
-        
-        // Only carry forward if there's a deficit (variance is negative)
-        if ($this->variance < 0) {
-            $carryAmount = abs($this->variance);
-            $newAdjustedTarget = $nextDayTarget->base_target + $carryAmount;
-            
-            $nextDayTarget->update([
-                'carry_forward' => $carryAmount,
-                'adjusted_target' => $newAdjustedTarget,
-            ]);
-        }
-
-        return $nextDayTarget;
-    }
-
-    /**
      * Get current achievement percentage
      */
     public function getAchievementPercentageAttribute()
     {
         if ($this->adjusted_target <= 0) {
-            return 0;
+            return $this->net_income > 0 ? 100 : 0;
         }
 
         return min(100, round(($this->net_income / $this->adjusted_target) * 100, 2));
@@ -226,6 +295,10 @@ class DailyTarget extends Model
      */
     public function getStatusColorAttribute()
     {
+        if (!$this->is_workday) {
+            return 'slate'; // Hari Libur
+        }
+
         if ($this->net_income >= $this->adjusted_target) {
             return 'green'; // Success
         } elseif ($this->net_income >= ($this->adjusted_target * 0.7)) {

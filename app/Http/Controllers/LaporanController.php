@@ -197,6 +197,13 @@ class LaporanController extends Controller
             ? round(($weeklyActualSum / $weeklyTargetSum) * 100, 1) 
             : 0;
 
+        $workdaysMode = \App\Models\DailyTarget::getWorkdaysMode();
+        $activeWorkDaysCount = \App\Models\DailyTarget::getTargetDaysInMonth();
+        $baseDailyTarget = \App\Models\DailyTarget::calculateBaseTarget();
+        $customDays = (int) \App\Models\Setting::getValue('target_custom_days', 22);
+        $holidaysCount = (int) \App\Models\Setting::getValue('target_holidays_count', 0);
+        $holidayDatesString = \App\Models\Setting::getValue('target_holiday_dates', '');
+
         return view('admin.laporan_keuangan.index', [
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
@@ -227,6 +234,13 @@ class LaporanController extends Controller
             'weeklyTargetSum' => $weeklyTargetSum,
             'weeklyActualSum' => $weeklyActualSum,
             'weeklyAchievementRate' => $weeklyAchievementRate,
+            // Workdays & Holidays
+            'workdaysMode' => $workdaysMode,
+            'activeWorkDaysCount' => $activeWorkDaysCount,
+            'baseDailyTarget' => $baseDailyTarget,
+            'customDays' => $customDays,
+            'holidaysCount' => $holidaysCount,
+            'holidayDatesString' => $holidayDatesString,
         ]);
     }
 
