@@ -86,7 +86,7 @@ class TaskCompletionTest extends TestCase
         
         $this->assertDatabaseHas('transaksi', [
             'id' => $transaksi->id,
-            'status' => 'dicuci'
+            'status' => 'disetrika'
         ]);
     }
 }

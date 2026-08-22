@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Petugas;
+use App\Models\JadwalPetugas;
 use App\Models\Transaksi;
 use App\Models\InventoryAdjustmentRequest;
 use App\Models\User;
@@ -81,7 +82,11 @@ class PetugasController extends Controller
                 ->count();
         }
 
-        return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division'));
+        // Data Jadwal Piket Hari Ini untuk Siswa (Model 1)
+        $jadwalHariIni = JadwalPetugas::hariIni()->orderBy('shift')->orderBy('nama')->get();
+        $activePiket = session('active_piket_nama') ? JadwalPetugas::hariIni()->where('nama', session('active_piket_nama'))->first() : null;
+
+        return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division', 'jadwalHariIni', 'activePiket'));
     }
     public function index()
     {
@@ -172,6 +177,77 @@ class PetugasController extends Controller
         return response()->json(['message' => 'Petugas berhasil dihapus']);
     }
 
+    /**
+     * Check-in stasiun tugas mandiri oleh murid / petugas (Model 1)
+     */
+    public function checkInStation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'jadwal_id' => 'required|exists:jadwal_petugas,id',
+            'station' => 'required|in:washing,setrika,packing,kasir',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->with('error', 'Silakan pilih nama dan stasiun tugas yang valid.');
+        }
+
+        $jadwal = JadwalPetugas::findOrFail($request->jadwal_id);
+        $jadwal->update([
+            'selected_station' => $request->station,
+            'checked_in_at' => now(),
+            'status' => 'hadir',
+        ]);
+
+        // Simpan sesi aktif browser untuk autofill
+        session([
+            'active_piket_id' => $jadwal->id,
+            'active_piket_nama' => $jadwal->nama,
+            'active_piket_station' => $jadwal->selected_station,
+        ]);
+
+        $stationRouteMap = [
+            'washing' => 'petugas_piket.washing.index',
+            'setrika' => 'petugas_piket.setrika.index',
+            'packing' => 'petugas_piket.packing.index',
+            'kasir' => 'petugas.pos.index',
+        ];
+
+        $redirectRoute = $stationRouteMap[$request->station] ?? 'petugas_piket.dashboard';
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Selamat bertugas, {$jadwal->nama}! Anda telah memilih bagian " . ucfirst($request->station),
+                'redirect_url' => route($redirectRoute),
+                'jadwal' => $jadwal,
+            ]);
+        }
+
+        return redirect()->route($redirectRoute)->with('success', "Selamat bertugas, {$jadwal->nama}! Anda telah memilih bagian " . ucfirst($request->station));
+    }
+
+    /**
+     * API untuk mendapatkan status duty aktif hari ini
+     */
+    public function getActiveDuty()
+    {
+        $activePiketNama = session('active_piket_nama');
+        $activeDuty = null;
+
+        if ($activePiketNama) {
+            $activeDuty = JadwalPetugas::hariIni()->where('nama', $activePiketNama)->first();
+        }
+
+        return response()->json([
+            'active_duty' => $activeDuty,
+            'session_nama' => $activePiketNama,
+            'today_roster' => JadwalPetugas::hariIni()->get(),
+        ]);
+    }
+
     public function washing()
     {
         $this->ensureStaffDivisionAccess(['washing']);
@@ -181,10 +257,20 @@ class PetugasController extends Controller
             $q->where('stage', 'washing')->where('status', 'pending');
         })->with(['details.layanan'])->orderBy('created_at', 'asc')->get();
 
-        $petugasList = Petugas::orderBy('nama')->get();
+        // Ambil daftar petugas dari jadwal hari ini jika ada, jika tidak fallback ke master Petugas
+        $todaySchedules = JadwalPetugas::hariIni()->get();
+        if ($todaySchedules->isNotEmpty()) {
+            $petugasList = $todaySchedules->sortBy(function ($item) {
+                return $item->selected_station === 'washing' ? 0 : 1;
+            })->values();
+        } else {
+            $petugasList = Petugas::orderBy('nama')->get();
+        }
+
+        $activePiketNama = session('active_piket_nama');
         $inventories = \App\Models\Inventory::select('id', 'name', 'category', 'unit_of_measurement')->orderBy('name')->get();
 
-        return view('petugas_piket.washing.index', compact('transactions', 'petugasList', 'inventories'));
+        return view('petugas_piket.washing.index', compact('transactions', 'petugasList', 'inventories', 'activePiketNama'));
     }
 
     public function setrika()
@@ -198,9 +284,18 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::orderBy('nama')->get();
+        $todaySchedules = JadwalPetugas::hariIni()->get();
+        if ($todaySchedules->isNotEmpty()) {
+            $petugasList = $todaySchedules->sortBy(function ($item) {
+                return $item->selected_station === 'setrika' ? 0 : 1;
+            })->values();
+        } else {
+            $petugasList = Petugas::orderBy('nama')->get();
+        }
 
-        return view('petugas_piket.setrika.index', compact('transactions', 'petugasList'));
+        $activePiketNama = session('active_piket_nama');
+
+        return view('petugas_piket.setrika.index', compact('transactions', 'petugasList', 'activePiketNama'));
     }
 
     public function packing()
@@ -214,9 +309,18 @@ class PetugasController extends Controller
         })
         ->with(['details.layanan'])->get();
 
-        $petugasList = Petugas::orderBy('nama')->get();
+        $todaySchedules = JadwalPetugas::hariIni()->get();
+        if ($todaySchedules->isNotEmpty()) {
+            $petugasList = $todaySchedules->sortBy(function ($item) {
+                return $item->selected_station === 'packing' ? 0 : 1;
+            })->values();
+        } else {
+            $petugasList = Petugas::orderBy('nama')->get();
+        }
 
-        return view('petugas_piket.packing.index', compact('transactions', 'petugasList'));
+        $activePiketNama = session('active_piket_nama');
+
+        return view('petugas_piket.packing.index', compact('transactions', 'petugasList', 'activePiketNama'));
     }
 
 

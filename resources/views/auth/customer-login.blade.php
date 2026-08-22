@@ -35,12 +35,8 @@
             
             <div class="relative z-10">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-3 mb-10">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shadow-lg shadow-sky-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                        </svg>
-                    </div>
-                    <span class="text-xl font-900 tracking-tight uppercase">Bening</span>
+                    <img src="{{ asset('images/logo-bening.png') }}" alt="Logo Bening Laundry" class="w-10 h-10 object-contain rounded-xl drop-shadow-md">
+                    <span class="text-xl font-900 tracking-tight uppercase">Bening Laundry</span>
                 </a>
                 
                 <h1 class="text-4xl font-900 leading-tight tracking-tight mt-8">

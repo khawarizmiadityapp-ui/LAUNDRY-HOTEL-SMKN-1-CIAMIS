@@ -1,7 +1,7 @@
-{{-- resources/views/petugas_piket/sidebar.blade.php --}}
-{{-- FIXED: Dynamic Sidebar v3.0 - No Helper Dependency --}}
 
-@php
+
+
+<?php
     use App\Services\MenuService;
     use Illuminate\Support\Facades\Log;
     
@@ -66,80 +66,82 @@
             'service_loaded' => false,
         ];
     }
-@endphp
+?>
 
 <aside id="sidebar"
        class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-100 z-30 flex flex-col py-6 px-4 gap-6 -translate-x-full md:translate-x-0">  
-    {{-- Brand --}}
+    
     <div class="px-2 flex items-center gap-3">
-        <img src="{{ asset('images/logo-bening.png') }}" alt="Logo Bening Laundry" class="w-9 h-9 object-contain rounded-xl drop-shadow-sm">
+        <img src="<?php echo e(asset('images/logo-bening.png')); ?>" alt="Logo Bening Laundry" class="w-9 h-9 object-contain rounded-xl drop-shadow-sm">
         <div>
-            <span class="text-base font-bold tracking-tight text-slate-900 block leading-tight">{{ $brand['name'] ?? 'Bening Laundry' }}</span>
+            <span class="text-base font-bold tracking-tight text-slate-900 block leading-tight"><?php echo e($brand['name'] ?? 'Bening Laundry'); ?></span>
             <span class="text-[10px] font-semibold text-slate-400 tracking-wider uppercase">Portal Petugas</span>
         </div>
     </div>
 
-    {{-- User Info --}}
-    @if(auth()->check())
+    
+    <?php if(auth()->check()): ?>
     <div class="flex items-center gap-3 px-2 py-3 bg-slate-50 rounded-xl">
         <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-            {{ $initials }}
+            <?php echo e($initials); ?>
+
         </div>
         <div class="min-w-0">
-            <p class="text-sm font-semibold text-slate-800 truncate">{{ auth()->user()->name ?? 'Staff Portal' }}</p>
+            <p class="text-sm font-semibold text-slate-800 truncate"><?php echo e(auth()->user()->name ?? 'Staff Portal'); ?></p>
             <div class="flex items-center gap-1.5 mt-0.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-dot"></span>
-                <span class="text-xs text-emerald-600 font-medium">{{ $divisionLabel }}</span>
+                <span class="text-xs text-emerald-600 font-medium"><?php echo e($divisionLabel); ?></span>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- Navigation Menu --}}
+    
     <nav class="flex-1 px-2 space-y-1 overflow-y-auto">
-        @forelse ($menus as $menu)
-            <a href="{{ $menu['url'] ?? '#' }}"
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ ($menu['is_active'] ?? false) ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
+        <?php $__empty_1 = true; $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <a href="<?php echo e($menu['url'] ?? '#'); ?>"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(($menu['is_active'] ?? false) ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'); ?>">
                 
-                @if(isset($menu['icon']))
-                <svg class="w-[18px] h-[18px] shrink-0 {{ ($menu['is_active'] ?? false) ? 'text-white' : 'text-slate-400' }}" 
+                <?php if(isset($menu['icon'])): ?>
+                <svg class="w-[18px] h-[18px] shrink-0 <?php echo e(($menu['is_active'] ?? false) ? 'text-white' : 'text-slate-400'); ?>" 
                      fill="none" 
                      viewBox="0 0 24 24" 
                      stroke-width="1.8" 
                      stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo e($menu['icon']); ?>" />
                 </svg>
-                @endif
+                <?php endif; ?>
                 
-                <span class="truncate">{{ $menu['label'] ?? 'Menu' }}</span>
+                <span class="truncate"><?php echo e($menu['label'] ?? 'Menu'); ?></span>
                 
-                {{-- Badge support (optional) --}}
-                @if(isset($menu['badge']) && !empty($menu['badge']))
-                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full {{ ($menu['is_active'] ?? false) ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }}">
-                        {{ ${$menu['badge']} ?? 0 }}
+                
+                <?php if(isset($menu['badge']) && !empty($menu['badge'])): ?>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full <?php echo e(($menu['is_active'] ?? false) ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600'); ?>">
+                        <?php echo e(${$menu['badge']} ?? 0); ?>
+
                     </span>
-                @endif
+                <?php endif; ?>
             </a>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="text-center py-8 text-slate-400 text-sm">
                 <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <p class="font-medium">No menu available</p>
-                @if(auth()->check())
+                <?php if(auth()->check()): ?>
                 <div class="mt-3 text-xs space-y-1">
-                    <p><strong>User:</strong> {{ auth()->user()->name }}</p>
-                    <p><strong>Division:</strong> {{ auth()->user()->division ?? 'Not set' }}</p>
-                    <p><strong>Role:</strong> {{ auth()->user()->role ?? 'Not set' }}</p>
+                    <p><strong>User:</strong> <?php echo e(auth()->user()->name); ?></p>
+                    <p><strong>Division:</strong> <?php echo e(auth()->user()->division ?? 'Not set'); ?></p>
+                    <p><strong>Role:</strong> <?php echo e(auth()->user()->role ?? 'Not set'); ?></p>
                 </div>
-                @else
+                <?php else: ?>
                 <p class="text-xs mt-2">Please login to see menus</p>
-                @endif
+                <?php endif; ?>
             </div>
-        @endforelse
+        <?php endif; ?>
     </nav>
 
-    {{-- Logout --}}
+    
     <div class="px-3 py-4 border-t border-slate-100">
         <button onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                 class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-500 hover:bg-rose-50 transition-all duration-150">
@@ -148,8 +150,9 @@
             </svg>
             <span>Logout</span>
         </button>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-            @csrf
+        <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden">
+            <?php echo csrf_field(); ?>
         </form>
     </div>
 </aside>
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/petugas_piket/sidebar.blade.php ENDPATH**/ ?>

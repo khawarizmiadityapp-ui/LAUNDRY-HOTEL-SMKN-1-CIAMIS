@@ -48,7 +48,7 @@
 
     <!-- Header Logo -->
     <div class="flex items-center gap-3 mb-6">
-        <img src="{{ asset('images/logo-bening.png') }}" alt="Logo Bening Laundry" class="w-12 h-12 object-contain drop-shadow-sm">
+        <img src="<?php echo e(asset('images/logo-bening.png')); ?>" alt="Logo Bening Laundry" class="w-12 h-12 object-contain drop-shadow-sm">
         <div>
             <span class="text-2xl font-extrabold text-blue-700 tracking-tight block leading-none">Bening Laundry</span>
             <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 block">SMKN 1 Ciamis</span>
@@ -63,15 +63,15 @@
             </div>
 
             <!-- Alert Messages -->
-            @if(session('error'))
+            <?php if(session('error')): ?>
             <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-red-700 text-sm flex items-center gap-3">
                 <i class="fa-solid fa-circle-exclamation text-lg"></i>
-                <span>{{ session('error') }}</span>
+                <span><?php echo e(session('error')); ?></span>
             </div>
-            @endif
+            <?php endif; ?>
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
-                @csrf
+            <form method="POST" action="<?php echo e(route('login')); ?>" class="space-y-6">
+                <?php echo csrf_field(); ?>
 
                 <!-- Email Input -->
                 <div class="space-y-2">
@@ -83,15 +83,29 @@
                         <input type="email" 
                                name="email" 
                                id="email-input"
-                               value="{{ old('email') }}" 
+                               value="<?php echo e(old('email')); ?>" 
                                required 
                                autofocus
-                               class="w-full pl-12 pr-6 py-4 bg-slate-50/50 border border-slate-200 rounded-[22px] outline-none transition-all focus:border-blue-600 focus:bg-white @error('email') border-red-500 @enderror"
+                               class="w-full pl-12 pr-6 py-4 bg-slate-50/50 border border-slate-200 rounded-[22px] outline-none transition-all focus:border-blue-600 focus:bg-white <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                placeholder="nama@beninglaundry.com">
                     </div>
-                    @error('email')
-                        <p class="mt-1 text-xs text-red-500 ml-1">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-xs text-red-500 ml-1"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- Password Input -->
@@ -107,7 +121,14 @@
                                name="password" 
                                id="password-input"
                                required
-                               class="w-full pl-12 pr-14 py-4 bg-slate-50/50 border border-slate-200 rounded-[22px] outline-none transition-all focus:border-blue-600 focus:bg-white @error('password') border-red-500 @enderror"
+                               class="w-full pl-12 pr-14 py-4 bg-slate-50/50 border border-slate-200 rounded-[22px] outline-none transition-all focus:border-blue-600 focus:bg-white <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                placeholder="••••••••">
                         <button type="button" 
                                 onclick="togglePassword()" 
@@ -116,9 +137,16 @@
                         </button>
                     </div>
 
-                    @error('password')
-                        <p class="mt-1 text-xs text-red-500 ml-1">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-xs text-red-500 ml-1"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- Remember Me -->
@@ -192,3 +220,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/auth/login.blade.php ENDPATH**/ ?>

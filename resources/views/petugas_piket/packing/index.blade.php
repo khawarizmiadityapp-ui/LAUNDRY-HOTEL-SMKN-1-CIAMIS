@@ -90,7 +90,7 @@
                                             @csrf
                                             <input type="hidden" name="stage" value="packing">
                                             
-                                            <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])) }})" @click.outside="showDropdown = false">
+                                            <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas ?? $p->id])) }}, '{{ $activePiketNama ?? '' }}')" @click.outside="showDropdown = false">
                                                 <div class="relative">
                                                     <span class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
                                                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -163,7 +163,7 @@
                     @csrf
                     <input type="hidden" name="stage" value="packing">
                     
-                    <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas])) }})" @click.outside="showDropdown = false" class="relative min-w-[200px]">
+                    <div x-data="petugasSearchComponent({{ json_encode($petugasList->map(fn($p) => ['nama' => $p->nama, 'id_petugas' => $p->id_petugas ?? $p->id])) }}, '{{ $activePiketNama ?? '' }}')" @click.outside="showDropdown = false" class="relative min-w-[200px]">
                         <input type="text" name="petugas_name" x-model="search" @input="filterPetugas()" @focus="showDropdown = true" required placeholder="Nama petugas..."
                                class="w-full pl-3 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                         

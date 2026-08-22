@@ -61,6 +61,13 @@ return [
             'roles' => ['admin'],
         ],
         [
+            'icon' => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
+            'label' => 'Jadwal Piket',
+            'route' => 'admin.jadwal.index',
+            'active' => ['admin.jadwal.*'],
+            'roles' => ['admin'],
+        ],
+        [
             'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
             'label' => 'Pembayaran',
             'route' => 'admin.pembayaran.index',

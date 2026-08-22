@@ -76,6 +76,16 @@ Route::group(['middleware' => ['auth']], function () {
             Route::put('/{id}', [PetugasController::class, 'update'])->middleware('throttle:30,1')->name('update');
             Route::delete('/{id}', [PetugasController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
         });
+
+        // Jadwal Petugas Management & Excel Import
+        Route::prefix('jadwal-petugas')->name('jadwal.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'index'])->name('index');
+            Route::get('/template', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'downloadTemplate'])->name('template');
+            Route::post('/import', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'import'])->name('import');
+            Route::post('/', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'store'])->name('store');
+            Route::put('/{id}', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'update'])->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'destroy'])->name('destroy');
+        });
         
         // Laporan Keuangan & BKU PDF
         Route::get('/laporan_keuangan', [LaporanController::class, 'index'])->name('laporan_keuangan.index');
@@ -193,6 +203,8 @@ Route::group(['middleware' => ['auth']], function () {
     // ================= PETUGAS/STAFF ROUTES =================
     Route::prefix('petugas')->name('petugas_piket.')->middleware(['staffOrAdmin', 'throttle:100,1'])->group(function () {
         Route::get('/', [PetugasController::class, 'dashboard'])->name('dashboard');
+        Route::post('/checkin-station', [PetugasController::class, 'checkInStation'])->name('checkin.station');
+        Route::get('/active-duty', [PetugasController::class, 'getActiveDuty'])->name('active.duty');
         Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
         Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
         Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
