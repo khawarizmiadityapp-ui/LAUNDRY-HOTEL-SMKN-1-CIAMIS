@@ -245,28 +245,35 @@ class LaporanController extends Controller
     }
 
     /**
-     * Ekspor Laporan Keuangan BKU (Buku Kas Umum) berbentuk PDF resmi.
+     * Ekspor Laporan Keuangan BKU (Buku Kas Umum) berbentuk PDF resmi sesuai format TEFA Perhotelan.
      */
     public function exportBkuPdf(Request $request)
     {
         $filter = $request->filter ?? 'bulanan';
 
         if ($filter === 'bulanan') {
-            $start = Carbon::now()->startOfMonth();
-            $end = Carbon::now()->endOfMonth();
-            $periodeLabel = 'Bulan ' . now()->translatedFormat('F Y');
+            $month = $request->bulan ? Carbon::parse($request->bulan)->month : Carbon::now()->month;
+            $year = $request->tahun ? Carbon::parse($request->tahun)->year : Carbon::now()->year;
+            $start = Carbon::create($year, $month, 1)->startOfDay();
+            $end = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
+            $periodeJudul = 'BULAN ' . strtoupper($start->translatedFormat('F Y'));
+            $saldoAwalLabel = 'Saldo Awal ' . $start->translatedFormat('F');
         } elseif ($filter === 'tahunan') {
-            $start = Carbon::now()->startOfYear();
-            $end = Carbon::now()->endOfYear();
-            $periodeLabel = 'Tahun ' . now()->year;
+            $year = $request->tahun ? (int)$request->tahun : Carbon::now()->year;
+            $start = Carbon::create($year, 1, 1)->startOfDay();
+            $end = Carbon::create($year, 12, 31)->endOfDay();
+            $periodeJudul = 'PERIODE TAHUN ' . $year;
+            $saldoAwalLabel = 'Saldo Awal Tahun ' . $year;
         } elseif ($filter === 'custom' && $request->dari && $request->sampai) {
             $start = Carbon::parse($request->dari)->startOfDay();
             $end = Carbon::parse($request->sampai)->endOfDay();
-            $periodeLabel = Carbon::parse($request->dari)->translatedFormat('d F Y') . ' s.d. ' . Carbon::parse($request->sampai)->translatedFormat('d F Y');
+            $periodeJudul = 'PERIODE ' . strtoupper($start->translatedFormat('d F Y') . ' S.D. ' . $end->translatedFormat('d F Y'));
+            $saldoAwalLabel = 'Saldo Awal Periode';
         } else {
             $start = Carbon::now()->startOfMonth();
             $end = Carbon::now()->endOfMonth();
-            $periodeLabel = 'Bulan ' . now()->translatedFormat('F Y');
+            $periodeJudul = 'BULAN ' . strtoupper(now()->translatedFormat('F Y'));
+            $saldoAwalLabel = 'Saldo Awal ' . now()->translatedFormat('F');
         }
 
         // 1. Hitung Saldo Awal (semua penerimaan - pengeluaran sebelum tanggal start)
@@ -286,14 +293,17 @@ class LaporanController extends Controller
             ->get()
             ->map(function ($trx) {
                 $detailNama = $trx->details->pluck('layanan.nama')->filter()->join(', ');
-                $subInfo = $detailNama ?: ucfirst($trx->service_type) . " ({$trx->weight} kg)";
+                $keterangan = $detailNama ?: ($trx->service_type ? 'Laundry ' . ucfirst($trx->service_type) : 'Laundry pakaian kiloan');
+                if ($trx->weight && $trx->weight > 0 && !str_contains(strtolower($keterangan), 'kg')) {
+                    $keterangan .= " ({$trx->weight} kg)";
+                }
 
                 return [
                     'timestamp' => $trx->created_at->timestamp,
-                    'tanggal' => $trx->created_at->format('d/m/Y'),
+                    'tanggal' => $trx->created_at->translatedFormat('d F Y'),
                     'no_bukti' => $trx->transaksi_code,
-                    'uraian' => 'Penerimaan Jasa Laundry - ' . ($trx->customer_name ?: 'Pelanggan'),
-                    'sub_info' => $subInfo . ' [Metode: ' . strtoupper($trx->payment_method ?: 'Tunai') . ']',
+                    'keterangan' => $keterangan,
+                    'ref' => 'Tn',
                     'debet' => (int) $trx->total_price,
                     'kredit' => 0,
                     'type' => 'masuk',
@@ -306,13 +316,14 @@ class LaporanController extends Controller
             ->get()
             ->map(function ($exp) {
                 $kategoriNama = $exp->kategoriPengeluaran?->nama ?? $exp->kategori;
+                $keterangan = $exp->nama . ($exp->keterangan ? ' - ' . $exp->keterangan : '');
 
                 return [
                     'timestamp' => $exp->tanggal->startOfDay()->timestamp + 3600, // slightly offset for sequential ordering
-                    'tanggal' => $exp->tanggal->format('d/m/Y'),
-                    'no_bukti' => $exp->id_transaksi,
-                    'uraian' => 'Pengeluaran: ' . $exp->nama,
-                    'sub_info' => 'Kategori: ' . $kategoriNama . ($exp->keterangan ? ' | ' . $exp->keterangan : ''),
+                    'tanggal' => $exp->tanggal->translatedFormat('d F Y'),
+                    'no_bukti' => $exp->id_transaksi ?: '-',
+                    'keterangan' => $keterangan,
+                    'ref' => '-',
                     'debet' => 0,
                     'kredit' => (int) $exp->nominal,
                     'type' => 'keluar',
@@ -338,10 +349,11 @@ class LaporanController extends Controller
         }
 
         $saldoAkhir = $runningSaldo;
-        $tanggalAwalFormatted = $start->format('d/m/Y');
+        $tanggalAwalFormatted = $start->translatedFormat('d F Y');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf.bku', compact(
-            'periodeLabel',
+            'periodeJudul',
+            'saldoAwalLabel',
             'saldoAwal',
             'ledgerItems',
             'totalDebet',
@@ -350,6 +362,6 @@ class LaporanController extends Controller
             'tanggalAwalFormatted'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->download('BKU-Laundry-Hotel-' . now()->format('Ymd_His') . '.pdf');
+        return $pdf->download('BKU-TEFA-HTL-' . $start->format('Ym') . '-' . now()->format('His') . '.pdf');
     }
 }
