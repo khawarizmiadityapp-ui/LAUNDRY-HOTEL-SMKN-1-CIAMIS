@@ -207,6 +207,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/active-duty', [PetugasController::class, 'getActiveDuty'])->name('active.duty');
         Route::get('/washing', [PetugasController::class, 'washing'])->name('washing.index');
         Route::get('/setrika', [PetugasController::class, 'setrika'])->name('setrika.index');
+        Route::get('/ironing', [PetugasController::class, 'setrika'])->name('ironing.index');
         Route::get('/packing', [PetugasController::class, 'packing'])->name('packing.index');
         
         Route::post('/tasks/{id}/status', [PetugasController::class, 'updateTaskStatus'])->middleware('throttle:60,1')->name('tasks.updateStatus');

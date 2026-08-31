@@ -33,7 +33,7 @@
             <option value="disortir" {{ request('status') == 'disortir' ? 'selected' : '' }}>Disortir</option>
             <option value="dicuci" {{ request('status') == 'dicuci' ? 'selected' : '' }}>Dicuci</option>
             <option value="dikeringkan" {{ request('status') == 'dikeringkan' ? 'selected' : '' }}>Dikeringkan</option>
-            <option value="disetrika" {{ request('status') == 'disetrika' ? 'selected' : '' }}>Disetrika</option>
+            <option value="disetrika" {{ request('status') == 'disetrika' ? 'selected' : '' }}>Ironing</option>
             <option value="dipacking" {{ request('status') == 'dipacking' ? 'selected' : '' }}>Dipacking</option>
             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
             <option value="diambil" {{ request('status') == 'diambil' ? 'selected' : '' }}>Diambil</option>

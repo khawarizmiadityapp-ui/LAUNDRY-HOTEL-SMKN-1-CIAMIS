@@ -17,7 +17,8 @@ return [
     // Division labels untuk display
     'division_labels' => [
         'washing' => 'Washing',
-        'setrika' => 'Setrika',
+        'setrika' => 'Ironing',
+        'ironing' => 'Ironing',
         'packing' => 'Packing',
         'customer_service' => 'Customer Service',
         'inventory' => 'Inventory',
@@ -140,11 +141,11 @@ return [
             'roles' => ['admin', 'staff'],
         ],
         [
-            'label' => 'Setrika',
+            'label' => 'Ironing',
             'route' => 'petugas_piket.setrika.index',
-            'active' => ['petugas_piket.setrika.*'],
+            'active' => ['petugas_piket.setrika.*', 'petugas_piket.ironing.*'],
             'icon' => 'M7 3.25H17A4.25 4.25 0 0121.25 7.5v8a4.25 4.25 0 01-4.25 4.25H7A4.25 4.25 0 012.75 15.5v-8A4.25 4.25 0 017 3.25zM10 11.25h4',
-            'divisions' => ['setrika'],
+            'divisions' => ['setrika', 'ironing'],
             'roles' => ['admin', 'staff'],
         ],
         [

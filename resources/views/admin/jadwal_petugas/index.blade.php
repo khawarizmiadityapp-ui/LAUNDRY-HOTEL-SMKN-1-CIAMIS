@@ -88,11 +88,11 @@
 
         <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Setrika</p>
+                <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Ironing</p>
                 <span class="text-base">♨️</span>
             </div>
             <p class="text-2xl font-black text-amber-700 mt-1">{{ $statsToday['setrika'] }}</p>
-            <span class="text-[11px] text-slate-400">petugas setrika</span>
+            <span class="text-[11px] text-slate-400">petugas ironing</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm">
@@ -127,7 +127,7 @@
                         onchange="this.form.submit()">
                     <option value="all" {{ request('station') == 'all' ? 'selected' : '' }}>Semua Stasiun</option>
                     <option value="washing" {{ request('station') == 'washing' ? 'selected' : '' }}>🌊 Washing (Cuci)</option>
-                    <option value="setrika" {{ request('station') == 'setrika' ? 'selected' : '' }}>♨️ Setrika (Ironing)</option>
+                    <option value="setrika" {{ request('station') == 'setrika' ? 'selected' : '' }}>♨️ Ironing</option>
                     <option value="packing" {{ request('station') == 'packing' ? 'selected' : '' }}>📦 Packing</option>
                     <option value="none" {{ request('station') == 'none' ? 'selected' : '' }}>⏳ Belum Check-in</option>
                 </select>
@@ -200,7 +200,7 @@
                                 </span>
                             @elseif($item->selected_station === 'setrika')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold">
-                                    <span>♨️</span> Setrika (Ironing)
+                                    <span>♨️</span> Ironing
                                 </span>
                             @elseif($item->selected_station === 'packing')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-xs font-bold">
@@ -307,7 +307,7 @@
                     <ul class="list-disc pl-4 space-y-1 text-slate-600">
                         <li>File wajib berformat <strong>.xlsx</strong> atau <strong>.csv</strong>.</li>
                         <li>Kolom format Excel: <strong>Tanggal, Nama Siswa / Petugas, ID / NIS, Shift, Keterangan</strong>.</li>
-                        <li>Siswa yang di-import otomatis bisa memilih sendiri stasiun tugasnya (**Washing, Setrika, Packing**) di halaman piket.</li>
+                        <li>Siswa yang di-import otomatis bisa memilih sendiri stasiun tugasnya (**Washing, Ironing, Packing**) di halaman piket.</li>
                     </ul>
                     <div class="pt-1">
                         <a href="{{ route('admin.jadwal.template') }}" class="text-blue-600 font-bold hover:underline inline-flex items-center gap-1">
@@ -376,7 +376,7 @@
                         <select name="selected_station" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm bg-slate-50">
                             <option value="none">Biarkan Siswa Pilih Sendiri</option>
                             <option value="washing">Washing (Cuci)</option>
-                            <option value="setrika">Setrika (Ironing)</option>
+                            <option value="setrika">Ironing</option>
                             <option value="packing">Packing</option>
                             <option value="kasir">Kasir</option>
                         </select>
@@ -434,7 +434,7 @@
                         <select name="selected_station" x-model="editingItem.selected_station" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm bg-slate-50">
                             <option value="none">Belum Pilih Stasiun</option>
                             <option value="washing">🌊 Washing (Cuci)</option>
-                            <option value="setrika">♨️ Setrika</option>
+                            <option value="setrika">♨️ Ironing</option>
                             <option value="packing">📦 Packing</option>
                             <option value="kasir">🏪 Kasir</option>
                         </select>

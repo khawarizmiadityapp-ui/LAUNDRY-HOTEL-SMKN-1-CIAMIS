@@ -1,18 +1,18 @@
 @extends('layouts.petugas_piket')
-@section('title', 'Setrika Operations')
+@section('title', 'Ironing Operations')
 @section('content')
 
 <div class="p-6 max-w-5xl mx-auto animate-fade-in">
     {{-- Header --}}
     <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Operasi Setrika</h1>
-        <p class="text-slate-500 mt-1">Selesaikan tugas penyetrikaan yang berada di antrean.</p>
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Operasi Ironing</h1>
+        <p class="text-slate-500 mt-1">Selesaikan tugas ironing yang berada di antrean.</p>
     </div>
 
     {{-- Main Content --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
         <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
-            <h2 class="text-lg font-bold text-slate-800">Antrean Setrika</h2>
+            <h2 class="text-lg font-bold text-slate-800">Antrean Ironing</h2>
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
                 {{ count($transactions) }} Menunggu
             </span>
@@ -141,8 +141,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-1">Tidak ada antrean setrika</h3>
-                    <p class="text-slate-500 text-sm">Semua pakaian telah selesai disetrika. Kerja bagus!</p>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Tidak ada antrean ironing</h3>
+                    <p class="text-slate-500 text-sm">Semua pakaian telah selesai di-ironing. Kerja bagus!</p>
                 </div>
             @endif
 

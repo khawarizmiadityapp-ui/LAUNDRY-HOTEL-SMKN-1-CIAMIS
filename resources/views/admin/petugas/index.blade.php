@@ -157,7 +157,7 @@
                         <select x-model="selectedPetugas.role" required
                                 class="w-full border rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
                             <option>Washing</option>
-                            <option>Setrika</option>
+                            <option>Ironing</option>
                             <option>Packing</option>
                             <option>Kasir</option>
                         </select>
@@ -193,7 +193,7 @@
                             <p class="text-2xl font-black text-blue-700 mt-1" x-text="selectedPetugas.completed_washing || 0"></p>
                         </div>
                         <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-100/50">
-                            <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Setrika</p>
+                            <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Ironing</p>
                             <p class="text-2xl font-black text-amber-700 mt-1" x-text="selectedPetugas.completed_ironing || 0"></p>
                         </div>
                         <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100/50">
@@ -227,7 +227,7 @@
         return {
             petugasList: [],
             activeFilter: 'Washing',
-            allRoles: ['Washing', 'Setrika', 'Packing', 'Kasir'],
+            allRoles: ['Washing', 'Ironing', 'Packing', 'Kasir'],
             searchQuery: '',
             currentPage: 1,
             perPage: 8,
@@ -251,7 +251,7 @@
             get startItem() { return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1; },
             get endItem() { return Math.min(this.currentPage * this.perPage, this.filteredData.length); },
             get totalPetugas() { return this.petugasList.length; },
-            get timProduksi() { return this.petugasList.filter(p => ['Washing', 'Setrika', 'Packing'].includes(p.role)).length; },
+            get timProduksi() { return this.petugasList.filter(p => ['Washing', 'Setrika', 'Ironing', 'Packing'].includes(p.role)).length; },
             get kasirKurir() { return this.petugasList.filter(p => p.role === 'Kasir').length; },
 
             prevPage() { if (this.currentPage > 1) this.currentPage--; },

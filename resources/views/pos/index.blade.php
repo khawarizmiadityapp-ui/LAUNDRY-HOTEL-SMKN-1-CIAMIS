@@ -729,12 +729,12 @@
                             </div>
                         </label>
                         
-                        <!-- Setrika -->
+                        <!-- Ironing -->
                         <label :class="serviceForm.needs_ironing ? 'border-brand-500 bg-brand-50/50 text-brand-700 shadow-sm shadow-brand-50' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
                                class="flex items-center gap-2.5 p-3 border-2 rounded-xl cursor-pointer transition-all duration-200">
                             <input type="checkbox" x-model="serviceForm.needs_ironing" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
                             <div class="flex flex-col">
-                                <span class="text-xs font-bold">Setrika</span>
+                                <span class="text-xs font-bold">Ironing</span>
                                 <span class="text-[9px] opacity-75">Suhu & uap</span>
                             </div>
                         </label>

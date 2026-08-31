@@ -179,7 +179,8 @@ class MenuService
         
         $labels = config('sidebar.division_labels', [
             'washing' => 'Washing',
-            'setrika' => 'Setrika',
+            'setrika' => 'Ironing',
+            'ironing' => 'Ironing',
             'packing' => 'Packing',
             'customer_service' => 'Customer Service',
             'inventory' => 'Inventory',

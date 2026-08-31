@@ -140,7 +140,7 @@
                         </div>
                     </label>
 
-                    {{-- Station 2: Setrika --}}
+                    {{-- Station 2: Ironing --}}
                     <label class="cursor-pointer">
                         <input type="radio" name="station" value="setrika" x-model="selectedStation" class="sr-only">
                         <div :class="selectedStation === 'setrika' ? 'border-amber-600 bg-amber-50/70 ring-2 ring-amber-600 ring-offset-2' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'"
@@ -157,8 +157,8 @@
                                 </span>
                             </div>
                             <div>
-                                <h3 class="font-extrabold text-slate-800 text-base">Setrika / Ironing</h3>
-                                <p class="text-xs text-slate-500 mt-1">Menyetrika dan merapikan pakaian pelanggan menggunakan setrika uap.</p>
+                                <h3 class="font-extrabold text-slate-800 text-base">Ironing</h3>
+                                <p class="text-xs text-slate-500 mt-1">Melakukan proses ironing dan merapikan pakaian pelanggan.</p>
                             </div>
                         </div>
                     </label>
@@ -242,11 +242,11 @@
                 </ul>
             </div>
 
-            {{-- Stasiun Setrika --}}
+            {{-- Stasiun Ironing --}}
             <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-100">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-extrabold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <span>♨️</span> Setrika (Ironing)
+                        <span>♨️</span> Ironing
                     </span>
                     <span class="px-2 py-0.5 bg-amber-200 text-amber-800 rounded-lg text-xs font-black">
                         {{ $jadwalHariIni->where('selected_station', 'setrika')->count() }}

@@ -89,7 +89,7 @@ class WhatsAppService
         $statusMessages = [
             'diterima' => 'Pesanan Anda telah diterima dan sedang diproses.',
             'dicuci' => 'Pesanan Anda sedang dalam proses pencucian.',
-            'disetrika' => 'Pesanan Anda sedang dalam proses setrika.',
+            'disetrika' => 'Pesanan Anda sedang dalam proses ironing.',
             'dipacking' => 'Pesanan Anda sedang dalam proses packing.',
             'selesai' => 'Pesanan Anda telah selesai dan siap diambil.',
             'diambil' => 'Terima kasih telah menggunakan layanan kami. Pesanan Anda telah diambil.',

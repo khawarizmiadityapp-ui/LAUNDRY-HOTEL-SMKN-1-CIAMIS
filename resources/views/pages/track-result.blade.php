@@ -192,7 +192,7 @@
                         @php
                             $stages = [
                                 'washing' => 'Pencucian',
-                                'ironing' => 'Setrika',
+                                'ironing' => 'Ironing',
                                 'packing' => 'Packing & QC'
                             ];
                         @endphp

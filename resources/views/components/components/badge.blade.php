@@ -8,7 +8,7 @@
     - sorting        → Oranye (pemilahan)
     - spotting       → Amber (spotting/noda)
     - washing        → Biru (sedang dicuci)
-    - ironing        → Ungu (setrika)
+    - ironing        → Ungu (ironing)
     - packing        → Indigo (packing)
     - ready          → Hijau (siap diambil)
     - paid           → Teal (lunas/diserahkan)
@@ -23,7 +23,7 @@
         'sorting'  => ['label' => 'Pemilahan',    'class' => 'bg-orange-50 text-orange-600 ring-orange-200'],
         'spotting' => ['label' => 'Spotting',     'class' => 'bg-amber-50 text-amber-600 ring-amber-200'],
         'washing'  => ['label' => 'Dicuci',       'class' => 'bg-sky-50 text-sky-600 ring-sky-200'],
-        'ironing'  => ['label' => 'Setrika',      'class' => 'bg-violet-50 text-violet-600 ring-violet-200'],
+        'ironing'  => ['label' => 'Ironing',      'class' => 'bg-violet-50 text-violet-600 ring-violet-200'],
         'packing'  => ['label' => 'Packing',      'class' => 'bg-indigo-50 text-indigo-600 ring-indigo-200'],
         'ready'    => ['label' => 'Siap Diambil', 'class' => 'bg-emerald-50 text-emerald-600 ring-emerald-200'],
         'paid'     => ['label' => 'Lunas',        'class' => 'bg-teal-50 text-teal-600 ring-teal-200'],

@@ -44,7 +44,7 @@
                         <div class="absolute -top-2 -right-2 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">3</div>
                     </div>
                     <h4 class="font-bold text-gray-900 text-lg mb-2">Proses</h4>
-                        <p class="text-sm text-gray-500 px-2 leading-relaxed">Dicuci, dikeringkan, dan disetrika dengan standar hotel.</p>
+                        <p class="text-sm text-gray-500 px-2 leading-relaxed">Dicuci, dikeringkan, dan di-ironing dengan standar hotel.</p>
                 </div>
 
                 <!-- Step 4 -->
@@ -92,7 +92,7 @@
             <div class="relative flex items-center gap-6 group bg-white p-4 rounded-2xl shadow-sm border border-gray-50 transition-all hover:shadow-md">
                 <div class="w-10 h-10 bg-primary-600 text-white rounded-full flex-shrink-0 flex items-center justify-center font-bold shadow-md relative z-10 ring-4 ring-white">3</div>
                 <div>
-                    <h4 class="font-bold text-gray-900 text-lg">Proses Cuci & Setrika</h4>
+                    <h4 class="font-bold text-gray-900 text-lg">Proses Cuci & Ironing</h4>
                     <p class="text-sm text-gray-500 mt-1">Ditangani profesional sesuai SOP Perhotelan.</p>
                 </div>
             </div>

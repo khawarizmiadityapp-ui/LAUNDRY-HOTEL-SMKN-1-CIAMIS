@@ -104,13 +104,13 @@
                                 <span class="text-xs font-bold">2</span>
                             @endif
                         </div>
-                        <span class="text-xs font-semibold text-slate-600">Setrika</span>
+                        <span class="text-xs font-semibold text-slate-600">Ironing</span>
                         
                         @if($stepIroning == 'active')
                             <form action="{{ route('petugas_piket.tasks.updateStatus', $trx->id) }}" method="POST" class="mt-2 text-center absolute top-full">
                                 @csrf
                                 <input type="hidden" name="status" value="dipacking">
-                                <button type="submit" class="whitespace-nowrap px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">Selesai Setrika</button>
+                                <button type="submit" class="whitespace-nowrap px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">Selesai Ironing</button>
                             </form>
                         @endif
                     </div>

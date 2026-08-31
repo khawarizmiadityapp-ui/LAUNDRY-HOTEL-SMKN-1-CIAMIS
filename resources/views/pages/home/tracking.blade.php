@@ -41,7 +41,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
                     </span>
-                    Proses Setrika
+                    Proses Ironing
                 </div>
             </div>
             
@@ -77,7 +77,7 @@
                         <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     </div>
                     <div class="md:text-center mt-0 md:mt-2">
-                        <p class="text-sm font-extrabold text-primary-600">Disetrika</p>
+                        <p class="text-sm font-extrabold text-primary-600">Ironing</p>
                         <p class="text-[11px] text-primary-400 font-medium">Sedang proses...</p>
                     </div>
                 </div>
