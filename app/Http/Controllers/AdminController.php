@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Hash;
 use App\Services\TransactionService;
 use App\Services\ErrorLoggingService;
 
@@ -737,7 +739,6 @@ class AdminController extends Controller
 
     public function settings()
     {
-        $limitPemasukanBulanan = (int) env('MONTHLY_INCOME_LIMIT', 50000000);
         $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
         $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
         $heroImage = \App\Models\Setting::getValue('hero_image', 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop');
@@ -748,13 +749,17 @@ class AdminController extends Controller
             ->orderBy('nama')
             ->get();
         
-        return view('admin.settings', compact('limitPemasukanBulanan', 'adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList'));
+        // Load seluruh akun pengguna sistem (Admin & Petugas/Staff)
+        $userList = User::orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList', 'userList'));
     }
 
     public function updateSettings(Request $request)
     {
         $request->validate([
-            'target' => 'required|numeric|min:0',
             'admin_wa' => 'required|string',
             'service_wa' => 'required|string',
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -762,18 +767,6 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Update target limit in .env
-            $path = base_path('.env');
-            if (file_exists($path)) {
-                $envContent = file_get_contents($path);
-                if (str_contains($envContent, 'MONTHLY_INCOME_LIMIT=')) {
-                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $request->target, $envContent);
-                } else {
-                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $request->target;
-                }
-                file_put_contents($path, $envContent);
-            }
-
             // Update WhatsApp number in settings table
             $phone = format_whatsapp_number($request->admin_wa);
             \App\Models\Setting::setValue('admin_wa', $phone);
@@ -800,6 +793,56 @@ class AdminController extends Controller
             return back()->with('success', 'Pengaturan berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
+        }
+    }
+
+    public function updateUserPassword(Request $request, $id)
+    {
+        // Pastikan hanya admin yang bisa melakukan aksi ini
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak. Hanya Admin yang dapat mengganti password.');
+        }
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal terdiri dari 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            // Log activity audit trail
+            $currentAdmin = Auth::user();
+            ActivityLog::create([
+                'log_name' => 'security',
+                'description' => "Admin {$currentAdmin->name} mengubah password akun {$user->name} ({$user->email})",
+                'subject_type' => User::class,
+                'subject_id' => $user->id,
+                'event' => 'password_updated',
+                'causer_type' => User::class,
+                'causer_id' => $currentAdmin->id,
+                'properties' => [
+                    'target_user_id' => $user->id,
+                    'target_user_email' => $user->email,
+                    'target_user_role' => $user->role,
+                ],
+            ]);
+
+            return back()->with('success', "Password untuk akun {$user->name} ({$user->email}) berhasil diperbarui!");
+        } catch (\Exception $e) {
+            Log::error('Update User Password Failed', [
+                'operation' => 'admin.updateUserPassword',
+                'admin_id' => Auth::id(),
+                'target_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Gagal memperbarui password: ' . $e->getMessage());
         }
     }
 }

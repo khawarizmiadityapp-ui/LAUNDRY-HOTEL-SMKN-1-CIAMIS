@@ -1,9 +1,6 @@
-{{-- resources/views/admin/settings.blade.php --}}
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Pengaturan - Bening Laundry'); ?>
 
-@section('title', 'Pengaturan - Bening Laundry')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -25,8 +22,8 @@
                 Konfigurasi Umum
             </h2>
             
-            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
-                @csrf
+            <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
+                <?php echo csrf_field(); ?>
                 
                 <!-- Nomor WA Pihak Bisa Dihubungi Pembeli -->
                 <div>
@@ -35,7 +32,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                         </div>
-                        <input type="text" name="admin_wa" id="admin_wa" value="{{ $adminWA }}" required
+                        <input type="text" name="admin_wa" id="admin_wa" value="<?php echo e($adminWA); ?>" required
                                class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
                                placeholder="Contoh: 082116035029">
                     </div>
@@ -49,7 +46,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                         </div>
-                        <input type="text" name="service_wa" id="service_wa" value="{{ $serviceWA }}" required
+                        <input type="text" name="service_wa" id="service_wa" value="<?php echo e($serviceWA); ?>" required
                                class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
                                placeholder="Contoh: 082116035029">
                     </div>
@@ -67,12 +64,12 @@
                                class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                     </div>
                     <p class="text-xs text-slate-400 mt-1.5">Biarkan kosong jika tidak ingin mengubah foto. (Rekomendasi rasio kotak/square, maks 2MB)</p>
-                    @if(isset($heroImage))
+                    <?php if(isset($heroImage)): ?>
                         <div class="mt-2 flex items-center gap-2">
                             <span class="text-xs text-slate-500">Foto saat ini:</span>
-                            <img src="{{ $heroImage }}" alt="Current Hero" class="h-10 w-10 object-cover rounded shadow-sm border border-slate-200">
+                            <img src="<?php echo e($heroImage); ?>" alt="Current Hero" class="h-10 w-10 object-cover rounded shadow-sm border border-slate-200">
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
                 <!-- Logo Laundry -->
@@ -86,12 +83,12 @@
                                class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                     </div>
                     <p class="text-xs text-slate-400 mt-1.5">Biarkan kosong jika tidak mengubah logo. (Rekomendasi rasio 1:1, maks 1MB)</p>
-                    @if(isset($logoImage))
+                    <?php if(isset($logoImage)): ?>
                         <div class="mt-2 flex items-center gap-2">
                             <span class="text-xs text-slate-500">Logo saat ini:</span>
-                            <img src="{{ $logoImage }}" alt="Current Logo" class="h-10 w-10 object-contain bg-white rounded shadow-sm border border-slate-200">
+                            <img src="<?php echo e($logoImage); ?>" alt="Current Logo" class="h-10 w-10 object-contain bg-white rounded shadow-sm border border-slate-200">
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
                 <!-- Submit Button -->
@@ -125,8 +122,9 @@
                     </div>
                     <div>
                         <p class="text-xs text-brand-200">WhatsApp Link Preview</p>
-                        <a href="https://wa.me/{{ $adminWA }}" target="_blank" class="text-sm font-bold text-white hover:underline flex items-center gap-1">
-                            wa.me/{{ $adminWA }}
+                        <a href="https://wa.me/<?php echo e($adminWA); ?>" target="_blank" class="text-sm font-bold text-white hover:underline flex items-center gap-1">
+                            wa.me/<?php echo e($adminWA); ?>
+
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
                             </svg>
@@ -169,78 +167,78 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100" id="kategoriTableBody">
-                    @foreach($kategoriList as $kategori)
+                    <?php $__currentLoopData = $kategoriList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="px-4 py-3 font-medium text-slate-800">{{ $kategori->nama }}</td>
-                        <td class="px-4 py-3 text-sm text-slate-600">{{ $kategori->deskripsi ?? '-' }}</td>
+                        <td class="px-4 py-3 font-medium text-slate-800"><?php echo e($kategori->nama); ?></td>
+                        <td class="px-4 py-3 text-sm text-slate-600"><?php echo e($kategori->deskripsi ?? '-'); ?></td>
                         <td class="px-4 py-3 text-center">
-                            @if($kategori->is_active)
+                            <?php if($kategori->is_active): ?>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
                                 Aktif
                             </span>
-                            @else
+                            <?php else: ?>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
                                 <span class="w-1.5 h-1.5 bg-slate-500 rounded-full mr-1.5"></span>
                                 Nonaktif
                             </span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-center text-sm text-slate-600">
-                            {{ $kategori->pengeluarans_count ?? 0 }} kali
+                            <?php echo e($kategori->pengeluarans_count ?? 0); ?> kali
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-2">
-                                <button onclick="editKategori({{ $kategori->id }}, '{{ $kategori->nama }}', '{{ $kategori->deskripsi }}', {{ $kategori->is_active ? 'true' : 'false' }})" 
+                                <button onclick="editKategori(<?php echo e($kategori->id); ?>, '<?php echo e($kategori->nama); ?>', '<?php echo e($kategori->deskripsi); ?>', <?php echo e($kategori->is_active ? 'true' : 'false'); ?>)" 
                                         class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
 
-                                <form action="{{ route('admin.kategori-pengeluaran.toggle-status', $kategori) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="p-1.5 {{ $kategori->is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50' }} rounded-lg transition" 
-                                            title="{{ $kategori->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                        @if($kategori->is_active)
+                                <form action="<?php echo e(route('admin.kategori-pengeluaran.toggle-status', $kategori)); ?>" method="POST" class="inline">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('PATCH'); ?>
+                                    <button type="submit" class="p-1.5 <?php echo e($kategori->is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'); ?> rounded-lg transition" 
+                                            title="<?php echo e($kategori->is_active ? 'Nonaktifkan' : 'Aktifkan'); ?>">
+                                        <?php if($kategori->is_active): ?>
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                         </svg>
-                                        @else
+                                        <?php else: ?>
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        @endif
+                                        <?php endif; ?>
                                     </button>
                                 </form>
 
-                                @if(!$kategori->isUsed())
-                                <form action="{{ route('admin.kategori-pengeluaran.destroy', $kategori) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
-                                    @csrf
-                                    @method('DELETE')
+                                <?php if(!$kategori->isUsed()): ?>
+                                <form action="<?php echo e(route('admin.kategori-pengeluaran.destroy', $kategori)); ?>" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </form>
-                                @else
+                                <?php else: ?>
                                 <span class="p-1.5 text-slate-300" title="Tidak bisa dihapus karena masih digunakan">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
                                 </span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
 
-        @if($kategoriList->isEmpty())
+        <?php if($kategoriList->isEmpty()): ?>
         <div class="text-center py-12">
             <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -248,7 +246,7 @@
             <p class="text-slate-500 font-medium">Belum ada kategori pengeluaran</p>
             <p class="text-slate-400 text-sm mt-1">Klik tombol "Tambah Kategori" untuk membuat kategori baru</p>
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 
     <!-- Manajemen Akun & Ganti Password Section -->
@@ -284,51 +282,54 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse($userList as $userItem)
+                    <?php $__empty_1 = true; $__currentLoopData = $userList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $userItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs {{ $userItem->role === 'admin' ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-sm' : 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm' }}">
-                                    {{ strtoupper(substr($userItem->name, 0, 2)) }}
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs <?php echo e($userItem->role === 'admin' ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-sm' : 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm'); ?>">
+                                    <?php echo e(strtoupper(substr($userItem->name, 0, 2))); ?>
+
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-semibold text-slate-800 text-sm">{{ $userItem->name }}</span>
-                                        @if($userItem->id === auth()->id())
+                                        <span class="font-semibold text-slate-800 text-sm"><?php echo e($userItem->name); ?></span>
+                                        <?php if($userItem->id === auth()->id()): ?>
                                             <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Akun Anda</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
-                                    <span class="text-xs text-slate-400">ID: #{{ $userItem->id }}</span>
+                                    <span class="text-xs text-slate-400">ID: #<?php echo e($userItem->id); ?></span>
                                 </div>
                             </div>
                         </td>
                         <td class="px-4 py-3 text-sm text-slate-600 font-mono">
-                            {{ $userItem->email }}
+                            <?php echo e($userItem->email); ?>
+
                         </td>
                         <td class="px-4 py-3 text-center">
-                            @if($userItem->role === 'admin')
+                            <?php if($userItem->role === 'admin'): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                                     Admin
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                                     Petugas / Staff
                                 </span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-center text-sm text-slate-600">
-                            @if($userItem->division)
+                            <?php if($userItem->division): ?>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 uppercase tracking-wide">
-                                    {{ config('sidebar.division_labels.' . $userItem->division) ?? ucfirst($userItem->division) }}
+                                    <?php echo e(config('sidebar.division_labels.' . $userItem->division) ?? ucfirst($userItem->division)); ?>
+
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="text-slate-400 text-xs italic">-</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <button type="button" onclick="openChangePasswordModal({{ $userItem->id }}, '{{ addslashes($userItem->name) }}', '{{ addslashes($userItem->email) }}', '{{ $userItem->role === 'admin' ? 'Admin' : 'Petugas' }}')"
+                            <button type="button" onclick="openChangePasswordModal(<?php echo e($userItem->id); ?>, '<?php echo e(addslashes($userItem->name)); ?>', '<?php echo e(addslashes($userItem->email)); ?>', '<?php echo e($userItem->role === 'admin' ? 'Admin' : 'Petugas'); ?>')"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs rounded-xl transition border border-brand-200 hover:border-brand-300 shadow-2xs">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -337,13 +338,13 @@
                             </button>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="5" class="text-center py-8 text-slate-400 text-sm">
                             Tidak ada data pengguna ditemukan.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -362,7 +363,7 @@
             </div>
 
             <form id="kategoriForm" method="POST" class="space-y-4">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="_method" id="formMethod" value="POST">
 
                 <div>
@@ -435,7 +436,7 @@
             </div>
 
             <form id="changePasswordForm" method="POST" class="space-y-4">
-                @csrf
+                <?php echo csrf_field(); ?>
                 
                 <div>
                     <label for="new_password" class="block text-sm font-semibold text-slate-700 mb-1">
@@ -500,7 +501,7 @@
     <script>
         function openAddKategoriModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Kategori';
-            document.getElementById('kategoriForm').action = '{{ route("admin.kategori-pengeluaran.store") }}';
+            document.getElementById('kategoriForm').action = '<?php echo e(route("admin.kategori-pengeluaran.store")); ?>';
             document.getElementById('formMethod').value = 'POST';
             document.getElementById('nama').value = '';
             document.getElementById('deskripsi').value = '';
@@ -510,7 +511,7 @@
 
         function editKategori(id, nama, deskripsi, isActive) {
             document.getElementById('modalTitle').textContent = 'Edit Kategori';
-            document.getElementById('kategoriForm').action = '{{ url("admin/kategori-pengeluaran") }}/' + id;
+            document.getElementById('kategoriForm').action = '<?php echo e(url("admin/kategori-pengeluaran")); ?>/' + id;
             document.getElementById('formMethod').value = 'PUT';
             document.getElementById('nama').value = nama;
             document.getElementById('deskripsi').value = deskripsi || '';
@@ -534,7 +535,7 @@
             document.getElementById('targetUserName').textContent = userName;
             document.getElementById('targetUserEmail').textContent = userEmail;
             document.getElementById('targetUserRole').textContent = userRole;
-            document.getElementById('changePasswordForm').action = "{{ url('admin/users') }}/" + userId + "/password";
+            document.getElementById('changePasswordForm').action = "<?php echo e(url('admin/users')); ?>/" + userId + "/password";
             document.getElementById('new_password').value = '';
             document.getElementById('new_password_confirmation').value = '';
             document.getElementById('changePasswordModal').classList.remove('hidden');
@@ -568,5 +569,7 @@
         });
     </script>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/settings.blade.php ENDPATH**/ ?>

@@ -95,9 +95,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/prices', [AdminController::class, 'prices'])->name('prices');
         Route::post('/prices', [AdminController::class, 'updatePrices'])->middleware('throttle:20,1')->name('prices.update');
         
-        // User Management
+        // User Management & Password
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::post('/users', [AdminController::class, 'storeUser'])->middleware('throttle:20,1')->name('users.store');
+        Route::post('/users/{id}/password', [AdminController::class, 'updateUserPassword'])->middleware('throttle:20,1')->name('users.password.update');
         
         // Activity Log
         Route::prefix('activity')->name('activity.')->group(function () {
