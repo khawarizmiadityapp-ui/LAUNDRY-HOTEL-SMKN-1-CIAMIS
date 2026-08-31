@@ -413,6 +413,8 @@
     }
 </script>
 
+@include('components.logout-confirm')
+
 @stack('scripts')
 
 </body>

@@ -75,7 +75,7 @@ Usage: @include('components.stat_card', [
 
         <!-- Logout -->
         <div class="px-3 py-4 border-t border-slate-100">
-            <button onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+            <button type="button" onclick="confirmLogout(event)"
                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-500
                       hover:bg-rose-50 transition-all duration-150">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">

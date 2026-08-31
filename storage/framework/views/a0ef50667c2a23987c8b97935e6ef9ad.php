@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') — Bening Laundry</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title><?php echo $__env->yieldContent('title', 'Dashboard'); ?> — Bening Laundry</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    {{-- Google Fonts: Plus Jakarta Sans --}}
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    {{-- Tailwind CSS CDN --}}
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <script>
@@ -59,7 +59,7 @@
         }
     </script>
 
-    {{-- Chart.js --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
     <script>
@@ -171,7 +171,7 @@
         }
     </style>
 
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
@@ -184,7 +184,7 @@
 <div class="flex h-screen overflow-hidden">
 
     <!-- ===================== SIDEBAR ===================== -->
-    @include('admin.sidebar')
+    <?php echo $__env->make('admin.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <!-- =================== END SIDEBAR =================== -->
 
     <!-- ===================== MAIN AREA ===================== -->
@@ -201,16 +201,16 @@
             </button>
 
             <!-- Search -->
-            <form action="{{ url()->current() }}" method="GET" class="relative flex-1 max-w-md">
-                @foreach (request()->except('search') as $key => $value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endforeach
+            <form action="<?php echo e(url()->current()); ?>" method="GET" class="relative flex-1 max-w-md">
+                <?php $__currentLoopData = request()->except('search'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <input type="hidden" name="<?php echo e($key); ?>" value="<?php echo e($value); ?>">
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z"/>
                     </svg>
                 </span>
-                <input type="text" name="search" value="{{ request('search') }}"
+                <input type="text" name="search" value="<?php echo e(request('search')); ?>"
                        placeholder="Search transactions, customers..."
                        class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl
                               focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400
@@ -225,7 +225,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                         </svg>
-                        @php
+                        <?php
                             // Mengambil data aktivitas langsung tanpa Cache untuk menghindari error unserialize object
                             $recentActivities = \App\Models\ActivityLog::with('causer')->latest()->limit(5)->get();
                             
@@ -233,10 +233,10 @@
                             // Cache::get aman digunakan untuk tipe data primitif seperti integer (ID)
                             $lastReadId = \Illuminate\Support\Facades\Cache::get('user_' . auth()->id() . '_last_read_activity', 0);
                             $hasNew = $latestId > $lastReadId;
-                        @endphp
-                        @if($hasNew)
+                        ?>
+                        <?php if($hasNew): ?>
                         <span id="notification-badge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                        @endif
+                        <?php endif; ?>
                     </button>
 
                     <!-- Notification Dropdown -->
@@ -245,9 +245,9 @@
                             <h3 class="font-semibold text-slate-800">Recent Activity</h3>
                         </div>
                         <div class="overflow-y-auto max-h-72">
-                            {{-- Data sudah di-cache dari query pertama di atas --}}
-                            @if($recentActivities->count() > 0)
-                                @foreach($recentActivities as $activity)
+                            
+                            <?php if($recentActivities->count() > 0): ?>
+                                <?php $__currentLoopData = $recentActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="block p-4 hover:bg-slate-50 border-b border-slate-100 last:border-0 transition">
                                     <div class="flex items-start gap-3">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -256,22 +256,23 @@
                                             </svg>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-slate-800 truncate">{{ $activity->description }}</p>
+                                            <p class="text-sm font-medium text-slate-800 truncate"><?php echo e($activity->description); ?></p>
                                             <p class="text-xs text-slate-500 mt-1">
-                                                {{ $activity->causer ? $activity->causer->name ?? $activity->causer->email : 'System' }} • {{ $activity->created_at->diffForHumans() }}
+                                                <?php echo e($activity->causer ? $activity->causer->name ?? $activity->causer->email : 'System'); ?> • <?php echo e($activity->created_at->diffForHumans()); ?>
+
                                             </p>
                                         </div>
                                     </div>
                                 </div>
-                                @endforeach
-                            @else
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php else: ?>
                                 <div class="p-8 text-center text-slate-400">
                                     <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                     </svg>
                                     <p class="text-sm">No recent activity</p>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -293,7 +294,7 @@
 
         <!-- PAGE CONTENT -->
         <main class="flex-1 overflow-y-auto p-5 lg:p-7 animate-fade-in">
-            @yield('content')
+            <?php echo $__env->yieldContent('content'); ?>
         </main>
 
     </div>
@@ -316,7 +317,7 @@
         dropdown.classList.toggle('hidden');
         
         if (!dropdown.classList.contains('hidden') && badge) {
-            fetch('{{ route("admin.activity.mark-read") }}', {
+            fetch('<?php echo e(route("admin.activity.mark-read")); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -422,22 +423,22 @@
     }
 
     // Show Laravel flash messages as toasts
-    @if(session('success'))
-        showToast('{{ session('success') }}', 'success');
-    @endif
-    @if(session('error'))
-        showToast('{{ session('error') }}', 'error');
-    @endif
-    @if(session('warning'))
-        showToast('{{ session('warning') }}', 'warning');
-    @endif
-    @if(session('info'))
-        showToast('{{ session('info') }}', 'info');
-    @endif
+    <?php if(session('success')): ?>
+        showToast('<?php echo e(session('success')); ?>', 'success');
+    <?php endif; ?>
+    <?php if(session('error')): ?>
+        showToast('<?php echo e(session('error')); ?>', 'error');
+    <?php endif; ?>
+    <?php if(session('warning')): ?>
+        showToast('<?php echo e(session('warning')); ?>', 'warning');
+    <?php endif; ?>
+    <?php if(session('info')): ?>
+        showToast('<?php echo e(session('info')); ?>', 'info');
+    <?php endif; ?>
 </script>
 
-@include('components.logout-confirm')
+<?php echo $__env->make('components.logout-confirm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-@stack('scripts')
+<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/layouts/admin.blade.php ENDPATH**/ ?>
