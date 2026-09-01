@@ -77,4 +77,41 @@ class RoleAccessTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Authorized');
     }
+
+    public function test_super_admin_role_is_allowed()
+    {
+        // Create a mock user with super_admin role
+        $user = new User();
+        $user->id = 4;
+        $user->name = 'Super Admin User';
+        $user->role = 'super_admin';
+        
+        $this->actingAs($user);
+        
+        $response = $this->get('/_test_secure_route');
+        
+        $response->assertStatus(200);
+        $response->assertSee('Authorized');
+    }
+
+    public function test_user_model_role_helpers()
+    {
+        $superAdmin = new User(['role' => 'super_admin']);
+        $this->assertTrue($superAdmin->isSuperAdmin());
+        $this->assertTrue($superAdmin->isAdmin());
+        $this->assertFalse($superAdmin->isStaff());
+        $this->assertEquals('Super Admin', $superAdmin->role_display_name);
+
+        $admin = new User(['role' => 'admin']);
+        $this->assertFalse($admin->isSuperAdmin());
+        $this->assertTrue($admin->isAdmin());
+        $this->assertFalse($admin->isStaff());
+        $this->assertEquals('Admin', $admin->role_display_name);
+
+        $staff = new User(['role' => 'staff']);
+        $this->assertFalse($staff->isSuperAdmin());
+        $this->assertFalse($staff->isAdmin());
+        $this->assertTrue($staff->isStaff());
+        $this->assertEquals('Petugas / Staff', $staff->role_display_name);
+    }
 }

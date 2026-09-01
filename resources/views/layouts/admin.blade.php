@@ -281,10 +281,12 @@
 
                 <!-- Profile -->
                 <div class="flex items-center gap-2.5 cursor-pointer group">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-xs font-bold shadow-sm">A</div>
+                    <div class="w-8 h-8 rounded-xl {{ auth()->user()->isSuperAdmin() ? 'bg-gradient-to-br from-purple-600 to-indigo-600' : 'bg-gradient-to-br from-brand-500 to-brand-700' }} flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                    </div>
                     <div class="hidden sm:block leading-none">
-                        <p class="text-sm font-semibold text-slate-800">Admin Profile</p>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Super Admin</p>
+                        <p class="text-sm font-semibold text-slate-800">{{ auth()->user()->name ?? 'Administrator' }}</p>
+                        <p class="text-[11px] {{ auth()->user()->isSuperAdmin() ? 'text-purple-600 font-semibold' : 'text-slate-400' }} mt-0.5">{{ auth()->user()->role_display_name ?? 'Admin' }}</p>
                     </div>
                 </div>
             </div>

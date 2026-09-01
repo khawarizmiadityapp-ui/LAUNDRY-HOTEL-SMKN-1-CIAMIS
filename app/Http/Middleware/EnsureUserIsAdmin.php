@@ -23,10 +23,10 @@ class EnsureUserIsAdmin
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
         
-        // Check if user is admin
-        if ($user->role !== 'admin') {
+        // Check if user is admin or super admin
+        if (!$user->isAdmin()) {
             // If user is staff, redirect to petugas dashboard
-            if ($user->role === 'staff') {
+            if ($user->isStaff()) {
                 return redirect()->route('petugas_piket.dashboard')
                     ->with('error', 'Anda tidak memiliki akses ke halaman admin. Dialihkan ke dashboard petugas.');
             }

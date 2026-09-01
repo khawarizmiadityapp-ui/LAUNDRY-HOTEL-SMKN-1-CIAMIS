@@ -12,6 +12,7 @@ class PetugasUserSeeder extends Seeder
     {
         // Delete existing test users
         User::whereIn('email', [
+            'superadmin@test.com',
             'admin@test.com',
             'washing@test.com',
             'setrika@test.com',
@@ -19,6 +20,15 @@ class PetugasUserSeeder extends Seeder
             'cs@test.com',
             'inventory@test.com',
         ])->delete();
+
+        // Super Admin User (Akses Penuh Seluruh Sistem)
+        User::create([
+            'name' => 'Super Admin User',
+            'email' => 'superadmin@test.com',
+            'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'division' => null,
+        ]);
 
         // Admin User (dapat akses semua menu)
         User::create([

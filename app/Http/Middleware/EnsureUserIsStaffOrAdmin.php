@@ -23,7 +23,7 @@ class EnsureUserIsStaffOrAdmin
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
         
-        if (!in_array($user->role, ['admin', 'staff'])) {
+        if (!$user->isAdmin() && !$user->isStaff()) {
             abort(403, 'Akses ditolak. Fitur ini hanya untuk Petugas atau Administrator.');
         }
         

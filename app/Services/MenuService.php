@@ -55,15 +55,17 @@ class MenuService
      */
     protected function canAccessMenu(array $menu, string $role, string $division): bool
     {
-        // Check role permission first
+        $isAdminRole = in_array($role, ['super_admin', 'super admin', 'superadmin', 'admin'], true);
+
+        // Super Admin and Admin can access everything (bypass division check)
+        if ($isAdminRole) {
+            return true;
+        }
+
+        // Check role permission for staff / others
         $allowedRoles = $menu['roles'] ?? ['admin', 'staff'];
         if (!in_array($role, $allowedRoles, true)) {
             return false;
-        }
-
-        // Admin can access everything (bypass division check)
-        if ($role === 'admin') {
-            return true;
         }
 
         // Check division permission for staff

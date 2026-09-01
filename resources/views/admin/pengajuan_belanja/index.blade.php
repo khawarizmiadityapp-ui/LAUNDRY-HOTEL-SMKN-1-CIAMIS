@@ -197,7 +197,7 @@
                                 </button>
 
                                 {{-- Jika Status: diajukan -> Approval Buttons (Admin) --}}
-                                @if($item->status === 'diajukan' && auth()->user()->role === 'admin')
+                                @if($item->status === 'diajukan' && auth()->user()->isAdmin())
                                     <button @click="openApproveModal({{ $item->id }}, '{{ $item->kode_pengajuan }}', '{{ $item->nama_pengajuan }}')"
                                             class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
                                             title="Setujui Pengajuan">
@@ -219,7 +219,7 @@
                                 @endif
 
                                 {{-- Tombol Hapus (Admin or Owner if pending) --}}
-                                @if(auth()->user()->role === 'admin' || $item->status === 'diajukan')
+                                @if(auth()->user()->isAdmin() || $item->status === 'diajukan')
                                     <form action="{{ route('admin.pengajuan_belanja.destroy', $item->id) }}" method="POST"
                                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengajuan belanja ini?')"
                                           class="inline-block">

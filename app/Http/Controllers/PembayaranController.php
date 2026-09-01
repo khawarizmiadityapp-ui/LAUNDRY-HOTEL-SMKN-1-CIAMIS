@@ -226,7 +226,7 @@ class PembayaranController extends Controller
             $transaksi = Transaksi::where('transaksi_code', $validated['transaksi_id'])->firstOrFail();
 
             $user = Auth::user();
-            if (!in_array($user->role, ['admin', 'staff'])) {
+            if (!$user->isAdmin() && !$user->isStaff()) {
                 DB::rollBack();
                 abort(403, 'Unauthorized. Hanya admin dan staff yang dapat memproses pembayaran.');
             }

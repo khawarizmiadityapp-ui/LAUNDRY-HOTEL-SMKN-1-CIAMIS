@@ -1,5 +1,5 @@
 {{-- resources/views/admin/customers/edit.blade.php --}}
-@extends('layouts.' . (auth()->user()->role === 'admin' ? 'admin' : 'petugas_piket'))
+@extends('layouts.' . (auth()->user()->isAdmin() ? 'admin' : 'petugas_piket'))
 
 @section('title', 'Edit Data Customer')
 

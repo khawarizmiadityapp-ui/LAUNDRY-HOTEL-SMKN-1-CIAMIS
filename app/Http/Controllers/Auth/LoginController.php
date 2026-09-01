@@ -36,8 +36,8 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
-        // Khusus Admin: Wajib 2FA Google Authenticator
-        if ($user->role === 'admin') {
+        // Khusus Super Admin & Admin: Wajib 2FA Google Authenticator
+        if ($user->isAdmin()) {
             // Pastikan admin memiliki secret key standar (16 karakter Base32)
             if (empty($user->google2fa_secret) || strlen($user->google2fa_secret) > 16) {
                 $user->google2fa_secret = Google2FAService::generateSecretKey(10);
@@ -55,7 +55,7 @@ class LoginController extends Controller
         Auth::login($user, (bool) $request->remember);
         $request->session()->regenerate();
 
-        if ($user->role === 'staff') {
+        if ($user->isStaff()) {
             $onlineStaff = Cache::get('online_staff_users', []);
             $onlineStaff[$user->id] = now()->timestamp;
             Cache::forever('online_staff_users', $onlineStaff);
@@ -79,7 +79,7 @@ class LoginController extends Controller
         }
 
         $admin = User::find($adminId);
-        if (!$admin || $admin->role !== 'admin') {
+        if (!$admin || !$admin->isAdmin()) {
             $request->session()->forget(['2fa_admin_id', '2fa_expires_at']);
             return redirect()->route('login');
         }
@@ -109,7 +109,7 @@ class LoginController extends Controller
         }
 
         $admin = User::find($adminId);
-        if (!$admin || $admin->role !== 'admin') {
+        if (!$admin || !$admin->isAdmin()) {
             $request->session()->forget(['2fa_admin_id', '2fa_expires_at']);
             return redirect()->route('login');
         }
@@ -148,7 +148,7 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $user->role === 'staff') {
+        if ($user && $user->isStaff()) {
             $onlineStaff = Cache::get('online_staff_users', []);
             unset($onlineStaff[$user->id]);
             Cache::forever('online_staff_users', $onlineStaff);
@@ -163,9 +163,9 @@ class LoginController extends Controller
 
     private function redirectBasedOnRole($user)
     {
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'staff') {
+        } elseif ($user->isStaff()) {
             $division = strtolower((string) $user->division);
 
             return match ($division) {
@@ -181,3 +181,4 @@ class LoginController extends Controller
         return redirect('/');
     }
 }
+

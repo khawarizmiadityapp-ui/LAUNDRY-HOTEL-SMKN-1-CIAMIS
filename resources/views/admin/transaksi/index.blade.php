@@ -1,4 +1,4 @@
-@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas_piket')
+@extends(auth()->user()->isAdmin() ? 'layouts.admin' : 'layouts.petugas_piket')
 
 @section('title', 'Manajemen Transaksi - Bening Laundry')
 
@@ -171,7 +171,7 @@
                                     <i class="fas fa-receipt text-slate-400"></i> Cek Nota / Struk
                                 </button>
 
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->user()->isAdmin())
                                 <div class="h-px bg-slate-100 my-1"></div>
 
                                 <form action="{{ route('admin.transactions.destroy', $trx->id) }}" method="POST"

@@ -110,9 +110,9 @@ class PosController extends Controller
      */
     public function store(Request $request)
     {
-        // Authorization check: only admin and staff can create transactions
+        // Authorization check: super admin, admin, and staff can create transactions
         $user = Auth::user();
-        if (!in_array($user->role, ['admin', 'staff'])) {
+        if (!$user->isAdmin() && !$user->isStaff()) {
             abort(403, 'Unauthorized. Only admin and staff can create transactions.');
         }
 

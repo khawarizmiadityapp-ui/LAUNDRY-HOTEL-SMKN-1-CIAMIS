@@ -1,4 +1,4 @@
-@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas_piket')
+@extends(auth()->user()->isAdmin() ? 'layouts.admin' : 'layouts.petugas_piket')
 
 @section('title', 'Buat Pesanan')
 
@@ -99,7 +99,7 @@
     .order-panel::-webkit-scrollbar { width: 4px; }
     .order-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
 
-    @if(auth()->user()->role !== 'admin')
+    @if(!auth()->user()->isAdmin())
     /* Override cashier layout constraints for full-screen POS */
     body {
         overflow: hidden !important;
@@ -138,7 +138,7 @@
 @endpush
 
 @section('content')
-<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-0 -mx-5 lg:-mx-8 -my-8 {{ auth()->user()->role === 'admin' ? 'h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-hidden' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4rem)]' }}">
+<div x-data="posApp()" x-init="init()" class="flex flex-col lg:flex-row gap-0 -mx-5 lg:-mx-8 -my-8 {{ auth()->user()->isAdmin() ? 'h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-hidden' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4rem)]' }}">
 
     {{-- ═══════════ LEFT: Service Grid ═══════════ --}}
     <div class="flex-1 p-5 lg:p-7 overflow-y-auto">
@@ -164,7 +164,7 @@
                 <p class="text-sm text-slate-400 mt-0.5" x-text="viewMode === 'order' ? 'Pilih layanan untuk customer' : 'Daftar cucian yang sudah selesai packing'"></p>
             </div>
             <div class="flex items-center gap-4">
-                @if(auth()->user()->role === 'admin')
+                @if(auth()->user()->isAdmin())
                 <button @click="openAddServiceModal()"
                         class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -261,7 +261,7 @@
                  class="pos-card bg-white border border-slate-100 rounded-2xl p-4 shadow-sm group">
 
                 {{-- Edit overlay for admin --}}
-                @if(auth()->user()->role === 'admin')
+                @if(auth()->user()->isAdmin())
                 <button @click.stop="openEditServiceModal({{ json_encode($layanan) }})"
                         class="absolute top-2.5 left-2.5 w-7 h-7 bg-white/90 backdrop-blur shadow-sm border border-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-brand-600 hover:scale-110 transition opacity-0 group-hover:opacity-100 z-10">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
@@ -626,7 +626,7 @@
     </div>
 
     {{-- ═══════════ SERVICE MODAL (ADD/EDIT) ═══════════ --}}
-    @if(auth()->user()->role === 'admin')
+    @if(auth()->user()->isAdmin())
     <div x-show="showServiceModal" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center modal-overlay"
          x-transition:enter="transition ease-out duration-200"

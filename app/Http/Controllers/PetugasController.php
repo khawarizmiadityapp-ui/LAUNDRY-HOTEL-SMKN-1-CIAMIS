@@ -35,11 +35,11 @@ class PetugasController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             return;
         }
 
-        if ($user->role !== 'staff') {
+        if (!$user->isStaff()) {
             abort(403, 'Akses ditolak');
         }
 
@@ -58,9 +58,9 @@ class PetugasController extends Controller
     {
         $user = Auth::user();
 
-        // Allow both admin and staff
-        if (!in_array($user->role, ['admin', 'staff'])) {
-            abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
+        // Allow super admin, admin, and staff
+        if (!$user->isAdmin() && !$user->isStaff()) {
+            abort(403, 'Akses ditolak. Hanya administrator dan petugas yang dapat mengakses halaman ini.');
         }
 
         $division = strtolower((string) $user->division);
@@ -555,7 +555,7 @@ class PetugasController extends Controller
             $item = \App\Models\Inventory::findOrFail($id);
             $adjustment = (int) $request->adjustment;
 
-            if (Auth::user()->role === 'admin') {
+            if (Auth::user()->isAdmin()) {
                 $item->adjustStockUnits($adjustment);
                 return redirect()->back()->with('success', "Stok {$item->name} berhasil diperbarui.");
             }
@@ -587,15 +587,15 @@ class PetugasController extends Controller
     {
         $user = Auth::user();
 
-        // Allow both admin and staff
-        if (!in_array($user->role, ['admin', 'staff'])) {
-            abort(403, 'Akses ditolak. Hanya admin dan staff yang dapat mengakses halaman ini.');
+        // Allow super admin, admin, and staff
+        if (!$user->isAdmin() && !$user->isStaff()) {
+            abort(403, 'Akses ditolak. Hanya administrator dan petugas yang dapat mengakses halaman ini.');
         }
 
         $division = strtolower((string) $user->division);
 
-        // Admin and All Roles can see all history
-        if ($user->role === 'admin' || $division === 'all_roles') {
+        // Admin, Super Admin, and All Roles can see all history
+        if ($user->isAdmin() || $division === 'all_roles') {
             $completedTasks = \App\Models\LaundryTask::where('status', 'completed')
                 ->with(['transaksi'])
                 ->orderBy('completed_at', 'desc')

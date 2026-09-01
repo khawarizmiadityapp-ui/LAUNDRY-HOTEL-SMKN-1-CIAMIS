@@ -23,6 +23,16 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Test User']
         );
 
+         // 0. Buat Super Admin Default (Akses Penuh)
+        User::updateOrCreate(
+            ['email' => 'superadmin@laundry.com'],
+            [
+                'name' => 'Super Administrator',
+                'password' => Hash::make('password'), // Password: 'password'
+                'role' => 'super_admin',
+            ]
+        );
+
          // 1. Buat Admin Default
         User::updateOrCreate(
             ['email' => 'admin@laundry.com'],

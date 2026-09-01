@@ -251,22 +251,30 @@
         @endif
     </div>
 
-    <!-- Manajemen Akun & Ganti Password Section -->
+    @if(auth()->user()->isSuperAdmin())
+    <!-- Manajemen Akun & Ganti Password Section (Khusus Super Admin) -->
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
                 <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                     </svg>
                     Manajemen Akun & Ganti Password
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                        Khusus Super Admin
+                    </span>
                 </h2>
-                <p class="text-sm text-slate-500 mt-0.5">Kelola kata sandi akun sistem (Admin & Petugas/Staff). Dilindungi verifikasi 2FA Google Authenticator.</p>
+                <p class="text-sm text-slate-500 mt-0.5">Kelola seluruh akun pengguna sistem dan penggantian kata sandi yang dilindungi verifikasi 2FA Google Authenticator.</p>
             </div>
             <div class="flex items-center gap-2.5 flex-wrap">
-                <button type="button" onclick="openQrModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition shadow-2xs">
-                    <i class="fa-solid fa-qrcode text-blue-600"></i>
-                    <span>QR Google Authenticator Admin</span>
+                <button type="button" onclick="openCreateUserModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition shadow-sm active:scale-95">
+                    <i class="fa-solid fa-user-plus text-white"></i>
+                    <span>Tambah Pengguna</span>
+                </button>
+                <button type="button" onclick="openQrModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition shadow-2xs">
+                    <i class="fa-solid fa-qrcode text-purple-600"></i>
+                    <span>QR 2FA Super Admin</span>
                 </button>
                 <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                     <i class="fa-solid fa-shield-halved text-amber-600"></i>
@@ -292,14 +300,14 @@
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs {{ $userItem->role === 'admin' ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-sm' : 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm' }}">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs {{ $userItem->isSuperAdmin() ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-sm' : ($userItem->role === 'admin' ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-sm' : 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm') }}">
                                     {{ strtoupper(substr($userItem->name, 0, 2)) }}
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <span class="font-semibold text-slate-800 text-sm">{{ $userItem->name }}</span>
                                         @if($userItem->id === auth()->id())
-                                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Akun Anda</span>
+                                            <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Akun Anda</span>
                                         @endif
                                     </div>
                                     <span class="text-xs text-slate-400">ID: #{{ $userItem->id }}</span>
@@ -310,7 +318,13 @@
                             {{ $userItem->email }}
                         </td>
                         <td class="px-4 py-3 text-center">
-                            @if($userItem->role === 'admin')
+                            @if($userItem->isSuperAdmin())
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                    <i class="fa-solid fa-crown text-[10px]"></i>
+                                    Super Admin
+                                </span>
+                            @elseif($userItem->role === 'admin')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                                     Admin
@@ -332,7 +346,7 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <button type="button" onclick="openChangePasswordModal({{ $userItem->id }}, '{{ addslashes($userItem->name) }}', '{{ addslashes($userItem->email) }}', '{{ $userItem->role === 'admin' ? 'Admin' : 'Petugas' }}')"
+                            <button type="button" onclick="openChangePasswordModal({{ $userItem->id }}, '{{ addslashes($userItem->name) }}', '{{ addslashes($userItem->email) }}', '{{ addslashes($userItem->role_display_name) }}')"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs rounded-xl transition border border-brand-200 hover:border-brand-300 shadow-2xs">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -352,6 +366,7 @@
             </table>
         </div>
     </div>
+    @endif
 
     <!-- Modal Tambah/Edit Kategori -->
     <div id="kategoriModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -572,7 +587,109 @@
         </div>
     </div>
 
+    <!-- Modal Tambah Pengguna Baru -->
+    <div id="createUserModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 animate-fade-in">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i class="fa-solid fa-user-plus text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Tambah Akun Pengguna</h3>
+                        <p class="text-xs text-slate-400">Buat akun Super Admin, Admin, atau Petugas baru</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCreateUserModal()" class="text-slate-400 hover:text-slate-600 transition p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="create_name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nama Lengkap</label>
+                    <input type="text" name="name" id="create_name" required placeholder="Contoh: Budi Super Admin"
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label for="create_email" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Alamat Email</label>
+                    <input type="email" name="email" id="create_email" required placeholder="Contoh: user@laundry.com"
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label for="create_password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Kata Sandi Awal</label>
+                    <input type="password" name="password" id="create_password" required minlength="6" placeholder="Minimal 6 karakter"
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label for="create_role" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Peran / Role</label>
+                    <select name="role" id="create_role" onchange="handleCreateUserRoleChange(this.value)" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                        <option value="super_admin">⭐ Super Admin (Akses Penuh Seluruh Sistem)</option>
+                        <option value="admin">🛡️ Admin (Administrator Portal)</option>
+                        <option value="staff">👤 Petugas / Staff (Operasional Lapangan)</option>
+                    </select>
+                </div>
+
+                <div id="divisionField" class="hidden">
+                    <label for="create_division" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Divisi Petugas</label>
+                    <select name="division" id="create_division"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                        <option value="washing">Washing (Pencucian)</option>
+                        <option value="ironing">Ironing (Setrika)</option>
+                        <option value="packing">Packing (Pengemasan)</option>
+                        <option value="customer_service">Customer Service (Kasir / POS)</option>
+                        <option value="inventory">Inventory (Gudang)</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeCreateUserModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-sm transition shadow-sm active:scale-95">
+                        Simpan Pengguna
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        function openCreateUserModal() {
+            document.getElementById('create_name').value = '';
+            document.getElementById('create_email').value = '';
+            document.getElementById('create_password').value = '';
+            document.getElementById('create_role').value = 'super_admin';
+            handleCreateUserRoleChange('super_admin');
+            document.getElementById('createUserModal').classList.remove('hidden');
+        }
+
+        function closeCreateUserModal() {
+            document.getElementById('createUserModal').classList.add('hidden');
+        }
+
+        function handleCreateUserRoleChange(role) {
+            const divisionField = document.getElementById('divisionField');
+            if (role === 'staff') {
+                divisionField.classList.remove('hidden');
+            } else {
+                divisionField.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('createUserModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateUserModal();
+            }
+        });
+
         function openAddKategoriModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Kategori';
             document.getElementById('kategoriForm').action = '{{ route("admin.kategori-pengeluaran.store") }}';
