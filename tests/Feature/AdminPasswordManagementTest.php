@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use App\Services\Google2FAService;
 use Illuminate\Support\Facades\Hash;
 
 class AdminPasswordManagementTest extends TestCase
@@ -24,14 +25,20 @@ class AdminPasswordManagementTest extends TestCase
         $response->assertSee('Manajemen Akun');
     }
 
-    public function test_admin_can_change_other_user_password()
+    public function test_admin_can_change_other_user_password_with_valid_2fa_otp()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
         $staff = User::factory()->create(['role' => 'staff', 'division' => 'washing']);
+
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
 
         $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
+            'otp' => $otp,
         ]);
 
         $response->assertStatus(302);
@@ -41,13 +48,19 @@ class AdminPasswordManagementTest extends TestCase
         $this->assertTrue(Hash::check('newpassword123', $staff->password));
     }
 
-    public function test_admin_can_change_own_password()
+    public function test_admin_can_change_own_password_with_valid_2fa_otp()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
+
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
 
         $response = $this->actingAs($admin)->post(route('admin.users.password.update', $admin->id), [
             'password' => 'adminnewpass123',
             'password_confirmation' => 'adminnewpass123',
+            'otp' => $otp,
         ]);
 
         $response->assertStatus(302);
@@ -57,15 +70,38 @@ class AdminPasswordManagementTest extends TestCase
         $this->assertTrue(Hash::check('adminnewpass123', $admin->password));
     }
 
+    public function test_password_change_fails_with_invalid_otp()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
+        $staff = User::factory()->create(['role' => 'staff']);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
+            'password' => 'newpass123',
+            'password_confirmation' => 'newpass123',
+            'otp' => '000000', // invalid code
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
+    }
+
     public function test_password_change_requires_confirmation_and_min_length()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
         $staff = User::factory()->create(['role' => 'staff']);
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
 
         // Test unconfirmed
         $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
             'password' => 'mismatch123',
             'password_confirmation' => 'different123',
+            'otp' => $otp,
         ]);
         $response->assertSessionHasErrors(['password']);
 
@@ -73,6 +109,7 @@ class AdminPasswordManagementTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
             'password' => '123',
             'password_confirmation' => '123',
+            'otp' => $otp,
         ]);
         $response->assertSessionHasErrors(['password']);
     }
@@ -85,6 +122,7 @@ class AdminPasswordManagementTest extends TestCase
         $response = $this->actingAs($staff)->post(route('admin.users.password.update', $targetUser->id), [
             'password' => 'hackedpassword123',
             'password_confirmation' => 'hackedpassword123',
+            'otp' => '123456',
         ]);
 
         // Middleware or controller should reject non-admin with redirect or 403

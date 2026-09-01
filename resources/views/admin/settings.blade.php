@@ -261,14 +261,18 @@
                     </svg>
                     Manajemen Akun & Ganti Password
                 </h2>
-                <p class="text-sm text-slate-500 mt-0.5">Kelola kata sandi akun sistem (Admin & Petugas/Staff). Hanya Admin yang memiliki wewenang untuk mengganti password.</p>
+                <p class="text-sm text-slate-500 mt-0.5">Kelola kata sandi akun sistem (Admin & Petugas/Staff). Dilindungi verifikasi 2FA Google Authenticator.</p>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0 self-start sm:self-auto">
-                <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-                Khusus Hak Akses Admin
-            </span>
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <button type="button" onclick="openQrModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition shadow-2xs">
+                    <i class="fa-solid fa-qrcode text-blue-600"></i>
+                    <span>QR Google Authenticator Admin</span>
+                </button>
+                <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                    <i class="fa-solid fa-shield-halved text-amber-600"></i>
+                    <span>2FA Aktif</span>
+                </span>
+            </div>
         </div>
 
         <!-- Tabel Daftar Akun -->
@@ -403,9 +407,9 @@
         </div>
     </div>
 
-    <!-- Modal Ganti Password -->
+    <!-- Modal Ganti Password (Dilindungi OTP Google Authenticator) -->
     <div id="changePasswordModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in border border-slate-100">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in border border-slate-100">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
@@ -415,7 +419,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 leading-tight">Ganti Password Akun</h3>
-                        <p class="text-xs text-slate-400">Perbarui kata sandi pengguna secara langsung</p>
+                        <p class="text-xs text-slate-400">Verifikasi 2FA Google Authenticator</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 transition p-1 rounded-lg hover:bg-slate-100">
@@ -426,7 +430,7 @@
             </div>
 
             <!-- Target User Info Box -->
-            <div class="mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+            <div class="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
                     <p id="targetUserName" class="font-bold text-sm text-slate-800">-</p>
                     <p id="targetUserEmail" class="text-xs text-slate-500 font-mono">-</p>
@@ -473,12 +477,26 @@
                     </div>
                 </div>
 
-                <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-100 flex items-start gap-2.5">
-                    <svg class="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                    </svg>
-                    <p class="text-xs text-blue-800 leading-relaxed">
-                        Sebagai Administrator, Anda dapat langsung mengatur kata sandi baru tanpa memerlukan kata sandi lama akun tersebut.
+                <!-- OTP 2FA Input -->
+                <div class="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="otp" class="block text-xs font-bold uppercase tracking-wider text-blue-900">
+                            Kode OTP Authenticator <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" onclick="openQrModal()" class="text-xs text-blue-700 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline">
+                            <i class="fa-solid fa-qrcode"></i> Lihat QR
+                        </button>
+                    </div>
+                    <div class="relative rounded-xl shadow-2xs">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-500">
+                            <i class="fa-solid fa-key text-xs"></i>
+                        </div>
+                        <input type="text" name="otp" id="otp" required maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                               class="w-full pl-9 pr-4 py-2.5 bg-white border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 font-mono font-bold tracking-widest text-base placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
+                               placeholder="6 digit kode OTP">
+                    </div>
+                    <p class="text-[11px] text-blue-700/80 leading-snug">
+                        Buka aplikasi Google Authenticator Admin di HP untuk mengambil 6 digit kode keamanan.
                     </p>
                 </div>
 
@@ -494,6 +512,63 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Lihat QR Google Authenticator Admin -->
+    <div id="adminQrModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in border border-slate-100">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight">Google Authenticator 2FA</h3>
+                        <p class="text-xs text-slate-400">Kunci Keamanan Akun Admin</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600 transition p-1 rounded-lg hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50/60 rounded-2xl border border-blue-100 flex flex-col items-center">
+                    <div class="p-2 bg-white rounded-2xl border border-slate-200 shadow-xs mb-2">
+                        <img src="{{ $adminQrCodeUrl }}" alt="QR 2FA Admin" class="w-40 h-40 object-contain rounded-lg">
+                    </div>
+                    <span class="text-xs text-blue-700 font-semibold flex items-center gap-1.5 mt-1">
+                        <i class="fa-solid fa-camera"></i> Scan dengan Google Authenticator di HP
+                    </span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                        Kunci Manual (Setup Key)
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-xs font-bold text-blue-700 tracking-wider flex-1 truncate select-all">
+                            {{ $adminFormattedSecret }}
+                        </div>
+                        <button type="button" onclick="copyAdminSecret('{{ $adminRawSecret }}', this)" 
+                                class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition shrink-0 active:scale-95">
+                            <i class="fa-regular fa-copy mr-1"></i> Salin
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">
+                        Masukkan kunci di atas pada Google Authenticator jika tidak bisa memindai QR code.
+                    </p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex justify-end">
+                    <button type="button" onclick="closeQrModal()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition">
+                        Tutup
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -537,6 +612,7 @@
             document.getElementById('changePasswordForm').action = "{{ url('admin/users') }}/" + userId + "/password";
             document.getElementById('new_password').value = '';
             document.getElementById('new_password_confirmation').value = '';
+            document.getElementById('otp').value = '';
             document.getElementById('changePasswordModal').classList.remove('hidden');
         }
 
@@ -566,7 +642,37 @@
                 closeChangePasswordModal();
             }
         });
+
+        // QR Modal Functions
+        function openQrModal() {
+            document.getElementById('adminQrModal').classList.remove('hidden');
+        }
+
+        function closeQrModal() {
+            document.getElementById('adminQrModal').classList.add('hidden');
+        }
+
+        document.getElementById('adminQrModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeQrModal();
+            }
+        });
+
+        function copyAdminSecret(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> Tersalin!';
+                btn.classList.add('bg-emerald-50', 'text-emerald-700');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('bg-emerald-50', 'text-emerald-700');
+                }, 2000);
+            }).catch(err => {
+                alert('Kunci: ' + text);
+            });
+        }
     </script>
 </div>
 @endsection
+
 

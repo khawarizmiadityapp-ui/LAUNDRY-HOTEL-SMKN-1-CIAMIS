@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
 use App\Models\ActivityLog;
+use App\Services\Google2FAService;
 use Illuminate\Support\Facades\Hash;
 use App\Services\TransactionService;
 use App\Services\ErrorLoggingService;
@@ -753,8 +754,18 @@ class AdminController extends Controller
         $userList = User::orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->get();
+
+        // Siapkan info 2FA Google Authenticator untuk Admin yang sedang login
+        $currentAdmin = Auth::user();
+        if ($currentAdmin && (empty($currentAdmin->google2fa_secret) || strlen($currentAdmin->google2fa_secret) > 16)) {
+            $currentAdmin->google2fa_secret = Google2FAService::generateSecretKey(10);
+            $currentAdmin->save();
+        }
+        $adminQrCodeUrl = $currentAdmin ? Google2FAService::getQrCodeImageUrl('Bening Laundry', $currentAdmin->email, $currentAdmin->google2fa_secret) : '';
+        $adminFormattedSecret = $currentAdmin ? Google2FAService::formatSecretKey($currentAdmin->google2fa_secret) : '';
+        $adminRawSecret = $currentAdmin ? $currentAdmin->google2fa_secret : '';
         
-        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList', 'userList'));
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret'));
     }
 
     public function updateSettings(Request $request)
@@ -805,11 +816,27 @@ class AdminController extends Controller
 
         $request->validate([
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'otp' => ['required', 'string', 'size:6'],
         ], [
             'password.required' => 'Password baru wajib diisi.',
             'password.min' => 'Password minimal terdiri dari 6 karakter.',
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'otp.required' => 'Kode OTP Google Authenticator wajib diisi.',
+            'otp.size' => 'Kode OTP harus berupa 6 digit angka.',
         ]);
+
+        $currentAdmin = Auth::user();
+
+        // Pastikan admin memiliki secret key
+        if (empty($currentAdmin->google2fa_secret)) {
+            $currentAdmin->google2fa_secret = Google2FAService::generateSecretKey();
+            $currentAdmin->save();
+        }
+
+        // Verifikasi kode OTP Google Authenticator Admin
+        if (!Google2FAService::verifyKey($currentAdmin->google2fa_secret, $request->otp)) {
+            return back()->with('error', 'Kode OTP Google Authenticator salah atau telah kedaluwarsa. Silakan periksa aplikasi Authenticator Anda.');
+        }
 
         try {
             $user = User::findOrFail($id);
@@ -817,13 +844,12 @@ class AdminController extends Controller
             $user->save();
 
             // Log activity audit trail
-            $currentAdmin = Auth::user();
             ActivityLog::create([
                 'log_name' => 'security',
-                'description' => "Admin {$currentAdmin->name} mengubah password akun {$user->name} ({$user->email})",
+                'description' => "Admin {$currentAdmin->name} mengubah password akun {$user->name} ({$user->email}) dengan verifikasi 2FA",
                 'subject_type' => User::class,
                 'subject_id' => $user->id,
-                'event' => 'password_updated',
+                'event' => 'password_updated_with_2fa',
                 'causer_type' => User::class,
                 'causer_id' => $currentAdmin->id,
                 'properties' => [
@@ -833,7 +859,7 @@ class AdminController extends Controller
                 ],
             ]);
 
-            return back()->with('success', "Password untuk akun {$user->name} ({$user->email}) berhasil diperbarui!");
+            return back()->with('success', "Password untuk akun {$user->name} ({$user->email}) berhasil diperbarui dengan verifikasi 2FA!");
         } catch (\Exception $e) {
             Log::error('Update User Password Failed', [
                 'operation' => 'admin.updateUserPassword',

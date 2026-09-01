@@ -28,8 +28,13 @@ class LoginFixTest extends TestCase
             'password' => 'password',
         ]);
 
-        // Should redirect to admin dashboard
-        $response->assertRedirect(route('admin.dashboard'));
+        // Should redirect to 2FA page first
+        $response->assertRedirect(route('login.2fa'));
+
+        $user->refresh();
+        $otp = \App\Services\Google2FAService::calculateOtp($user->google2fa_secret);
+        $res2fa = $this->post(route('login.2fa.verify'), ['code' => $otp]);
+        $res2fa->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($user);
     }
 

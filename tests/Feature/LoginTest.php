@@ -31,7 +31,12 @@ class LoginTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertRedirect(route('login.2fa'));
+
+        $user->refresh();
+        $otp = \App\Services\Google2FAService::calculateOtp($user->google2fa_secret);
+        $res2fa = $this->post(route('login.2fa.verify'), ['code' => $otp]);
+        $res2fa->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($user);
     }
 

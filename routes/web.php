@@ -35,6 +35,9 @@ Route::get('/track', [LandingController::class, 'trackStatus'])->middleware('thr
 // Public Routes
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
+Route::get('/login/2fa', [LoginController::class, 'show2fa'])->name('login.2fa');
+Route::post('/login/2fa', [LoginController::class, 'verify2fa'])->middleware('throttle:10,1')->name('login.2fa.verify');
+Route::post('/login/2fa/cancel', [LoginController::class, 'cancel2fa'])->name('login.2fa.cancel');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Middleware 'auth' memastikan hanya yang sudah login bisa akses
