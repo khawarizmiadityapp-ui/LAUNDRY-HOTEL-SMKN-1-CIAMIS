@@ -685,7 +685,8 @@ class AdminController extends Controller
     {
         $request->validate([
             'target' => 'required|numeric|min:0',
-            'target_type' => 'nullable|in:bulanan,tahunan',
+            'target_type' => 'nullable|in:bulanan,tahunan,bulan_spesifik',
+            'target_month' => 'nullable|string',
             'workdays_mode' => 'nullable|in:senin_jumat,senin_sabtu,setiap_hari,custom',
             'custom_days' => 'nullable|numeric|min:1|max:31',
             'holidays_count' => 'nullable|numeric|min:0|max:31',
@@ -696,51 +697,46 @@ class AdminController extends Controller
             $type = $request->target_type ?? 'bulanan';
             $targetValue = (int) $request->target;
 
-            if ($type === 'tahunan') {
+            $targetDate = $request->target_month ? Carbon::parse($request->target_month . '-01') : Carbon::now();
+            $targetYear = $targetDate->year;
+            $targetMonth = str_pad((string) $targetDate->month, 2, '0', STR_PAD_LEFT);
+
+            if ($type === 'bulan_spesifik') {
+                $monthKey = "target_monthly_{$targetYear}_{$targetMonth}";
+                \App\Models\Setting::setValue($monthKey, $targetValue);
+                \App\Models\DailyTarget::recalculateMonthTargets($targetYear, (int) $targetMonth);
+                $msg = "Target khusus untuk bulan " . $targetDate->translatedFormat('F Y') . " berhasil disimpan: Rp " . number_format($targetValue, 0, ',', '.');
+            } elseif ($type === 'tahunan') {
                 $annualTarget = $targetValue;
                 $monthlyTarget = (int) ceil($annualTarget / 12);
+                \App\Models\Setting::setValue('target_annual', $annualTarget);
+                \App\Models\Setting::setValue('target_monthly', $monthlyTarget);
+                \App\Models\DailyTarget::recalculateMonthTargets();
+                $msg = "Target tahunan berhasil diperbarui: Rp " . number_format($annualTarget, 0, ',', '.');
             } else {
                 $monthlyTarget = $targetValue;
                 $annualTarget = $monthlyTarget * 12;
+                \App\Models\Setting::setValue('target_monthly', $monthlyTarget);
+                \App\Models\Setting::setValue('target_annual', $annualTarget);
+                \App\Models\DailyTarget::recalculateMonthTargets();
+                $msg = "Target bulanan standar berhasil diperbarui: Rp " . number_format($monthlyTarget, 0, ',', '.');
             }
 
-            $workdaysMode = $request->workdays_mode ?? 'senin_jumat';
-            $customDays = $request->custom_days ? (int) $request->custom_days : 22;
-            $holidaysCount = $request->holidays_count ? (int) $request->holidays_count : 0;
-            $holidayDates = $request->holiday_dates ? trim($request->holiday_dates) : '';
-
-            // Simpan ke Setting DB (Persistent & Fleksibel)
-            \App\Models\Setting::setValue('target_monthly', $monthlyTarget);
-            \App\Models\Setting::setValue('target_annual', $annualTarget);
-            \App\Models\Setting::setValue('target_workdays_mode', $workdaysMode);
-            \App\Models\Setting::setValue('target_custom_days', $customDays);
-            \App\Models\Setting::setValue('target_holidays_count', $holidaysCount);
-            \App\Models\Setting::setValue('target_holiday_dates', $holidayDates);
-
-            // Update juga ke file .env sebagai fallback
-            $path = base_path('.env');
-            if (file_exists($path)) {
-                $envContent = file_get_contents($path);
-
-                if (str_contains($envContent, 'MONTHLY_INCOME_LIMIT=')) {
-                    $envContent = preg_replace('/^MONTHLY_INCOME_LIMIT=.*/m', 'MONTHLY_INCOME_LIMIT=' . $monthlyTarget, $envContent);
-                } else {
-                    $envContent .= "\nMONTHLY_INCOME_LIMIT=" . $monthlyTarget;
-                }
-
-                if (str_contains($envContent, 'ANNUAL_INCOME_LIMIT=')) {
-                    $envContent = preg_replace('/^ANNUAL_INCOME_LIMIT=.*/m', 'ANNUAL_INCOME_LIMIT=' . $annualTarget, $envContent);
-                } else {
-                    $envContent .= "\nANNUAL_INCOME_LIMIT=" . $annualTarget;
-                }
-                
-                file_put_contents($path, $envContent);
+            // Simpan pengaturan hari kerja jika ada
+            if ($request->has('workdays_mode')) {
+                \App\Models\Setting::setValue('target_workdays_mode', $request->workdays_mode ?? 'senin_jumat');
+            }
+            if ($request->has('custom_days')) {
+                \App\Models\Setting::setValue('target_custom_days', (int) $request->custom_days);
+            }
+            if ($request->has('holidays_count')) {
+                \App\Models\Setting::setValue('target_holidays_count', (int) $request->holidays_count);
+            }
+            if ($request->has('holiday_dates')) {
+                \App\Models\Setting::setValue('target_holiday_dates', trim((string) $request->holiday_dates));
             }
 
-            // Recalculate daily targets for current month with new workdays & targets
-            \App\Models\DailyTarget::recalculateMonthTargets();
-            
-            return back()->with('success', 'Target bulanan & pengaturan hari kerja berhasil diperbarui.');
+            return back()->with('success', $msg);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui target: ' . $e->getMessage());
         }

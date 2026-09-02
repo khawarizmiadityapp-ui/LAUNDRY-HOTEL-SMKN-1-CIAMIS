@@ -555,7 +555,7 @@
             <div class="px-5 py-4 flex items-center justify-between bg-[#0b172a] text-white shrink-0">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-receipt text-emerald-400"></i>
-                    <h3 class="font-bold text-xs tracking-widest uppercase">STRUK NOTA TRANSAKSI</h3>
+                    <h3 class="font-bold text-xs tracking-widest uppercase">STRUK NOTA / INVOICE TRANSAKSI</h3>
                 </div>
                 <button @click="closeNotaModal()" class="text-slate-400 hover:text-white transition">
                     <i class="fas fa-times"></i>

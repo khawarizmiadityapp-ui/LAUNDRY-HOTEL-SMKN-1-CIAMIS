@@ -20,24 +20,36 @@ class LaporanController extends Controller
 
         $filter = $request->filter ?? 'bulanan';
 
+        if ($request->filled('bulan')) {
+            try {
+                $viewDate = Carbon::parse($request->bulan . '-01');
+            } catch (\Exception $e) {
+                $viewDate = Carbon::now();
+            }
+        } else {
+            $viewDate = Carbon::now();
+        }
+
+        $viewMonth = $viewDate->month;
+        $viewYear = $viewDate->year;
+
         $query = Transaksi::where('payment_status', 'lunas');
         $piutangQuery = Transaksi::where('payment_status', 'belum_bayar');
         $pengeluaranQuery = Pengeluaran::query();
 
         if ($filter == 'bulanan') {
-            $query->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year);
+            $query->whereMonth('created_at', $viewMonth)
+                ->whereYear('created_at', $viewYear);
 
-            $piutangQuery->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year);
+            $piutangQuery->whereMonth('created_at', $viewMonth)
+                ->whereYear('created_at', $viewYear);
 
-            $pengeluaranQuery->whereMonth('tanggal', now()->month)
-                ->whereYear('tanggal', now()->year);
+            $pengeluaranQuery->whereMonth('tanggal', $viewMonth)
+                ->whereYear('tanggal', $viewYear);
         } elseif ($filter == 'tahunan') {
-            $query->whereYear('created_at', now()->year);
-            $piutangQuery->whereYear('created_at', now()->year);
-            // BUG FIX 1: Pengeluaran juga harus terfilter per tahun
-            $pengeluaranQuery->whereYear('tanggal', now()->year);
+            $query->whereYear('created_at', $viewYear);
+            $piutangQuery->whereYear('created_at', $viewYear);
+            $pengeluaranQuery->whereYear('tanggal', $viewYear);
         } elseif ($filter == 'custom') {
             if ($request->dari && $request->sampai) {
                 // BUG FIX 2: Gunakan startOfDay() dan endOfDay() agar presisi
@@ -70,7 +82,7 @@ class LaporanController extends Controller
         $persentaseKeluar = 0;
 
         if ($filter == 'bulanan') {
-            $prevMonth = now()->subMonth();
+            $prevMonth = $viewDate->copy()->subMonth();
             $pemasukanLalu = Transaksi::where('payment_status', 'lunas')
                 ->whereMonth('created_at', $prevMonth->month)
                 ->whereYear('created_at', $prevMonth->year)
@@ -94,12 +106,13 @@ class LaporanController extends Controller
         }
 
         $annualTarget = \App\Models\DailyTarget::getAnnualTarget();
-        $limitPemasukanBulanan = \App\Models\DailyTarget::getMonthlyTarget();
+        $limitPemasukanBulanan = \App\Models\DailyTarget::getMonthlyTarget($viewDate);
+        $isCustomMonthTarget = \App\Models\DailyTarget::isMonthCustomTarget($viewDate);
         $targetAnggaran = $limitPemasukanBulanan;
 
         $realisasiBulanIni = Transaksi::where('payment_status', 'lunas')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', $viewMonth)
+            ->whereYear('created_at', $viewYear)
             ->sum('total_price');
         $persenTargetBulanIni = $limitPemasukanBulanan > 0
             ? min(100, round(($realisasiBulanIni / $limitPemasukanBulanan) * 100, 2))
@@ -178,15 +191,18 @@ class LaporanController extends Controller
             ->get();
 
         // ═══════════ DAILY TARGET TRACKING & CARRY FORWARD ═══════════
-        // Recalculate daily targets sequentially for current month
-        $monthTargets = \App\Models\DailyTarget::recalculateMonthTargets(now()->year, now()->month);
+        // Recalculate daily targets sequentially for view month
+        $monthTargets = \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $viewMonth);
         
         $today = Carbon::today();
-        $todayTarget = $monthTargets->firstWhere('date', $today) ?? \App\Models\DailyTarget::getOrCreateForDate($today);
+        $isViewingCurrentMonth = ($viewYear === now()->year && $viewMonth === now()->month);
+        $todayTarget = $isViewingCurrentMonth 
+            ? ($monthTargets->firstWhere('date', $today) ?? \App\Models\DailyTarget::getOrCreateForDate($today))
+            : ($monthTargets->first() ?? \App\Models\DailyTarget::getOrCreateForDate($viewDate->copy()->startOfMonth()));
 
-        // Daily targets list for display (all days of month up to today, or all days of month)
-        $dailyTargets = \App\Models\DailyTarget::whereYear('date', now()->year)
-            ->whereMonth('date', now()->month)
+        // Daily targets list for display
+        $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
+            ->whereMonth('date', $viewMonth)
             ->orderBy('date', 'desc')
             ->get();
 
@@ -198,13 +214,18 @@ class LaporanController extends Controller
             : 0;
 
         $workdaysMode = \App\Models\DailyTarget::getWorkdaysMode();
-        $activeWorkDaysCount = \App\Models\DailyTarget::getTargetDaysInMonth();
-        $baseDailyTarget = \App\Models\DailyTarget::calculateBaseTarget();
+        $activeWorkDaysCount = \App\Models\DailyTarget::getTargetDaysInMonth($viewDate);
+        $baseDailyTarget = \App\Models\DailyTarget::calculateBaseTarget($viewDate);
         $customDays = (int) \App\Models\Setting::getValue('target_custom_days', 22);
         $holidaysCount = (int) \App\Models\Setting::getValue('target_holidays_count', 0);
         $holidayDatesString = \App\Models\Setting::getValue('target_holiday_dates', '');
 
         return view('admin.laporan_keuangan.index', [
+            'viewDate' => $viewDate,
+            'viewMonth' => $viewMonth,
+            'viewYear' => $viewYear,
+            'isCustomMonthTarget' => $isCustomMonthTarget,
+            'isViewingCurrentMonth' => $isViewingCurrentMonth,
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
             'laba' => $laba,

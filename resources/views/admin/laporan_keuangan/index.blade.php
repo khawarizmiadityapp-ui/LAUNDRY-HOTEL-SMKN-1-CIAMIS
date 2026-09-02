@@ -14,16 +14,27 @@
         <div class="flex flex-col gap-3">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan']) }}"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ ($filter ?? 'bulanan') == 'bulanan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Bulanan</a>
+                    <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 gap-1">
+                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan', 'bulan' => request('bulan', now()->format('Y-m'))]) }}"
+                        class="px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg shadow-sm transition {{ ($filter ?? 'bulanan') == 'bulanan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Bulanan</a>
                         
                         <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'tahunan']) }}"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Tahunan</a>
+                        class="px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'tahunan' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Tahunan</a>
                         
                         <button type="button" onclick="toggleCustomFilter(this)"
-                        class="px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Custom</button>
+                        class="px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg shadow-sm transition {{ $filter == 'custom' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-800' }}">Custom</button>
                     </div>
+
+                    @if(($filter ?? 'bulanan') == 'bulanan')
+                        <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" class="flex items-center gap-1.5">
+                            <input type="hidden" name="filter" value="bulanan">
+                            <input type="month" name="bulan" value="{{ isset($viewDate) ? $viewDate->format('Y-m') : now()->format('Y-m') }}" 
+                                   onchange="this.form.submit()" 
+                                   title="Pilih Bulan Laporan"
+                                   class="px-3 py-1.5 text-xs sm:text-sm font-bold bg-white border border-gray-200 rounded-xl text-gray-800 shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer">
+                        </form>
+                    @endif
+
                     <a href="{{ route('admin.laporan_keuangan.bku_pdf', request()->query()) }}" 
                        class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition text-sm">
                         <i class="fas fa-book"></i> Cetak BKU (PDF)
@@ -135,11 +146,17 @@
                     <i class="fas fa-bullseye text-lg"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2.5">
-                        <h3 class="text-base font-bold text-gray-800 tracking-tight">Target Pemasukan Admin</h3>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Target Aktif
-                        </span>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h3 class="text-base font-bold text-gray-800 tracking-tight">Target Pemasukan ({{ $viewDate->translatedFormat('F Y') }})</h3>
+                        @if(!empty($isCustomMonthTarget))
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                                ✨ Target Khusus Bulan Ini
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                🌐 Target Default Bulanan
+                            </span>
+                        @endif
                     </div>
                     <p class="text-xs text-gray-500 mt-0.5">Monitoring target finansial bulanan & tahunan secara realtime</p>
                 </div>
@@ -178,7 +195,7 @@
                     <i class="fas fa-calendar-check text-sm"></i>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-wider font-semibold text-indigo-500">Target Bulanan</p>
+                    <p class="text-[10px] uppercase tracking-wider font-semibold text-indigo-500">Target {{ $viewDate->translatedFormat('F') }}</p>
                     <p class="text-sm font-bold text-gray-800 mt-0.5 truncate">Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }}</p>
                 </div>
             </div>
@@ -190,9 +207,9 @@
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] uppercase tracking-wider font-semibold text-blue-500">
-                        Target Harian ({{ \App\Models\DailyTarget::getTargetDaysInMonth() }} Hari)
+                        Target Harian ({{ $activeWorkDaysCount }} Hari)
                     </p>
-                    <p class="text-sm font-bold text-blue-700 mt-0.5 truncate">Rp {{ number_format(\App\Models\DailyTarget::calculateBaseTarget(), 0, ',', '.') }}</p>
+                    <p class="text-sm font-bold text-blue-700 mt-0.5 truncate">Rp {{ number_format($baseDailyTarget, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -201,11 +218,11 @@
         <div class="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-semibold gap-1.5 mb-2.5">
                 <div class="flex items-center gap-1.5">
-                    <span class="text-gray-500">Realisasi Bulan Ini:</span>
+                    <span class="text-gray-500">Realisasi {{ $viewDate->translatedFormat('F Y') }}:</span>
                     <span class="text-gray-900 font-bold text-sm">Rp {{ number_format($realisasiBulanIni, 0, ',', '.') }}</span>
                 </div>
                 <div class="text-gray-500 text-xs">
-                    Target: <span class="font-semibold text-gray-700">Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }}</span>
+                    Target {{ $viewDate->translatedFormat('F') }}: <span class="font-semibold text-gray-700">Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }}</span>
                 </div>
             </div>
 
@@ -223,13 +240,13 @@
             <div>
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-calendar-day text-blue-600"></i>
-                    Laporan Keuangan & Target Harian (Bulan {{ now()->translatedFormat('F Y') }})
+                    Laporan Keuangan & Target Harian (Bulan {{ $viewDate->translatedFormat('F Y') }})
                 </h3>
                 <p class="text-sm text-gray-600 mt-1">Sistem pencatatan harian otomatis. Jika pemasukan minus/defisit, kekurangan target otomatis ditambahkan ke target hari berikutnya.</p>
             </div>
             <div class="bg-white rounded-xl px-4 py-3 border border-blue-200 shadow-sm flex items-center gap-4">
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pencapaian Bulan Ini</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pencapaian {{ $viewDate->translatedFormat('F') }}</p>
                     <p class="text-2xl font-bold text-blue-600 mt-0.5">{{ $weeklyAchievementRate }}%</p>
                 </div>
                 <div class="text-right border-l border-gray-200 pl-4">
@@ -482,12 +499,12 @@
         </div>
     </div>
 
-    {{-- ── Edit Target Modal (Custom Workdays & Holidays) ── --}}
+    {{-- ── Edit Target Modal (Custom Workdays, Per-Month Custom Target & Holidays) ── --}}
     <div id="targetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('targetModal').classList.add('hidden')"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-100 animate-fade-up">
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-slate-100 animate-fade-up">
                 <form action="{{ route('admin.update_target') }}" method="POST" id="targetForm">
                     @csrf
                     <div class="bg-white px-6 pt-6 pb-4">
@@ -497,35 +514,59 @@
                             </div>
                             <div class="w-full">
                                 <h3 class="text-base font-bold text-slate-900" id="modal-title">Konfigurasi Target & Jadwal Hari Kerja</h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Atur target bulanan dan skema hari kerja aktif operasional laundry (Senin - Jumat / Hari Libur).</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Atur target khusus per bulan atau target default umum, serta skema hari kerja aktif laundry.</p>
                             </div>
                         </div>
 
                         <div class="mt-5 space-y-4">
                             {{-- Tipe Target --}}
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Tipe Target</label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <label class="flex items-center gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                                        <input type="radio" name="target_type" value="bulanan" checked onchange="toggleTargetLabel('bulanan')" class="text-blue-600 focus:ring-blue-500">
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Terapkan Target Untuk</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                    {{-- Opsi 1: Bulan Tertentu (Kustom) --}}
+                                    <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="target_type" value="bulan_spesifik" checked onchange="toggleTargetLabel('bulan_spesifik')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
                                         <div>
-                                            <span class="text-xs font-bold text-slate-800 block">Target Bulanan</span>
-                                            <span class="text-[10px] text-slate-400">Target per bulan</span>
+                                            <span class="text-xs font-bold text-slate-800 block">Kustom Bulan</span>
+                                            <span class="text-[10px] text-slate-400">Bulan tertentu saja</span>
                                         </div>
                                     </label>
-                                    <label class="flex items-center gap-2.5 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                                        <input type="radio" name="target_type" value="tahunan" onchange="toggleTargetLabel('tahunan')" class="text-blue-600 focus:ring-blue-500">
+
+                                    {{-- Opsi 2: Standar Bulanan Umum --}}
+                                    <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="target_type" value="bulanan" onchange="toggleTargetLabel('bulanan')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
                                         <div>
-                                            <span class="text-xs font-bold text-slate-800 block">Target Tahunan</span>
-                                            <span class="text-[10px] text-slate-400">Target per tahun</span>
+                                            <span class="text-xs font-bold text-slate-800 block">Standar Bulanan</span>
+                                            <span class="text-[10px] text-slate-400">Semua bulan umum</span>
+                                        </div>
+                                    </label>
+
+                                    {{-- Opsi 3: Target Tahunan --}}
+                                    <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="target_type" value="tahunan" onchange="toggleTargetLabel('tahunan')" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                        <div>
+                                            <span class="text-xs font-bold text-slate-800 block">Tahunan</span>
+                                            <span class="text-[10px] text-slate-400">Target 1 tahun</span>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
+                            {{-- Pilihan Bulan & Tahun (Jika target_type = bulan_spesifik) --}}
+                            <div id="targetMonthWrapper">
+                                <label for="targetMonthInput" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                    Pilih Bulan Yang Akan Diatur Targetnya
+                                </label>
+                                <input type="month" name="target_month" id="targetMonthInput" value="{{ $viewDate->format('Y-m') }}"
+                                       class="w-full px-3.5 py-2.5 text-xs font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-900 bg-slate-50">
+                                <p class="text-[10px] text-slate-400 mt-1">Hanya bulan ini yang akan memakai target tersebut. Bulan lain tetap memakai target standar.</p>
+                            </div>
+
                             {{-- Nominal Target --}}
                             <div>
-                                <label for="targetInput" id="targetInputLabel" class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Target Bulanan (Rp) <span class="text-rose-500">*</span></label>
+                                <label for="targetInput" id="targetInputLabel" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                    Nominal Target (Rp) <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 font-bold text-xs">Rp</span>
                                     <input type="number" name="target" id="targetInput" value="{{ $limitPemasukanBulanan }}" required min="0"
@@ -643,22 +684,29 @@
     </div>
 
     <script>
-        let currentTargetType = 'bulanan';
+        let currentTargetType = 'bulan_spesifik';
         const annualTargetVal = {{ $annualTarget }};
         const monthlyTargetVal = {{ $limitPemasukanBulanan }};
-        let currentDaysInMonth = {{ now()->daysInMonth }};
-        let currentWeekdaysInMonth = 22; // default approx
+        let currentDaysInMonth = {{ $viewDate->daysInMonth }};
 
         function toggleTargetLabel(type) {
             currentTargetType = type;
             const label = document.getElementById('targetInputLabel');
             const input = document.getElementById('targetInput');
+            const monthWrapper = document.getElementById('targetMonthWrapper');
+
             if (type === 'tahunan') {
                 label.innerText = 'Nominal Target Tahunan (Rp) *';
                 input.value = annualTargetVal;
-            } else {
-                label.innerText = 'Nominal Target Bulanan (Rp) *';
+                if (monthWrapper) monthWrapper.classList.add('hidden');
+            } else if (type === 'bulan_spesifik') {
+                label.innerText = 'Nominal Target Bulan Terpilih (Rp) *';
                 input.value = monthlyTargetVal;
+                if (monthWrapper) monthWrapper.classList.remove('hidden');
+            } else {
+                label.innerText = 'Nominal Target Bulanan Standar (Semua Bulan) (Rp) *';
+                input.value = monthlyTargetVal;
+                if (monthWrapper) monthWrapper.classList.add('hidden');
             }
             recalculatePreview();
         }

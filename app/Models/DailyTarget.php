@@ -157,17 +157,28 @@ class DailyTarget extends Model
     }
 
     /**
-     * Get configured monthly target
+     * Get configured monthly target (supports custom target for specific month/year)
      */
-    public static function getMonthlyTarget(): int
+    public static function getMonthlyTarget($date = null): int
     {
-        // 1. Check database setting first (most flexible)
+        $date = $date ? Carbon::parse($date) : Carbon::now();
+        $year = $date->year;
+        $month = str_pad((string) $date->month, 2, '0', STR_PAD_LEFT);
+
+        // 1. Check custom target for this specific month (e.g. target_monthly_2026_09)
+        $monthKey = "target_monthly_{$year}_{$month}";
+        $monthSpecificTarget = Setting::getValue($monthKey);
+        if ($monthSpecificTarget && is_numeric($monthSpecificTarget) && (int) $monthSpecificTarget > 0) {
+            return (int) $monthSpecificTarget;
+        }
+
+        // 2. Check global database default target_monthly
         $dbTarget = Setting::getValue('target_monthly');
         if ($dbTarget && is_numeric($dbTarget) && (int) $dbTarget > 0) {
             return (int) $dbTarget;
         }
 
-        // 2. Check environment variables
+        // 3. Check environment variables
         if (env('MONTHLY_INCOME_LIMIT')) {
             return (int) env('MONTHLY_INCOME_LIMIT');
         }
@@ -176,6 +187,20 @@ class DailyTarget extends Model
         }
 
         return 50000000;
+    }
+
+    /**
+     * Check if a specific month has a custom monthly target configured
+     */
+    public static function isMonthCustomTarget($date = null): bool
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::now();
+        $year = $date->year;
+        $month = str_pad((string) $date->month, 2, '0', STR_PAD_LEFT);
+
+        $monthKey = "target_monthly_{$year}_{$month}";
+        $monthSpecificTarget = Setting::getValue($monthKey);
+        return !empty($monthSpecificTarget) && is_numeric($monthSpecificTarget) && (int) $monthSpecificTarget > 0;
     }
 
     /**

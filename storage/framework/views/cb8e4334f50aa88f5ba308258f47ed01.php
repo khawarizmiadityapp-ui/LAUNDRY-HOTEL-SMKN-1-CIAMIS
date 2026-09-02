@@ -1,4 +1,6 @@
 <?php
+    $isLunas = ($transaksi->payment_status === 'lunas');
+
     $itemsText = "";
     foreach ($transaksi->details as $detail) {
         $namaLayanan = $detail->layanan->nama ?? 'Layanan';
@@ -27,7 +29,12 @@
         ? "\n📅 *Estimasi Selesai: " . $estimasiSelesai->format('d/m/Y H:i') . " WIB*" 
         : "";
 
-    $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. Invoice: *#" . $transaksi->transaksi_code . "*\n📅 Tanggal: " . $transaksi->created_at->format('d/m/Y H:i') . $estimasiText . "\n\n*Rincian Layanan:*\n" . $itemsText . "\n💰 *Total Tagihan: Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n💳 Pembayaran: " . strtoupper($transaksi->payment_method) . " (" . ($transaksi->payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas') . ")\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
+    $statusBayarText = $isLunas ? 'Lunas (Sudah Dibayar)' : 'INVOICE (Belum Lunas)';
+    $instruksiBayar = $isLunas 
+        ? "✅ *Status: LUNAS*\nTerima kasih atas pembayaran Anda." 
+        : "⚠️ *Status: INVOICE (Belum Lunas)*\nMohon lakukan pelunasan saat pengambilan cucian.";
+
+    $waMessage = "Halo *" . ($transaksi->customer_name ?: 'Pelanggan') . "*,\nTerima kasih telah menggunakan jasa *Bening Laundry*.\n\nBerikut rincian pesanan Anda:\n📌 No. " . ($isLunas ? 'Struk' : 'Invoice') . ": *#" . $transaksi->transaksi_code . "*\n📅 Tanggal: " . $transaksi->created_at->format('d/m/Y H:i') . $estimasiText . "\n\n*Rincian Layanan:*\n" . $itemsText . "\n💰 *Total " . ($isLunas ? 'Tagihan' : 'Tagihan (Invoice)') . ": Rp " . number_format($transaksi->total_price, 0, ',', '.') . "*\n💳 Pembayaran: " . strtoupper($transaksi->payment_method) . " (" . $statusBayarText . ")\n" . $instruksiBayar . "\n\nLacak status laundry Anda secara real-time di sini:\n" . route('track.status', ['nota_number' => $transaksi->transaksi_code]);
     $waPhone = format_whatsapp_number($transaksi->customer_phone);
 ?>
 <!DOCTYPE html>
@@ -35,7 +42,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nota #<?php echo e($transaksi->transaksi_code); ?> — Bening Laundry</title>
+    <title><?php echo e($isLunas ? 'Nota Struk #' . $transaksi->transaksi_code : 'Invoice #' . $transaksi->transaksi_code); ?> — Bening Laundry</title>
 
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -279,14 +286,20 @@
 
     
     <div class="nota-card">
-        <div class="watermark">BENING LAUNDRY</div>
+        <div class="watermark"><?php echo e($isLunas ? 'BENING LAUNDRY' : 'INVOICE'); ?></div>
 
         
         <div class="nota-header">
             <div class="logo-text">Bening Laundry</div>
             <div class="logo-sub">SMKN 1 Ciamis • Hotel Laundry</div>
             <div class="logo-sub">Jl. Jend. Sudirman No. 99, Ciamis</div>
-            <div class="nota-code">No: #<?php echo e($transaksi->transaksi_code); ?></div>
+            
+            <div style="margin: 8px 0 4px; display: inline-block; padding: 2px 10px; border-radius: 4px; font-weight: 800; font-size: 0.78rem; letter-spacing: 1px; <?php echo e($isLunas ? 'background: #000; color: #fff;' : 'background: #fff; color: #000; border: 1.5px dashed #000;'); ?>">
+                <?php echo e($isLunas ? 'STRUK PEMBAYARAN' : 'INVOICE / TAGIHAN'); ?>
+
+            </div>
+
+            <div class="nota-code"><?php echo e($isLunas ? 'No. Struk' : 'No. Invoice'); ?>: #<?php echo e($transaksi->transaksi_code); ?></div>
         </div>
 
         <div class="divider"></div>
@@ -313,12 +326,12 @@
                     <span><?php echo e($transaksi->kasir_name ?? $transaksi->user->name ?? '-'); ?></span>
                 </div>
                 <div class="info-row">
-                    <label>Status</label>
+                    <label>Status Cucian</label>
                     <span><?php echo e(ucfirst($transaksi->status)); ?></span>
                 </div>
                 <div class="info-row">
-                    <label>Bayar</label>
-                    <span><?php echo e($transaksi->payment_status === 'lunas' ? 'LUNAS' : 'BELUM LUNAS'); ?></span>
+                    <label>Status Bayar</label>
+                    <span><?php echo e($isLunas ? 'LUNAS' : 'INVOICE (BELUM LUNAS)'); ?></span>
                 </div>
                 <?php if($estimasiSelesai): ?>
                 <div class="info-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #ddd;">
@@ -367,11 +380,11 @@
                 <?php endif; ?>
 
                 <div class="totals-row grand">
-                    <span>TOTAL</span>
+                    <span><?php echo e($isLunas ? 'TOTAL' : 'TOTAL TAGIHAN'); ?></span>
                     <span>Rp <?php echo e(number_format($totalTagihan, 0, ',', '.')); ?></span>
                 </div>
 
-                <?php if($transaksi->payment_method === 'tunai'): ?>
+                <?php if($isLunas && $transaksi->payment_method === 'tunai'): ?>
                 <div class="totals-row" style="margin-top: 6px; font-size: 0.75rem;">
                     <span>Uang Pelanggan</span>
                     <span>Rp <?php echo e(number_format($transaksi->dibayar, 0, ',', '.')); ?></span>
@@ -383,12 +396,17 @@
                 <?php endif; ?>
             </div>
 
+            <?php if(!$isLunas): ?>
+            <div style="text-align: center; margin: 8px 0 10px; padding: 6px 4px; border: 1px dashed #000; font-size: 0.72rem; font-weight: 700; line-height: 1.3;">
+                [ ! ] STATUS: INVOICE (BELUM LUNAS)<br>
+                <span style="font-size: 0.65rem; font-weight: 500;">Harap melunasi tagihan saat pengambilan</span>
+            </div>
+            <?php endif; ?>
+
             
             <div class="payment-info" style="margin-bottom: 12px;">
-                <?php echo e(strtoupper($transaksi->payment_method)); ?>
-
+                METODE: <?php echo e(strtoupper($transaksi->payment_method)); ?> (<?php echo e($isLunas ? 'LUNAS' : 'INVOICE'); ?>)
             </div>
-
 
         </div>
 
@@ -397,7 +415,11 @@
         
         <div class="nota-footer">
             <p class="thanks">Terima kasih!</p>
-            <p>Simpan struk ini sebagai<br>bukti transaksi Anda.</p>
+            <?php if($isLunas): ?>
+                <p>Simpan struk ini sebagai<br>bukti pembayaran transaksi Anda.</p>
+            <?php else: ?>
+                <p>Simpan invoice ini sebagai<br>bukti rincian tagihan pesanan Anda.<br>Pelunasan dilakukan saat pengambilan.</p>
+            <?php endif; ?>
         </div>
     </div>
 

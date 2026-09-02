@@ -62,4 +62,71 @@ class PosOrderTest extends TestCase
            'status' => 'pending'
         ]);
     }
+
+    /** @test */
+    public function test_unpaid_transaction_renders_as_invoice_on_receipt(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $customer = Customer::create([
+            'nama' => 'Asep',
+            'no_hp' => '081234567891',
+            'alamat' => 'Ciamis'
+        ]);
+
+        $transaksi = \App\Models\Transaksi::create([
+            'transaksi_code' => 'TRX-TEST-INVOICE',
+            'customer_id' => $customer->id,
+            'customer_name' => $customer->nama,
+            'customer_phone' => $customer->no_hp,
+            'service_type' => 'kiloan',
+            'weight' => 3,
+            'price_per_kg' => 6000,
+            'total_price' => 18000,
+            'payment_status' => 'belum_bayar',
+            'payment_method' => 'tunai',
+            'status' => 'diterima',
+            'user_id' => $admin->id,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('pos.nota', $transaksi->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('INVOICE / TAGIHAN');
+        $response->assertSee('No. Invoice');
+        $response->assertSee('INVOICE (BELUM LUNAS)');
+        $response->assertSee('TOTAL TAGIHAN');
+    }
+
+    /** @test */
+    public function test_paid_transaction_renders_as_struk_on_receipt(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $customer = Customer::create([
+            'nama' => 'Dewi',
+            'no_hp' => '081234567892',
+            'alamat' => 'Ciamis'
+        ]);
+
+        $transaksi = \App\Models\Transaksi::create([
+            'transaksi_code' => 'TRX-TEST-LUNAS',
+            'customer_id' => $customer->id,
+            'customer_name' => $customer->nama,
+            'customer_phone' => $customer->no_hp,
+            'service_type' => 'kiloan',
+            'weight' => 2,
+            'price_per_kg' => 6000,
+            'total_price' => 12000,
+            'payment_status' => 'lunas',
+            'payment_method' => 'qris',
+            'status' => 'selesai',
+            'user_id' => $admin->id,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('pos.nota', $transaksi->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('STRUK PEMBAYARAN');
+        $response->assertSee('No. Struk');
+        $response->assertSee('LUNAS');
+    }
 }
