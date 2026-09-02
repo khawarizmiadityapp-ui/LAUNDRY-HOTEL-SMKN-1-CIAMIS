@@ -93,6 +93,13 @@ Route::group(['middleware' => ['auth']], function () {
         // Laporan Keuangan & BKU PDF
         Route::get('/laporan_keuangan', [LaporanController::class, 'index'])->name('laporan_keuangan.index');
         Route::get('/laporan_keuangan/bku/pdf', [LaporanController::class, 'exportBkuPdf'])->name('laporan_keuangan.bku_pdf');
+
+        // Laporan Pekerjaan Petugas
+        Route::prefix('laporan-pekerjaan-petugas')->name('laporan_petugas.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\LaporanPekerjaanPetugasController::class, 'index'])->name('index');
+            Route::get('/pdf', [\App\Http\Controllers\Admin\LaporanPekerjaanPetugasController::class, 'exportPdf'])->name('pdf');
+            Route::get('/excel', [\App\Http\Controllers\Admin\LaporanPekerjaanPetugasController::class, 'exportExcel'])->name('excel');
+        });
         
         // Prices Management
         Route::get('/prices', [AdminController::class, 'prices'])->name('prices');
