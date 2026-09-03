@@ -12,6 +12,7 @@
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^3.1",
+        "smalot/pdfparser": "^2.12",
         "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-backup": "^10.2"
     },

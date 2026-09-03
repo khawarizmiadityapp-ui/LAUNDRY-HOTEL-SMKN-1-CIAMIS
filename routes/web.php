@@ -146,6 +146,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [PengajuanBelanjaController::class, 'index'])->name('index');
             Route::get('/create', [PengajuanBelanjaController::class, 'create'])->name('create');
             Route::post('/', [PengajuanBelanjaController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::get('/{pengajuanBelanja}/export-pdf', [PengajuanBelanjaController::class, 'exportPdf'])->name('export_pdf');
             Route::get('/{pengajuanBelanja}', [PengajuanBelanjaController::class, 'show'])->name('show');
             Route::patch('/{pengajuanBelanja}/status', [PengajuanBelanjaController::class, 'updateStatus'])->middleware('throttle:30,1')->name('update_status');
             Route::post('/{pengajuanBelanja}/convert', [PengajuanBelanjaController::class, 'convertToPengeluaran'])->middleware('throttle:30,1')->name('convert');

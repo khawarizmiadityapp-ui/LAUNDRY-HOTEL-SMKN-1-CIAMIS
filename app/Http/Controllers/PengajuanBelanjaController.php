@@ -132,6 +132,55 @@ class PengajuanBelanjaController extends Controller
     }
 
     /**
+     * Export Pengajuan Belanja ke PDF (TEFA Format)
+     */
+    public function exportPdf(PengajuanBelanja $pengajuanBelanja)
+    {
+        $pengajuanBelanja->load(['user', 'approver', 'kategoriPengeluaran']);
+
+        // Attempt to parse the 'alasan' field back into structured items if it matches the generated format
+        $items = [];
+        $keteranganTambahan = '';
+        $lines = explode("\n", $pengajuanBelanja->alasan);
+        
+        $inCatatan = false;
+        foreach ($lines as $line) {
+            $line = trim($line);
+            
+            if ($line === 'Catatan Tambahan:') {
+                $inCatatan = true;
+                continue;
+            }
+            
+            if ($inCatatan) {
+                if ($line !== '') {
+                    $keteranganTambahan .= $line . "\n";
+                }
+                continue;
+            }
+
+            // Match pattern: "- {qty}x {nama} (@ Rp{harga}) = Rp{total}"
+            if (preg_match('/^-\s+(\d+)x\s+(.+?)\s+\(@\s+Rp([\d\.,]+)\)\s+=\s+Rp([\d\.,]+)$/', $line, $matches)) {
+                $items[] = [
+                    'qty' => $matches[1],
+                    'nama' => trim($matches[2]),
+                    'harga' => $matches[3],
+                    'total' => $matches[4]
+                ];
+            }
+        }
+        $keteranganTambahan = trim($keteranganTambahan);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pengajuan_belanja.pdf', [
+            'pengajuan' => $pengajuanBelanja,
+            'items' => $items,
+            'keterangan_tambahan' => $keteranganTambahan,
+        ]);
+
+        return $pdf->stream('Pengajuan_Belanja_' . $pengajuanBelanja->kode_pengajuan . '.pdf');
+    }
+
+    /**
      * Setujui atau Tolak Pengajuan Belanja (Admin Only).
      */
     public function updateStatus(Request $request, PengajuanBelanja $pengajuanBelanja)
