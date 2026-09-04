@@ -132,7 +132,7 @@ class PetugasController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
-            'role' => 'required|in:Washing,Setrika,Ironing,Packing,Kasir',
+            'role' => 'required|in:Washing,Setrika,Ironing,Packing,Kasir,Kurir,Admin,Operasional',
         ]);
 
         if ($validator->fails()) {
@@ -159,7 +159,7 @@ class PetugasController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama' => 'sometimes|string|max:255',
-            'role' => 'sometimes|in:Washing,Setrika,Ironing,Packing,Kasir',
+            'role' => 'sometimes|in:Washing,Setrika,Ironing,Packing,Kasir,Kurir,Admin,Operasional',
         ]);
 
         if ($validator->fails()) {

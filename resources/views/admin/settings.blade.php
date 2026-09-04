@@ -251,8 +251,8 @@
         @endif
     </div>
 
-    @if(auth()->user()->isSuperAdmin())
-    <!-- Manajemen Akun & Ganti Password Section (Khusus Super Admin) -->
+    @if(auth()->user()->isAdmin())
+    <!-- Manajemen Akun & Ganti Password Section -->
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
@@ -261,9 +261,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                     </svg>
                     Manajemen Akun & Ganti Password
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
-                        Khusus Super Admin
-                    </span>
+                    @if(auth()->user()->isSuperAdmin())
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                            Super Admin
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">
+                            Administrator
+                        </span>
+                    @endif
                 </h2>
                 <p class="text-sm text-slate-500 mt-0.5">Kelola seluruh akun pengguna sistem dan penggantian kata sandi yang dilindungi verifikasi 2FA Google Authenticator.</p>
             </div>
@@ -274,7 +280,7 @@
                 </button>
                 <button type="button" onclick="openQrModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition shadow-2xs">
                     <i class="fa-solid fa-qrcode text-purple-600"></i>
-                    <span>QR 2FA Super Admin</span>
+                    <span>QR 2FA {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin' }}</span>
                 </button>
                 <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                     <i class="fa-solid fa-shield-halved text-amber-600"></i>
@@ -307,7 +313,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="font-semibold text-slate-800 text-sm">{{ $userItem->name }}</span>
                                         @if($userItem->id === auth()->id())
-                                            <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Akun Anda</span>
+                                             <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Akun Anda</span>
                                         @endif
                                     </div>
                                     <span class="text-xs text-slate-400">ID: #{{ $userItem->id }}</span>
@@ -346,13 +352,22 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <button type="button" onclick="openChangePasswordModal({{ $userItem->id }}, '{{ addslashes($userItem->name) }}', '{{ addslashes($userItem->email) }}', '{{ addslashes($userItem->role_display_name) }}')"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs rounded-xl transition border border-brand-200 hover:border-brand-300 shadow-2xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                                </svg>
-                                Ganti Password
-                            </button>
+                            @if(auth()->user()->isSuperAdmin() || !$userItem->isSuperAdmin())
+                                <button type="button" onclick="openChangePasswordModal({{ $userItem->id }}, '{{ addslashes($userItem->name) }}', '{{ addslashes($userItem->email) }}', '{{ addslashes($userItem->role_display_name) }}', {{ $userItem->isSuperAdmin() ? 'true' : 'false' }})"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs rounded-xl transition border border-brand-200 hover:border-brand-300 shadow-2xs cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                    </svg>
+                                    Ganti Password
+                                </button>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none" title="Admin tidak memiliki izin mengubah password Super Admin">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    </svg>
+                                    <span>Terkunci</span>
+                                </span>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -631,9 +646,11 @@
                     <label for="create_role" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Peran / Role</label>
                     <select name="role" id="create_role" onchange="handleCreateUserRoleChange(this.value)" required
                             class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition">
+                        @if(auth()->user()->isSuperAdmin())
                         <option value="super_admin">⭐ Super Admin (Akses Penuh Seluruh Sistem)</option>
+                        @endif
                         <option value="admin">🛡️ Admin (Administrator Portal)</option>
-                        <option value="staff">👤 Petugas / Staff (Operasional Lapangan)</option>
+                        <option value="staff" selected>👤 Petugas / Staff (Operasional Lapangan)</option>
                     </select>
                 </div>
 
@@ -722,7 +739,13 @@
         });
 
         // Change Password Functions
-        function openChangePasswordModal(userId, userName, userEmail, userRole) {
+        function openChangePasswordModal(userId, userName, userEmail, userRole, isSuperAdmin = false) {
+            @if(!auth()->user()->isSuperAdmin())
+            if (isSuperAdmin) {
+                alert('Akses ditolak. Admin tidak memiliki izin untuk mengubah kata sandi Super Admin.');
+                return;
+            }
+            @endif
             document.getElementById('targetUserName').textContent = userName;
             document.getElementById('targetUserEmail').textContent = userEmail;
             document.getElementById('targetUserRole').textContent = userRole;

@@ -66,6 +66,41 @@ class JadwalPetugasTest extends TestCase
             'shift' => 'Pagi',
             'selected_station' => 'none',
         ]);
+        $this->assertDatabaseHas('petugas', [
+            'nama' => 'Siswa Test Satu',
+            'role' => 'Washing',
+            'shift' => 'Pagi',
+        ]);
+    }
+
+    public function test_admin_can_create_schedule_for_new_petugas_with_custom_shift_and_station(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+
+        $response = $this->actingAs($admin)->post(route('admin.jadwal.store'), [
+            'tanggal' => $today,
+            'nama' => 'fatin',
+            'shift' => 'Full Day',
+            'selected_station' => 'kasir',
+            'keterangan' => 'Piket shift penuh',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'nama' => 'fatin',
+            'shift' => 'Full Day',
+            'selected_station' => 'kasir',
+        ]);
+        $this->assertDatabaseHas('petugas', [
+            'nama' => 'fatin',
+            'role' => 'Kasir',
+            'shift' => 'Full Day',
+            'status' => 'Aktif',
+        ]);
     }
 
     public function test_student_can_checkin_and_select_station_model_1(): void

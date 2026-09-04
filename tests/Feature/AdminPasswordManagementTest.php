@@ -23,34 +23,54 @@ class AdminPasswordManagementTest extends TestCase
         $response->assertSee($staff->name);
         $response->assertSee($staff->email);
         $response->assertSee('Manajemen Akun');
-        $response->assertSee('Khusus Super Admin');
+        $response->assertSee('Super Admin');
     }
 
-    public function test_regular_admin_cannot_see_user_management_section_in_settings()
+    public function test_regular_admin_can_see_user_management_section_in_settings()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
         $staff = User::factory()->create(['role' => 'staff', 'division' => 'washing']);
 
         $response = $this->actingAs($admin)->get(route('admin.settings'));
 
         $response->assertStatus(200);
-        $response->assertDontSee('Khusus Super Admin');
-        $response->assertDontSee($staff->email);
+        $response->assertSee('Manajemen Akun');
+        $response->assertSee($staff->email);
+        $response->assertSee($superAdmin->email);
+        // Baris Super Admin harus berstatus Terkunci untuk Admin biasa
+        $response->assertSee('Terkunci');
     }
 
-    public function test_regular_admin_cannot_create_user()
+    public function test_regular_admin_cannot_create_super_admin()
     {
         $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($admin)->post(route('admin.users.store'), [
-            'name' => 'New User',
-            'email' => 'newuser@test.com',
+            'name' => 'New Super Admin Attempt',
+            'email' => 'fake_super@test.com',
+            'password' => 'password123',
+            'role' => 'super_admin',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_regular_admin_can_create_staff_user()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'New Staff User',
+            'email' => 'newstaff_admin@test.com',
             'password' => 'password123',
             'role' => 'staff',
             'division' => 'washing',
         ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(302);
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('users', ['email' => 'newstaff_admin@test.com']);
     }
 
     public function test_super_admin_can_create_user()
@@ -68,6 +88,70 @@ class AdminPasswordManagementTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('users', ['email' => 'newstaff@test.com']);
+    }
+
+    public function test_regular_admin_cannot_change_super_admin_password()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.password.update', $superAdmin->id), [
+            'password' => 'adminAttemptPass123',
+            'password_confirmation' => 'adminAttemptPass123',
+            'otp' => $otp,
+        ]);
+
+        // Regular admin DITOLAK (403 Forbidden) saat mencoba mengganti password Super Admin
+        $response->assertStatus(403);
+    }
+
+    public function test_regular_admin_can_change_staff_password_with_valid_2fa_otp()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
+        $staff = User::factory()->create(['role' => 'staff', 'division' => 'washing']);
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
+            'password' => 'newstaffpass123',
+            'password_confirmation' => 'newstaffpass123',
+            'otp' => $otp,
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('success');
+
+        $staff->refresh();
+        $this->assertTrue(Hash::check('newstaffpass123', $staff->password));
+    }
+
+    public function test_regular_admin_can_change_own_password_with_valid_2fa_otp()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'google2fa_secret' => Google2FAService::generateSecretKey(),
+        ]);
+        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.password.update', $admin->id), [
+            'password' => 'adminOwnPass123',
+            'password_confirmation' => 'adminOwnPass123',
+            'otp' => $otp,
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('success');
+
+        $admin->refresh();
+        $this->assertTrue(Hash::check('adminOwnPass123', $admin->password));
     }
 
     public function test_super_admin_can_change_other_user_password_with_valid_2fa_otp()
@@ -113,25 +197,6 @@ class AdminPasswordManagementTest extends TestCase
 
         $superAdmin->refresh();
         $this->assertTrue(Hash::check('adminnewpass123', $superAdmin->password));
-    }
-
-    public function test_admin_cannot_change_user_password()
-    {
-        $admin = User::factory()->create([
-            'role' => 'admin',
-            'google2fa_secret' => Google2FAService::generateSecretKey(),
-        ]);
-        $staff = User::factory()->create(['role' => 'staff', 'division' => 'washing']);
-        $otp = Google2FAService::calculateOtp($admin->google2fa_secret);
-
-        $response = $this->actingAs($admin)->post(route('admin.users.password.update', $staff->id), [
-            'password' => 'adminAttemptPass123',
-            'password_confirmation' => 'adminAttemptPass123',
-            'otp' => $otp,
-        ]);
-
-        // Regular admin must receive 403 Forbidden
-        $response->assertStatus(403);
     }
 
     public function test_password_change_fails_with_invalid_otp()

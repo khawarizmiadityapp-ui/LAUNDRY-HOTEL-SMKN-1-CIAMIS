@@ -105,10 +105,14 @@ class JadwalPetugasController extends Controller
         $petugas = Petugas::where('nama', $request->nama)->first();
         if (!$petugas) {
             $nextId = ((int) Petugas::max('id')) + 1;
+            $role = ($request->filled('selected_station') && $request->selected_station !== 'none')
+                ? ucfirst($request->selected_station)
+                : 'Washing';
+
             $petugas = Petugas::create([
                 'nama' => $request->nama,
                 'id_petugas' => 'STF-' . str_pad((string) $nextId, 4, '0', STR_PAD_LEFT),
-                'role' => 'Washing',
+                'role' => $role,
                 'status' => 'Aktif',
                 'shift' => $request->shift,
             ]);

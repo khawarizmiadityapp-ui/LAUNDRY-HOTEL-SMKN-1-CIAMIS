@@ -612,11 +612,11 @@ class AdminController extends Controller
         }
     }
 
-    // 8. Manajemen Pengguna (Khusus Super Admin)
+    // 8. Manajemen Pengguna (Super Admin & Admin)
     public function users()
     {
-        if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Halaman ini hanya untuk Super Admin.');
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Akses ditolak. Halaman ini hanya untuk Administrator.');
         }
 
         $users = User::where('role', '!=', 'customer')->latest()->paginate(10);
@@ -625,8 +625,12 @@ class AdminController extends Controller
 
     public function storeUser(Request $request)
     {
-        if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang berhak menambahkan pengguna baru.');
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Administrator yang berhak menambahkan pengguna baru.');
+        }
+
+        if (!Auth::user()->isSuperAdmin() && $request->role === 'super_admin') {
+            abort(403, 'Akses ditolak. Admin tidak memiliki izin untuk membuat akun Super Admin.');
         }
 
         $request->validate([
@@ -813,9 +817,17 @@ class AdminController extends Controller
 
     public function updateUserPassword(Request $request, $id)
     {
-        // Pastikan HANYA Super Admin yang bisa melakukan aksi ini
-        if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang berhak mengubah kata sandi akun pengguna.');
+        // Pastikan Admin atau Super Admin yang bisa melakukan aksi ini
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Administrator yang berhak mengubah kata sandi akun pengguna.');
+        }
+
+        $currentAdmin = Auth::user();
+        $user = User::findOrFail($id);
+
+        // Keamanan: Admin biasa TIDAK BISA mengubah kata sandi Super Admin
+        if ($user->isSuperAdmin() && !$currentAdmin->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Admin tidak memiliki izin untuk mengubah kata sandi akun Super Admin.');
         }
 
         $request->validate([
@@ -829,28 +841,26 @@ class AdminController extends Controller
             'otp.size' => 'Kode OTP harus berupa 6 digit angka.',
         ]);
 
-        $currentAdmin = Auth::user();
-
-        // Pastikan Super Admin memiliki secret key
+        // Pastikan Admin yang login memiliki secret key
         if (empty($currentAdmin->google2fa_secret)) {
             $currentAdmin->google2fa_secret = Google2FAService::generateSecretKey();
             $currentAdmin->save();
         }
 
-        // Verifikasi kode OTP Google Authenticator Super Admin
+        // Verifikasi kode OTP Google Authenticator Admin/Super Admin yang sedang login
         if (!Google2FAService::verifyKey($currentAdmin->google2fa_secret, $request->otp)) {
             return back()->with('error', 'Kode OTP Google Authenticator salah atau telah kedaluwarsa. Silakan periksa aplikasi Authenticator Anda.');
         }
 
         try {
-            $user = User::findOrFail($id);
             $user->password = Hash::make($request->password);
             $user->save();
 
             // Log activity audit trail
+            $roleTitle = $currentAdmin->isSuperAdmin() ? 'Super Admin' : 'Admin';
             ActivityLog::create([
                 'log_name' => 'security',
-                'description' => "Super Admin {$currentAdmin->name} mengubah password akun {$user->name} ({$user->email}) dengan verifikasi 2FA",
+                'description' => "{$roleTitle} {$currentAdmin->name} mengubah password akun {$user->name} ({$user->email}) dengan verifikasi 2FA",
                 'subject_type' => User::class,
                 'subject_id' => $user->id,
                 'event' => 'password_updated_with_2fa',
