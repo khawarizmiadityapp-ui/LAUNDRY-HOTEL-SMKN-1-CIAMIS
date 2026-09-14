@@ -7,11 +7,10 @@ use App\Models\Petugas;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class JadwalPetugasImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
+class JadwalPetugasImport implements ToCollection, SkipsEmptyRows
 {
     protected int $importedCount = 0;
     protected array $errors = [];
@@ -19,87 +18,71 @@ class JadwalPetugasImport implements ToCollection, WithHeadingRow, SkipsEmptyRow
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $index => $row) {
-            $rowNum = $index + 2; // header at row 1
+        $headerMap = null;
 
-            // Normalize row keys to lowercase / trimmed
-            $normalized = [];
-            foreach ($row as $key => $val) {
-                $cleanKey = strtolower(trim((string)$key));
-                $normalized[$cleanKey] = is_string($val) ? trim($val) : $val;
+        foreach ($rows as $rowIndex => $row) {
+            $rowNum = $rowIndex + 1;
+            $rowArray = $row->toArray();
+
+            // 1. Cari baris header jika belum ditemukan
+            if ($headerMap === null) {
+                $candidate = [];
+                $foundTanggal = false;
+                $foundNama = false;
+
+                foreach ($rowArray as $colIdx => $cellVal) {
+                    if ($cellVal === null || $cellVal === '') continue;
+                    $clean = strtolower(trim((string)$cellVal));
+                    
+                    if (str_contains($clean, 'tang') || str_contains($clean, 'tgl') || $clean === 'date') {
+                        $candidate['tanggal'] = $colIdx;
+                        $foundTanggal = true;
+                    } elseif (str_contains($clean, 'nama') || str_contains($clean, 'siswa') || str_contains($clean, 'petugas')) {
+                        if (!str_contains($clean, 'id') && !str_contains($clean, 'nis')) {
+                            $candidate['nama'] = $colIdx;
+                            $foundNama = true;
+                        }
+                    } elseif (str_contains($clean, 'shift') || str_contains($clean, 'waktu') || str_contains($clean, 'jam')) {
+                        $candidate['shift'] = $colIdx;
+                    } elseif (str_contains($clean, 'id') || str_contains($clean, 'nis')) {
+                        $candidate['id_nis'] = $colIdx;
+                    } elseif (str_contains($clean, 'kelas') || str_contains($clean, 'keterangan') || str_contains($clean, 'ket') || str_contains($clean, 'catat') || str_contains($clean, 'note')) {
+                        $candidate['keterangan'] = $colIdx;
+                    }
+                }
+
+                if ($foundTanggal && $foundNama) {
+                    $headerMap = $candidate;
+                }
+                continue; // Lanjut ke baris data setelah header
             }
 
-            // Cari nama siswa / petugas secara fleksibel
-            $nama = $this->extractField($normalized, [
-                'nama_siswa_petugas',
-                'nama_siswa___petugas',
-                'nama_siswa',
-                'nama_petugas',
-                'nama',
-                'petugas',
-                'siswa',
-                'nama_lengkap',
-                'name',
-            ], ['nama', 'siswa', 'petugas']);
-
-            // Cari tanggal secara fleksibel
-            $rawTanggal = $this->extractField($normalized, [
-                'tanggal',
-                'tgl',
-                'date',
-                'tanggal_piket',
-                'tgl_piket',
-            ], ['tang', 'tgl', 'date']);
+            // 2. Ambil nilai per kolom sesuai posisi header yang ditemukan
+            $rawTanggal = isset($headerMap['tanggal']) ? ($rowArray[$headerMap['tanggal']] ?? null) : null;
+            $nama = isset($headerMap['nama']) ? trim((string)($rowArray[$headerMap['nama']] ?? '')) : '';
+            $idPetugas = isset($headerMap['id_nis']) ? trim((string)($rowArray[$headerMap['id_nis']] ?? '')) : null;
+            $shift = isset($headerMap['shift']) ? trim((string)($rowArray[$headerMap['shift']] ?? '')) : 'Pagi';
+            $keterangan = isset($headerMap['keterangan']) ? trim((string)($rowArray[$headerMap['keterangan']] ?? '')) : null;
 
             // Jika seluruh baris kosong atau tidak ada nama & tanggal, lewati
             if (empty($nama) && empty($rawTanggal)) {
                 continue;
             }
 
-            if (empty($nama)) {
-                $this->errors[] = "Baris {$rowNum}: Kolom Nama Siswa/Petugas tidak ditemukan atau kosong.";
-                continue;
-            }
-
-            if (empty($rawTanggal)) {
-                $this->errors[] = "Baris {$rowNum}: Kolom Tanggal untuk '{$nama}' kosong.";
-                continue;
-            }
-
-            // Parse Tanggal (mendukung Excel serial date, Y-m-d, d/m/Y, d-m-Y, dsb.)
+            // Validasi format tanggal (jika bukan tanggal valid, misal baris tabel keterangan kelas di bawah, lewati dengan aman)
             $parsedDate = $this->parseDate($rawTanggal);
             if (!$parsedDate) {
-                $this->errors[] = "Baris {$rowNum}: Format tanggal '{$rawTanggal}' tidak valid. Gunakan format YYYY-MM-DD atau DD/MM/YYYY.";
                 continue;
             }
 
-            // Cari Shift
-            $shift = $this->extractField($normalized, [
-                'shift',
-                'jam_kerja',
-                'waktu',
-            ], ['shift']) ?: 'Pagi';
+            if (empty($nama)) {
+                $this->errors[] = "Baris {$rowNum}: Kolom Nama Siswa/Petugas kosong.";
+                continue;
+            }
 
-            // Cari Keterangan
-            $keterangan = $this->extractField($normalized, [
-                'keterangan',
-                'catatan',
-                'ket',
-                'keterangan_tambahan',
-                'note',
-                'notes',
-            ], ['keterangan', 'catat', 'note']);
-
-            // Cari ID / NIS
-            $idPetugas = $this->extractField($normalized, [
-                'id_nis',
-                'id___nis',
-                'id_petugas',
-                'nis',
-                'id',
-                'nisn',
-                'no_induk',
-            ], ['nis']);
+            if (!$shift) {
+                $shift = 'Pagi';
+            }
 
             // Pastikan Petugas ada di master table petugas
             $petugas = Petugas::where('nama', $nama)->first();
@@ -151,35 +134,6 @@ class JadwalPetugasImport implements ToCollection, WithHeadingRow, SkipsEmptyRow
     }
 
     /**
-     * Ekstraksi nilai field berdasarkan kandidat nama kolom dan keyword fallback
-     */
-    protected function extractField(array $normalized, array $candidates, array $keywords = []): mixed
-    {
-        foreach ($candidates as $cand) {
-            if (isset($normalized[$cand]) && $normalized[$cand] !== '' && $normalized[$cand] !== null) {
-                return $normalized[$cand];
-            }
-        }
-
-        if (!empty($keywords)) {
-            foreach ($normalized as $k => $v) {
-                if ($v === '' || $v === null) continue;
-                foreach ($keywords as $kw) {
-                    if (str_contains($k, $kw)) {
-                        // Hindari mapping 'id_nis' sebagai 'nama' jika ada keyword pencocokan
-                        if ($kw !== 'nis' && (str_contains($k, 'id') || str_contains($k, 'nis'))) {
-                            continue;
-                        }
-                        return $v;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Parse tanggal secara fleksibel (Excel date serial, d/m/Y, d-m-Y, Y-m-d)
      */
     protected function parseDate(mixed $raw): ?string
@@ -207,6 +161,12 @@ class JadwalPetugasImport implements ToCollection, WithHeadingRow, SkipsEmptyRow
             // Format Y-m-d atau Y/m/d
             if (preg_match('/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/', $str, $m)) {
                 return sprintf('%04d-%02d-%02d', (int)$m[1], (int)$m[2], (int)$m[3]);
+            }
+
+            // Pastikan bukan teks biasa yang gagal diparse
+            $timestamp = strtotime($str);
+            if ($timestamp === false) {
+                return null;
             }
 
             return Carbon::parse($str)->format('Y-m-d');

@@ -108,7 +108,7 @@
 
             {{-- TABEL TRANSAKSI --}}
             <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto min-h-[280px]">
                     <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
                         <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
                             <tr>
@@ -160,17 +160,35 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        @if($trx->payment_status != 'lunas')
-                                        <button onclick="openPaymentModal('{{ $trx->transaksi_code }}', {{ $trx->total_price }})"
-                                                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
-                                            <i class="fas fa-cash-register"></i> Bayar
+                                    <div class="relative inline-block text-left">
+                                        <button type="button" 
+                                                onclick="toggleDropdown('dropdown-bayar-{{ $trx->id }}')" 
+                                                class="w-8 h-8 inline-flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition focus:outline-none"
+                                                title="Menu Aksi">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
+                                            </svg>
                                         </button>
-                                        @endif
-                                        <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}')"
-                                                class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition flex items-center gap-1">
-                                            <i class="fas fa-receipt text-slate-400"></i> Struk
-                                        </button>
+                                        
+                                        <div id="dropdown-bayar-{{ $trx->id }}" 
+                                             class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5 text-left">
+                                            @if($trx->payment_status != 'lunas')
+                                            <button type="button" 
+                                                    onclick="openPaymentModal('{{ $trx->transaksi_code }}', {{ $trx->total_price }}); document.getElementById('dropdown-bayar-{{ $trx->id }}').classList.add('hidden')"
+                                                    class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors">
+                                                <i class="fas fa-cash-register w-4 text-blue-500"></i>
+                                                Bayar Transaksi
+                                            </button>
+                                            <div class="h-px bg-slate-100 my-1"></div>
+                                            @endif
+
+                                            <button type="button" 
+                                                    @click="openNota('{{ route('pos.nota', $trx->id) }}'); document.getElementById('dropdown-bayar-{{ $trx->id }}').classList.add('hidden')"
+                                                    class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                                                <i class="fas fa-receipt w-4 text-slate-400"></i>
+                                                Cetak Struk / Nota
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

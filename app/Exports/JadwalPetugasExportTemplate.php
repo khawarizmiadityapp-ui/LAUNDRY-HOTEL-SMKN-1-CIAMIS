@@ -7,10 +7,21 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class JadwalPetugasExportTemplate implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
+class JadwalPetugasExportTemplate implements FromArray, WithHeadings, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents
 {
+    public function startCell(): string
+    {
+        return 'A5';
+    }
+
     public function headings(): array
     {
         return [
@@ -18,7 +29,7 @@ class JadwalPetugasExportTemplate implements FromArray, WithHeadings, WithStyles
             'Nama Siswa / Petugas',
             'ID / NIS',
             'Shift',
-            'Keterangan',
+            'Kelas / Keterangan',
         ];
     }
 
@@ -33,35 +44,35 @@ class JadwalPetugasExportTemplate implements FromArray, WithHeadings, WithStyles
                 'Ahmad Fauzi',
                 'NIS-10291',
                 'Pagi',
-                'Piket shift pagi',
+                'HOTEL-1',
             ],
             [
                 $today,
                 'Siti Aminah',
                 'NIS-10292',
                 'Pagi',
-                'Piket shift pagi',
+                'HOTEL-1',
             ],
             [
                 $today,
                 'Budi Santoso',
                 'NIS-10293',
                 'Pagi',
-                'Piket shift pagi',
+                'HOTEL-2',
             ],
             [
                 $tomorrow,
                 'Rian Hidayat',
                 'NIS-10294',
                 'Siang',
-                'Piket shift siang',
+                'HOTEL-1',
             ],
             [
                 $tomorrow,
                 'Dewi Lestari',
                 'NIS-10295',
                 'Siang',
-                'Piket shift siang',
+                'HOTEL-2',
             ],
         ];
     }
@@ -69,16 +80,48 @@ class JadwalPetugasExportTemplate implements FromArray, WithHeadings, WithStyles
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => [
+            5 => [
                 'font' => [
                     'bold' => true,
                     'color' => ['argb' => 'FFFFFFFF'],
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['argb' => 'FF2563EB'], // Primary blue
                 ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
             ],
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Kop Judul
+                $sheet->mergeCells('A1:E1');
+                $sheet->setCellValue('A1', 'JADWAL PIKET HARIAN MURID');
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->mergeCells('A2:E2');
+                $sheet->setCellValue('A2', 'PROGRAM KEAHLIAN PERHOTELAN');
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
+                $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->mergeCells('A3:E3');
+                $sheet->setCellValue('A3', 'TAHUN PELAJARAN 2026/2027');
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(11);
+                $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // Border untuk data jadwal
+                $sheet->getStyle('A5:E10')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            },
         ];
     }
 }

@@ -157,7 +157,7 @@
         <p class="text-sm text-slate-500 mb-4">Kelola kategori untuk pengeluaran operasional laundry. Kategori nonaktif tidak akan muncul di dropdown pengeluaran.</p>
 
         <!-- Tabel Kategori -->
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[250px]">
             <table class="w-full">
                 <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
@@ -165,7 +165,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Deskripsi</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Digunakan</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Aksi</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100" id="kategoriTableBody">
@@ -189,49 +189,73 @@
                         <td class="px-4 py-3 text-center text-sm text-slate-600">
                             {{ $kategori->pengeluarans_count ?? 0 }} kali
                         </td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center justify-center gap-2">
-                                <button onclick="editKategori({{ $kategori->id }}, '{{ $kategori->nama }}', '{{ $kategori->deskripsi }}', {{ $kategori->is_active ? 'true' : 'false' }})" 
-                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <td class="px-4 py-3 text-right">
+                            <div class="relative inline-block text-left">
+                                <button type="button" 
+                                        onclick="toggleDropdown('dropdown-kategori-{{ $kategori->id }}')" 
+                                        class="w-8 h-8 inline-flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition focus:outline-none"
+                                        title="Menu Aksi">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 2a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z" />
                                     </svg>
                                 </button>
-
-                                <form action="{{ route('admin.kategori-pengeluaran.toggle-status', $kategori) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="p-1.5 {{ $kategori->is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50' }} rounded-lg transition" 
-                                            title="{{ $kategori->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                        @if($kategori->is_active)
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                
+                                <div id="dropdown-kategori-{{ $kategori->id }}" 
+                                     class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5 text-left">
+                                    {{-- Edit --}}
+                                    <button type="button" 
+                                            onclick="editKategori({{ $kategori->id }}, '{{ addslashes($kategori->nama) }}', '{{ addslashes($kategori->deskripsi ?? '') }}', {{ $kategori->is_active ? 'true' : 'false' }}); document.getElementById('dropdown-kategori-{{ $kategori->id }}').classList.add('hidden')" 
+                                            class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
-                                        @else
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        @endif
+                                        Edit Kategori
                                     </button>
-                                </form>
 
-                                @if(!$kategori->isUsed())
-                                <form action="{{ route('admin.kategori-pengeluaran.destroy', $kategori) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    {{-- Toggle Status --}}
+                                    <form action="{{ route('admin.kategori-pengeluaran.toggle-status', $kategori) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                                class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold {{ $kategori->is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50' }} transition-colors">
+                                            @if($kategori->is_active)
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                            Nonaktifkan
+                                            @else
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Aktifkan
+                                            @endif
+                                        </button>
+                                    </form>
+
+                                    <div class="h-px bg-slate-100 my-1"></div>
+
+                                    {{-- Hapus --}}
+                                    @if(!$kategori->isUsed())
+                                    <form action="{{ route('admin.kategori-pengeluaran.destroy', $kategori) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                    @else
+                                    <div class="flex items-center gap-2 px-4 py-2 text-[11px] text-slate-400 cursor-not-allowed" title="Tidak bisa dihapus karena masih digunakan">
+                                        <svg class="w-3.5 h-3.5 text-slate-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
-                                    </button>
-                                </form>
-                                @else
-                                <span class="p-1.5 text-slate-300" title="Tidak bisa dihapus karena masih digunakan">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </span>
-                                @endif
+                                        Sedang Digunakan
+                                    </div>
+                                    @endif
+                                </div>
                             </div>
                         </td>
                     </tr>

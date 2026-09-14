@@ -1,10 +1,8 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Manajemen Jadwal Piket Petugas'); ?>
 
-@section('title', 'Manajemen Jadwal Piket Petugas')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div x-data="jadwalPetugasManager()" class="space-y-6 animate-fade-in">
-    {{-- Header --}}
+    
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div>
             <div class="flex items-center gap-3">
@@ -24,7 +22,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-            <a href="{{ route('admin.jadwal.template') }}" 
+            <a href="<?php echo e(route('admin.jadwal.template')); ?>" 
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all shadow-sm">
                 <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -48,35 +46,35 @@
         </div>
     </div>
 
-    {{-- Alert Success / Error --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
     <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm">
         <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <div>{!! session('success') !!}</div>
+        <div><?php echo session('success'); ?></div>
     </div>
-    @endif
-    @if(session('error'))
+    <?php endif; ?>
+    <?php if(session('error')): ?>
     <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-800 text-sm">
         <svg class="w-5 h-5 text-rose-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
         </svg>
-        <div>{!! session('error') !!}</div>
+        <div><?php echo session('error'); ?></div>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- Stats Cards (Monitoring Hari Ini) --}}
+    
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
-            <p class="text-2xl font-black text-slate-800 mt-1">{{ $statsToday['total'] }}</p>
+            <p class="text-2xl font-black text-slate-800 mt-1"><?php echo e($statsToday['total']); ?></p>
             <span class="text-[11px] text-slate-500">petugas pada tanggal ini</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm">
             <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Sudah Check-In</p>
-            <p class="text-2xl font-black text-emerald-700 mt-1">{{ $statsToday['checked_in'] }}</p>
+            <p class="text-2xl font-black text-emerald-700 mt-1"><?php echo e($statsToday['checked_in']); ?></p>
             <span class="text-[11px] text-emerald-600 font-medium">memilih bagian tugas</span>
         </div>
 
@@ -85,7 +83,7 @@
                 <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Washing</p>
                 <span class="text-base">🌊</span>
             </div>
-            <p class="text-2xl font-black text-blue-700 mt-1">{{ $statsToday['washing'] }}</p>
+            <p class="text-2xl font-black text-blue-700 mt-1"><?php echo e($statsToday['washing']); ?></p>
             <span class="text-[11px] text-slate-400">petugas cuci</span>
         </div>
 
@@ -94,7 +92,7 @@
                 <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Ironing</p>
                 <span class="text-base">♨️</span>
             </div>
-            <p class="text-2xl font-black text-amber-700 mt-1">{{ $statsToday['setrika'] }}</p>
+            <p class="text-2xl font-black text-amber-700 mt-1"><?php echo e($statsToday['setrika']); ?></p>
             <span class="text-[11px] text-slate-400">petugas ironing</span>
         </div>
 
@@ -103,23 +101,23 @@
                 <p class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Packing</p>
                 <span class="text-base">📦</span>
             </div>
-            <p class="text-2xl font-black text-purple-700 mt-1">{{ $statsToday['packing'] }}</p>
+            <p class="text-2xl font-black text-purple-700 mt-1"><?php echo e($statsToday['packing']); ?></p>
             <span class="text-[11px] text-slate-400">petugas packing</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Belum Check-In</p>
-            <p class="text-2xl font-black text-slate-500 mt-1">{{ $statsToday['pending_checkin'] }}</p>
+            <p class="text-2xl font-black text-slate-500 mt-1"><?php echo e($statsToday['pending_checkin']); ?></p>
             <span class="text-[11px] text-amber-600 font-medium">belum memilih stasiun</span>
         </div>
     </div>
 
-    {{-- Filter Bar --}}
+    
     <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-        <form method="GET" action="{{ route('admin.jadwal.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 items-end">
+        <form method="GET" action="<?php echo e(route('admin.jadwal.index')); ?>" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 items-end">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Pilih Tanggal</label>
-                <input type="date" name="date" value="{{ $selectedDate }}" 
+                <input type="date" name="date" value="<?php echo e($selectedDate); ?>" 
                        class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50"
                        onchange="this.form.submit()">
             </div>
@@ -128,9 +126,9 @@
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Kelas</label>
                 <select name="kelas" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50"
                         onchange="this.form.submit()">
-                    <option value="all" {{ request('kelas') == 'all' ? 'selected' : '' }}>Semua Kelas</option>
-                    <option value="HOTEL-1" {{ request('kelas') == 'HOTEL-1' ? 'selected' : '' }}>HOTEL-1 (Kelas XI)</option>
-                    <option value="HOTEL-2" {{ request('kelas') == 'HOTEL-2' ? 'selected' : '' }}>HOTEL-2 (Kelas XI)</option>
+                    <option value="all" <?php echo e(request('kelas') == 'all' ? 'selected' : ''); ?>>Semua Kelas</option>
+                    <option value="HOTEL-1" <?php echo e(request('kelas') == 'HOTEL-1' ? 'selected' : ''); ?>>HOTEL-1 (Kelas XI)</option>
+                    <option value="HOTEL-2" <?php echo e(request('kelas') == 'HOTEL-2' ? 'selected' : ''); ?>>HOTEL-2 (Kelas XI)</option>
                 </select>
             </div>
 
@@ -138,11 +136,11 @@
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Stasiun Tugas</label>
                 <select name="station" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50"
                         onchange="this.form.submit()">
-                    <option value="all" {{ request('station') == 'all' ? 'selected' : '' }}>Semua Stasiun</option>
-                    <option value="washing" {{ request('station') == 'washing' ? 'selected' : '' }}>🌊 Washing (Cuci)</option>
-                    <option value="setrika" {{ request('station') == 'setrika' ? 'selected' : '' }}>♨️ Ironing</option>
-                    <option value="packing" {{ request('station') == 'packing' ? 'selected' : '' }}>📦 Packing</option>
-                    <option value="none" {{ request('station') == 'none' ? 'selected' : '' }}>⏳ Belum Check-in</option>
+                    <option value="all" <?php echo e(request('station') == 'all' ? 'selected' : ''); ?>>Semua Stasiun</option>
+                    <option value="washing" <?php echo e(request('station') == 'washing' ? 'selected' : ''); ?>>🌊 Washing (Cuci)</option>
+                    <option value="setrika" <?php echo e(request('station') == 'setrika' ? 'selected' : ''); ?>>♨️ Ironing</option>
+                    <option value="packing" <?php echo e(request('station') == 'packing' ? 'selected' : ''); ?>>📦 Packing</option>
+                    <option value="none" <?php echo e(request('station') == 'none' ? 'selected' : ''); ?>>⏳ Belum Check-in</option>
                 </select>
             </div>
 
@@ -154,7 +152,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z"/>
                         </svg>
                     </span>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama..." 
+                    <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Ketik nama..." 
                            class="w-full pl-9 pr-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50">
                 </div>
             </div>
@@ -163,14 +161,14 @@
                 <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
                     Filter
                 </button>
-                <a href="{{ route('admin.jadwal.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold rounded-xl transition text-center flex items-center">
+                <a href="<?php echo e(route('admin.jadwal.index')); ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold rounded-xl transition text-center flex items-center">
                     Reset
                 </a>
             </div>
         </form>
     </div>
 
-    {{-- Tabel Jadwal --}}
+    
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div class="overflow-x-auto min-h-[300px]">
             <table class="w-full text-left border-collapse">
@@ -187,79 +185,83 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
-                    @forelse($jadwalList as $item)
+                    <?php $__empty_1 = true; $__currentLoopData = $jadwalList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="hover:bg-slate-50/60 transition-colors">
                         <td class="py-3.5 px-4 font-semibold text-slate-800">
-                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}
+                            <?php echo e(\Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y')); ?>
+
                         </td>
                         <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-800">{{ $item->nama }}</div>
-                            @if($item->keterangan)
-                                @if(str_contains(strtoupper($item->keterangan), 'HOTEL-1') || str_contains(strtoupper($item->keterangan), 'HOTEL 1'))
+                            <div class="font-bold text-slate-800"><?php echo e($item->nama); ?></div>
+                            <?php if($item->keterangan): ?>
+                                <?php if(str_contains(strtoupper($item->keterangan), 'HOTEL-1') || str_contains(strtoupper($item->keterangan), 'HOTEL 1')): ?>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 mt-0.5">
                                         HOTEL-1
                                     </span>
-                                @elseif(str_contains(strtoupper($item->keterangan), 'HOTEL-2') || str_contains(strtoupper($item->keterangan), 'HOTEL 2'))
+                                <?php elseif(str_contains(strtoupper($item->keterangan), 'HOTEL-2') || str_contains(strtoupper($item->keterangan), 'HOTEL 2')): ?>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 mt-0.5">
                                         HOTEL-2
                                     </span>
-                                @else
-                                    <span class="text-xs text-slate-400">{{ $item->keterangan }}</span>
-                                @endif
-                            @endif
+                                <?php else: ?>
+                                    <span class="text-xs text-slate-400"><?php echo e($item->keterangan); ?></span>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </td>
                         <td class="py-3.5 px-4 text-xs font-mono text-slate-500">
-                            {{ $item->id_petugas ?: '-' }}
+                            <?php echo e($item->id_petugas ?: '-'); ?>
+
                         </td>
                         <td class="py-3.5 px-4">
                             <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">
-                                {{ $item->shift }}
+                                <?php echo e($item->shift); ?>
+
                             </span>
                         </td>
                         <td class="py-3.5 px-4">
-                            @if($item->selected_station === 'washing')
+                            <?php if($item->selected_station === 'washing'): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold">
                                     <span>🌊</span> Washing (Cuci)
                                 </span>
-                            @elseif($item->selected_station === 'setrika')
+                            <?php elseif($item->selected_station === 'setrika'): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold">
                                     <span>♨️</span> Ironing
                                 </span>
-                            @elseif($item->selected_station === 'packing')
+                            <?php elseif($item->selected_station === 'packing'): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-xs font-bold">
                                     <span>📦</span> Packing
                                 </span>
-                            @elseif($item->selected_station === 'kasir')
+                            <?php elseif($item->selected_station === 'kasir'): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
                                     <span>🏪</span> Kasir / CS
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-medium">
                                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Belum Pilih Stasiun
                                 </span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="py-3.5 px-4 text-xs text-slate-500">
-                            {{ $item->checked_in_at ? \Carbon\Carbon::parse($item->checked_in_at)->format('H:i') . ' WIB' : '-' }}
+                            <?php echo e($item->checked_in_at ? \Carbon\Carbon::parse($item->checked_in_at)->format('H:i') . ' WIB' : '-'); ?>
+
                         </td>
                         <td class="py-3.5 px-4">
-                            @if($item->status === 'hadir')
+                            <?php if($item->status === 'hadir'): ?>
                                 <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold">Hadir</span>
-                            @elseif($item->status === 'izin')
+                            <?php elseif($item->status === 'izin'): ?>
                                 <span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold">Izin</span>
-                            @elseif($item->status === 'alpha')
+                            <?php elseif($item->status === 'alpha'): ?>
                                 <span class="px-2.5 py-0.5 bg-rose-100 text-rose-800 rounded-full text-xs font-semibold">Alpha</span>
-                            @else
+                            <?php else: ?>
                                 <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">Terjadwal</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="py-3.5 px-4 text-right">
                             <div class="relative inline-block text-left">
                                 <button type="button" 
-                                        onclick="toggleDropdown('dropdown-jadwal-{{ $item->id }}')" 
+                                        onclick="toggleDropdown('dropdown-jadwal-<?php echo e($item->id); ?>')" 
                                         class="w-8 h-8 inline-flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition focus:outline-none"
                                         title="Menu Aksi">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -267,10 +269,10 @@
                                     </svg>
                                 </button>
                                 
-                                <div id="dropdown-jadwal-{{ $item->id }}" 
+                                <div id="dropdown-jadwal-<?php echo e($item->id); ?>" 
                                      class="hidden absolute right-0 top-full mt-1 w-36 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1.5 text-left">
                                     <button type="button" 
-                                            @click="editJadwal({{ json_encode($item) }}); document.getElementById('dropdown-jadwal-{{ $item->id }}').classList.add('hidden')" 
+                                            @click="editJadwal(<?php echo e(json_encode($item)); ?>); document.getElementById('dropdown-jadwal-<?php echo e($item->id); ?>').classList.add('hidden')" 
                                             class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
                                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -280,9 +282,9 @@
 
                                     <div class="h-px bg-slate-50 my-1"></div>
 
-                                    <form action="{{ route('admin.jadwal.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal untuk {{ $item->nama }}?');">
-                                        @csrf
-                                        @method('DELETE')
+                                    <form action="<?php echo e(route('admin.jadwal.destroy', $item->id)); ?>" method="POST" onsubmit="return confirm('Hapus jadwal untuk <?php echo e($item->nama); ?>?');">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
                                         <button type="submit" 
                                                 class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
                                             <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -295,7 +297,7 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="8" class="py-12 text-center text-slate-400">
                             <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-300 flex items-center justify-center mx-auto mb-3">
@@ -307,20 +309,21 @@
                             <p class="text-xs text-slate-400 mt-1">Gunakan tombol "Import Excel" atau "Tambah Manual" untuk membuat jadwal.</p>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($jadwalList->hasPages())
+        
+        <?php if($jadwalList->hasPages()): ?>
         <div class="p-4 border-t border-slate-100">
-            {{ $jadwalList->links() }}
+            <?php echo e($jadwalList->links()); ?>
+
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 
-    {{-- MODAL IMPORT EXCEL --}}
+    
     <div x-show="openImportModal" x-cloak 
          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          @click.self="openImportModal = false">
@@ -337,8 +340,8 @@
                 <button @click="openImportModal = false" class="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
-            <form action="{{ route('admin.jadwal.import') }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
-                @csrf
+            <form action="<?php echo e(route('admin.jadwal.import')); ?>" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
+                <?php echo csrf_field(); ?>
                 <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100 text-xs text-blue-800 space-y-2.5">
                     <p class="font-bold flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -353,7 +356,7 @@
                         <li>Siswa yang di-import otomatis bisa memilih sendiri stasiun tugasnya (**Washing, Ironing, Packing**) di halaman piket.</li>
                     </ul>
 
-                    {{-- Tabel Referensi 2 Kelas --}}
+                    
                     <div class="p-2.5 bg-white rounded-xl border border-blue-100 text-[11px] text-slate-600">
                         <span class="font-bold text-slate-700 block mb-1">Tabel Keterangan 2 Kelas (Program Keahlian Perhotelan):</span>
                         <div class="grid grid-cols-2 gap-2">
@@ -369,7 +372,7 @@
                     </div>
 
                     <div class="pt-1">
-                        <a href="{{ route('admin.jadwal.template') }}" class="text-blue-600 font-bold hover:underline inline-flex items-center gap-1">
+                        <a href="<?php echo e(route('admin.jadwal.template')); ?>" class="text-blue-600 font-bold hover:underline inline-flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                             </svg>
@@ -396,7 +399,7 @@
         </div>
     </div>
 
-    {{-- MODAL TAMBAH MANUAL --}}
+    
     <div x-show="openAddModal" x-cloak 
          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          @click.self="openAddModal = false">
@@ -406,11 +409,11 @@
                 <button @click="openAddModal = false" class="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
-            <form action="{{ route('admin.jadwal.store') }}" method="POST" class="mt-4 space-y-4">
-                @csrf
+            <form action="<?php echo e(route('admin.jadwal.store')); ?>" method="POST" class="mt-4 space-y-4">
+                <?php echo csrf_field(); ?>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Tanggal</label>
-                    <input type="date" name="tanggal" value="{{ $selectedDate }}" required 
+                    <input type="date" name="tanggal" value="<?php echo e($selectedDate); ?>" required 
                            class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm bg-slate-50 focus:bg-white">
                 </div>
 
@@ -462,7 +465,7 @@
         </div>
     </div>
 
-    {{-- MODAL EDIT --}}
+    
     <div x-show="openEditModal" x-cloak 
          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
          @click.self="openEditModal = false">
@@ -472,9 +475,9 @@
                 <button @click="openEditModal = false" class="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
-            <form :action="'{{ url('/admin/jadwal-petugas') }}/' + editingItem.id" method="POST" class="mt-4 space-y-4">
-                @csrf
-                @method('PUT')
+            <form :action="'<?php echo e(url('/admin/jadwal-petugas')); ?>/' + editingItem.id" method="POST" class="mt-4 space-y-4">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Nama Petugas</label>
                     <input type="text" :value="editingItem.nama" disabled class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm bg-slate-100 text-slate-500 font-bold">
@@ -532,9 +535,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function jadwalPetugasManager() {
         return {
@@ -550,4 +553,6 @@
         };
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/jadwal_petugas/index.blade.php ENDPATH**/ ?>

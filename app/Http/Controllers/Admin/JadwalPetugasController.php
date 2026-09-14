@@ -20,6 +20,7 @@ class JadwalPetugasController extends Controller
         $selectedDate = $request->get('date', Carbon::today()->format('Y-m-d'));
         $search = $request->get('search');
         $station = $request->get('station');
+        $kelas = $request->get('kelas');
 
         $query = JadwalPetugas::query();
 
@@ -33,6 +34,10 @@ class JadwalPetugasController extends Controller
 
         if ($station && $station !== 'all') {
             $query->where('selected_station', $station);
+        }
+
+        if ($kelas && $kelas !== 'all') {
+            $query->where('keterangan', 'like', "%{$kelas}%");
         }
 
         $jadwalList = $query->orderBy('shift')->orderBy('nama')->paginate(20)->withQueryString();
