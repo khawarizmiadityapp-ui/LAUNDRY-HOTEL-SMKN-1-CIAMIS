@@ -200,6 +200,13 @@
                                 </button>
 
                                 
+                                <a href="<?php echo e(route('admin.pengajuan_belanja.export_pdf', $item->id)); ?>" target="_blank"
+                                   class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-lg transition"
+                                   title="Download PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+
+                                
                                 <?php if($item->status === 'diajukan' && auth()->user()->isAdmin()): ?>
                                     <button @click="openApproveModal(<?php echo e($item->id); ?>, '<?php echo e($item->kode_pengajuan); ?>', '<?php echo e($item->nama_pengajuan); ?>')"
                                             class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
@@ -341,7 +348,13 @@
                 </template>
             </div>
 
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                <template x-if="detailData?.id">
+                    <a :href="'/admin/pengajuan-belanja/' + detailData.id + '/export-pdf'" target="_blank"
+                       class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
+                </template>
                 <button type="button" @click="showDetailModal = false"
                         class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
                     Tutup

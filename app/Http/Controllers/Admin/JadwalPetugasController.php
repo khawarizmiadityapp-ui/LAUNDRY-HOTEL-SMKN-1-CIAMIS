@@ -76,16 +76,24 @@ class JadwalPetugasController extends Controller
             $count = $import->getImportedCount();
             $errors = $import->getErrors();
 
-            if ($count === 0 && !empty($errors)) {
-                return redirect()->back()->with('error', 'Gagal import: ' . implode('<br>', $errors));
+            if ($count === 0) {
+                $errorMsg = !empty($errors)
+                    ? 'Gagal import:<br>' . implode('<br>', array_slice($errors, 0, 5))
+                    : 'Tidak ada data yang berhasil diimpor. Pastikan file Excel menggunakan format yang sesuai petunjuk template (kolom: Tanggal, Nama Siswa / Petugas, ID / NIS, Shift, Keterangan).';
+                return redirect()->back()->with('error', $errorMsg);
             }
+
+            $firstDate = $import->getFirstImportedDate();
+            $targetUrl = $firstDate ? route('admin.jadwal.index', ['date' => $firstDate]) : null;
 
             $msg = "Berhasil mengimpor {$count} data jadwal petugas!";
             if (!empty($errors)) {
-                $msg .= " Namun ada beberapa baris dilewati: " . implode(', ', $errors);
+                $msg .= " Namun ada beberapa baris dilewati: " . implode(', ', array_slice($errors, 0, 3));
             }
 
-            return redirect()->back()->with('success', $msg);
+            return $targetUrl 
+                ? redirect($targetUrl)->with('success', $msg) 
+                : redirect()->back()->with('success', $msg);
         } catch (\Exception $e) {
             Log::error('Import Jadwal Petugas Gagal: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
