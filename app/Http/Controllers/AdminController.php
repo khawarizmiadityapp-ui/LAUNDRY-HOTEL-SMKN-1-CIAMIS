@@ -691,18 +691,27 @@ class AdminController extends Controller
             'target' => 'required|numeric|min:0',
             'target_type' => 'nullable|in:bulanan,tahunan,bulan_spesifik',
             'target_month' => 'nullable|string',
+            'target_year' => 'nullable|numeric|min:2020|max:2050',
+            'tahunan_mode' => 'nullable|in:bagi_rata,kustom_bulan',
+            'monthly_targets' => 'nullable|array',
+            'monthly_targets.*' => 'nullable|numeric|min:0',
             'workdays_mode' => 'nullable|in:senin_jumat,senin_sabtu,setiap_hari,custom',
             'custom_days' => 'nullable|numeric|min:1|max:31',
             'holidays_count' => 'nullable|numeric|min:0|max:31',
             'holiday_dates' => 'nullable|string',
+        ], [
+            'target.min' => 'Nominal target tidak boleh bernilai minus (minimal 0).',
+            'monthly_targets.*.min' => 'Nominal target bulanan tidak boleh bernilai minus (minimal 0).',
+            'custom_days.min' => 'Jumlah hari kerja minimal 1 hari.',
+            'holidays_count.min' => 'Jumlah hari libur tidak boleh bernilai minus.',
         ]);
 
         try {
             $type = $request->target_type ?? 'bulanan';
-            $targetValue = (int) $request->target;
+            $targetValue = max(0, (int) $request->target);
 
             $targetDate = $request->target_month ? Carbon::parse($request->target_month . '-01') : Carbon::now();
-            $targetYear = $targetDate->year;
+            $targetYear = (int) ($request->target_year ?: $targetDate->year);
             $targetMonth = str_pad((string) $targetDate->month, 2, '0', STR_PAD_LEFT);
 
             if ($type === 'bulan_spesifik') {
@@ -711,12 +720,40 @@ class AdminController extends Controller
                 \App\Models\DailyTarget::recalculateMonthTargets($targetYear, (int) $targetMonth);
                 $msg = "Target khusus untuk bulan " . $targetDate->translatedFormat('F Y') . " berhasil disimpan: Rp " . number_format($targetValue, 0, ',', '.');
             } elseif ($type === 'tahunan') {
-                $annualTarget = $targetValue;
-                $monthlyTarget = (int) ceil($annualTarget / 12);
-                \App\Models\Setting::setValue('target_annual', $annualTarget);
-                \App\Models\Setting::setValue('target_monthly', $monthlyTarget);
-                \App\Models\DailyTarget::recalculateMonthTargets();
-                $msg = "Target tahunan berhasil diperbarui: Rp " . number_format($annualTarget, 0, ',', '.');
+                $tahunanMode = $request->tahunan_mode ?? 'bagi_rata';
+
+                if ($tahunanMode === 'kustom_bulan' && is_array($request->monthly_targets) && count($request->monthly_targets) > 0) {
+                    $totalCalculated = 0;
+                    for ($m = 1; $m <= 12; $m++) {
+                        $mVal = max(0, isset($request->monthly_targets[$m]) ? (int) $request->monthly_targets[$m] : (int) ceil($targetValue / 12));
+                        $mPad = str_pad((string) $m, 2, '0', STR_PAD_LEFT);
+                        $monthKey = "target_monthly_{$targetYear}_{$mPad}";
+                        \App\Models\Setting::setValue($monthKey, $mVal);
+                        \App\Models\DailyTarget::recalculateMonthTargets($targetYear, $m);
+                        $totalCalculated += $mVal;
+                    }
+                    $annualTarget = $totalCalculated > 0 ? $totalCalculated : $targetValue;
+                    \App\Models\Setting::setValue('target_annual', $annualTarget);
+                    \App\Models\Setting::setValue("target_annual_{$targetYear}", $annualTarget);
+                    \App\Models\Setting::setValue('target_monthly', (int) ceil($annualTarget / 12));
+                    $msg = "Target tahunan {$targetYear} berhasil disimpan dengan kustomisasi per bulan! Total: Rp " . number_format($annualTarget, 0, ',', '.');
+                } else {
+                    $annualTarget = $targetValue;
+                    $monthlyTarget = (int) ceil($annualTarget / 12);
+                    \App\Models\Setting::setValue('target_annual', $annualTarget);
+                    \App\Models\Setting::setValue("target_annual_{$targetYear}", $annualTarget);
+                    \App\Models\Setting::setValue('target_monthly', $monthlyTarget);
+
+                    // Update alokasi 12 bulan dalam tahun ini
+                    for ($m = 1; $m <= 12; $m++) {
+                        $mPad = str_pad((string) $m, 2, '0', STR_PAD_LEFT);
+                        $monthKey = "target_monthly_{$targetYear}_{$mPad}";
+                        \App\Models\Setting::setValue($monthKey, $monthlyTarget);
+                        \App\Models\DailyTarget::recalculateMonthTargets($targetYear, $m);
+                    }
+
+                    $msg = "Target tahunan {$targetYear} berhasil diperbarui (Rp " . number_format($annualTarget, 0, ',', '.') . ") dan dibagi rata Rp " . number_format($monthlyTarget, 0, ',', '.') . "/bulan.";
+                }
             } else {
                 $monthlyTarget = $targetValue;
                 $annualTarget = $monthlyTarget * 12;

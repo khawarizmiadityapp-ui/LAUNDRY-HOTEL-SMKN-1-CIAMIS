@@ -90,9 +90,9 @@ Route::group(['middleware' => ['auth']], function () {
             Route::delete('/{id}', [App\Http\Controllers\Admin\JadwalPetugasController::class, 'destroy'])->name('destroy');
         });
         
-        // Laporan Keuangan & BKU PDF
         Route::get('/laporan_keuangan', [LaporanController::class, 'index'])->name('laporan_keuangan.index');
         Route::get('/laporan_keuangan/bku/pdf', [LaporanController::class, 'exportBkuPdf'])->name('laporan_keuangan.bku_pdf');
+        Route::get('/laporan_keuangan/target-harian/pdf', [LaporanController::class, 'exportTargetHarianPdf'])->name('laporan_keuangan.target_harian_pdf');
 
         // Laporan Pekerjaan Petugas
         Route::prefix('laporan-pekerjaan-petugas')->name('laporan_petugas.')->group(function () {

@@ -206,8 +206,29 @@ class DailyTarget extends Model
     /**
      * Get configured annual target
      */
-    public static function getAnnualTarget(): int
+    public static function getAnnualTarget($year = null): int
     {
+        $year = $year ?: Carbon::now()->year;
+
+        $yearSpecific = Setting::getValue("target_annual_{$year}");
+        if ($yearSpecific && is_numeric($yearSpecific) && (int) $yearSpecific > 0) {
+            return (int) $yearSpecific;
+        }
+
+        $sum = 0;
+        $hasCustom = false;
+        for ($m = 1; $m <= 12; $m++) {
+            $mPad = str_pad((string) $m, 2, '0', STR_PAD_LEFT);
+            $val = Setting::getValue("target_monthly_{$year}_{$mPad}");
+            if ($val && is_numeric($val) && (int) $val > 0) {
+                $sum += (int) $val;
+                $hasCustom = true;
+            }
+        }
+        if ($hasCustom && $sum > 0) {
+            return $sum;
+        }
+
         $dbAnnual = Setting::getValue('target_annual');
         if ($dbAnnual && is_numeric($dbAnnual) && (int) $dbAnnual > 0) {
             return (int) $dbAnnual;
@@ -233,7 +254,7 @@ class DailyTarget extends Model
         $calendarDaysInMonth = $startDate->daysInMonth;
         $targetDaysInMonth = self::getTargetDaysInMonth($startDate);
         
-        $monthlyTarget = self::getMonthlyTarget();
+        $monthlyTarget = self::getMonthlyTarget($startDate);
         $baseDailyTarget = $targetDaysInMonth > 0 ? (int) ceil($monthlyTarget / $targetDaysInMonth) : 0;
 
         $runningDeficit = 0;

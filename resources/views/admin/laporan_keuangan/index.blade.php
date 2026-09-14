@@ -4,6 +4,50 @@
 @section('title', 'Laporan Keuangan - Bening Laundry')
 
 @section('content')
+@push('styles')
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printableTargetHarian, #printableTargetHarian * {
+        visibility: visible;
+    }
+    #printableTargetHarian {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0 !important;
+        padding: 10px !important;
+        background: white !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+    .overflow-x-auto, .overflow-y-auto, .max-h-96 {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    table {
+        width: 100% !important;
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}
+.print-only {
+    display: none;
+}
+</style>
+@endpush
 <div class="space-y-6">
     <!-- Header + Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
@@ -362,20 +406,111 @@
         </div>
 
         {{-- Laporan Per Hari Table --}}
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div id="printableTargetHarian" class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+            <!-- Kop Khusus Print (Hanya Muncul Saat Print / Cetak) -->
+            <div class="print-only mb-4 pb-3 border-b-2 border-slate-800 text-center">
+                <h2 class="text-base font-bold uppercase tracking-wider text-slate-900">SMK NEGERI 1 CIAMIS &bull; TEFA PERHOTELAN</h2>
+                <h3 class="text-sm font-bold uppercase text-blue-700">LAPORAN RINCIAN TARGET HARIAN & REALISASI KEUANGAN</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Unit Usaha: Bening Laundry &bull; 
+                    Periode: <strong>{{ $targetRange === 'jan_to_now' ? 'Januari s/d ' . $viewDate->translatedFormat('F Y') : 'Bulan ' . $viewDate->translatedFormat('F Y') }}</strong> &bull; 
+                    Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB
+                </p>
+            </div>
+
+            <!-- Card Header (Tampilan Web) -->
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3 no-print">
                 <div>
                     <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i class="fas fa-calendar-alt text-blue-600"></i> Rincian Target Harian (Bulan {{ now()->translatedFormat('F Y') }})
+                        <i class="fas fa-calendar-alt text-blue-600"></i>
+                        Rincian Target Harian 
+                        <span class="text-blue-600 font-bold">
+                            ({{ $targetRange === 'jan_to_now' ? 'Januari s/d ' . $viewDate->translatedFormat('F Y') : 'Bulan ' . $viewDate->translatedFormat('F Y') }})
+                        </span>
                     </h4>
                     <p class="text-xs text-slate-400 mt-0.5">
-                        Target bulanan Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} dibagi {{ $activeWorkDaysCount }} hari kerja aktif (Rp {{ number_format($baseDailyTarget, 0, ',', '.') }}/hari).
+                        @if($targetRange === 'jan_to_now')
+                            Menampilkan data kumulatif dari <strong>Januari {{ $viewYear }}</strong> s/d <strong>{{ $viewDate->translatedFormat('F Y') }}</strong> ({{ $totalHariKerjaAktif }} hari kerja aktif).
+                        @else
+                            Target bulanan Rp {{ number_format($limitPemasukanBulanan, 0, ',', '.') }} dibagi {{ $activeWorkDaysCount }} hari kerja aktif (Rp {{ number_format($baseDailyTarget, 0, ',', '.') }}/hari).
+                        @endif
                     </p>
                 </div>
-                <span class="text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-2xs">
-                    {{ $activeWorkDaysCount }} Hari Kerja Aktif
-                </span>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-600 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-1.5">
+                        <i class="fas fa-briefcase text-slate-400"></i>
+                        {{ $totalHariKerjaAktif }} Hari Kerja ({{ $totalHariTercapai }} Tercapai)
+                    </span>
+
+                    {{-- Tombol Cetak Langsung (Print Dialog) --}}
+                    <button type="button" onclick="window.print()" 
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-2xs transition hover:border-slate-300 cursor-pointer">
+                        <i class="fas fa-print text-blue-600"></i>
+                        Cetak Tabel
+                    </button>
+
+                    {{-- Tombol Export PDF Formal --}}
+                    <a href="{{ route('admin.laporan_keuangan.target_harian_pdf', ['bulan' => $viewDate->format('Y-m'), 'target_range' => $targetRange, 'tahun' => $viewYear]) }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                        <i class="fas fa-file-pdf"></i>
+                        Export PDF
+                    </a>
+                </div>
             </div>
+
+            <!-- Month Navigator & Quick Tabs (Januari s/d Desember & Seterusnya) -->
+            <div class="px-6 py-3 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    {{-- Tab: Januari s/d Sekarang (Kumulatif) --}}
+                    <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan', 'bulan' => $viewDate->format('Y-m'), 'target_range' => 'jan_to_now']) }}"
+                       class="px-3 py-1 text-xs font-bold rounded-lg border transition {{ $targetRange === 'jan_to_now' ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' }}">
+                        <i class="fas fa-layer-group mr-1"></i> Januari s/d {{ now()->translatedFormat('M Y') }} (Kumulatif)
+                    </a>
+
+                    <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                    {{-- 12 Bulan (Jan - Des) --}}
+                    @php
+                        $namaBulanSingkat = [
+                            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+                            7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+                        ];
+                    @endphp
+                    @foreach($namaBulanSingkat as $mNum => $mLabel)
+                        @php
+                            $isCurrentMonthActive = ($targetRange !== 'jan_to_now' && $viewMonth === $mNum);
+                            $isThisRealMonth = (now()->year === $viewYear && now()->month === $mNum);
+                            $monthParam = sprintf('%04d-%02d', $viewYear, $mNum);
+                        @endphp
+                        <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan', 'bulan' => $monthParam, 'target_range' => 'single']) }}"
+                           class="relative px-2.5 py-1 text-xs font-semibold rounded-lg border transition {{ $isCurrentMonthActive ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-blue-600' }}">
+                            {{ $mLabel }}
+                            @if($isThisRealMonth && !$isCurrentMonthActive)
+                                <span class="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white" title="Bulan Berjalan"></span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+
+                {{-- Pemilih Tahun --}}
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 font-semibold uppercase">Tahun:</span>
+                    <form method="GET" action="{{ route('admin.laporan_keuangan.index') }}" class="inline">
+                        <input type="hidden" name="filter" value="bulanan">
+                        <input type="hidden" name="target_range" value="{{ $targetRange }}">
+                        <select name="bulan" onchange="this.form.submit()"
+                                class="text-xs font-bold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none cursor-pointer focus:ring-2 focus:ring-blue-500/20">
+                            @foreach([2024, 2025, 2026, 2027, 2028] as $y)
+                                <option value="{{ sprintf('%04d-%02d', $y, $viewMonth) }}" {{ $viewYear == $y ? 'selected' : '' }}>
+                                    {{ $y }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+            </div>
+
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-slate-100 border-b border-slate-200 sticky top-0 z-10 text-xs font-semibold text-slate-600 uppercase">
@@ -458,7 +593,7 @@
                                 @else
                                     @if($dt->net_income > 0)
                                         <span class="text-emerald-600">+Rp {{ number_format($dt->net_income, 0, ',', '.') }} (Bonus)</span>
-                                    @else
+                                     @else
                                         <span class="text-slate-400">-</span>
                                     @endif
                                 @endif
@@ -487,11 +622,52 @@
                         </tr>
                         @endforeach
                     </tbody>
+                    <tfoot class="bg-slate-100 border-t-2 border-slate-300 font-bold text-xs text-slate-800">
+                        <tr>
+                            <td class="px-4 py-3 text-center uppercase tracking-wider">TOTAL</td>
+                            <td class="px-4 py-3 text-right font-mono">Rp {{ number_format($totalTargetDasar, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-center text-slate-400">-</td>
+                            <td class="px-4 py-3 text-center text-slate-400">-</td>
+                            <td class="px-4 py-3 text-right font-mono text-emerald-600">Rp {{ number_format($totalPemasukanTarget, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-right font-mono text-rose-600">Rp {{ number_format($totalPengeluaranTarget, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-right font-mono text-blue-600">Rp {{ number_format($totalRealisasiBersihTarget, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-right font-mono {{ $totalSelisihTarget >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                                {{ $totalSelisihTarget >= 0 ? '+' : '' }}Rp {{ number_format($totalSelisihTarget, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                                <span class="text-[11px] font-bold {{ $totalTargetDasar > 0 && $totalPemasukanTarget >= $totalTargetDasar ? 'text-emerald-700' : 'text-slate-600' }}">
+                                    {{ $totalTargetDasar > 0 ? round(($totalPemasukanTarget / $totalTargetDasar) * 100, 1) . '%' : '-' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Kolom Tanda Tangan (Hanya Tampil Saat Print) -->
+            <div class="print-only mt-8 pt-4 px-6 pb-6">
+                <table style="width: 100%; border: none;">
+                    <tr>
+                        <td style="width: 50%; text-align: left; vertical-align: top; border: none;">
+                            <p style="margin: 0; font-size: 8.5pt;">Mengetahui / Menyetujui,</p>
+                            <p style="margin: 2px 0 0 0; font-size: 9pt; font-weight: bold;">Manajer / Ketua TEFA Perhotelan</p>
+                            <div style="height: 55px;"></div>
+                            <p style="margin: 0; font-size: 9pt; font-weight: bold; text-decoration: underline;">( ___________________________ )</p>
+                            <p style="margin: 2px 0 0 0; font-size: 7.5pt; color: #64748b;">NIP. ....................................................</p>
+                        </td>
+                        <td style="width: 50%; text-align: right; vertical-align: top; border: none;">
+                            <p style="margin: 0; font-size: 8.5pt;">Ciamis, {{ now()->translatedFormat('d F Y') }}</p>
+                            <p style="margin: 2px 0 0 0; font-size: 9pt; font-weight: bold;">Bagian Administrasi Keuangan</p>
+                            <div style="height: 55px;"></div>
+                            <p style="margin: 0; font-size: 9pt; font-weight: bold; text-decoration: underline;">( {{ auth()->user()->name ?? 'Petugas Administrasi' }} )</p>
+                            <p style="margin: 2px 0 0 0; font-size: 7.5pt; color: #64748b;">NIP/ID. .................................................</p>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
 
-        <div class="mt-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-200/60">
+        <div class="mt-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-200/60 no-print">
             <p class="text-xs text-slate-600 leading-relaxed">
                 <i class="fas fa-info-circle text-blue-600 mr-1.5"></i>
                 <strong>Sistem Carry-Forward Defisit & Hari Kerja Kustom:</strong> Target harian hanya dibebankan pada hari kerja aktif operasional (default: <strong>Senin s/d Jumat</strong>). Hari libur / akhir pekan berstatus non-operasional (Target Rp 0). Jika realisasi bersih harian mengalami defisit, defisit tersebut secara otomatis dialihkan dan ditambahkan ke target hari kerja aktif berikutnya.
@@ -562,6 +738,106 @@
                                 <p class="text-[10px] text-slate-400 mt-1">Hanya bulan ini yang akan memakai target tersebut. Bulan lain tetap memakai target standar.</p>
                             </div>
 
+                            {{-- Pilihan Khusus Target Tahunan (Kustomisasi Bulan) --}}
+                            <div id="targetTahunanWrapper" class="hidden space-y-3.5 pt-1">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="targetYearInput" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Pilih Tahun Target
+                                        </label>
+                                        <select name="target_year" id="targetYearInput"
+                                                class="w-full px-3.5 py-2.5 text-xs font-bold border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:ring-2 focus:ring-blue-500/20">
+                                            @foreach([2024, 2025, 2026, 2027, 2028] as $yr)
+                                                <option value="{{ $yr }}" {{ $viewYear == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Skema Pembagian Target
+                                        </label>
+                                        <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
+                                            <button type="button" id="btnModeBagiRata" onclick="setTahunanMode('bagi_rata')"
+                                                    class="py-1.5 text-[11px] font-bold rounded-lg transition bg-white text-blue-600 shadow-xs cursor-pointer">
+                                                Bagi Rata (12 Bln)
+                                            </button>
+                                            <button type="button" id="btnModeKustomBulan" onclick="setTahunanMode('kustom_bulan')"
+                                                    class="py-1.5 text-[11px] font-bold rounded-lg transition text-slate-600 hover:text-slate-900 cursor-pointer">
+                                                Kustom Per Bulan
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="tahunan_mode" id="tahunanModeInput" value="bagi_rata">
+                                    </div>
+                                </div>
+
+                                {{-- Bagian Kustom Alokasi Per Bulan dalam Tahunan --}}
+                                <div id="tahunanMonthBreakdownWrapper" class="hidden space-y-3 p-3.5 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div>
+                                            <label for="tahunanQuickMonthPicker" class="block text-xs font-bold text-blue-900 uppercase">
+                                                Pilih Bulan Yang Akan Diatur Targetnya
+                                            </label>
+                                            <p class="text-[10px] text-blue-700">Pilih bulan tertentu atau sesuaikan nominal masing-masing bulan di bawah.</p>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" onclick="distributeAnnualToMonths()" 
+                                                    class="text-[10px] font-bold text-blue-700 hover:text-blue-800 bg-white hover:bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs transition cursor-pointer">
+                                                <i class="fas fa-calculator mr-1"></i> Bagi Rata ke 12 Bulan
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Dropdown Pilih Bulan Cepat --}}
+                                    <div>
+                                        <select id="tahunanQuickMonthPicker" onchange="focusMonthlyInput(this.value)"
+                                                class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
+                                            <option value="">-- Klik untuk Pilih Bulan Yang Akan Diatur Targetnya --</option>
+                                            @php
+                                                $namaBulanLengkap = [
+                                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                                ];
+                                            @endphp
+                                            @foreach($namaBulanLengkap as $mNum => $mNama)
+                                                <option value="{{ $mNum }}">{{ $mNama }} (Bulan {{ $mNum }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Grid 12 Bulan Input Target --}}
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto p-1 bg-white rounded-xl border border-slate-200">
+                                        @foreach($namaBulanLengkap as $mNum => $mNama)
+                                        @php
+                                            $defaultMonthVal = $yearlyMonthTargets[$mNum] ?? (int)ceil($annualTarget / 12);
+                                        @endphp
+                                        <div id="monthCard_{{ $mNum }}" class="p-2 border border-slate-200 rounded-lg transition hover:border-blue-300">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-[11px] font-bold text-slate-700">{{ $mNama }}</span>
+                                                @if(now()->month == $mNum && now()->year == $viewYear)
+                                                    <span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-bold">Saat Ini</span>
+                                                @endif
+                                            </div>
+                                            <div class="relative">
+                                                <span class="absolute inset-y-0 left-2 flex items-center text-slate-400 text-[10px] font-bold">Rp</span>
+                                                <input type="number" name="monthly_targets[{{ $mNum }}]" id="monthInput_{{ $mNum }}"
+                                                       value="{{ $defaultMonthVal }}" min="0"
+                                                       onkeydown="preventNegative(event)" onpaste="preventPasteNegative(event)"
+                                                       oninput="onMonthlyTargetInputChange(this)"
+                                                       class="w-full pl-6 pr-2 py-1 text-xs font-mono font-bold border border-slate-200 rounded-md text-slate-900 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-blue-200 text-xs">
+                                        <span class="font-bold text-slate-700">Total Akumulasi 12 Bulan:</span>
+                                        <span class="font-mono font-black text-blue-700 text-sm" id="tahunanCalculatedTotal">Rp {{ number_format($annualTarget, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Nominal Target --}}
                             <div>
                                 <label for="targetInput" id="targetInputLabel" class="block text-xs font-bold text-slate-700 uppercase mb-1">
@@ -570,9 +846,12 @@
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 font-bold text-xs">Rp</span>
                                     <input type="number" name="target" id="targetInput" value="{{ $limitPemasukanBulanan }}" required min="0"
-                                           oninput="recalculatePreview()"
-                                           class="w-full pl-9 pr-4 py-2.5 text-xs font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-900">
+                                           onkeydown="preventNegative(event)" onpaste="preventPasteNegative(event)"
+                                           oninput="onMainTargetInput()"
+                                           onchange="onMainTargetInput()"
+                                           class="w-full pl-9 pr-4 py-2.5 text-xs font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-900 transition-colors">
                                 </div>
+                                <p id="targetInputHelper" class="text-[10px] text-blue-600 font-semibold mt-1 hidden"></p>
                             </div>
 
                             {{-- Skema Hari Kerja Operasional --}}
@@ -620,6 +899,7 @@
                                 <div id="customDaysWrapper" class="mb-3 {{ $workdaysMode === 'custom' ? '' : 'hidden' }}">
                                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Hari Kerja Target Per Bulan</label>
                                     <input type="number" name="custom_days" id="customDaysInput" min="1" max="31" value="{{ $customDays }}" placeholder="Contoh: 21"
+                                           onkeydown="preventNegative(event)" onpaste="preventPasteNegative(event)"
                                            oninput="recalculatePreview()"
                                            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                                     <p class="text-[10px] text-slate-400 mt-1">Misal 21 hari kerja aktif dalam sebulan.</p>
@@ -632,6 +912,7 @@
                                             <i class="fas fa-umbrella-beach text-amber-500 mr-1"></i> Jumlah Hari Libur Nasional / Cuti di Bulan Ini
                                         </label>
                                         <input type="number" name="holidays_count" id="holidaysCountInput" min="0" max="31" value="{{ $holidaysCount }}"
+                                               onkeydown="preventNegative(event)" onpaste="preventPasteNegative(event)"
                                                oninput="recalculatePreview()"
                                                class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                                                placeholder="0 (jika tidak ada libur tambahan)">
@@ -685,28 +966,275 @@
 
     <script>
         let currentTargetType = 'bulan_spesifik';
+        let currentTahunanMode = 'bagi_rata';
         const annualTargetVal = {{ $annualTarget }};
         const monthlyTargetVal = {{ $limitPemasukanBulanan }};
+        const viewMonthNum = {{ $viewDate->month }};
         let currentDaysInMonth = {{ $viewDate->daysInMonth }};
+
+        // Cegah pengetikan karakter minus (-), plus (+), dan eksponensial (e)
+        function preventNegative(e) {
+            if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E' || 
+                e.key === 'Subtract' || e.keyCode === 189 || e.keyCode === 109 || 
+                e.which === 189 || e.which === 109) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.key === 'ArrowDown' || e.keyCode === 40) {
+                const min = parseFloat(e.target.min) || 0;
+                const currentVal = parseFloat(e.target.value) || 0;
+                if (currentVal <= min) {
+                    e.preventDefault();
+                    e.target.value = min;
+                    return false;
+                }
+            }
+        }
+
+        // Cegah paste teks yang mengandung minus atau bukan angka positif
+        function preventPasteNegative(e) {
+            const pasteData = (e.clipboardData || window.clipboardData)?.getData('text');
+            if (pasteData && (pasteData.includes('-') || isNaN(pasteData) || parseFloat(pasteData) < 0)) {
+                e.preventDefault();
+                const cleanNum = pasteData.replace(/[^0-9]/g, '');
+                if (cleanNum) {
+                    document.execCommand('insertText', false, cleanNum);
+                }
+            }
+        }
+
+        // Pasang proteksi berlapis pada seluruh elemen input angka di modal
+        function initNegativeBlockers() {
+            const modal = document.getElementById('targetModal');
+            if (!modal) return;
+            const numberInputs = modal.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('keydown', preventNegative);
+                input.addEventListener('paste', preventPasteNegative);
+                
+                // Cegah karakter minus dari mobile keyboard / virtual keyboard
+                input.addEventListener('beforeinput', function(e) {
+                    if (e.data && (e.data.includes('-') || e.data.includes('+') || e.data.toLowerCase().includes('e'))) {
+                        e.preventDefault();
+                    }
+                });
+
+                // Sanitasi langsung jika nilai menjadi minus karena spinner arrow browser
+                input.addEventListener('input', function() {
+                    const min = parseFloat(input.min) || 0;
+                    if (input.value.includes('-')) {
+                        input.value = input.value.replace(/-/g, '');
+                    }
+                    if (input.value !== '' && parseFloat(input.value) < min) {
+                        input.value = min;
+                    }
+                });
+
+                input.addEventListener('change', function() {
+                    const min = parseFloat(input.min) || 0;
+                    if (input.value === '' || isNaN(parseFloat(input.value)) || parseFloat(input.value) < min) {
+                        input.value = min;
+                    }
+                });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNegativeBlockers);
+        } else {
+            initNegativeBlockers();
+        }
 
         function toggleTargetLabel(type) {
             currentTargetType = type;
             const label = document.getElementById('targetInputLabel');
             const input = document.getElementById('targetInput');
             const monthWrapper = document.getElementById('targetMonthWrapper');
+            const tahunanWrapper = document.getElementById('targetTahunanWrapper');
+            const helper = document.getElementById('targetInputHelper');
 
             if (type === 'tahunan') {
-                label.innerText = 'Nominal Target Tahunan (Rp) *';
-                input.value = annualTargetVal;
                 if (monthWrapper) monthWrapper.classList.add('hidden');
+                if (tahunanWrapper) tahunanWrapper.classList.remove('hidden');
+                
+                if (currentTahunanMode === 'kustom_bulan') {
+                    label.innerText = 'Total Akumulasi Target Tahunan (Rp) *';
+                    if (input) {
+                        input.readOnly = true;
+                        input.classList.add('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                        input.classList.remove('text-slate-900', 'bg-white');
+                    }
+                    if (helper) {
+                        helper.innerText = 'Terkunci otomatis: Total dihitung dari akumulasi 12 bulan di atas.';
+                        helper.classList.remove('hidden');
+                    }
+                    onMonthlyTargetInputChange();
+                } else {
+                    label.innerText = 'Nominal Target Tahunan (Rp) *';
+                    if (input) {
+                        input.readOnly = false;
+                        input.classList.remove('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                        input.classList.add('text-slate-900', 'bg-white');
+                        input.value = Math.max(0, annualTargetVal);
+                    }
+                    if (helper) helper.classList.add('hidden');
+                }
             } else if (type === 'bulan_spesifik') {
                 label.innerText = 'Nominal Target Bulan Terpilih (Rp) *';
-                input.value = monthlyTargetVal;
+                if (input) {
+                    input.readOnly = false;
+                    input.classList.remove('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                    input.classList.add('text-slate-900', 'bg-white');
+                    input.value = Math.max(0, monthlyTargetVal);
+                }
                 if (monthWrapper) monthWrapper.classList.remove('hidden');
+                if (tahunanWrapper) tahunanWrapper.classList.add('hidden');
+                if (helper) helper.classList.add('hidden');
             } else {
                 label.innerText = 'Nominal Target Bulanan Standar (Semua Bulan) (Rp) *';
-                input.value = monthlyTargetVal;
+                if (input) {
+                    input.readOnly = false;
+                    input.classList.remove('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                    input.classList.add('text-slate-900', 'bg-white');
+                    input.value = Math.max(0, monthlyTargetVal);
+                }
                 if (monthWrapper) monthWrapper.classList.add('hidden');
+                if (tahunanWrapper) tahunanWrapper.classList.add('hidden');
+                if (helper) helper.classList.add('hidden');
+            }
+            recalculatePreview();
+        }
+
+        function setTahunanMode(mode) {
+            currentTahunanMode = mode;
+            const modeInput = document.getElementById('tahunanModeInput');
+            if (modeInput) modeInput.value = mode;
+
+            const btnBagiRata = document.getElementById('btnModeBagiRata');
+            const btnKustom = document.getElementById('btnModeKustomBulan');
+            const breakdownWrapper = document.getElementById('tahunanMonthBreakdownWrapper');
+            const label = document.getElementById('targetInputLabel');
+            const mainInput = document.getElementById('targetInput');
+            const helper = document.getElementById('targetInputHelper');
+
+            if (mode === 'kustom_bulan') {
+                if (btnKustom) btnKustom.className = 'py-1.5 text-[11px] font-bold rounded-lg transition bg-white text-blue-600 shadow-xs cursor-pointer';
+                if (btnBagiRata) btnBagiRata.className = 'py-1.5 text-[11px] font-bold rounded-lg transition text-slate-600 hover:text-slate-900 cursor-pointer';
+                if (breakdownWrapper) breakdownWrapper.classList.remove('hidden');
+                if (label) label.innerText = 'Total Akumulasi Target Tahunan (Rp) *';
+                if (mainInput) {
+                    mainInput.readOnly = true;
+                    mainInput.classList.add('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                    mainInput.classList.remove('text-slate-900', 'bg-white');
+                }
+                if (helper) {
+                    helper.innerText = 'Terkunci otomatis: Total dihitung dari akumulasi 12 bulan di atas.';
+                    helper.classList.remove('hidden');
+                }
+                onMonthlyTargetInputChange();
+            } else {
+                if (btnBagiRata) btnBagiRata.className = 'py-1.5 text-[11px] font-bold rounded-lg transition bg-white text-blue-600 shadow-xs cursor-pointer';
+                if (btnKustom) btnKustom.className = 'py-1.5 text-[11px] font-bold rounded-lg transition text-slate-600 hover:text-slate-900 cursor-pointer';
+                if (breakdownWrapper) breakdownWrapper.classList.add('hidden');
+                if (label) label.innerText = 'Nominal Target Tahunan (Rp) *';
+                if (mainInput) {
+                    mainInput.readOnly = false;
+                    mainInput.classList.remove('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                    mainInput.classList.add('text-slate-900', 'bg-white');
+                }
+                if (helper) helper.classList.add('hidden');
+                recalculatePreview();
+            }
+        }
+
+        function focusMonthlyInput(mNum) {
+            if (!mNum) return;
+            
+            // Highlight selected month card
+            for (let i = 1; i <= 12; i++) {
+                const card = document.getElementById('monthCard_' + i);
+                if (card) {
+                    card.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500/30', 'bg-blue-50/50');
+                    card.classList.add('border-slate-200');
+                }
+            }
+
+            const targetCard = document.getElementById('monthCard_' + mNum);
+            const targetInput = document.getElementById('monthInput_' + mNum);
+            if (targetCard) {
+                targetCard.classList.remove('border-slate-200');
+                targetCard.classList.add('border-blue-500', 'ring-2', 'ring-blue-500/30', 'bg-blue-50/50');
+            }
+            if (targetInput) {
+                targetInput.focus();
+                targetInput.select();
+                targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function distributeAnnualToMonths() {
+            const mainInput = document.getElementById('targetInput');
+            if (mainInput && (mainInput.value.includes('-') || parseFloat(mainInput.value) < 0)) {
+                mainInput.value = Math.max(0, parseFloat(mainInput.value.replace(/-/g, '')) || 0);
+            }
+            const annualVal = Math.max(0, parseFloat(mainInput?.value) || 0);
+            const perMonth = Math.round(annualVal / 12);
+            for (let m = 1; m <= 12; m++) {
+                const el = document.getElementById('monthInput_' + m);
+                if (el) el.value = perMonth;
+            }
+            onMonthlyTargetInputChange();
+        }
+
+        function onMonthlyTargetInputChange(elChanged) {
+            if (elChanged) {
+                if (elChanged.value.includes('-') || (elChanged.value !== '' && parseFloat(elChanged.value) < 0)) {
+                    elChanged.value = Math.max(0, parseFloat(elChanged.value.replace(/-/g, '')) || 0);
+                }
+            }
+            let total = 0;
+            for (let m = 1; m <= 12; m++) {
+                const el = document.getElementById('monthInput_' + m);
+                if (el) {
+                    if (el.value.includes('-') || (el.value !== '' && parseFloat(el.value) < 0)) {
+                        el.value = Math.max(0, parseFloat(el.value.replace(/-/g, '')) || 0);
+                    }
+                    total += Math.max(0, parseFloat(el.value) || 0);
+                }
+            }
+
+            const totalDisplay = document.getElementById('tahunanCalculatedTotal');
+            if (totalDisplay) {
+                totalDisplay.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(total);
+            }
+
+            if (currentTargetType === 'tahunan' && currentTahunanMode === 'kustom_bulan') {
+                const mainInput = document.getElementById('targetInput');
+                if (mainInput) mainInput.value = total;
+            }
+
+            recalculatePreview();
+        }
+
+        function onMainTargetInput() {
+            const mainInput = document.getElementById('targetInput');
+            if (mainInput && (mainInput.value.includes('-') || (mainInput.value !== '' && parseFloat(mainInput.value) < 0))) {
+                mainInput.value = Math.max(0, parseFloat(mainInput.value.replace(/-/g, '')) || 0);
+            }
+
+            if (currentTargetType === 'tahunan') {
+                if (currentTahunanMode === 'bagi_rata') {
+                    const annualVal = Math.max(0, parseFloat(mainInput.value) || 0);
+                    const perMonth = Math.round(annualVal / 12);
+                    for (let m = 1; m <= 12; m++) {
+                        const el = document.getElementById('monthInput_' + m);
+                        if (el) el.value = perMonth;
+                    }
+                    const totalDisplay = document.getElementById('tahunanCalculatedTotal');
+                    if (totalDisplay) {
+                        totalDisplay.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(annualVal);
+                    }
+                }
             }
             recalculatePreview();
         }
@@ -722,8 +1250,24 @@
         }
 
         function recalculatePreview() {
-            const targetInput = parseFloat(document.getElementById('targetInput').value) || 0;
-            let monthlyVal = currentTargetType === 'tahunan' ? Math.ceil(targetInput / 12) : targetInput;
+            const targetInputEl = document.getElementById('targetInput');
+            if (targetInputEl && (targetInputEl.value.includes('-') || (targetInputEl.value !== '' && parseFloat(targetInputEl.value) < 0))) {
+                targetInputEl.value = Math.max(0, parseFloat(targetInputEl.value.replace(/-/g, '')) || 0);
+            }
+            const targetInput = Math.max(0, parseFloat(targetInputEl?.value) || 0);
+            let monthlyVal = targetInput;
+
+            if (currentTargetType === 'tahunan') {
+                if (currentTahunanMode === 'kustom_bulan') {
+                    const currentMonthInput = document.getElementById('monthInput_' + viewMonthNum);
+                    if (currentMonthInput && (currentMonthInput.value.includes('-') || parseFloat(currentMonthInput.value) < 0)) {
+                        currentMonthInput.value = Math.max(0, parseFloat(currentMonthInput.value.replace(/-/g, '')) || 0);
+                    }
+                    monthlyVal = currentMonthInput ? Math.max(0, parseFloat(currentMonthInput.value) || Math.ceil(targetInput / 12)) : Math.ceil(targetInput / 12);
+                } else {
+                    monthlyVal = Math.ceil(targetInput / 12);
+                }
+            }
 
             const mode = document.querySelector('input[name="workdays_mode"]:checked')?.value || 'senin_jumat';
             let workdays = 22;
@@ -735,19 +1279,54 @@
             } else if (mode === 'setiap_hari') {
                 workdays = currentDaysInMonth;
             } else if (mode === 'custom') {
-                workdays = parseInt(document.getElementById('customDaysInput').value) || 22;
+                const customDaysEl = document.getElementById('customDaysInput');
+                if (customDaysEl && (customDaysEl.value.includes('-') || (customDaysEl.value !== '' && parseFloat(customDaysEl.value) < 1))) {
+                    customDaysEl.value = 1;
+                }
+                workdays = Math.max(1, parseInt(customDaysEl?.value) || 22);
             }
 
-            const holidaysCount = parseInt(document.getElementById('holidaysCountInput').value) || 0;
+            const holidaysCountEl = document.getElementById('holidaysCountInput');
+            if (holidaysCountEl && (holidaysCountEl.value.includes('-') || (holidaysCountEl.value !== '' && parseFloat(holidaysCountEl.value) < 0))) {
+                holidaysCountEl.value = 0;
+            }
+            const holidaysCount = Math.max(0, parseInt(holidaysCountEl?.value) || 0);
             const finalDays = Math.max(1, workdays - holidaysCount);
 
-            const dailyVal = Math.ceil(monthlyVal / finalDays);
+            const dailyVal = Math.max(0, Math.ceil(monthlyVal / finalDays));
 
             document.getElementById('previewFormulaText').innerText = 
                 'Rp ' + new Intl.NumberFormat('id-ID').format(monthlyVal) + ' ÷ ' + finalDays + ' hari kerja';
             document.getElementById('previewDailyTargetText').innerText = 
                 'Rp ' + new Intl.NumberFormat('id-ID').format(dailyVal);
         }
+
+        // Validasi form saat submit agar tidak ada nilai negatif
+        document.getElementById('targetForm')?.addEventListener('submit', function(e) {
+            const mainInput = document.getElementById('targetInput');
+            if (mainInput && parseFloat(mainInput.value) < 0) {
+                e.preventDefault();
+                alert('Nominal target tidak boleh kurang dari 0 (tidak boleh minus).');
+                mainInput.focus();
+                return false;
+            }
+            for (let m = 1; m <= 12; m++) {
+                const el = document.getElementById('monthInput_' + m);
+                if (el && parseFloat(el.value) < 0) {
+                    e.preventDefault();
+                    alert('Nominal target bulan ke-' + m + ' tidak boleh minus.');
+                    focusMonthlyInput(m);
+                    return false;
+                }
+            }
+            const holidaysEl = document.getElementById('holidaysCountInput');
+            if (holidaysEl && parseFloat(holidaysEl.value) < 0) {
+                e.preventDefault();
+                alert('Jumlah hari libur tidak boleh bernilai minus.');
+                holidaysEl.focus();
+                return false;
+            }
+        });
     </script>
 
     <!-- Grafik Tren & Distribusi Pengeluaran (2 kolom + 1 kolom kanan) -->

@@ -191,20 +191,31 @@ class LaporanController extends Controller
             ->get();
 
         // ═══════════ DAILY TARGET TRACKING & CARRY FORWARD ═══════════
-        // Recalculate daily targets sequentially for view month
-        $monthTargets = \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $viewMonth);
+        $targetRange = $request->get('target_range', 'single');
+
+        if ($targetRange === 'jan_to_now') {
+            $endMonth = $viewMonth;
+            for ($m = 1; $m <= $endMonth; $m++) {
+                \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $m);
+            }
+            $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
+                ->whereMonth('date', '<=', $endMonth)
+                ->orderBy('date', 'desc')
+                ->get();
+        } else {
+            // Recalculate daily targets sequentially for view month
+            \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $viewMonth);
+            $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
+                ->whereMonth('date', $viewMonth)
+                ->orderBy('date', 'desc')
+                ->get();
+        }
         
         $today = Carbon::today();
         $isViewingCurrentMonth = ($viewYear === now()->year && $viewMonth === now()->month);
         $todayTarget = $isViewingCurrentMonth 
-            ? ($monthTargets->firstWhere('date', $today) ?? \App\Models\DailyTarget::getOrCreateForDate($today))
-            : ($monthTargets->first() ?? \App\Models\DailyTarget::getOrCreateForDate($viewDate->copy()->startOfMonth()));
-
-        // Daily targets list for display
-        $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
-            ->whereMonth('date', $viewMonth)
-            ->orderBy('date', 'desc')
-            ->get();
+            ? ($dailyTargets->firstWhere('date', $today) ?? \App\Models\DailyTarget::getOrCreateForDate($today))
+            : ($dailyTargets->first() ?? \App\Models\DailyTarget::getOrCreateForDate($viewDate->copy()->startOfMonth()));
 
         // Calculate summary stats
         $weeklyTargetSum = $dailyTargets->sum('adjusted_target');
@@ -213,6 +224,15 @@ class LaporanController extends Controller
             ? round(($weeklyActualSum / $weeklyTargetSum) * 100, 1) 
             : 0;
 
+        // Daily targets grand totals for table footer & summary
+        $totalTargetDasar = $dailyTargets->where('is_workday', true)->sum('base_target');
+        $totalPemasukanTarget = $dailyTargets->sum('actual_income');
+        $totalPengeluaranTarget = $dailyTargets->sum('actual_expense');
+        $totalRealisasiBersihTarget = $dailyTargets->sum('net_income');
+        $totalSelisihTarget = $dailyTargets->where('is_workday', true)->sum('variance');
+        $totalHariKerjaAktif = $dailyTargets->where('is_workday', true)->count();
+        $totalHariTercapai = $dailyTargets->where('is_workday', true)->where('is_achieved', true)->count();
+
         $workdaysMode = \App\Models\DailyTarget::getWorkdaysMode();
         $activeWorkDaysCount = \App\Models\DailyTarget::getTargetDaysInMonth($viewDate);
         $baseDailyTarget = \App\Models\DailyTarget::calculateBaseTarget($viewDate);
@@ -220,10 +240,17 @@ class LaporanController extends Controller
         $holidaysCount = (int) \App\Models\Setting::getValue('target_holidays_count', 0);
         $holidayDatesString = \App\Models\Setting::getValue('target_holiday_dates', '');
 
+        $yearlyMonthTargets = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $mDate = Carbon::createFromDate($viewYear, $m, 1);
+            $yearlyMonthTargets[$m] = \App\Models\DailyTarget::getMonthlyTarget($mDate);
+        }
+
         return view('admin.laporan_keuangan.index', [
             'viewDate' => $viewDate,
             'viewMonth' => $viewMonth,
             'viewYear' => $viewYear,
+            'targetRange' => $targetRange,
             'isCustomMonthTarget' => $isCustomMonthTarget,
             'isViewingCurrentMonth' => $isViewingCurrentMonth,
             'pemasukan' => $pemasukan,
@@ -255,6 +282,14 @@ class LaporanController extends Controller
             'weeklyTargetSum' => $weeklyTargetSum,
             'weeklyActualSum' => $weeklyActualSum,
             'weeklyAchievementRate' => $weeklyAchievementRate,
+            'totalTargetDasar' => $totalTargetDasar,
+            'totalPemasukanTarget' => $totalPemasukanTarget,
+            'totalPengeluaranTarget' => $totalPengeluaranTarget,
+            'totalRealisasiBersihTarget' => $totalRealisasiBersihTarget,
+            'totalSelisihTarget' => $totalSelisihTarget,
+            'totalHariKerjaAktif' => $totalHariKerjaAktif,
+            'totalHariTercapai' => $totalHariTercapai,
+            'yearlyMonthTargets' => $yearlyMonthTargets,
             // Workdays & Holidays
             'workdaysMode' => $workdaysMode,
             'activeWorkDaysCount' => $activeWorkDaysCount,
@@ -297,15 +332,21 @@ class LaporanController extends Controller
             $saldoAwalLabel = 'Saldo Awal ' . now()->translatedFormat('F');
         }
 
-        // 1. Hitung Saldo Awal (semua penerimaan - pengeluaran sebelum tanggal start)
-        $pemasukanSebelumnya = Transaksi::where('payment_status', 'lunas')
-            ->where('created_at', '<', $start)
-            ->sum('total_price');
+        // 1. Hitung Saldo Awal
+        if ($request->filled('saldo_awal') && is_numeric($request->saldo_awal)) {
+            $saldoAwal = max(0, (int) $request->saldo_awal);
+        } else {
+            $pemasukanSebelumnya = Transaksi::where('payment_status', 'lunas')
+                ->where('created_at', '<', $start)
+                ->sum('total_price');
 
-        $pengeluaranSebelumnya = Pengeluaran::where('tanggal', '<', $start->format('Y-m-d'))
-            ->sum('nominal');
+            $pengeluaranSebelumnya = Pengeluaran::where('tanggal', '<', $start->format('Y-m-d'))
+                ->sum('nominal');
 
-        $saldoAwal = (int) ($pemasukanSebelumnya - $pengeluaranSebelumnya);
+            // Kas fisik awal periode tidak boleh bernilai negatif (kas tekor karena belum catat modal kas)
+            $calculatedSaldo = (int) ($pemasukanSebelumnya - $pengeluaranSebelumnya);
+            $saldoAwal = max(0, $calculatedSaldo);
+        }
 
         // 2. Ambil Transaksi Pemasukan (Lunas) dalam periode
         $transaksis = Transaksi::with(['customer', 'details.layanan'])
@@ -370,6 +411,7 @@ class LaporanController extends Controller
         }
 
         $saldoAkhir = $runningSaldo;
+        $totalPenerimaanKumulatif = $saldoAwal + $totalDebet;
         $tanggalAwalFormatted = $start->translatedFormat('d F Y');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf.bku', compact(
@@ -378,11 +420,81 @@ class LaporanController extends Controller
             'saldoAwal',
             'ledgerItems',
             'totalDebet',
+            'totalPenerimaanKumulatif',
             'totalKredit',
             'saldoAkhir',
             'tanggalAwalFormatted'
         ))->setPaper('a4', 'portrait');
 
         return $pdf->download('BKU-TEFA-HTL-' . $start->format('Ym') . '-' . now()->format('His') . '.pdf');
+    }
+
+    public function exportTargetHarianPdf(Request $request)
+    {
+        $viewYear = (int) ($request->get('tahun') ?: now()->year);
+        $targetRange = $request->get('target_range', 'single');
+
+        if ($request->filled('bulan') && $request->bulan !== 'jan_to_now') {
+            try {
+                $viewDate = Carbon::parse($request->bulan . '-01');
+                $viewMonth = $viewDate->month;
+                $viewYear = $viewDate->year;
+            } catch (\Exception $e) {
+                $viewDate = Carbon::now();
+                $viewMonth = $viewDate->month;
+            }
+        } else {
+            $viewDate = Carbon::now();
+            $viewMonth = $viewDate->month;
+        }
+
+        if ($targetRange === 'jan_to_now' || $request->bulan === 'jan_to_now') {
+            $targetRange = 'jan_to_now';
+            $endMonth = $viewMonth;
+            for ($m = 1; $m <= $endMonth; $m++) {
+                \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $m);
+            }
+            $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
+                ->whereMonth('date', '<=', $endMonth)
+                ->orderBy('date', 'desc')
+                ->get();
+
+            $startMonthName = Carbon::create($viewYear, 1, 1)->translatedFormat('F');
+            $endMonthName = Carbon::create($viewYear, $endMonth, 1)->translatedFormat('F');
+            $periodeJudul = "Januari - {$endMonthName} {$viewYear}";
+        } else {
+            \App\Models\DailyTarget::recalculateMonthTargets($viewYear, $viewMonth);
+            $dailyTargets = \App\Models\DailyTarget::whereYear('date', $viewYear)
+                ->whereMonth('date', $viewMonth)
+                ->orderBy('date', 'desc')
+                ->get();
+            $periodeJudul = "Bulan " . $viewDate->translatedFormat('F Y');
+        }
+
+        $totalBaseTarget = $dailyTargets->where('is_workday', true)->sum('base_target');
+        $totalIncome = $dailyTargets->sum('actual_income');
+        $totalExpense = $dailyTargets->sum('actual_expense');
+        $totalNetIncome = $dailyTargets->sum('net_income');
+        $totalVariance = $dailyTargets->where('is_workday', true)->sum('variance');
+        $activeWorkdays = $dailyTargets->where('is_workday', true)->count();
+        $achievedDays = $dailyTargets->where('is_workday', true)->where('is_achieved', true)->count();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf.target_harian', compact(
+            'dailyTargets',
+            'periodeJudul',
+            'viewYear',
+            'viewMonth',
+            'targetRange',
+            'totalBaseTarget',
+            'totalIncome',
+            'totalExpense',
+            'totalNetIncome',
+            'totalVariance',
+            'activeWorkdays',
+            'achievedDays'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = 'Laporan-Target-Harian-' . \Illuminate\Support\Str::slug($periodeJudul) . '-' . now()->format('His') . '.pdf';
+        return $pdf->download($filename);
     }
 }

@@ -65,4 +65,83 @@ class CustomMonthlyTargetTest extends TestCase
         $response->assertSee('40.000.000');
         $response->assertSee('Target Khusus Bulan Ini');
     }
+
+    public function test_admin_can_update_annual_target_with_equal_split()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.update_target'), [
+            'target' => 120000000,
+            'target_type' => 'tahunan',
+            'target_year' => 2026,
+            'tahunan_mode' => 'bagi_rata',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(120000000, DailyTarget::getAnnualTarget(2026));
+        $this->assertEquals(10000000, DailyTarget::getMonthlyTarget('2026-05-01'));
+    }
+
+    public function test_admin_can_update_annual_target_with_custom_monthly_targets()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $monthlyTargets = [
+            1 => 8000000,
+            2 => 8000000,
+            3 => 10000000,
+            4 => 10000000,
+            5 => 12000000,
+            6 => 12000000,
+            7 => 15000000,
+            8 => 15000000,
+            9 => 10000000,
+            10 => 10000000,
+            11 => 10000000,
+            12 => 20000000,
+        ]; // Total: 140.000.000
+
+        $response = $this->actingAs($admin)->post(route('admin.update_target'), [
+            'target' => 140000000,
+            'target_type' => 'tahunan',
+            'target_year' => 2026,
+            'tahunan_mode' => 'kustom_bulan',
+            'monthly_targets' => $monthlyTargets,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(140000000, DailyTarget::getAnnualTarget(2026));
+        $this->assertEquals(8000000, DailyTarget::getMonthlyTarget('2026-01-01'));
+        $this->assertEquals(12000000, DailyTarget::getMonthlyTarget('2026-05-01'));
+        $this->assertEquals(20000000, DailyTarget::getMonthlyTarget('2026-12-01'));
+    }
+
+    public function test_admin_cannot_submit_negative_target_values()
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        // Negative main target
+        $response = $this->actingAs($admin)->post(route('admin.update_target'), [
+            'target' => -500000,
+            'target_type' => 'bulanan',
+        ]);
+        $response->assertSessionHasErrors(['target']);
+
+        // Negative monthly target in tahunan mode
+        $response2 = $this->actingAs($admin)->post(route('admin.update_target'), [
+            'target' => 10000000,
+            'target_type' => 'tahunan',
+            'tahunan_mode' => 'kustom_bulan',
+            'monthly_targets' => [
+                1 => -1000000,
+            ],
+        ]);
+        $response2->assertSessionHasErrors(['monthly_targets.1']);
+    }
 }

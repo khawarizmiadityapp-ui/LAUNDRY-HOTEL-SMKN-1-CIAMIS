@@ -97,16 +97,16 @@
             <!-- Saldo Awal -->
             <tr>
                 <td class="text-left"><?php echo e($tanggalAwalFormatted); ?></td>
-                <td class="text-center"></td>
+                <td class="text-center">-</td>
                 <td class="text-left font-bold"><?php echo e($saldoAwalLabel); ?></td>
-                <td class="text-center"></td>
-                <td class="text-right currency-cell">
-                    <?php echo e($saldoAwal > 0 ? 'Rp ' . number_format($saldoAwal, 0, ',', '.') : 'Rp -'); ?>
+                <td class="text-center">-</td>
+                <td class="text-right currency-cell font-bold">
+                    <?php echo e($saldoAwal > 0 ? 'Rp ' . number_format($saldoAwal, 0, ',', '.') : 'Rp 0'); ?>
 
                 </td>
                 <td class="text-right currency-cell">Rp -</td>
                 <td class="text-right currency-cell font-bold">
-                    <?php echo e($saldoAwal > 0 ? 'Rp ' . number_format($saldoAwal, 0, ',', '.') : 'Rp -'); ?>
+                    <?php echo e($saldoAwal > 0 ? 'Rp ' . number_format($saldoAwal, 0, ',', '.') : 'Rp 0'); ?>
 
                 </td>
             </tr>
@@ -126,21 +126,70 @@
                     <?php echo e($item['kredit'] > 0 ? 'Rp ' . number_format($item['kredit'], 0, ',', '.') : ''); ?>
 
                 </td>
-                <td class="text-right currency-cell">
-                    Rp <?php echo e(number_format($item['saldo'], 0, ',', '.')); ?>
+                <td class="text-right currency-cell font-bold" style="<?php echo e($item['saldo'] < 0 ? 'color: #b91c1c;' : ''); ?>">
+                    <?php if($item['saldo'] < 0): ?>
+                        -Rp <?php echo e(number_format(abs($item['saldo']), 0, ',', '.')); ?>
 
+                    <?php else: ?>
+                        Rp <?php echo e(number_format($item['saldo'], 0, ',', '.')); ?>
+
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
             <!-- Total -->
-            <tr class="font-bold">
-                <td colspan="4" class="text-center">TOTAL</td>
-                <td class="text-right currency-cell">Rp <?php echo e(number_format($totalDebet, 0, ',', '.')); ?></td>
+            <tr class="font-bold" style="background-color: #f8fafc;">
+                <td colspan="4" class="text-center">TOTAL KAS (PENERIMAAN & PENGELUARAN)</td>
+                <td class="text-right currency-cell">Rp <?php echo e(number_format($totalPenerimaanKumulatif ?? ($saldoAwal + $totalDebet), 0, ',', '.')); ?></td>
                 <td class="text-right currency-cell"><?php echo e($totalKredit > 0 ? 'Rp ' . number_format($totalKredit, 0, ',', '.') : 'Rp -'); ?></td>
-                <td class="text-right currency-cell">Rp <?php echo e(number_format($saldoAkhir, 0, ',', '.')); ?></td>
+                <td class="text-right currency-cell font-bold" style="<?php echo e($saldoAkhir < 0 ? 'color: #b91c1c;' : ''); ?>">
+                    <?php if($saldoAkhir < 0): ?>
+                        -Rp <?php echo e(number_format(abs($saldoAkhir), 0, ',', '.')); ?>
+
+                    <?php else: ?>
+                        Rp <?php echo e(number_format($saldoAkhir, 0, ',', '.')); ?>
+
+                    <?php endif; ?>
+                </td>
             </tr>
         </tbody>
+    </table>
+
+    <!-- Ringkasan Penutupan Kas -->
+    <table style="width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 9pt;">
+        <tr>
+            <td style="width: 58%; vertical-align: top; border: none; padding-right: 15px;">
+                <?php if($saldoAkhir < 0): ?>
+                    <div style="padding: 7px 10px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; color: #991b1b; font-size: 8pt; line-height: 1.4;">
+                        <strong>Catatan Kas Defisit:</strong> Total pengeluaran periode ini (Rp <?php echo e(number_format($totalKredit, 0, ',', '.')); ?>) melebihi penerimaan kas (Rp <?php echo e(number_format($totalPenerimaanKumulatif ?? ($saldoAwal + $totalDebet), 0, ',', '.')); ?>). Masukkan <em>Saldo Awal Kas / Modal Kas Operasional</em> pada filter unduh BKU jika terdapat modal kas fisik di laci kasir.
+                    </div>
+                <?php endif; ?>
+            </td>
+            <td style="width: 42%; vertical-align: top; border: none;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
+                    <tr>
+                        <td style="padding: 2px 4px; border: none;">Saldo Awal Kas</td>
+                        <td style="padding: 2px 4px; border: none; text-align: right;">: Rp <?php echo e(number_format($saldoAwal, 0, ',', '.')); ?></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 2px 4px; border: none;">Penerimaan Periode Ini</td>
+                        <td style="padding: 2px 4px; border: none; text-align: right;">: Rp <?php echo e(number_format($totalDebet, 0, ',', '.')); ?></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 2px 4px; border: none;">Pengeluaran Periode Ini</td>
+                        <td style="padding: 2px 4px; border: none; text-align: right;">: Rp <?php echo e(number_format($totalKredit, 0, ',', '.')); ?></td>
+                    </tr>
+                    <tr style="font-weight: bold; border-top: 1px solid #000;">
+                        <td style="padding: 3px 4px; border: none;">Sisa Saldo Kas Akhir</td>
+                        <td style="padding: 3px 4px; border: none; text-align: right; <?php echo e($saldoAkhir < 0 ? 'color: #b91c1c;' : ''); ?>">
+                            : <?php echo e($saldoAkhir < 0 ? '-Rp ' . number_format(abs($saldoAkhir), 0, ',', '.') : 'Rp ' . number_format($saldoAkhir, 0, ',', '.')); ?>
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
     </table>
 
     <!-- Tanda Tangan -->
