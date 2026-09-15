@@ -88,6 +88,15 @@ class MenuService
             return true;
         }
 
+        // Allow menu if user checked in to this station via active session
+        $activeStation = session('active_piket_station');
+        if ($activeStation) {
+            $normalizedActiveStation = $this->normalizeDivision((string) $activeStation);
+            if (in_array($normalizedActiveStation, $allowedDivisions, true) || in_array($activeStation, $allowedDivisions, true)) {
+                return true;
+            }
+        }
+
         // If user has no division, deny access (staff must have division)
         if (empty($division)) {
             return false;

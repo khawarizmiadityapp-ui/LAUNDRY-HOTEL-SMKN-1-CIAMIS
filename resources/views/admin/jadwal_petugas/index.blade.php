@@ -67,50 +67,68 @@
     @endif
 
     {{-- Stats Cards (Monitoring Hari Ini) --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
-            <p class="text-2xl font-black text-slate-800 mt-1">{{ $statsToday['total'] }}</p>
-            <span class="text-[11px] text-slate-500">petugas pada tanggal ini</span>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
+            <p class="text-xl font-black text-slate-800 mt-1">{{ $statsToday['total'] }}</p>
+            <span class="text-[10px] text-slate-500">petugas shift</span>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm">
-            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Sudah Check-In</p>
-            <p class="text-2xl font-black text-emerald-700 mt-1">{{ $statsToday['checked_in'] }}</p>
-            <span class="text-[11px] text-emerald-600 font-medium">memilih bagian tugas</span>
+        <div class="bg-white p-3.5 rounded-2xl border border-emerald-100 shadow-sm">
+            <p class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Sudah Check-In</p>
+            <p class="text-xl font-black text-emerald-700 mt-1">{{ $statsToday['checked_in'] }}</p>
+            <span class="text-[10px] text-emerald-600 font-medium">aktif bertugas</span>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm">
+        <div class="bg-white p-3.5 rounded-2xl border border-blue-100 shadow-sm">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Washing</p>
-                <span class="text-base">🌊</span>
+                <p class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">Washing</p>
+                <span class="text-sm">🌊</span>
             </div>
-            <p class="text-2xl font-black text-blue-700 mt-1">{{ $statsToday['washing'] }}</p>
-            <span class="text-[11px] text-slate-400">petugas cuci</span>
+            <p class="text-xl font-black text-blue-700 mt-1">{{ $statsToday['washing'] }}</p>
+            <span class="text-[10px] text-slate-400">petugas cuci</span>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
+        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-sm">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Ironing</p>
-                <span class="text-base">♨️</span>
+                <p class="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">Ironing</p>
+                <span class="text-sm">♨️</span>
             </div>
-            <p class="text-2xl font-black text-amber-700 mt-1">{{ $statsToday['setrika'] }}</p>
-            <span class="text-[11px] text-slate-400">petugas ironing</span>
+            <p class="text-xl font-black text-amber-700 mt-1">{{ $statsToday['setrika'] }}</p>
+            <span class="text-[10px] text-slate-400">petugas setrika</span>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm">
+        <div class="bg-white p-3.5 rounded-2xl border border-purple-100 shadow-sm">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Packing</p>
-                <span class="text-base">📦</span>
+                <p class="text-[10px] font-semibold text-purple-600 uppercase tracking-wider">Packing</p>
+                <span class="text-sm">📦</span>
             </div>
-            <p class="text-2xl font-black text-purple-700 mt-1">{{ $statsToday['packing'] }}</p>
-            <span class="text-[11px] text-slate-400">petugas packing</span>
+            <p class="text-xl font-black text-purple-700 mt-1">{{ $statsToday['packing'] }}</p>
+            <span class="text-[10px] text-slate-400">petugas packing</span>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Belum Check-In</p>
-            <p class="text-2xl font-black text-slate-500 mt-1">{{ $statsToday['pending_checkin'] }}</p>
-            <span class="text-[11px] text-amber-600 font-medium">belum memilih stasiun</span>
+        <div class="bg-white p-3.5 rounded-2xl border border-emerald-100 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Kasir</p>
+                <span class="text-sm">🏪</span>
+            </div>
+            <p class="text-xl font-black text-emerald-700 mt-1">{{ $statsToday['kasir'] }}</p>
+            <span class="text-[10px] text-slate-400">petugas kasir/CS</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-indigo-100 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider">Inventory</p>
+                <span class="text-sm">📋</span>
+            </div>
+            <p class="text-xl font-black text-indigo-700 mt-1">{{ $statsToday['inventory'] }}</p>
+            <span class="text-[10px] text-slate-400">petugas gudang</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Belum Check-In</p>
+            <p class="text-xl font-black text-slate-500 mt-1">{{ $statsToday['pending_checkin'] }}</p>
+            <span class="text-[10px] text-amber-600 font-medium">belum stasiun</span>
         </div>
     </div>
 
@@ -142,6 +160,8 @@
                     <option value="washing" {{ request('station') == 'washing' ? 'selected' : '' }}>🌊 Washing (Cuci)</option>
                     <option value="setrika" {{ request('station') == 'setrika' ? 'selected' : '' }}>♨️ Ironing</option>
                     <option value="packing" {{ request('station') == 'packing' ? 'selected' : '' }}>📦 Packing</option>
+                    <option value="kasir" {{ request('station') == 'kasir' ? 'selected' : '' }}>🏪 Kasir (CS)</option>
+                    <option value="inventory" {{ request('station') == 'inventory' ? 'selected' : '' }}>📋 Inventory</option>
                     <option value="none" {{ request('station') == 'none' ? 'selected' : '' }}>⏳ Belum Check-in</option>
                 </select>
             </div>
@@ -232,6 +252,10 @@
                             @elseif($item->selected_station === 'kasir')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
                                     <span>🏪</span> Kasir / CS
+                                </span>
+                            @elseif($item->selected_station === 'inventory')
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
+                                    <span>📋</span> Inventory
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-medium">
@@ -438,6 +462,7 @@
                             <option value="setrika">Ironing</option>
                             <option value="packing">Packing</option>
                             <option value="kasir">Kasir</option>
+                            <option value="inventory">Inventory</option>
                         </select>
                     </div>
                 </div>
@@ -498,6 +523,7 @@
                             <option value="setrika">♨️ Ironing</option>
                             <option value="packing">📦 Packing</option>
                             <option value="kasir">🏪 Kasir</option>
+                            <option value="inventory">📋 Inventory</option>
                         </select>
                     </div>
                 </div>

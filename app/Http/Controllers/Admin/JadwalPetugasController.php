@@ -50,6 +50,8 @@ class JadwalPetugasController extends Controller
             'washing' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'washing')->count(),
             'setrika' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'setrika')->count(),
             'packing' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'packing')->count(),
+            'kasir' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'kasir')->count(),
+            'inventory' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'inventory')->count(),
             'pending_checkin' => JadwalPetugas::whereDate('tanggal', $targetDate)->where('selected_station', 'none')->count(),
         ];
 
@@ -111,7 +113,7 @@ class JadwalPetugasController extends Controller
             'tanggal' => 'required|date',
             'nama' => 'required|string|max:255',
             'shift' => 'required|string|max:50',
-            'selected_station' => 'nullable|in:washing,setrika,packing,kasir,none',
+            'selected_station' => 'nullable|in:washing,setrika,packing,kasir,inventory,none',
             'keterangan' => 'nullable|string|max:255',
         ]);
 
@@ -153,7 +155,7 @@ class JadwalPetugasController extends Controller
     {
         $request->validate([
             'shift' => 'required|string|max:50',
-            'selected_station' => 'required|in:washing,setrika,packing,kasir,none',
+            'selected_station' => 'required|in:washing,setrika,packing,kasir,inventory,none',
             'status' => 'required|in:terjadwal,hadir,izin,alpha',
             'keterangan' => 'nullable|string|max:255',
         ]);

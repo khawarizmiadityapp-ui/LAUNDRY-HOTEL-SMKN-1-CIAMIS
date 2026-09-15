@@ -135,6 +135,146 @@ class JadwalPetugasTest extends TestCase
         ]);
     }
 
+    public function test_student_can_checkin_to_kasir_station(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'washing',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $jadwal = JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => 'Fatin CS',
+            'shift' => 'Pagi',
+            'selected_station' => 'none',
+            'status' => 'terjadwal',
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('petugas_piket.checkin.station'), [
+            'jadwal_id' => $jadwal->id,
+            'station' => 'kasir',
+        ]);
+
+        $response->assertRedirect(route('petugas.pos.index'));
+        $response->assertSessionHas('active_piket_nama', 'Fatin CS');
+        $response->assertSessionHas('active_piket_station', 'kasir');
+
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'kasir',
+            'status' => 'hadir',
+        ]);
+    }
+
+    public function test_student_can_checkin_to_inventory_station(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'washing',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $jadwal = JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => 'Budi Gudang',
+            'shift' => 'Pagi',
+            'selected_station' => 'none',
+            'status' => 'terjadwal',
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('petugas_piket.checkin.station'), [
+            'jadwal_id' => $jadwal->id,
+            'station' => 'inventory',
+        ]);
+
+        $response->assertRedirect(route('petugas_piket.inventory.index'));
+        $response->assertSessionHas('active_piket_nama', 'Budi Gudang');
+        $response->assertSessionHas('active_piket_station', 'inventory');
+
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'inventory',
+            'status' => 'hadir',
+        ]);
+    }
+
+    public function test_student_cannot_change_station_once_locked(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'washing',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $jadwal = JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => 'Rina Melati',
+            'shift' => 'Pagi',
+            'selected_station' => 'washing',
+            'status' => 'hadir',
+        ]);
+
+        // Siswa mencoba mengubah stasiun ke kasir
+        $response = $this->actingAs($staff)->post(route('petugas_piket.checkin.station'), [
+            'jadwal_id' => $jadwal->id,
+            'station' => 'kasir',
+        ]);
+
+        // Harus ditolak dengan error session dan stasiun di DB tidak berubah
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'washing',
+        ]);
+        $this->assertDatabaseMissing('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'kasir',
+        ]);
+    }
+
+    public function test_allroles_staff_can_bypass_station_lock(): void
+    {
+        $allrolesStaff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'all_roles',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $jadwal = JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => 'Rina Melati',
+            'shift' => 'Pagi',
+            'selected_station' => 'washing',
+            'status' => 'hadir',
+        ]);
+
+        // Akun all_roles memindahkan stasiun siswa yang sudah terkunci dari washing ke kasir
+        $response = $this->actingAs($allrolesStaff)->post(route('petugas_piket.checkin.station'), [
+            'jadwal_id' => $jadwal->id,
+            'station' => 'kasir',
+        ]);
+
+        $response->assertRedirect(route('petugas.pos.index'));
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'kasir',
+            'status' => 'hadir',
+        ]);
+    }
+
+    public function test_staff_can_access_petugas_dashboard(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'washing',
+        ]);
+
+        $response = $this->actingAs($staff)->get(route('petugas_piket.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Pilih Stasiun Tugas Hari Ini');
+    }
+
     public function test_admin_can_update_and_delete_jadwal(): void
     {
         $admin = User::factory()->create([

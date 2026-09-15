@@ -116,7 +116,7 @@ return [
             'roles' => ['admin', 'staff'],
         ],
         [
-            'label' => 'Customer Service',
+            'label' => 'Kasir (POS)',
             'route' => 'petugas.pos.index',
             'active' => ['petugas.pos.*'],
             'icon' => 'M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z',

@@ -49,6 +49,19 @@ class PetugasController extends Controller
             return;
         }
 
+        // Periksa juga stasiun aktif yang dipilih saat check-in mandiri
+        $activeStation = session('active_piket_station');
+        if ($activeStation) {
+            $stationDivision = match ($activeStation) {
+                'kasir' => 'customer_service',
+                'setrika' => 'ironing',
+                default => $activeStation,
+            };
+            if (in_array($stationDivision, $allowedDivisions, true) || in_array($activeStation, $allowedDivisions, true)) {
+                return;
+            }
+        }
+
         if (!in_array($division, $allowedDivisions, true)) {
             abort(403, 'Akun Anda tidak memiliki akses ke modul ini.');
         }
@@ -86,7 +99,18 @@ class PetugasController extends Controller
         $jadwalHariIni = JadwalPetugas::hariIni()->orderBy('shift')->orderBy('nama')->get();
         $activePiket = session('active_piket_nama') ? JadwalPetugas::hariIni()->where('nama', session('active_piket_nama'))->first() : null;
 
-        return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division', 'jadwalHariIni', 'activePiket'));
+        $rosterJson = $jadwalHariIni->map(function ($j) {
+            return [
+                'id' => (string) $j->id,
+                'nama' => $j->nama,
+                'station' => $j->selected_station,
+                'checked_in_at' => $j->checked_in_at ? \Carbon\Carbon::parse($j->checked_in_at)->format('H:i') : null,
+            ];
+        })->values()->all();
+
+        $canBypassLock = $user && ($user->isAdmin() || strtolower((string)$user->division) === 'all_roles');
+
+        return view('petugas_piket.dashboard', compact('pendingTasks', 'completedToday', 'division', 'jadwalHariIni', 'activePiket', 'rosterJson', 'canBypassLock'));
     }
     public function index()
     {
@@ -184,7 +208,7 @@ class PetugasController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'jadwal_id' => 'required|exists:jadwal_petugas,id',
-            'station' => 'required|in:washing,setrika,packing,kasir',
+            'station' => 'required|in:washing,setrika,packing,kasir,inventory',
         ]);
 
         if ($validator->fails()) {
@@ -195,11 +219,52 @@ class PetugasController extends Controller
         }
 
         $jadwal = JadwalPetugas::findOrFail($request->jadwal_id);
-        $jadwal->update([
-            'selected_station' => $request->station,
-            'checked_in_at' => now(),
-            'status' => 'hadir',
-        ]);
+
+        $stationLabels = [
+            'washing' => 'Washing / Cuci',
+            'setrika' => 'Ironing / Setrika',
+            'packing' => 'Packing & Quality',
+            'kasir' => 'Kasir (POS)',
+            'inventory' => 'Inventory / Gudang',
+        ];
+
+        $user = Auth::user();
+        $canBypassLock = $user && ($user->isAdmin() || strtolower((string)$user->division) === 'all_roles');
+
+        // 🔒 CEK APAKAH STASIUN SUDAH DIKUNCI (Bypass jika Admin atau akun All-Roles)
+        if (!$canBypassLock && $jadwal->selected_station !== 'none' && $jadwal->selected_station !== $request->station) {
+            $lockedLabel = $stationLabels[$jadwal->selected_station] ?? ucfirst($jadwal->selected_station);
+            $errorMsg = "Stasiun tugas untuk {$jadwal->nama} sudah dikunci pada bagian {$lockedLabel}. Hubungi Admin atau Guru Piket jika ingin mengubah stasiun.";
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $errorMsg], 403);
+            }
+
+            return redirect()->back()->with('error', $errorMsg);
+        }
+
+        // Jika belum pernah check-in, set stasiun dan jam masuk
+        if ($jadwal->selected_station === 'none') {
+            $jadwal->update([
+                'selected_station' => $request->station,
+                'checked_in_at' => now(),
+                'status' => 'hadir',
+            ]);
+            $flashMsg = "Selamat bertugas, {$jadwal->nama}! Stasiun Anda telah dikunci di bagian " . ($stationLabels[$request->station] ?? ucfirst($request->station)) . ".";
+        } elseif ($canBypassLock && $jadwal->selected_station !== $request->station) {
+            // Admin / All-Roles memindahkan stasiun
+            $jadwal->update([
+                'selected_station' => $request->station,
+                'status' => 'hadir',
+            ]);
+            $flashMsg = "Stasiun tugas untuk {$jadwal->nama} dialihkan ke bagian " . ($stationLabels[$request->station] ?? ucfirst($request->station)) . " (Mode All-Roles).";
+        } else {
+            // Sudah pernah check-in di stasiun ini, pastikan status hadir
+            if ($jadwal->status !== 'hadir') {
+                $jadwal->update(['status' => 'hadir']);
+            }
+            $flashMsg = "Melanjutkan tugas di bagian " . ($stationLabels[$jadwal->selected_station] ?? ucfirst($jadwal->selected_station)) . ", {$jadwal->nama}!";
+        }
 
         // Simpan sesi aktif browser untuk autofill
         session([
@@ -213,20 +278,22 @@ class PetugasController extends Controller
             'setrika' => 'petugas_piket.setrika.index',
             'packing' => 'petugas_piket.packing.index',
             'kasir' => 'petugas.pos.index',
+            'inventory' => 'petugas_piket.inventory.index',
         ];
 
-        $redirectRoute = $stationRouteMap[$request->station] ?? 'petugas_piket.dashboard';
+        $redirectRoute = $stationRouteMap[$jadwal->selected_station] ?? 'petugas_piket.dashboard';
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => "Selamat bertugas, {$jadwal->nama}! Anda telah memilih bagian " . ucfirst($request->station),
+                'message' => $flashMsg,
                 'redirect_url' => route($redirectRoute),
                 'jadwal' => $jadwal,
+                'is_locked' => true,
             ]);
         }
 
-        return redirect()->route($redirectRoute)->with('success', "Selamat bertugas, {$jadwal->nama}! Anda telah memilih bagian " . ucfirst($request->station));
+        return redirect()->route($redirectRoute)->with('success', $flashMsg);
     }
 
     /**
