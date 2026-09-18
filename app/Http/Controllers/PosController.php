@@ -235,7 +235,7 @@ class PosController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.',
-                    'error' => config('app.debug') ? $e->getMessage() : null,
+                    'error' => $e->getMessage(),
                 ], 500);
             }
 

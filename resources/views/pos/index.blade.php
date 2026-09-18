@@ -815,6 +815,46 @@
             </div>
         </div>
     </div>
+
+    {{-- ═══════════ ERROR / NOTIFICATION MODAL (NO JAVASCRIPT ALERT) ═══════════ --}}
+    <div x-show="showErrorModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center modal-overlay"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div @click.outside="showErrorModal = false"
+             class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 animate-fade-up overflow-hidden border border-rose-100">
+            <div class="px-6 pt-6 pb-4 text-center">
+                <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-8 ring-rose-50/60">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900 tracking-tight" x-text="errorModalTitle || 'Pemberitahuan'"></h3>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed" x-text="errorModalMessage"></p>
+                
+                <template x-if="errorModalDetail">
+                    <div class="mt-4 p-3.5 bg-slate-900 text-slate-200 rounded-xl text-left font-mono text-xs overflow-x-auto max-h-40 border border-slate-800 shadow-inner">
+                        <div class="text-[10px] uppercase tracking-wider font-bold text-rose-400 mb-1 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block animate-ping"></span>
+                            Detail Masalah Sistem:
+                        </div>
+                        <p class="break-words select-all text-slate-300" x-text="errorModalDetail"></p>
+                    </div>
+                </template>
+            </div>
+            
+            <div class="px-6 py-4 bg-slate-50/80 border-t border-slate-100 flex gap-2 justify-end">
+                <button @click="showErrorModal = false"
+                        class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition duration-200 shadow-sm active:scale-98">
+                    Tutup & Coba Lagi
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -851,6 +891,19 @@ function posApp() {
         showNotaModal: false,
         notaUrl: '',
         notaIframeRef: null,
+
+        // Modal Error/Notif state (Custom UI, non-javascript alert)
+        showErrorModal: false,
+        errorModalTitle: '',
+        errorModalMessage: '',
+        errorModalDetail: '',
+
+        showError(message, detail = '', title = 'Gagal Membuat Pesanan') {
+            this.errorModalTitle = title;
+            this.errorModalMessage = message;
+            this.errorModalDetail = detail;
+            this.showErrorModal = true;
+        },
 
         // Service management state
         showServiceModal: false,
@@ -1027,7 +1080,7 @@ function posApp() {
                 this.showNewCustomerModal = false;
                 this.newCustomer = { nama: '', no_hp: '', alamat: '' };
             } catch (e) {
-                alert('Gagal menyimpan customer. Pastikan data sudah benar.');
+                this.showError('Gagal menyimpan pelanggan baru. Pastikan nomor HP dan nama sudah benar.', (e && e.message) ? e.message : '', 'Gagal Tambah Pelanggan');
                 console.error(e);
             }
         },
@@ -1064,8 +1117,9 @@ function posApp() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    const detail = data.error ? `\nDetail: ${data.error}` : '';
-                    throw new Error((data.message || 'Gagal membuat pesanan') + detail);
+                    const err = new Error(data.message || 'Gagal membuat pesanan');
+                    err.detail = data.error || '';
+                    throw err;
                 }
 
                 // Success - show modal instead of redirect
@@ -1083,7 +1137,11 @@ function posApp() {
             } catch (e) {
                 this.submitting = false;
                 console.error('Submit Order Error:', e);
-                alert(e.message || 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.');
+                this.showError(
+                    e.message || 'Gagal membuat pesanan. Silakan coba lagi atau hubungi administrator.',
+                    e.detail || '',
+                    'Gagal Membuat Pesanan'
+                );
             }
         },
 
@@ -1155,7 +1213,7 @@ function posApp() {
                 // For better UX, let's just reload.
                 window.location.reload();
             } catch (e) {
-                alert('Gagal menyimpan layanan.');
+                this.showError('Gagal menyimpan layanan.', (e && e.message) ? e.message : '', 'Gagal Simpan Layanan');
                 console.error(e);
             } finally {
                 this.savingService = false;
@@ -1184,7 +1242,7 @@ function posApp() {
                 if (waLink) {
                     window.open(waLink.href, '_blank');
                 } else {
-                    alert('Link WhatsApp tidak ditemukan.');
+                    this.showError('Link WhatsApp tidak ditemukan di nota.', '', 'Pemberitahuan');
                 }
             }
         }
