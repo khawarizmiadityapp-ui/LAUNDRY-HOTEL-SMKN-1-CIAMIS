@@ -1064,7 +1064,8 @@ function posApp() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.message || 'Gagal membuat pesanan');
+                    const detail = data.error ? `\nDetail: ${data.error}` : '';
+                    throw new Error((data.message || 'Gagal membuat pesanan') + detail);
                 }
 
                 // Success - show modal instead of redirect

@@ -16,54 +16,25 @@ class TransactionService
      */
     public function generateTransactionCode(): string
     {
-        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+        $maxAttempts = 10;
+        $attempt = 0;
 
-        return DB::transaction(function () use ($isSqlite) {
-            if (!$isSqlite) {
-                // Use advisory lock to prevent concurrent code generation
-                // Lock ID 1 is reserved for transaction code generation
-                $lockResult = DB::select('SELECT GET_LOCK(?, 10) as lock_status', [1]);
-                
-                if (!$lockResult[0]->lock_status) {
-                    throw new \Exception('Failed to acquire lock for transaction code generation');
-                }
+        do {
+            $randomStr = strtoupper(Str::random(4));
+            $code = 'TRX-' . date('Ymd') . '-' . $randomStr;
+
+            // Check if code already exists
+            $exists = Transaksi::where('transaksi_code', $code)->exists();
+
+            if (!$exists) {
+                return $code;
             }
-            
-            try {
-                $maxAttempts = 10;
-                $attempt = 0;
-                
-                do {
-                    $randomStr = strtoupper(Str::random(4));
-                    $code = 'TRX-' . date('Ymd') . '-' . $randomStr;
-                    
-                    // Check if code already exists (with lock, this should be safe)
-                    $exists = Transaksi::where('transaksi_code', $code)->lockForUpdate()->exists();
-                    
-                    if (!$exists) {
-                        return $code;
-                    }
-                    
-                    $attempt++;
-                } while ($attempt < $maxAttempts);
-                
-                // Fallback: use timestamp + random for guaranteed uniqueness
-                $fallbackCode = 'TRX-' . date('Ymd') . '-' . time() . '-' . strtoupper(Str::random(2));
-                
-                // Verify fallback is also unique
-                if (Transaksi::where('transaksi_code', $fallbackCode)->exists()) {
-                    throw new \Exception('Unable to generate unique transaction code after maximum attempts');
-                }
-                
-                return $fallbackCode;
-                
-            } finally {
-                if (!$isSqlite) {
-                    // Always release the lock
-                    DB::select('SELECT RELEASE_LOCK(?)', [1]);
-                }
-            }
-        });
+
+            $attempt++;
+        } while ($attempt < $maxAttempts);
+
+        // Fallback: use timestamp + random for guaranteed uniqueness
+        return 'TRX-' . date('Ymd') . '-' . time() . '-' . strtoupper(Str::random(4));
     }
 
     /**
