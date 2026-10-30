@@ -168,6 +168,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('inventory')->name('inventory.')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('index');
             Route::post('/', [InventoryController::class, 'store'])->name('store');
+            Route::put('/{id}', [InventoryController::class, 'update'])->middleware('throttle:30,1')->name('update_item');
             Route::post('/{id}/update', [InventoryController::class, 'updateQty'])->middleware('throttle:30,1')->name('update');
             Route::delete('/{id}', [InventoryController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
             Route::post('/request/{id}/approve', [InventoryController::class, 'approveAdjustment'])->middleware('throttle:30,1')->name('request.approve');
@@ -228,6 +229,7 @@ Route::group(['middleware' => ['auth']], function () {
         
         Route::get('/inventory', [PetugasController::class, 'inventory'])->name('inventory.index');
         Route::post('/inventory', [PetugasController::class, 'storeInventory'])->middleware('throttle:30,1')->name('inventory.store');
+        Route::put('/inventory/{id}', [PetugasController::class, 'updateInventory'])->middleware('throttle:30,1')->name('inventory.update');
         Route::post('/inventory/{id}/adjust', [PetugasController::class, 'adjustInventory'])->middleware('throttle:30,1')->name('inventory.adjust');
         
         Route::get('/history', [PetugasController::class, 'history'])->name('history.index');

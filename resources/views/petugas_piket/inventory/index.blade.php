@@ -64,11 +64,16 @@
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                         @endif
                     </div>
-                    @if($item->stock_units < $item->minimum_stock)
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 animate-pulse">
-                        STOK RENDAH
-                    </span>
-                    @endif
+                    <div class="flex items-center gap-1.5">
+                        @if($item->stock_units < $item->minimum_stock)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 animate-pulse">
+                            STOK RENDAH
+                        </span>
+                        @endif
+                        <button type="button" onclick="openEditModal({{ json_encode($item) }})" title="Edit Barang" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <h3 class="font-bold text-slate-800 leading-tight">{{ $item->name }}</h3>
@@ -191,6 +196,73 @@
 </div>
 
 
+<!-- Edit Item Modal -->
+<div id="edit-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Edit Data Barang</h3>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form id="edit-item-form" action="" method="POST" class="p-6 space-y-4">
+            @csrf
+            @method('PUT')
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" id="edit_name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" id="edit_category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                        <option value="Detergent">Detergent</option>
+                        <option value="Fragrance">Pewangi</option>
+                        <option value="Hanger">Hanger</option>
+                        <option value="Packaging">Packaging</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="edit_unit_type" onchange="toggleEditUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="edit_capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="edit_capacity_input" required min="1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="edit_subunits_input" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jumlah Stok (Unit)</label>
+                    <input type="number" name="quantity" id="edit_quantity" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
+                    <input type="number" name="minimum_stock" id="edit_minimum_stock" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">Perbarui Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function toggleUnitFields(val) {
     const capacityFields = document.getElementById('capacity_fields');
@@ -210,6 +282,48 @@ function toggleUnitFields(val) {
         if (val === 'sachet') {
             capacityInput.value = 20;
         } else {
+            capacityInput.value = 1000;
+        }
+    }
+}
+
+function openEditModal(item) {
+    const form = document.getElementById('edit-item-form');
+    let updateUrl = "{{ route('petugas_piket.inventory.update', ':id') }}";
+    form.action = updateUrl.replace(':id', item.id);
+
+    document.getElementById('edit_name').value = item.name || '';
+    document.getElementById('edit_category').value = item.category ? (item.category.charAt(0).toUpperCase() + item.category.slice(1).toLowerCase()) : 'Detergent';
+    document.getElementById('edit_unit_type').value = item.unit_type || 'botol';
+    document.getElementById('edit_capacity_input').value = item.capacity_per_unit || 1000;
+    document.getElementById('edit_subunits_input').value = item.stock_subunits || 0;
+    document.getElementById('edit_quantity').value = item.stock_units ?? item.quantity ?? 0;
+    document.getElementById('edit_minimum_stock').value = item.minimum_stock ?? 5;
+
+    toggleEditUnitFields(item.unit_type || 'botol');
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+}
+
+function toggleEditUnitFields(val) {
+    const capacityFields = document.getElementById('edit_capacity_fields');
+    const capacityInput = document.getElementById('edit_capacity_input');
+    const subunitsInput = document.getElementById('edit_subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else if (val === 'botol' && (!capacityInput.value || capacityInput.value == 1)) {
             capacityInput.value = 1000;
         }
     }

@@ -608,6 +608,43 @@ class PetugasController extends Controller
         }
     }
 
+    public function updateInventory(Request $request, $id)
+    {
+        $this->ensureStaffDivisionAccess(['inventory']);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'unit_type' => 'required|in:botol,sachet,pcs',
+            'capacity_per_unit' => 'required|integer|min:1',
+            'stock_subunits' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
+            'minimum_stock' => 'required|integer|min:0',
+        ]);
+
+        try {
+            $item = \App\Models\Inventory::findOrFail($id);
+            $unitOfMeasurement = ($request->unit_type === 'pcs') ? 'pcs' : 'ml';
+
+            $item->update([
+                'name' => $request->name,
+                'category' => strtolower($request->category),
+                'unit_type' => $request->unit_type,
+                'capacity_per_unit' => $request->capacity_per_unit,
+                'unit_of_measurement' => $unitOfMeasurement,
+                'stock_units' => $request->quantity,
+                'stock_subunits' => $request->stock_subunits,
+                'quantity' => $request->quantity,
+                'minimum_stock' => $request->minimum_stock,
+            ]);
+
+            return redirect()->back()->with('success', "Barang '{$item->name}' berhasil diperbarui.");
+        } catch (\Exception $e) {
+            \Log::error('Update Inventory Failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal memperbarui barang: ' . $e->getMessage());
+        }
+    }
+
     // Update stok inventory dari portal petugas
     public function adjustInventory(Request $request, $id)
     {

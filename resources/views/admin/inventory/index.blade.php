@@ -91,13 +91,18 @@
                     @foreach($detergents as $item)
                     <div class="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative">
                         <div class="relative bg-gradient-to-br {{ $loop->index % 2 == 0 ? 'from-cyan-50 via-teal-50 to-sky-50' : 'from-blue-50 via-sky-50 to-indigo-50' }} h-44 flex items-center justify-center p-4">
-                            <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" class="absolute top-3 right-3 z-10" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" title="Hapus Barang" class="w-8 h-8 rounded-full bg-white/50 hover:bg-red-100 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                                <button type="button" onclick="openEditModal({{ json_encode($item) }})" title="Edit Barang" class="w-8 h-8 rounded-full bg-white/80 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center shadow-sm transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                            </form>
+                                <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Hapus Barang" class="w-8 h-8 rounded-full bg-white/80 hover:bg-red-100 text-slate-400 hover:text-red-500 flex items-center justify-center shadow-sm transition-colors">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
                             @if($item->stock_units < $item->minimum_stock)
                             <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-red-50 border border-red-200 text-red-500 shadow-sm">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
@@ -176,13 +181,18 @@
                         $style = $colors[$loop->index % 4];
                     @endphp
                     <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 relative">
-                        <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" class="absolute top-3 right-3 z-10" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full hover:bg-red-50 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <div class="absolute top-3 right-3 z-10 flex items-center gap-1">
+                            <button type="button" onclick="openEditModal({{ json_encode($item) }})" title="Edit Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </button>
-                        </form>
+                            <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
                         <div class="w-11 h-11 rounded-xl {{ $style['bg'] }} flex items-center justify-center mb-3">
                             <svg class="w-5 h-5 {{ $style['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $style['icon'] }}"/>
@@ -200,9 +210,55 @@
                         @endif
                     </div>
                     @endforeach
-                </div>
             </div>
 
+            @if(isset($otherItems) && $otherItems->isNotEmpty())
+            <!-- Other Supplies & Packaging -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 fade-up delay-3">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg uppercase tracking-tight">Perlengkapan Lainnya & Packaging</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Plastik packing, label, dan perlengkapan operasional lainnya</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($otherItems as $item)
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 relative">
+                        <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                            <button type="button" onclick="openEditModal({{ json_encode($item) }})" title="Edit Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase mb-2">
+                            {{ $item->category }}
+                        </span>
+                        <h4 class="font-bold text-slate-800 text-base leading-snug">{{ $item->name }}</h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Kemasan: {{ $item->unit_type }} @if($item->unit_type !== 'pcs') ({{ $item->capacity_per_unit }} {{ $item->unit_of_measurement }}) @endif</p>
+                        
+                        <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+                            <div>
+                                <span class="text-xl font-bold text-slate-800" id="qty{{ $item->id }}">{{ $item->stock_units }}</span>
+                                <span class="text-xs text-slate-400 ml-0.5">{{ $item->unit_type }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateQty({{ $item->id }}, 'decrement')" class="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">−</button>
+                                <span class="min-w-[1.75rem] text-center font-semibold text-slate-700 text-sm" id="qty-disp-{{ $item->id }}">{{ $item->stock_units }}</span>
+                                <button onclick="updateQty({{ $item->id }}, 'increment')" class="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- ── RIGHT PANEL ── -->
@@ -261,11 +317,14 @@
                                 <p class="text-xs text-slate-400">Qty: <span id="qty{{ $item->id }}">{{ number_format($item->stock_units) }}</span></p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
                             <button onclick="updateQty({{ $item->id }}, 'increment')" title="Tambah Stok" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-colors flex-shrink-0">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                                 </svg>
+                            </button>
+                            <button type="button" onclick="openEditModal({{ json_encode($item) }})" title="Edit Barang" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </button>
                             <form method="POST" action="{{ route('admin.inventory.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus hanger ini?');">
                                 @csrf
@@ -349,6 +408,73 @@
         </form>
     </div>
 </div>
+
+<!-- Edit Item Modal -->
+<div id="edit-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Edit Data Barang</h3>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form id="edit-item-form" action="" method="POST" class="p-6 space-y-4">
+            @csrf
+            @method('PUT')
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" id="edit_name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" id="edit_category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="detergent">Detergent</option>
+                        <option value="fragrance">Pewangi</option>
+                        <option value="hanger">Hanger</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="edit_unit_type" onchange="toggleEditUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="edit_capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="edit_capacity_input" required min="1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="edit_subunits_input" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jumlah Stok (Unit)</label>
+                    <input type="number" name="quantity" id="edit_quantity" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
+                    <input type="number" name="minimum_stock" id="edit_minimum_stock" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">Perbarui Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -371,6 +497,50 @@ function toggleUnitFields(val) {
         if (val === 'sachet') {
             capacityInput.value = 20;
         } else {
+            capacityInput.value = 1000;
+        }
+    }
+}
+
+function openEditModal(item) {
+    const form = document.getElementById('edit-item-form');
+    let updateUrl = "{{ route('admin.inventory.update_item', ':id') }}";
+    form.action = updateUrl.replace(':id', item.id);
+
+    document.getElementById('edit_name').value = item.name || '';
+    document.getElementById('edit_category').value = (item.category || '').toLowerCase();
+    document.getElementById('edit_unit_type').value = item.unit_type || 'botol';
+    document.getElementById('edit_capacity_input').value = item.capacity_per_unit || 1000;
+    document.getElementById('edit_subunits_input').value = item.stock_subunits || 0;
+    document.getElementById('edit_quantity').value = item.stock_units ?? item.quantity ?? 0;
+    document.getElementById('edit_minimum_stock').value = item.minimum_stock ?? 5;
+
+    toggleEditUnitFields(item.unit_type || 'botol');
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+}
+
+function toggleEditUnitFields(val) {
+    const capacityFields = document.getElementById('edit_capacity_fields');
+    const capacityInput = document.getElementById('edit_capacity_input');
+    const subunitsInput = document.getElementById('edit_subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+        capacityInput.value = 1;
+        subunitsInput.value = 0;
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else if (val === 'botol' && (!capacityInput.value || capacityInput.value == 1)) {
             capacityInput.value = 1000;
         }
     }
