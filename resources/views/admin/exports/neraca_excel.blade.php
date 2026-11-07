@@ -120,9 +120,53 @@
         </tr>
         <tr><td colspan="4"></td></tr>
 
+        <!-- REKAPAN METODE PEMBAYARAN -->
+        @if(isset($rekapPembayaran))
+        <tr>
+            <td colspan="4" class="section-header"> IV. REKAPAN METODE PEMBAYARAN &amp; PELUNASAN</td>
+        </tr>
+        <tr class="table-head">
+            <th>Metode / Status Pembayaran</th>
+            <th>Jumlah Transaksi</th>
+            <th>Nominal (Rp)</th>
+            <th>Persentase Lunas</th>
+        </tr>
+        <tr>
+            <td>Pembayaran Tunai (Cash)</td>
+            <td class="text-center">{{ $rekapPembayaran['tunai_count'] }} Transaksi</td>
+            <td class="text-right">{{ number_format($rekapPembayaran['tunai_total'], 0, ',', '.') }}</td>
+            <td class="text-center">{{ $rekapPembayaran['tunai_persen'] }}%</td>
+        </tr>
+        <tr>
+            <td>Pembayaran QRIS (Scan Barcode)</td>
+            <td class="text-center">{{ $rekapPembayaran['qris_count'] }} Transaksi</td>
+            <td class="text-right">{{ number_format($rekapPembayaran['qris_total'], 0, ',', '.') }}</td>
+            <td class="text-center">{{ $rekapPembayaran['qris_persen'] }}%</td>
+        </tr>
+        <tr>
+            <td>Transfer Bank (BCA / Mandiri / BRI)</td>
+            <td class="text-center">{{ $rekapPembayaran['transfer_count'] }} Transaksi</td>
+            <td class="text-right">{{ number_format($rekapPembayaran['transfer_total'], 0, ',', '.') }}</td>
+            <td class="text-center">{{ $rekapPembayaran['transfer_persen'] }}%</td>
+        </tr>
+        <tr class="sub-total">
+            <td class="text-bold">TOTAL PENERIMAAN LUNAS</td>
+            <td class="text-center text-bold">{{ $rekapPembayaran['lunas_count'] }} Transaksi</td>
+            <td class="text-right text-bold">{{ number_format($rekapPembayaran['lunas_total'], 0, ',', '.') }}</td>
+            <td class="text-center text-bold">100%</td>
+        </tr>
+        <tr>
+            <td>Tagihan Belum Lunas (Piutang)</td>
+            <td class="text-center">{{ $rekapPembayaran['belum_bayar_count'] }} Transaksi</td>
+            <td class="text-right">{{ number_format($rekapPembayaran['belum_bayar_total'], 0, ',', '.') }}</td>
+            <td class="text-center">Piutang</td>
+        </tr>
+        <tr><td colspan="4"></td></tr>
+        @endif
+
         <!-- RINCIAN PENGELUARAN PER KATEGORI -->
         <tr>
-            <td colspan="4" class="section-header"> IV. RINCIAN BIAYA &amp; PENGELUARAN PER KATEGORI</td>
+            <td colspan="4" class="section-header"> V. RINCIAN BIAYA &amp; PENGELUARAN PER KATEGORI</td>
         </tr>
         <tr class="table-head">
             <th>No</th>

@@ -34,42 +34,88 @@
         {{-- TAB 1: DAFTAR TRANSAKSI & STATUS PEMBAYARAN                         --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         @if($tab === 'daftar')
-            {{-- STATISTIK CARDS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {{-- Card 1 --}}
-                <div class="bg-white rounded-2xl shadow-card p-6 border-l-4 border-blue-500 border border-slate-100">
+            {{-- STATISTIK & REKAPAN HARI INI CARDS --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                {{-- Card 1: Total Hari Ini --}}
+                <div class="bg-white rounded-2xl shadow-card p-5 border-l-4 border-blue-500 border border-slate-100">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-slate-400 text-xs uppercase font-semibold">Total Pendapatan Diterima Hari Ini</p>
-                            <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($totalPendapatanHariIni, 0, ',', '.') }}</p>
+                            <p class="text-slate-400 text-[11px] uppercase font-bold">Total Masuk Hari Ini</p>
+                            <p class="text-xl font-bold text-slate-900 mt-1">Rp {{ number_format($totalPendapatanHariIni, 0, ',', '.') }}</p>
                         </div>
-                        <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                            <i class="fas fa-wallet text-lg"></i>
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-wallet text-sm"></i>
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
-                        <span>Pemasukan kas langsung hari ini</span>
-                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'harian']) }}" class="text-blue-600 font-semibold hover:underline">
-                            Lihat Rincian Harian <i class="fas fa-arrow-right ml-1 text-[10px]"></i>
-                        </a>
+                    <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2 flex justify-between">
+                        <span>{{ $rekapHariIni['total_transaksi'] ?? 0 }} transaksi lunas</span>
+                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'harian']) }}" class="text-blue-600 font-bold hover:underline">Rekap &rarr;</a>
                     </div>
                 </div>
 
-                {{-- Card 2 --}}
-                <div class="bg-white rounded-2xl shadow-card p-6 border-l-4 border-rose-500 border border-slate-100">
+                {{-- Card 2: Tunai Hari Ini --}}
+                <div class="bg-white rounded-2xl shadow-card p-5 border-l-4 border-emerald-500 border border-slate-100">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-slate-400 text-xs uppercase font-semibold">Transaksi Belum Lunas (Piutang)</p>
-                            <p class="text-2xl font-bold text-rose-600 mt-1">{{ $transaksiBelumLunas }} Transaksi</p>
+                            <p class="text-slate-400 text-[11px] uppercase font-bold">Tunai (Cash) Hari Ini</p>
+                            <p class="text-xl font-bold text-emerald-600 mt-1">Rp {{ number_format($rekapHariIni['tunai_nominal'] ?? 0, 0, ',', '.') }}</p>
                         </div>
-                        <span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                            <i class="fas fa-clock text-lg"></i>
+                        <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-money-bill-wave text-sm"></i>
                         </span>
                     </div>
-                    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
-                        <span>Menunggu pembayaran pelanggan</span>
-                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar']) }}" class="text-rose-600 font-semibold hover:underline">
-                            Filter Belum Lunas <i class="fas fa-filter ml-1 text-[10px]"></i>
+                    <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>{{ $rekapHariIni['tunai_count'] ?? 0 }} order ({{ $rekapHariIni['tunai_persen'] ?? 0 }}%)</span>
+                    </div>
+                </div>
+
+                {{-- Card 3: QRIS Hari Ini --}}
+                <div class="bg-white rounded-2xl shadow-card p-5 border-l-4 border-indigo-500 border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-400 text-[11px] uppercase font-bold">QRIS Hari Ini</p>
+                            <p class="text-xl font-bold text-indigo-600 mt-1">Rp {{ number_format($rekapHariIni['qris_nominal'] ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-qrcode text-sm"></i>
+                        </span>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>{{ $rekapHariIni['qris_count'] ?? 0 }} order ({{ $rekapHariIni['qris_persen'] ?? 0 }}%)</span>
+                    </div>
+                </div>
+
+                {{-- Card 4: Transfer Hari Ini --}}
+                <div class="bg-white rounded-2xl shadow-card p-5 border-l-4 border-purple-500 border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-400 text-[11px] uppercase font-bold">Transfer / E-Wallet</p>
+                            <p class="text-xl font-bold text-purple-600 mt-1">Rp {{ number_format($rekapHariIni['transfer_nominal'] ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-university text-sm"></i>
+                        </span>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>{{ $rekapHariIni['transfer_count'] ?? 0 }} order ({{ $rekapHariIni['transfer_persen'] ?? 0 }}%)</span>
+                    </div>
+                </div>
+
+                {{-- Card 5: Belum Lunas (Piutang) --}}
+                <div class="bg-white rounded-2xl shadow-card p-5 border-l-4 border-rose-500 border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-400 text-[11px] uppercase font-bold">Belum Lunas (Piutang)</p>
+                            <p class="text-xl font-bold text-rose-600 mt-1">Rp {{ number_format($nominalBelumLunas ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-clock text-sm"></i>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>{{ $transaksiBelumLunas }} transaksi</span>
+                        <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar']) }}" class="text-rose-600 font-bold hover:underline">
+                            Filter &rarr;
                         </a>
                     </div>
                 </div>
@@ -77,24 +123,44 @@
 
             {{-- FILTER TABS & SEARCH --}}
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
-                <div class="flex space-x-2">
-                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar']) }}" 
-                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ !request('status') ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'metode' => request('metode')]) }}" 
+                       class="px-3.5 py-2 text-xs font-semibold rounded-xl transition {{ !request('status') ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                         Semua Status
                     </a>
-                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'lunas']) }}" 
-                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'lunas' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'lunas', 'metode' => request('metode')]) }}" 
+                       class="px-3.5 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'lunas' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                         Lunas
                     </a>
-                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar']) }}" 
-                       class="px-4 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'belum_bayar' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => 'belum_bayar', 'metode' => request('metode')]) }}" 
+                       class="px-3.5 py-2 text-xs font-semibold rounded-xl transition {{ request('status') == 'belum_bayar' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                         Belum Lunas
+                    </a>
+
+                    <span class="h-5 w-px bg-slate-200 mx-1"></span>
+
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => request('status')]) }}"
+                       class="px-3 py-1.5 text-xs font-semibold rounded-xl transition {{ !request('metode') ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Semua Metode
+                    </a>
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => request('status'), 'metode' => 'tunai']) }}"
+                       class="px-3 py-1.5 text-xs font-semibold rounded-xl transition {{ request('metode') == 'tunai' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        💵 Tunai
+                    </a>
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => request('status'), 'metode' => 'qris']) }}"
+                       class="px-3 py-1.5 text-xs font-semibold rounded-xl transition {{ request('metode') == 'qris' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        📱 QRIS
+                    </a>
+                    <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar', 'status' => request('status'), 'metode' => 'transfer']) }}"
+                       class="px-3 py-1.5 text-xs font-semibold rounded-xl transition {{ request('metode') == 'transfer' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        🏦 Transfer
                     </a>
                 </div>
 
                 <form action="{{ route('admin.pembayaran.index') }}" method="GET" class="flex items-center gap-2">
                     <input type="hidden" name="tab" value="daftar">
                     @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
+                    @if(request('metode')) <input type="hidden" name="metode" value="{{ request('metode') }}"> @endif
                     <div class="relative w-64">
                         <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
                             <i class="fas fa-search text-xs"></i>
@@ -226,26 +292,88 @@
             </div>
 
             {{-- STATISTIK HARIAN CARDS --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Omzet Hari Ini</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($harianTotalPendapatan, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-slate-900 mt-1">Rp {{ number_format($harianTotalPendapatan, 0, ',', '.') }}</p>
                     <p class="text-[11px] text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($tanggalHarian)->translatedFormat('d F Y') }}</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jumlah Transaksi Lunas</p>
-                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $harianTotalTransaksi }} Order</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Selesai / Lunas</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Transaksi Lunas</p>
+                    <p class="text-xl font-bold text-blue-600 mt-1">{{ $harianTotalTransaksi }} Order</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Belum bayar: {{ $harianRekapMetode['piutang_count'] ?? 0 }} order</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Penerimaan Tunai (Cash)</p>
-                    <p class="text-2xl font-bold text-emerald-600 mt-1">Rp {{ number_format($harianTotalTunai, 0, ',', '.') }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Fisik di laci kasir</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tunai (Cash)</p>
+                    <p class="text-xl font-bold text-emerald-600 mt-1">Rp {{ number_format($harianTotalTunai, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $harianRekapMetode['tunai_count'] ?? 0 }} transaksi ({{ $harianRekapMetode['tunai_persen'] ?? 0 }}%)</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Penerimaan Non-Tunai</p>
-                    <p class="text-2xl font-bold text-indigo-600 mt-1">Rp {{ number_format($harianTotalNonTunai, 0, ',', '.') }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">QRIS & Transfer Bank</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pembayaran QRIS</p>
+                    <p class="text-xl font-bold text-indigo-600 mt-1">Rp {{ number_format($harianTotalQris ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $harianRekapMetode['qris_count'] ?? 0 }} transaksi ({{ $harianRekapMetode['qris_persen'] ?? 0 }}%)</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Transfer / E-Wallet</p>
+                    <p class="text-xl font-bold text-purple-600 mt-1">Rp {{ number_format($harianTotalTransfer ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $harianRekapMetode['transfer_count'] ?? 0 }} transaksi ({{ $harianRekapMetode['transfer_persen'] ?? 0 }}%)</p>
+                </div>
+            </div>
+
+            {{-- REKAPAN METODE PEMBAYARAN HARIAN --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-credit-card text-indigo-600"></i>
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rekapan Metode Pembayaran &amp; Status Pelunasan ({{ \Carbon\Carbon::parse($tanggalHarian)->translatedFormat('d F Y') }})</h2>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Metode Pembayaran</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Jumlah Transaksi</th>
+                                <th class="px-6 py-3">Total Nominal (Rp)</th>
+                                <th class="px-6 py-3">Persentase Omzet</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @foreach($harianRekapMetode['methods'] ?? [] as $m)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $m['label'] }}</td>
+                                <td class="px-6 py-3.5"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-700">Lunas</span></td>
+                                <td class="px-6 py-3.5 font-semibold">{{ $m['count'] }} transaksi</td>
+                                <td class="px-6 py-3.5 font-mono font-bold text-slate-900">Rp {{ number_format($m['total'], 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ $m['persen'] }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600">{{ $m['persen'] }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                            <tr class="bg-slate-50 font-bold text-slate-900">
+                                <td class="px-6 py-3.5">TOTAL PENERIMAAN LUNAS</td>
+                                <td class="px-6 py-3.5"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-700">Total Kas Masuk</span></td>
+                                <td class="px-6 py-3.5">{{ $harianTotalTransaksi }} transaksi</td>
+                                <td class="px-6 py-3.5 font-mono text-blue-700">Rp {{ number_format($harianTotalPendapatan, 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5">100%</td>
+                            </tr>
+                            @if(($harianRekapMetode['piutang_count'] ?? 0) > 0)
+                            <tr class="bg-rose-50/50 text-rose-700 font-semibold">
+                                <td class="px-6 py-3">Transaksi Belum Dibayar (Piutang Hari Ini)</td>
+                                <td class="px-6 py-3"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-rose-100 text-rose-700">Belum Lunas</span></td>
+                                <td class="px-6 py-3">{{ $harianRekapMetode['piutang_count'] }} transaksi</td>
+                                <td class="px-6 py-3 font-mono font-bold">Rp {{ number_format($harianRekapMetode['piutang_nominal'], 0, ',', '.') }}</td>
+                                <td class="px-6 py-3 text-xs">Menunggu Pelunasan</td>
+                            </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -385,26 +513,88 @@
             </div>
 
             {{-- STATISTIK BULANAN CARDS --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Omzet Bulan Ini</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-1">Rp {{ number_format($bulananTotalPendapatan, 0, ',', '.') }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">{{ \Carbon\Carbon::create($tahunBulanan, $bulanBulanan, 1)->translatedFormat('F Y') }}</p>
+                    <p class="text-xl font-bold text-slate-900 mt-1">Rp {{ number_format($bulananTotalPendapatan, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $bulananTotalTransaksi }} order lunas ({{ \Carbon\Carbon::create($tahunBulanan, $bulanBulanan, 1)->translatedFormat('F Y') }})</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transaksi</p>
-                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $bulananTotalTransaksi }} Order</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Sepanjang bulan ini</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Tunai (Cash)</p>
+                    <p class="text-xl font-bold text-emerald-600 mt-1">Rp {{ number_format($bulananTotalTunai, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $bulananRekapMetode['tunai_count'] ?? 0 }} order ({{ $bulananRekapMetode['tunai_persen'] ?? 0 }}%)</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Omzet Harian</p>
-                    <p class="text-2xl font-bold text-emerald-600 mt-1">Rp {{ number_format($rataRataHarian, 0, ',', '.') }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Per hari kerja</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pembayaran QRIS</p>
+                    <p class="text-xl font-bold text-indigo-600 mt-1">Rp {{ number_format($bulananTotalQris ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $bulananRekapMetode['qris_count'] ?? 0 }} order ({{ $bulananRekapMetode['qris_persen'] ?? 0 }}%)</p>
                 </div>
                 <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Layanan Terlaris</p>
-                    <p class="text-xl font-bold text-indigo-600 mt-1 truncate">{{ $layananTerlaris }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Paling diminati pelanggan</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transfer / E-Wallet</p>
+                    <p class="text-xl font-bold text-purple-600 mt-1">Rp {{ number_format($bulananTotalTransfer ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ $bulananRekapMetode['transfer_count'] ?? 0 }} order ({{ $bulananRekapMetode['transfer_persen'] ?? 0 }}%)</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-card p-5 border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata / Hari</p>
+                    <p class="text-xl font-bold text-blue-600 mt-1">Rp {{ number_format($rataRataHarian, 0, ',', '.') }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 truncate">Terlaris: {{ $layananTerlaris }}</p>
+                </div>
+            </div>
+
+            {{-- REKAPAN METODE PEMBAYARAN BULANAN --}}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-wallet text-indigo-600"></i>
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rekapan Metode Pembayaran Bulanan ({{ \Carbon\Carbon::create($tahunBulanan, $bulanBulanan, 1)->translatedFormat('F Y') }})</h2>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Metode Pembayaran</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Total Order</th>
+                                <th class="px-6 py-3">Total Penerimaan (Rp)</th>
+                                <th class="px-6 py-3">Porsi %</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            @foreach($bulananRekapMetode['methods'] ?? [] as $m)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $m['label'] }}</td>
+                                <td class="px-6 py-3.5"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-700">Lunas</span></td>
+                                <td class="px-6 py-3.5 font-semibold">{{ $m['count'] }} transaksi</td>
+                                <td class="px-6 py-3.5 font-mono font-bold text-slate-900">Rp {{ number_format($m['total'], 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $m['persen'] }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600">{{ $m['persen'] }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                            <tr class="bg-slate-50 font-bold text-slate-900">
+                                <td class="px-6 py-3.5">TOTAL OMZET LUNAS BULAN INI</td>
+                                <td class="px-6 py-3.5"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-700">Total Kas Masuk</span></td>
+                                <td class="px-6 py-3.5">{{ $bulananTotalTransaksi }} transaksi</td>
+                                <td class="px-6 py-3.5 font-mono text-blue-700">Rp {{ number_format($bulananTotalPendapatan, 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5">100%</td>
+                            </tr>
+                            @if(($bulananRekapMetode['piutang_count'] ?? 0) > 0)
+                            <tr class="bg-rose-50/50 text-rose-700 font-semibold">
+                                <td class="px-6 py-3">Piutang / Belum Lunas Bulan Ini</td>
+                                <td class="px-6 py-3"><span class="px-2 py-0.5 text-[11px] font-bold rounded bg-rose-100 text-rose-700">Belum Lunas</span></td>
+                                <td class="px-6 py-3">{{ $bulananRekapMetode['piutang_count'] }} transaksi</td>
+                                <td class="px-6 py-3 font-mono font-bold">Rp {{ number_format($bulananRekapMetode['piutang_nominal'], 0, ',', '.') }}</td>
+                                <td class="px-6 py-3 text-xs">Menunggu Pelunasan</td>
+                            </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -470,7 +660,8 @@
                                 <th class="px-6 py-3">Hari</th>
                                 <th class="px-6 py-3">Jumlah Transaksi</th>
                                 <th class="px-6 py-3">Tunai (Cash)</th>
-                                <th class="px-6 py-3">Non-Tunai</th>
+                                <th class="px-6 py-3">QRIS</th>
+                                <th class="px-6 py-3">Transfer</th>
                                 <th class="px-6 py-3">Total Omzet Harian</th>
                             </tr>
                         </thead>
@@ -480,11 +671,14 @@
                                 <td class="px-6 py-3 whitespace-nowrap font-mono font-semibold">{{ $day['tanggal'] }}</td>
                                 <td class="px-6 py-3 whitespace-nowrap">{{ $day['hari'] }}</td>
                                 <td class="px-6 py-3 whitespace-nowrap">{{ $day['count'] > 0 ? $day['count'] . ' order' : '-' }}</td>
-                                <td class="px-6 py-3 whitespace-nowrap font-mono">
+                                <td class="px-6 py-3 whitespace-nowrap font-mono text-emerald-700">
                                     {{ $day['tunai'] > 0 ? 'Rp ' . number_format($day['tunai'], 0, ',', '.') : '-' }}
                                 </td>
-                                <td class="px-6 py-3 whitespace-nowrap font-mono">
-                                    {{ $day['non_tunai'] > 0 ? 'Rp ' . number_format($day['non_tunai'], 0, ',', '.') : '-' }}
+                                <td class="px-6 py-3 whitespace-nowrap font-mono text-indigo-700">
+                                    {{ ($day['qris'] ?? 0) > 0 ? 'Rp ' . number_format($day['qris'], 0, ',', '.') : '-' }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap font-mono text-purple-700">
+                                    {{ ($day['transfer'] ?? 0) > 0 ? 'Rp ' . number_format($day['transfer'], 0, ',', '.') : '-' }}
                                 </td>
                                 <td class="px-6 py-3 whitespace-nowrap font-mono font-bold {{ $day['total'] > 0 ? 'text-slate-900' : 'text-slate-400' }}">
                                     {{ $day['total'] > 0 ? 'Rp ' . number_format($day['total'], 0, ',', '.') : 'Rp 0' }}
@@ -492,6 +686,16 @@
                             </tr>
                             @endforeach
                         </tbody>
+                        <tfoot class="bg-slate-100 font-bold text-slate-900 text-sm">
+                            <tr>
+                                <td colspan="2" class="px-6 py-3.5 uppercase">TOTAL REKAP BULANAN</td>
+                                <td class="px-6 py-3.5">{{ $bulananTotalTransaksi }} order</td>
+                                <td class="px-6 py-3.5 font-mono text-emerald-700">Rp {{ number_format($bulananTotalTunai, 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5 font-mono text-indigo-700">Rp {{ number_format($bulananTotalQris ?? 0, 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5 font-mono text-purple-700">Rp {{ number_format($bulananTotalTransfer ?? 0, 0, ',', '.') }}</td>
+                                <td class="px-6 py-3.5 font-mono text-blue-700">Rp {{ number_format($bulananTotalPendapatan, 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -534,14 +738,33 @@
                 
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Metode Pembayaran <span class="text-rose-500">*</span></label>
-                    <select name="metode_pembayaran" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer" required>
-                        <option value="Tunai">Tunai (Cash)</option>
-                        <option value="QRIS">QRIS</option>
-                        <option value="Transfer BCA">Transfer BCA</option>
-                        <option value="Transfer Mandiri">Transfer Mandiri</option>
-                        <option value="Transfer BRI">Transfer BRI</option>
-                        <option value="E-Wallet">E-Wallet</option>
+                    <select name="metode_pembayaran" id="modal_metode_pembayaran" onchange="onModalPaymentMethodChange(this.value)" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer" required>
+                        <option value="Tunai">💵 Tunai (Cash)</option>
+                        <option value="QRIS">📱 QRIS (Scan Barcode)</option>
+                        <option value="Transfer BCA">🏦 Transfer BCA</option>
+                        <option value="Transfer Mandiri">🏦 Transfer Mandiri</option>
+                        <option value="Transfer BRI">🏦 Transfer BRI</option>
+                        <option value="E-Wallet">💳 E-Wallet</option>
                     </select>
+                </div>
+
+                {{-- Preview Barcode QRIS Otomatis Saat Pilih QRIS --}}
+                <div id="modal_qris_box" class="hidden mb-3 p-3.5 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl text-center">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-extrabold rounded uppercase">QRIS</span>
+                        <span class="text-[11px] font-bold text-slate-700">{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS' }}</span>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-xl border border-indigo-100 inline-block mx-auto">
+                        <img id="modal_qris_img" src="{{ $qrisConfig['display_qr_url'] ?? '' }}" alt="QRIS" class="w-40 h-40 object-contain mx-auto">
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1.5">NMID: <span class="font-mono">{{ $qrisConfig['nmid'] ?? 'ID1026000109281' }}</span></p>
+                    <p class="text-[11px] text-indigo-700 font-semibold mt-0.5">Silakan scan QRIS sesuai nominal tagihan di atas</p>
+                </div>
+
+                {{-- Info Rekening Saat Pilih Transfer --}}
+                <div id="modal_transfer_box" class="hidden mb-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+                    <span class="font-bold text-slate-500 uppercase text-[10px] block mb-1"><i class="fas fa-university text-blue-600 mr-1"></i> Info Rekening Tujuan:</span>
+                    <span class="font-bold text-slate-900">{{ $qrisConfig['bank_info'] ?? 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis' }}</span>
                 </div>
 
                 <div class="mb-4">
@@ -607,7 +830,15 @@
 
 @push('scripts')
 <script>
+    const qrisStaticImgUrl = @json($qrisConfig['qris_image'] ?? null);
+    const qrisMerchantName = @json($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS');
+    const qrisNmidCode = @json($qrisConfig['nmid'] ?? 'ID1026000109281');
+    let currentModalPrice = 0;
+    let currentModalTrxCode = '';
+
     function openPaymentModal(transaksiCode, totalPrice) {
+        currentModalPrice = totalPrice;
+        currentModalTrxCode = transaksiCode;
         document.getElementById('modal_transaksi_id').value = transaksiCode;
         document.getElementById('modal_transaksi_code_display').value = transaksiCode;
         document.getElementById('modal_total_price_display').value = new Intl.NumberFormat('id-ID').format(totalPrice);
@@ -615,8 +846,45 @@
         let jumlahBayarInput = document.getElementById('modal_jumlah_bayar');
         jumlahBayarInput.value = totalPrice;
         jumlahBayarInput.min = totalPrice;
+
+        const selectEl = document.getElementById('modal_metode_pembayaran');
+        if (selectEl) {
+            onModalPaymentMethodChange(selectEl.value);
+        }
         
         document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    function onModalPaymentMethodChange(method) {
+        const qrisBox = document.getElementById('modal_qris_box');
+        const transferBox = document.getElementById('modal_transfer_box');
+        const qrisImg = document.getElementById('modal_qris_img');
+        const jumlahBayarInput = document.getElementById('modal_jumlah_bayar');
+
+        if (method === 'QRIS') {
+            if (qrisBox) qrisBox.classList.remove('hidden');
+            if (transferBox) transferBox.classList.add('hidden');
+            if (jumlahBayarInput && currentModalPrice > 0) {
+                jumlahBayarInput.value = currentModalPrice;
+            }
+            if (qrisImg) {
+                if (qrisStaticImgUrl) {
+                    qrisImg.src = qrisStaticImgUrl;
+                } else {
+                    const payload = `QRIS:${qrisMerchantName}|NMID:${qrisNmidCode}|AMOUNT:Rp${Math.round(currentModalPrice)}|REF:${currentModalTrxCode}`;
+                    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(payload)}`;
+                }
+            }
+        } else if (method && method !== 'Tunai') {
+            if (qrisBox) qrisBox.classList.add('hidden');
+            if (transferBox) transferBox.classList.remove('hidden');
+            if (jumlahBayarInput && currentModalPrice > 0) {
+                jumlahBayarInput.value = currentModalPrice;
+            }
+        } else {
+            if (qrisBox) qrisBox.classList.add('hidden');
+            if (transferBox) transferBox.classList.add('hidden');
+        }
     }
     
     function closePaymentModal() {

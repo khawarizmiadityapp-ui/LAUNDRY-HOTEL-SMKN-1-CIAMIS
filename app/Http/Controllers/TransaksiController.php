@@ -71,8 +71,11 @@ class TransaksiController extends Controller
         }
         
         $data = $query->get();
+        $lunasData = $data->where('payment_status', 'lunas');
+        $belumBayarData = $data->where('payment_status', '!=', 'lunas');
+        $rekapPembayaran = calculate_payment_recap($lunasData, $belumBayarData);
 
-        $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data', 'filter'))->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.pdf.transaksi', compact('data', 'filter', 'rekapPembayaran'))->setPaper('a4', 'landscape');
 
         return $pdf->download('laporan-keuangan.pdf');
     }

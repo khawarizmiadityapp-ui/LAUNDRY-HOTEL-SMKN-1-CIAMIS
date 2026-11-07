@@ -117,6 +117,8 @@
                                 Metode Pembayaran <span class="text-red-500">*</span>
                             </label>
                             <select name="metode_pembayaran" 
+                                    x-model="metodePembayaran"
+                                    @change="onMethodChange()"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required>
                                 <option value="">Pilih Metode</option>
@@ -127,6 +129,35 @@
                                 <option value="Transfer BRI">🏦 Transfer BRI</option>
                                 <option value="E-Wallet">💳 E-Wallet (GoPay/OVO/Dana)</option>
                             </select>
+                        </div>
+
+                        <!-- QRIS Barcode Box -->
+                        <div class="md:col-span-2" x-show="metodePembayaran === 'QRIS' || metodePembayaran === 'E-Wallet'" x-cloak>
+                            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
+                                <div class="bg-white p-2.5 rounded-xl border border-purple-200 shadow-sm shrink-0">
+                                    @if(!empty($qrisConfig['image_url']))
+                                        <img src="{{ $qrisConfig['image_url'] }}" alt="QRIS Barcode" class="w-36 h-36 object-contain">
+                                    @else
+                                        <img src="{{ $qrisConfig['fallback_qr_url'] }}" alt="QRIS Barcode" class="w-36 h-36 object-contain">
+                                    @endif
+                                </div>
+                                <div class="text-center sm:text-left">
+                                    <span class="inline-block px-2.5 py-0.5 bg-purple-600 text-white text-[10px] font-bold rounded-full uppercase tracking-wider mb-1">QRIS Terkoneksi</span>
+                                    <h4 class="font-bold text-gray-800 text-base">{{ $qrisConfig['merchant_name'] }}</h4>
+                                    <p class="text-xs text-gray-500 font-mono mb-2">NMID: {{ $qrisConfig['nmid'] }}</p>
+                                    <p class="text-xs text-purple-800 bg-purple-100/80 px-3 py-1.5 rounded-lg border border-purple-200">
+                                        Scan QRIS melalui GoPay, OVO, DANA, ShopeePay, LinkAja, atau Mobile Banking. Nominal otomatis disamakan dengan tagihan: <strong>Rp <span x-text="formatRupiah(totalTagihan)"></span></strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Rekening Transfer -->
+                        <div class="md:col-span-2" x-show="metodePembayaran.startsWith('Transfer')" x-cloak>
+                            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900">
+                                <p class="font-bold uppercase tracking-wider mb-1"><i class="fas fa-university mr-1"></i> Rekening Tujuan Transfer:</p>
+                                <p class="font-mono font-semibold">{{ $qrisConfig['bank_transfer_info'] }}</p>
+                            </div>
                         </div>
 
                         <!-- Tanggal Pembayaran -->
@@ -276,6 +307,13 @@ document.addEventListener('alpine:init', () => {
         selectedTransaksi: '',
         totalTagihan: 0,
         jumlahBayar: '',
+        metodePembayaran: '',
+
+        onMethodChange() {
+            if ((this.metodePembayaran === 'QRIS' || this.metodePembayaran === 'E-Wallet' || this.metodePembayaran.startsWith('Transfer')) && this.totalTagihan > 0) {
+                this.jumlahBayar = this.totalTagihan;
+            }
+        },
         
         get kembalian() {
             if (!this.jumlahBayar || this.totalTagihan === 0) return 0;

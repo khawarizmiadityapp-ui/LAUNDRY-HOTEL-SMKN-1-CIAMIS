@@ -67,6 +67,7 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
 
         $labaBersih = $totalPemasukan - $totalPengeluaran;
         $marginLaba = $totalPemasukan > 0 ? ($labaBersih / $totalPemasukan) * 100 : 0;
+        $rekapPembayaran = calculate_payment_recap((clone $queryPemasukan)->get(), (clone $queryPiutang)->get());
 
         // Breakdown pengeluaran per kategori
         $allPengeluaran = (clone $queryPengeluaran)->get();
@@ -97,6 +98,7 @@ class NeracaSheet implements FromView, WithTitle, ShouldAutoSize
             'labaBersih' => $labaBersih,
             'marginLaba' => $marginLaba,
             'distribusiPengeluaran' => $distribusiPengeluaran,
+            'rekapPembayaran' => $rekapPembayaran,
         ]);
     }
 

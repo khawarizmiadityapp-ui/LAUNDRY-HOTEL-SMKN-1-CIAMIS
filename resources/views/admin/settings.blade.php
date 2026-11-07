@@ -94,6 +94,53 @@
                     @endif
                 </div>
 
+                <!-- Divider Konfigurasi QRIS & Pembayaran Non-Tunai -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fas fa-qrcode text-brand-600"></i> Konfigurasi Pembayaran QRIS & Transfer
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="qris_merchant_name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Merchant QRIS</label>
+                                <input type="text" name="qris_merchant_name" id="qris_merchant_name" value="{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS' }}"
+                                       class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                                       placeholder="BENING LAUNDRY - SMKN 1 CIAMIS">
+                            </div>
+                            <div>
+                                <label for="qris_nmid" class="block text-xs font-semibold text-gray-700 mb-1">NMID / ID Merchant QRIS</label>
+                                <input type="text" name="qris_nmid" id="qris_nmid" value="{{ $qrisConfig['nmid'] ?? 'ID1026000109281' }}"
+                                       class="w-full px-3.5 py-2.5 text-sm font-mono border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                                       placeholder="ID1026000109281">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="qris_image" class="block text-xs font-semibold text-gray-700 mb-1">Upload Gambar Barcode QRIS Resmi Toko (Opsional)</label>
+                            <input type="file" name="qris_image" id="qris_image" accept="image/*"
+                                   class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                            <p class="text-[11px] text-slate-400 mt-1">Jika belum diupload, sistem otomatis men-generate QR Code QRIS dinamis berdasarkan Nama Merchant &amp; Nominal Tagihan.</p>
+                            @if(!empty($qrisConfig['qris_image']))
+                                <div class="mt-2 flex items-center gap-3">
+                                    <img src="{{ $qrisConfig['qris_image'] }}" alt="QRIS Toko" class="h-14 w-14 object-contain bg-white rounded-lg border border-slate-200 p-1">
+                                    <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-semibold cursor-pointer">
+                                        <input type="checkbox" name="reset_qris_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                        Hapus gambar &amp; gunakan QRIS otomatis
+                                    </label>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div>
+                            <label for="bank_transfer_info" class="block text-xs font-semibold text-gray-700 mb-1">Info Rekening Transfer Bank / E-Wallet</label>
+                            <input type="text" name="bank_transfer_info" id="bank_transfer_info" value="{{ $qrisConfig['bank_info'] ?? '' }}"
+                                   class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                                   placeholder="Contoh: BCA 1234567890 a.n. Bening Laundry SMKN 1 Ciamis">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="pt-2 flex justify-end">
                     <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-brand-500/25 transition flex items-center gap-2">
@@ -106,17 +153,34 @@
             </form>
         </div>
 
-        <!-- Info Card -->
+        <!-- Info Card + QRIS Preview -->
         <div class="bg-gradient-to-br from-brand-600 to-indigo-900 rounded-2xl shadow-xl text-white p-6 flex flex-col justify-between">
             <div class="space-y-4">
-                <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Informasi Kontak</span>
-                <h3 class="text-xl font-bold leading-snug">Kontak ini akan dihubungi oleh pembeli/pelanggan di situs depan.</h3>
+                <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Informasi Kontak &amp; QRIS Aktif</span>
+                <h3 class="text-xl font-bold leading-snug">Kontak &amp; Barcode Pembayaran QRIS Terintegrasi</h3>
                 <p class="text-brand-100 text-sm leading-relaxed">
-                    Sistem akan menyinkronkan nomor WhatsApp Admin ke link tombol "Hubungi Admin" di halaman Lacak Status Cucian, serta nomor WhatsApp Service ke tombol "Pesan Layanan". Pastikan nomor-nomor tersebut aktif agar pesan dari pelanggan dapat terkirim secara langsung.
+                    Sistem menyinkronkan nomor WhatsApp Admin &amp; Service ke halaman depan, serta menghubungkan <strong>Barcode QRIS</strong> secara otomatis ke halaman POS (Kasir), Pengambilan Cucian, Manajemen Pembayaran, dan Struk/Invoice.
                 </p>
+
+                <!-- Preview Kartu QRIS -->
+                <div class="bg-white text-slate-800 rounded-2xl p-4 shadow-lg mt-4 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl shrink-0">
+                        <img src="{{ $qrisConfig['display_qr_url'] ?? '' }}" alt="QRIS Preview" class="w-28 h-28 object-contain">
+                    </div>
+                    <div class="text-center sm:text-left min-w-0 flex-1">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-extrabold uppercase tracking-wider border border-rose-200 mb-1">
+                            <i class="fas fa-qrcode"></i> QRIS CONNECTED
+                        </div>
+                        <p class="text-sm font-extrabold text-slate-900 truncate">{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS' }}</p>
+                        <p class="text-xs font-mono text-slate-500 mt-0.5">NMID: {{ $qrisConfig['nmid'] ?? 'ID1026000109281' }}</p>
+                        <p class="text-[11px] text-slate-500 mt-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                            <i class="fas fa-university text-blue-600 mr-1"></i> {{ $qrisConfig['bank_info'] ?? '-' }}
+                        </p>
+                    </div>
+                </div>
             </div>
             
-            <div class="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+            <div class="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">

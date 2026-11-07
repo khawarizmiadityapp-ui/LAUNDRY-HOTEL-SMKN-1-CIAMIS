@@ -51,8 +51,9 @@ class PosController extends Controller
         });
 
         $petugasList = \App\Models\Petugas::orderBy('nama')->get();
+        $qrisConfig = get_qris_config();
 
-        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup', 'petugasList'));
+        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup', 'petugasList', 'qrisConfig'));
     }
 
     /**
@@ -253,8 +254,9 @@ class PosController extends Controller
         $transaksi = Transaksi::with(['details.layanan', 'customer', 'user'])->findOrFail($id);
         $subtotal  = $transaksi->details->sum('subtotal');
         $totalTagihan  = $transaksi->total_price;
+        $qrisConfig = get_qris_config();
 
-        return view('pos.nota', compact('transaksi', 'subtotal', 'totalTagihan'));
+        return view('pos.nota', compact('transaksi', 'subtotal', 'totalTagihan', 'qrisConfig'));
     }
 
     /**
@@ -270,12 +272,16 @@ class PosController extends Controller
             }
 
             if ($transaksi->payment_status !== 'lunas') {
-                $dibayar = (float) $request->input('dibayar', 0);
+                $metode = classify_payment_method($request->input('payment_method', 'tunai'));
+                $dibayar = $metode === 'tunai'
+                    ? (float) $request->input('dibayar', 0)
+                    : (float) $request->input('dibayar', $transaksi->total_price);
+
                 if ($dibayar >= $transaksi->total_price) {
                     $transaksi->payment_status = 'lunas';
                     $transaksi->dibayar = $dibayar;
-                    $transaksi->kembalian = $dibayar - $transaksi->total_price;
-                    $transaksi->payment_method = 'tunai'; // Default to cash if paid at pickup
+                    $transaksi->kembalian = max(0, $dibayar - $transaksi->total_price);
+                    $transaksi->payment_method = $metode;
                 } else {
                     return back()->with('error', 'Pesanan tidak bisa diambil karena belum dibayar lunas. Pembayaran kurang dari tagihan.');
                 }

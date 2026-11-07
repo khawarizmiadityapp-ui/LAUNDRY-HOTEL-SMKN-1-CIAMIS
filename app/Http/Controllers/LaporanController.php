@@ -77,6 +77,7 @@ class LaporanController extends Controller
         
         $piutang = (clone $piutangQuery)->sum('total_price');
         $utang = 0; // Tidak ada data hutang pada sistem saat ini
+        $rekapPembayaran = calculate_payment_recap((clone $query)->get(), (clone $piutangQuery)->get());
 
         $persentaseMasuk = 0;
         $persentaseKeluar = 0;
@@ -258,6 +259,7 @@ class LaporanController extends Controller
             'laba' => $laba,
             'piutang' => $piutang,
             'utang' => $utang,
+            'rekapPembayaran' => $rekapPembayaran,
             'months' => $months,
             'dataMasuk' => $dataMasuk,
             'dataKeluar' => $dataKeluar,
@@ -349,23 +351,37 @@ class LaporanController extends Controller
         }
 
         // 2. Ambil Transaksi Pemasukan (Lunas) dalam periode
-        $transaksis = Transaksi::with(['customer', 'details.layanan'])
+        $rawTransaksisLunas = Transaksi::with(['customer', 'details.layanan'])
             ->where('payment_status', 'lunas')
             ->whereBetween('created_at', [$start, $end])
-            ->get()
-            ->map(function ($trx) {
+            ->get();
+
+        $rawTransaksisPiutang = Transaksi::where('payment_status', 'belum_bayar')
+            ->whereBetween('created_at', [$start, $end])
+            ->get();
+
+        $rekapPembayaran = calculate_payment_recap($rawTransaksisLunas, $rawTransaksisPiutang);
+
+        $transaksis = $rawTransaksisLunas->map(function ($trx) {
                 $detailNama = $trx->details->pluck('layanan.nama')->filter()->join(', ');
                 $keterangan = $detailNama ?: ($trx->service_type ? 'Laundry ' . ucfirst($trx->service_type) : 'Laundry pakaian kiloan');
                 if ($trx->weight && $trx->weight > 0 && !str_contains(strtolower($keterangan), 'kg')) {
                     $keterangan .= " ({$trx->weight} kg)";
                 }
 
+                $methodCategory = classify_payment_method($trx->payment_method);
+                $refLabel = match ($methodCategory) {
+                    'qris' => 'QRIS',
+                    'transfer' => 'TF',
+                    default => 'Tn',
+                };
+
                 return [
                     'timestamp' => $trx->created_at->timestamp,
                     'tanggal' => $trx->created_at->translatedFormat('d F Y'),
                     'no_bukti' => $trx->transaksi_code,
                     'keterangan' => $keterangan,
-                    'ref' => 'Tn',
+                    'ref' => $refLabel,
                     'debet' => (int) $trx->total_price,
                     'kredit' => 0,
                     'type' => 'masuk',
@@ -423,7 +439,8 @@ class LaporanController extends Controller
             'totalPenerimaanKumulatif',
             'totalKredit',
             'saldoAkhir',
-            'tanggalAwalFormatted'
+            'tanggalAwalFormatted',
+            'rekapPembayaran'
         ))->setPaper('a4', 'portrait');
 
         return $pdf->download('BKU-TEFA-HTL-' . $start->format('Ym') . '-' . now()->format('His') . '.pdf');

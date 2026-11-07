@@ -44,6 +44,7 @@
             <th>Layanan</th>
             <th>Berat</th>
             <th>Total Harga</th>
+            <th>Metode Bayar</th>
             <th>Status Pengerjaan</th>
             <th>Status Pembayaran</th>
             <th>Tanggal</th>
@@ -57,6 +58,7 @@
             <td>{{ ucfirst($trx->service_type) }}</td>
             <td>{{ $trx->weight }} kg</td>
             <td>Rp {{ number_format($trx->total_price, 0, ',', '.') }}</td>
+            <td>{{ strtoupper(classify_payment_method($trx->payment_method)) }}</td>
             <td>{{ ucfirst($trx->status) }}</td>
             <td>{{ str_replace('_', ' ', ucfirst($trx->payment_status)) }}</td>
             <td>{{ $trx->created_at->format('d/m/Y H:i') }}</td>
@@ -64,6 +66,62 @@
         @endforeach
     </tbody>
 </table>
+
+@if(isset($rekapPembayaran))
+<div style="margin-top: 20px;">
+    <div style="font-weight: bold; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; color: #1e3a8a;">
+        Rekapan Metode Pembayaran & Status Pelunasan
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Metode / Status Pembayaran</th>
+                <th>Jumlah Transaksi</th>
+                <th>Persentase Omzet Lunas</th>
+                <th>Total Nominal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Pembayaran Tunai (Cash)</strong></td>
+                <td>{{ $rekapPembayaran['tunai_count'] }} Transaksi</td>
+                <td>{{ $rekapPembayaran['tunai_persen'] }}%</td>
+                <td><strong>Rp {{ number_format($rekapPembayaran['tunai_total'], 0, ',', '.') }}</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Pembayaran QRIS (Scan Barcode)</strong></td>
+                <td>{{ $rekapPembayaran['qris_count'] }} Transaksi</td>
+                <td>{{ $rekapPembayaran['qris_persen'] }}%</td>
+                <td><strong>Rp {{ number_format($rekapPembayaran['qris_total'], 0, ',', '.') }}</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Transfer Bank (BCA / Mandiri / BRI)</strong></td>
+                <td>{{ $rekapPembayaran['transfer_count'] }} Transaksi</td>
+                <td>{{ $rekapPembayaran['transfer_persen'] }}%</td>
+                <td><strong>Rp {{ number_format($rekapPembayaran['transfer_total'], 0, ',', '.') }}</strong></td>
+            </tr>
+            <tr style="background-color: #e0f2fe; font-weight: bold;">
+                <td>TOTAL PENERIMAAN LUNAS</td>
+                <td>{{ $rekapPembayaran['lunas_count'] }} Transaksi</td>
+                <td>100%</td>
+                <td>Rp {{ number_format($rekapPembayaran['lunas_total'], 0, ',', '.') }}</td>
+            </tr>
+            <tr style="background-color: #fef2f2; font-weight: bold; color: #991b1b;">
+                <td>TOTAL BELUM LUNAS (PIUTANG)</td>
+                <td>{{ $rekapPembayaran['belum_bayar_count'] }} Transaksi</td>
+                <td>Piutang</td>
+                <td>Rp {{ number_format($rekapPembayaran['belum_bayar_total'], 0, ',', '.') }}</td>
+            </tr>
+            <tr style="background-color: #f3f4f6; font-weight: bold;">
+                <td>GRAND TOTAL SELURUH TRANSAKSI</td>
+                <td>{{ $rekapPembayaran['grand_count'] }} Transaksi</td>
+                <td>-</td>
+                <td>Rp {{ number_format($rekapPembayaran['grand_total'], 0, ',', '.') }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+@endif
 
 <div class="signature-section clearfix">
     <div class="signature-box">

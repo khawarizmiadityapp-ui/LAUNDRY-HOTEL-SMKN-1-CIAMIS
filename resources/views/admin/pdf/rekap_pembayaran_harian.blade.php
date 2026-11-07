@@ -59,35 +59,90 @@
     {{-- STATISTIK KARTU --}}
     <table class="summary-grid">
         <tr>
-            <td style="width: 25%;">
+            <td style="width: 20%;">
                 <div class="stat-card">
-                    <span>Total Omzet Diterima</span>
+                    <span>Total Omzet Lunas</span>
                     <strong>Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</strong>
                 </div>
             </td>
-            <td style="width: 25%;">
-                <div class="stat-card">
-                    <span>Jumlah Transaksi</span>
-                    <strong>{{ $totalTransaksi }} Transaksi</strong>
-                </div>
-            </td>
-            <td style="width: 25%;">
+            <td style="width: 20%;">
                 <div class="stat-card">
                     <span>Pembayaran Tunai</span>
                     <strong>Rp {{ number_format($totalTunai, 0, ',', '.') }}</strong>
                 </div>
             </td>
-            <td style="width: 25%;">
+            <td style="width: 20%;">
                 <div class="stat-card">
-                    <span>Pembayaran Non-Tunai</span>
-                    <strong>Rp {{ number_format($totalNonTunai, 0, ',', '.') }}</strong>
+                    <span>Pembayaran QRIS</span>
+                    <strong>Rp {{ number_format($totalQris ?? 0, 0, ',', '.') }}</strong>
+                </div>
+            </td>
+            <td style="width: 20%;">
+                <div class="stat-card">
+                    <span>Transfer Bank</span>
+                    <strong>Rp {{ number_format($totalTransfer ?? 0, 0, ',', '.') }}</strong>
+                </div>
+            </td>
+            <td style="width: 20%;">
+                <div class="stat-card">
+                    <span>Belum Lunas (Piutang)</span>
+                    <strong>Rp {{ number_format($rekapMetode['belum_bayar_total'] ?? 0, 0, ',', '.') }}</strong>
                 </div>
             </td>
         </tr>
     </table>
 
-    {{-- 1. RINCIAN BREAKDOWN PELAYANAN --}}
-    <div class="section-title">1. Rincian Pelayanan Laundry Hari Ini</div>
+    {{-- REKAPAN METODE PEMBAYARAN --}}
+    @if(isset($rekapMetode))
+    <div class="section-title">1. Rekapan Metode Pembayaran & Status Pelunasan</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35%;">Metode / Status Pembayaran</th>
+                <th style="width: 20%;">Jumlah Transaksi</th>
+                <th style="width: 20%;">Persentase Omzet Lunas</th>
+                <th style="width: 25%;">Total Nominal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="font-bold">Pembayaran Tunai (Cash)</td>
+                <td class="text-center">{{ $rekapMetode['tunai_count'] }} Transaksi</td>
+                <td class="text-center">{{ $rekapMetode['tunai_persen'] }}%</td>
+                <td class="text-right font-mono font-bold">Rp {{ number_format($rekapMetode['tunai_total'], 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold">Pembayaran QRIS (Scan Barcode)</td>
+                <td class="text-center">{{ $rekapMetode['qris_count'] }} Transaksi</td>
+                <td class="text-center">{{ $rekapMetode['qris_persen'] }}%</td>
+                <td class="text-right font-mono font-bold">Rp {{ number_format($rekapMetode['qris_total'], 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold">Transfer Bank (BCA / Mandiri / BRI)</td>
+                <td class="text-center">{{ $rekapMetode['transfer_count'] }} Transaksi</td>
+                <td class="text-center">{{ $rekapMetode['transfer_persen'] }}%</td>
+                <td class="text-right font-mono font-bold">Rp {{ number_format($rekapMetode['transfer_total'], 0, ',', '.') }}</td>
+            </tr>
+            <tr style="background-color: #edf2f7; font-weight: bold;">
+                <td>TOTAL PENERIMAAN LUNAS</td>
+                <td class="text-center">{{ $rekapMetode['lunas_count'] }} Transaksi</td>
+                <td class="text-center">100%</td>
+                <td class="text-right font-mono font-bold">Rp {{ number_format($rekapMetode['lunas_total'], 0, ',', '.') }}</td>
+            </tr>
+            @if(($rekapMetode['belum_bayar_count'] ?? 0) > 0)
+            <tr style="background-color: #fff5f5;">
+                <td class="font-bold" style="color: #9b2c2c;">Tagihan Belum Lunas (Piutang)</td>
+                <td class="text-center" style="color: #9b2c2c;">{{ $rekapMetode['belum_bayar_count'] }} Transaksi</td>
+                <td class="text-center" style="color: #9b2c2c;">Piutang</td>
+                <td class="text-right font-mono font-bold" style="color: #9b2c2c;">Rp {{ number_format($rekapMetode['belum_bayar_total'], 0, ',', '.') }}</td>
+            </tr>
+            @endif
+        </tbody>
+    </table>
+    @endif
+
+    {{-- 2. RINCIAN BREAKDOWN PELAYANAN --}}
+    <div class="section-title">2. Rincian Pelayanan Laundry Hari Ini</div>
     <table>
         <thead>
             <tr>
@@ -122,8 +177,8 @@
         </tbody>
     </table>
 
-    {{-- 2. DAFTAR TRANSAKSI MASUK --}}
-    <div class="section-title" style="margin-top: 15px;">2. Daftar Transaksi & Pelunasan Pelanggan</div>
+    {{-- 3. DAFTAR TRANSAKSI MASUK --}}
+    <div class="section-title" style="margin-top: 15px;">3. Daftar Transaksi & Pelunasan Pelanggan</div>
     <table>
         <thead>
             <tr>

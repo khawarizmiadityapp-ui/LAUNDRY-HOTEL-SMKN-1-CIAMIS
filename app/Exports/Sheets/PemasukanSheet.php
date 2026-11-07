@@ -41,12 +41,14 @@ class PemasukanSheet implements FromView, WithTitle, ShouldAutoSize
         }
 
         $pemasukanData = $query->latest()->get();
+        $rekapPembayaran = calculate_payment_recap($pemasukanData);
 
         return view('admin.exports.pemasukan_excel', [
             'filter' => $this->filter,
             'dari' => $this->dari,
             'sampai' => $this->sampai,
             'pemasukanData' => $pemasukanData,
+            'rekapPembayaran' => $rekapPembayaran,
         ]);
     }
 

@@ -178,6 +178,72 @@
         </div>
     </div>
 
+    <!-- Rekapan Metode Pembayaran & Pelunasan -->
+    @if(isset($rekapPembayaran))
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+            <div>
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-cash-register text-purple-600"></i>
+                    Rekapan Metode Pembayaran & Status Pelunasan
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">Ringkasan penerimaan pembayaran berdasarkan metode (Tunai, QRIS, Transfer Bank) dan tagihan belum lunas pada periode terpilih.</p>
+            </div>
+            <a href="{{ route('admin.pembayaran.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                <span>Buka Manajemen Pembayaran</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-emerald-700">💵 Tunai (Cash)</span>
+                    <span class="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{{ $rekapPembayaran['tunai_persen'] }}%</span>
+                </div>
+                <p class="text-lg font-extrabold text-gray-900 mt-2">Rp {{ number_format($rekapPembayaran['tunai_total'], 0, ',', '.') }}</p>
+                <p class="text-xs text-emerald-700 mt-0.5 font-medium">{{ $rekapPembayaran['tunai_count'] }} Transaksi Lunas</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-purple-50/70 border border-purple-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-purple-700">📱 QRIS</span>
+                    <span class="text-[11px] font-bold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">{{ $rekapPembayaran['qris_persen'] }}%</span>
+                </div>
+                <p class="text-lg font-extrabold text-gray-900 mt-2">Rp {{ number_format($rekapPembayaran['qris_total'], 0, ',', '.') }}</p>
+                <p class="text-xs text-purple-700 mt-0.5 font-medium">{{ $rekapPembayaran['qris_count'] }} Transaksi Lunas</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-indigo-700">🏦 Transfer Bank</span>
+                    <span class="text-[11px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">{{ $rekapPembayaran['transfer_persen'] }}%</span>
+                </div>
+                <p class="text-lg font-extrabold text-gray-900 mt-2">Rp {{ number_format($rekapPembayaran['transfer_total'], 0, ',', '.') }}</p>
+                <p class="text-xs text-indigo-700 mt-0.5 font-medium">{{ $rekapPembayaran['transfer_count'] }} Transaksi Lunas</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-blue-700">✅ Total Lunas</span>
+                    <span class="text-[11px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">100%</span>
+                </div>
+                <p class="text-lg font-extrabold text-blue-900 mt-2">Rp {{ number_format($rekapPembayaran['lunas_total'], 0, ',', '.') }}</p>
+                <p class="text-xs text-blue-700 mt-0.5 font-medium">{{ $rekapPembayaran['lunas_count'] }} Transaksi Lunas</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-orange-50/70 border border-orange-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-orange-700">⏳ Belum Lunas</span>
+                    <span class="text-[11px] font-bold bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full">Piutang</span>
+                </div>
+                <p class="text-lg font-extrabold text-orange-900 mt-2">Rp {{ number_format($rekapPembayaran['belum_bayar_total'], 0, ',', '.') }}</p>
+                <p class="text-xs text-orange-700 mt-0.5 font-medium">{{ $rekapPembayaran['belum_bayar_count'] }} Transaksi Belum Bayar</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Target Pemasukan Bulanan & Tahunan (Modernized Layout) -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden transition-all duration-300 hover:shadow-md">
         <!-- Top Accent Gradient Line -->

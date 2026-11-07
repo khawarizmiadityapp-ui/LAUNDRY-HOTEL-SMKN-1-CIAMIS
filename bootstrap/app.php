@@ -1,5 +1,20 @@
 <?php
 
+if (!class_exists('ZipArchive')) {
+    class ZipArchive
+    {
+        public const CM_DEFAULT = -1;
+        public const CM_STORE = 0;
+        public const CM_DEFLATE = 8;
+        public const CM_BZIP2 = 12;
+        public const CM_XZ = 95;
+        public const CREATE = 1;
+        public const EXCL = 2;
+        public const CHECKCONS = 4;
+        public const OVERWRITE = 8;
+    }
+}
+
 $dbPath = dirname(__DIR__) . '/database/database.sqlite';
 if (!file_exists($dbPath) || filesize($dbPath) < 100) {
     @file_put_contents($dbPath, '');
@@ -9,6 +24,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -44,11 +60,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Log all exceptions
         $exceptions->report(function (Throwable $e) {
-            \Log::error('Unhandled Exception', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            if (app()->hasBeenBootstrapped()) {
+                Log::error('Unhandled Exception', [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
         });
     })->create();

@@ -789,6 +789,7 @@ class AdminController extends Controller
         $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
         $heroImage = \App\Models\Setting::getValue('hero_image', 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=800&auto=format&fit=crop');
         $logoImage = \App\Models\Setting::getValue('logo_image', asset('images/logobening.jpeg'));
+        $qrisConfig = get_qris_config();
         
         // Load kategori pengeluaran dengan jumlah penggunaan
         $kategoriList = \App\Models\KategoriPengeluaran::withCount('pengeluarans')
@@ -810,7 +811,7 @@ class AdminController extends Controller
         $adminFormattedSecret = $currentAdmin ? Google2FAService::formatSecretKey($currentAdmin->google2fa_secret) : '';
         $adminRawSecret = $currentAdmin ? $currentAdmin->google2fa_secret : '';
         
-        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret'));
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret'));
     }
 
     public function updateSettings(Request $request)
@@ -820,6 +821,11 @@ class AdminController extends Controller
             'service_wa' => 'required|string',
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'logo_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:1024',
+            'qris_merchant_name' => 'nullable|string|max:100',
+            'qris_nmid' => 'nullable|string|max:50',
+            'qris_payload' => 'nullable|string|max:1000',
+            'bank_transfer_info' => 'nullable|string|max:255',
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         try {
@@ -829,6 +835,19 @@ class AdminController extends Controller
 
             $servicePhone = format_whatsapp_number($request->service_wa);
             \App\Models\Setting::setValue('service_wa', $servicePhone);
+
+            if ($request->filled('qris_merchant_name')) {
+                \App\Models\Setting::setValue('qris_merchant_name', trim($request->qris_merchant_name));
+            }
+            if ($request->filled('qris_nmid')) {
+                \App\Models\Setting::setValue('qris_nmid', trim($request->qris_nmid));
+            }
+            if ($request->has('qris_payload')) {
+                \App\Models\Setting::setValue('qris_payload', trim((string) $request->qris_payload));
+            }
+            if ($request->filled('bank_transfer_info')) {
+                \App\Models\Setting::setValue('bank_transfer_info', trim($request->bank_transfer_info));
+            }
 
             // Handle hero_image upload
             if ($request->hasFile('hero_image')) {
@@ -846,7 +865,17 @@ class AdminController extends Controller
                 \App\Models\Setting::setValue('logo_image', asset('images/' . $filename));
             }
 
-            return back()->with('success', 'Pengaturan berhasil diperbarui.');
+            // Handle qris_image upload
+            if ($request->hasFile('qris_image')) {
+                $file = $request->file('qris_image');
+                $filename = 'qris_' . time() . '.' . $file->extension();
+                $file->move(public_path('images'), $filename);
+                \App\Models\Setting::setValue('qris_image', asset('images/' . $filename));
+            } elseif ($request->boolean('reset_qris_image')) {
+                \App\Models\Setting::where('key', 'qris_image')->delete();
+            }
+
+            return back()->with('success', 'Pengaturan aplikasi & pembayaran QRIS berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
         }

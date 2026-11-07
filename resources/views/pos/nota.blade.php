@@ -402,9 +402,27 @@
             @endif
 
             {{-- Payment Info --}}
-            <div class="payment-info" style="margin-bottom: 12px;">
-                METODE: {{ strtoupper($transaksi->payment_method) }} ({{ $isLunas ? 'LUNAS' : 'INVOICE' }})
+            <div class="payment-info" style="margin-bottom: 10px;">
+                METODE: {{ strtoupper(str_replace('_', ' ', $transaksi->payment_method ?: 'TUNAI')) }} ({{ $isLunas ? 'LUNAS' : 'INVOICE' }})
             </div>
+
+            @php
+                $qrisData = $qrisConfig ?? get_qris_config();
+                $qrPayload = "QRIS:" . ($qrisData['merchant_name'] ?? 'BENING LAUNDRY') . "|NMID:" . ($qrisData['nmid'] ?? '') . "|AMOUNT:Rp" . (int)$totalTagihan . "|REF:" . $transaksi->transaksi_code;
+                $notaQrUrl = !empty($qrisData['qris_image'])
+                    ? $qrisData['qris_image']
+                    : ('https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=6&data=' . urlencode($qrPayload));
+            @endphp
+            @if(classify_payment_method($transaksi->payment_method) === 'qris' || !$isLunas)
+            <div style="text-align: center; margin: 8px 0 10px; padding: 8px; border: 1px dashed #333; border-radius: 6px;">
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">
+                    SCAN QRIS PEMBAYARAN
+                </div>
+                <img src="{{ $notaQrUrl }}" alt="QRIS" style="width: 120px; height: 120px; object-fit: contain; margin: 2px auto; display: block;">
+                <div style="font-size: 0.65rem; font-weight: 700; margin-top: 3px;">{{ $qrisData['merchant_name'] ?? 'BENING LAUNDRY' }}</div>
+                <div style="font-size: 0.6rem; color: #555;">NMID: {{ $qrisData['nmid'] ?? 'ID1026000109281' }}</div>
+            </div>
+            @endif
 
         </div>
 

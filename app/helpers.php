@@ -215,3 +215,124 @@ if (!function_exists('mask_name')) {
         return implode(' ', $masked);
     }
 }
+
+if (!function_exists('get_qris_config')) {
+    /**
+     * Get QRIS and non-cash payment configuration from Settings.
+     */
+    function get_qris_config(): array
+    {
+        $merchantName = \App\Models\Setting::getValue('qris_merchant_name', 'BENING LAUNDRY - SMKN 1 CIAMIS');
+        $nmid = \App\Models\Setting::getValue('qris_nmid', 'ID1026000109281');
+        $qrisImage = \App\Models\Setting::getValue('qris_image', null);
+        $qrisPayload = \App\Models\Setting::getValue('qris_payload', '');
+        $bankInfo = \App\Models\Setting::getValue('bank_transfer_info', 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis');
+
+        $defaultPayload = $qrisPayload ?: "QRIS:{$merchantName}|NMID:{$nmid}";
+        $fallbackQrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=' . urlencode($defaultPayload);
+
+        return [
+            'merchant_name' => $merchantName,
+            'nmid' => $nmid,
+            'qris_image' => $qrisImage,
+            'qris_payload' => $qrisPayload,
+            'bank_info' => $bankInfo,
+            'display_qr_url' => $qrisImage ?: $fallbackQrUrl,
+        ];
+    }
+}
+
+if (!function_exists('classify_payment_method')) {
+    /**
+     * Classify a payment method string into 'tunai', 'qris', or 'transfer'.
+     */
+    function classify_payment_method(?string $method): string
+    {
+        $m = strtolower(trim((string) $method));
+        if ($m === '' || in_array($m, ['tunai', 'cash'])) {
+            return 'tunai';
+        }
+        if (str_contains($m, 'qris')) {
+            return 'qris';
+        }
+        return 'transfer';
+    }
+}
+
+if (!function_exists('calculate_payment_recap')) {
+    /**
+     * Calculate comprehensive payment recap by method (Tunai, QRIS, Transfer) and status.
+     */
+    function calculate_payment_recap($lunasTransactions, $belumBayarTransactions = null): array
+    {
+        $lunas = collect($lunasTransactions);
+        $belumBayar = $belumBayarTransactions ? collect($belumBayarTransactions) : collect();
+
+        $totalPendapatan = (int) $lunas->sum('total_price');
+        $totalTransaksi = $lunas->count();
+
+        $tunaiItems = $lunas->filter(fn($t) => classify_payment_method($t->payment_method) === 'tunai');
+        $qrisItems = $lunas->filter(fn($t) => classify_payment_method($t->payment_method) === 'qris');
+        $transferItems = $lunas->filter(fn($t) => classify_payment_method($t->payment_method) === 'transfer');
+
+        $tunaiNominal = (int) $tunaiItems->sum('total_price');
+        $qrisNominal = (int) $qrisItems->sum('total_price');
+        $transferNominal = (int) $transferItems->sum('total_price');
+        $nonTunaiNominal = $qrisNominal + $transferNominal;
+
+        $tunaiCount = $tunaiItems->count();
+        $qrisCount = $qrisItems->count();
+        $transferCount = $transferItems->count();
+        $nonTunaiCount = $qrisCount + $transferCount;
+
+        $tunaiPersen = $totalPendapatan > 0 ? round(($tunaiNominal / $totalPendapatan) * 100, 1) : 0;
+        $qrisPersen = $totalPendapatan > 0 ? round(($qrisNominal / $totalPendapatan) * 100, 1) : 0;
+        $transferPersen = $totalPendapatan > 0 ? round(($transferNominal / $totalPendapatan) * 100, 1) : 0;
+        $nonTunaiPersen = $totalPendapatan > 0 ? round(($nonTunaiNominal / $totalPendapatan) * 100, 1) : 0;
+
+        $piutangNominal = (int) $belumBayar->sum('total_price');
+        $piutangCount = $belumBayar->count();
+
+        return [
+            'total_pendapatan' => $totalPendapatan,
+            'total_transaksi' => $totalTransaksi,
+            'tunai_nominal' => $tunaiNominal,
+            'tunai_count' => $tunaiCount,
+            'tunai_persen' => $tunaiPersen,
+            'qris_nominal' => $qrisNominal,
+            'qris_count' => $qrisCount,
+            'qris_persen' => $qrisPersen,
+            'transfer_nominal' => $transferNominal,
+            'transfer_count' => $transferCount,
+            'transfer_persen' => $transferPersen,
+            'non_tunai_nominal' => $nonTunaiNominal,
+            'non_tunai_count' => $nonTunaiCount,
+            'non_tunai_persen' => $nonTunaiPersen,
+            'piutang_nominal' => $piutangNominal,
+            'piutang_count' => $piutangCount,
+            'methods' => [
+                [
+                    'key' => 'tunai',
+                    'label' => 'Tunai (Cash)',
+                    'count' => $tunaiCount,
+                    'total' => $tunaiNominal,
+                    'persen' => $tunaiPersen,
+                ],
+                [
+                    'key' => 'qris',
+                    'label' => 'QRIS',
+                    'count' => $qrisCount,
+                    'total' => $qrisNominal,
+                    'persen' => $qrisPersen,
+                ],
+                [
+                    'key' => 'transfer',
+                    'label' => 'Transfer Bank / E-Wallet',
+                    'count' => $transferCount,
+                    'total' => $transferNominal,
+                    'persen' => $transferPersen,
+                ],
+            ],
+        ];
+    }
+}

@@ -151,7 +151,46 @@
     <!-- Ringkasan Penutupan Kas -->
     <table style="width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 9pt;">
         <tr>
-            <td style="width: 58%; vertical-align: top; border: none; padding-right: 15px;">
+            <td style="width: 55%; vertical-align: top; border: none; padding-right: 15px;">
+                @if(isset($rekapPembayaran))
+                <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt; margin-bottom: 8px;">
+                    <thead>
+                        <tr>
+                            <th colspan="3" style="border: 1px solid #000; padding: 3px 6px; background-color: #f1f5f9; text-align: left;">REKAPAN METODE PEMBAYARAN PERIODE INI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px 6px;">1. Tunai (Cash / Tn)</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: center;">{{ $rekapPembayaran['tunai_count'] }} Trx</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: right;">Rp {{ number_format($rekapPembayaran['tunai_total'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px 6px;">2. QRIS (Scan Barcode)</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: center;">{{ $rekapPembayaran['qris_count'] }} Trx</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: right;">Rp {{ number_format($rekapPembayaran['qris_total'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px 6px;">3. Transfer Bank (TF)</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: center;">{{ $rekapPembayaran['transfer_count'] }} Trx</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: right;">Rp {{ number_format($rekapPembayaran['transfer_total'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr style="font-weight: bold; background-color: #f8fafc;">
+                            <td style="border: 1px solid #000; padding: 3px 6px;">Total Penerimaan Lunas</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: center;">{{ $rekapPembayaran['lunas_count'] }} Trx</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: right;">Rp {{ number_format($rekapPembayaran['lunas_total'], 0, ',', '.') }}</td>
+                        </tr>
+                        @if(($rekapPembayaran['belum_bayar_count'] ?? 0) > 0)
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px 6px; color: #b91c1c;">Piutang (Belum Lunas)</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: center; color: #b91c1c;">{{ $rekapPembayaran['belum_bayar_count'] }} Trx</td>
+                            <td style="border: 1px solid #000; padding: 3px 6px; text-align: right; color: #b91c1c;">Rp {{ number_format($rekapPembayaran['belum_bayar_total'], 0, ',', '.') }}</td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+                @endif
+
                 @if($saldoAkhir < 0)
                     <div style="padding: 7px 10px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; color: #991b1b; font-size: 8pt; line-height: 1.4;">
                         <strong>Catatan Kas Defisit:</strong> Total pengeluaran periode ini (Rp {{ number_format($totalKredit, 0, ',', '.') }}) melebihi penerimaan kas (Rp {{ number_format($totalPenerimaanKumulatif ?? ($saldoAwal + $totalDebet), 0, ',', '.') }}). Masukkan <em>Saldo Awal Kas / Modal Kas Operasional</em> pada filter unduh BKU jika terdapat modal kas fisik di laci kasir.

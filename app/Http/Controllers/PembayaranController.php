@@ -31,6 +31,20 @@ class PembayaranController extends Controller
             $query->where('payment_status', $request->status);
         }
 
+        if ($request->filled('metode')) {
+            $metodeFilter = strtolower($request->metode);
+            if ($metodeFilter === 'tunai') {
+                $query->where(function ($q) {
+                    $q->whereIn('payment_method', ['tunai', 'cash', ''])->orWhereNull('payment_method');
+                });
+            } elseif ($metodeFilter === 'qris') {
+                $query->where('payment_method', 'like', '%qris%');
+            } elseif ($metodeFilter === 'transfer') {
+                $query->whereNotIn('payment_method', ['tunai', 'cash', 'qris', ''])
+                      ->whereNotNull('payment_method');
+            }
+        }
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -44,11 +58,16 @@ class PembayaranController extends Controller
         $startOfDay = Carbon::today()->startOfDay();
         $endOfDay = Carbon::today()->endOfDay();
 
-        $totalPendapatanHariIni = Transaksi::where('payment_status', 'lunas')
+        $hariIniTrx = Transaksi::where('payment_status', 'lunas')
             ->whereBetween('updated_at', [$startOfDay, $endOfDay])
-            ->sum('total_price');
+            ->get();
+        $semuaBelumLunasTrx = Transaksi::where('payment_status', 'belum_bayar')->get();
 
-        $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')->count();
+        $rekapHariIni = calculate_payment_recap($hariIniTrx, $semuaBelumLunasTrx);
+        $totalPendapatanHariIni = $rekapHariIni['total_pendapatan'];
+        $transaksiBelumLunas = $rekapHariIni['piutang_count'];
+        $nominalBelumLunas = $rekapHariIni['piutang_nominal'];
+        $qrisConfig = get_qris_config();
 
         // ═══════════════════════════════════════════════════════════════════
         // TAB 2: REKAPAN HARIAN
@@ -62,10 +81,17 @@ class PembayaranController extends Controller
             ->whereBetween('updated_at', [$harianStart, $harianEnd])
             ->get();
 
-        $harianTotalPendapatan = $harianTrx->sum('total_price');
-        $harianTotalTransaksi = $harianTrx->count();
-        $harianTotalTunai = $harianTrx->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price');
-        $harianTotalNonTunai = $harianTotalPendapatan - $harianTotalTunai;
+        $harianBelumLunasTrx = Transaksi::where('payment_status', 'belum_bayar')
+            ->whereBetween('created_at', [$harianStart, $harianEnd])
+            ->get();
+
+        $harianRekapMetode = calculate_payment_recap($harianTrx, $harianBelumLunasTrx);
+        $harianTotalPendapatan = $harianRekapMetode['total_pendapatan'];
+        $harianTotalTransaksi = $harianRekapMetode['total_transaksi'];
+        $harianTotalTunai = $harianRekapMetode['tunai_nominal'];
+        $harianTotalQris = $harianRekapMetode['qris_nominal'];
+        $harianTotalTransfer = $harianRekapMetode['transfer_nominal'];
+        $harianTotalNonTunai = $harianRekapMetode['non_tunai_nominal'];
 
         // Breakdown Pelayanan Harian
         $harianServiceBreakdown = $this->calculateServiceBreakdown($harianTrx);
@@ -84,10 +110,17 @@ class PembayaranController extends Controller
             ->whereBetween('updated_at', [$bulananStart, $bulananEnd])
             ->get();
 
-        $bulananTotalPendapatan = $bulananTrx->sum('total_price');
-        $bulananTotalTransaksi = $bulananTrx->count();
-        $bulananTotalTunai = $bulananTrx->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price');
-        $bulananTotalNonTunai = $bulananTotalPendapatan - $bulananTotalTunai;
+        $bulananBelumLunasTrx = Transaksi::where('payment_status', 'belum_bayar')
+            ->whereBetween('created_at', [$bulananStart, $bulananEnd])
+            ->get();
+
+        $bulananRekapMetode = calculate_payment_recap($bulananTrx, $bulananBelumLunasTrx);
+        $bulananTotalPendapatan = $bulananRekapMetode['total_pendapatan'];
+        $bulananTotalTransaksi = $bulananRekapMetode['total_transaksi'];
+        $bulananTotalTunai = $bulananRekapMetode['tunai_nominal'];
+        $bulananTotalQris = $bulananRekapMetode['qris_nominal'];
+        $bulananTotalTransfer = $bulananRekapMetode['transfer_nominal'];
+        $bulananTotalNonTunai = $bulananRekapMetode['non_tunai_nominal'];
 
         $daysInMonth = $bulananStart->daysInMonth;
         $rataRataHarian = $daysInMonth > 0 ? (int) ($bulananTotalPendapatan / $daysInMonth) : 0;
@@ -104,36 +137,49 @@ class PembayaranController extends Controller
                 return Carbon::parse($t->updated_at)->isSameDay($currentDate);
             });
 
+            $dayRecap = calculate_payment_recap($dayTrx);
+
             $dailyBreakdown[] = [
                 'tanggal' => $currentDate->format('d/m/Y'),
                 'hari' => $currentDate->translatedFormat('l'),
-                'count' => $dayTrx->count(),
-                'tunai' => $dayTrx->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price'),
-                'non_tunai' => $dayTrx->whereNotIn('payment_method', ['tunai', 'cash'])->sum('total_price'),
-                'total' => $dayTrx->sum('total_price'),
+                'count' => $dayRecap['total_transaksi'],
+                'tunai' => $dayRecap['tunai_nominal'],
+                'qris' => $dayRecap['qris_nominal'],
+                'transfer' => $dayRecap['transfer_nominal'],
+                'non_tunai' => $dayRecap['non_tunai_nominal'],
+                'total' => $dayRecap['total_pendapatan'],
             ];
         }
 
         return view('admin.pembayaran.index', compact(
             'tab',
             'transactions',
+            'rekapHariIni',
             'totalPendapatanHariIni',
             'transaksiBelumLunas',
+            'nominalBelumLunas',
+            'qrisConfig',
             // Harian
             'tanggalHarian',
             'harianTrx',
+            'harianRekapMetode',
             'harianTotalPendapatan',
             'harianTotalTransaksi',
             'harianTotalTunai',
+            'harianTotalQris',
+            'harianTotalTransfer',
             'harianTotalNonTunai',
             'harianServiceBreakdown',
             // Bulanan
             'bulanBulanan',
             'tahunBulanan',
             'bulananTrx',
+            'bulananRekapMetode',
             'bulananTotalPendapatan',
             'bulananTotalTransaksi',
             'bulananTotalTunai',
+            'bulananTotalQris',
+            'bulananTotalTransfer',
             'bulananTotalNonTunai',
             'rataRataHarian',
             'layananTerlaris',
@@ -202,8 +248,9 @@ class PembayaranController extends Controller
         $transaksiBelumLunas = Transaksi::where('payment_status', 'belum_bayar')
             ->orderBy('created_at', 'desc')
             ->get();
+        $qrisConfig = get_qris_config();
 
-        return view('admin.pembayaran.create', compact('transaksiBelumLunas'));
+        return view('admin.pembayaran.create', compact('transaksiBelumLunas', 'qrisConfig'));
     }
 
     /**
@@ -214,7 +261,7 @@ class PembayaranController extends Controller
         $validated = $request->validate([
             'transaksi_id' => 'required|string|exists:transaksi,transaksi_code',
             'jumlah_bayar' => 'required|numeric|min:0',
-            'metode_pembayaran' => 'required|string|in:Tunai,QRIS,Transfer BCA,Transfer Mandiri,Transfer BRI,E-Wallet',
+            'metode_pembayaran' => 'required|string|in:Tunai,QRIS,Transfer,Transfer BCA,Transfer Mandiri,Transfer BRI,E-Wallet',
             'tanggal_bayar' => 'required|date',
             'catatan' => 'nullable|string|max:500',
             'bukti_pembayaran' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -245,7 +292,7 @@ class PembayaranController extends Controller
                 $paymentStatus = 'lunas';
             } elseif ($jumlahBayar > 0 && $jumlahBayar < $totalPrice) {
                 $statusPembayaran = 'Cicilan';
-                $paymentStatus = 'cicilan';
+                $paymentStatus = 'belum_bayar';
             } else {
                 DB::rollBack();
                 if ($buktiPath && Storage::disk('public')->exists($buktiPath)) {
@@ -256,9 +303,12 @@ class PembayaranController extends Controller
                     ->with('error', 'Jumlah pembayaran harus lebih dari 0.');
             }
 
+            // Normalisasi metode pembayaran agar kompatibel dengan kolom DB (tunai, qris, transfer)
+            $normalizedMethod = classify_payment_method($validated['metode_pembayaran']);
+
             $updateData = [
                 'payment_status' => $paymentStatus,
-                'payment_method' => strtolower(str_replace(' ', '_', $validated['metode_pembayaran'])),
+                'payment_method' => $normalizedMethod,
                 'dibayar'        => $jumlahBayar,
                 'kembalian'      => $kembalian,
                 'updated_at'     => now(),
@@ -320,10 +370,17 @@ class PembayaranController extends Controller
             ->whereBetween('updated_at', [$start, $end])
             ->get();
 
-        $totalPendapatan = $transactions->sum('total_price');
-        $totalTransaksi = $transactions->count();
-        $totalTunai = $transactions->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price');
-        $totalNonTunai = $totalPendapatan - $totalTunai;
+        $belumBayarTrx = Transaksi::where('payment_status', 'belum_bayar')
+            ->whereBetween('created_at', [$start, $end])
+            ->get();
+
+        $rekapMetode = calculate_payment_recap($transactions, $belumBayarTrx);
+        $totalPendapatan = $rekapMetode['total_pendapatan'];
+        $totalTransaksi = $rekapMetode['total_transaksi'];
+        $totalTunai = $rekapMetode['tunai_nominal'];
+        $totalQris = $rekapMetode['qris_nominal'];
+        $totalTransfer = $rekapMetode['transfer_nominal'];
+        $totalNonTunai = $rekapMetode['non_tunai_nominal'];
 
         $serviceBreakdown = $this->calculateServiceBreakdown($transactions);
         $tanggalFormatted = Carbon::parse($tanggal)->translatedFormat('l, d F Y');
@@ -331,9 +388,12 @@ class PembayaranController extends Controller
         $pdf = Pdf::loadView('admin.pdf.rekap_pembayaran_harian', compact(
             'tanggalFormatted',
             'transactions',
+            'rekapMetode',
             'totalPendapatan',
             'totalTransaksi',
             'totalTunai',
+            'totalQris',
+            'totalTransfer',
             'totalNonTunai',
             'serviceBreakdown'
         ))->setPaper('a4', 'portrait');
@@ -357,10 +417,17 @@ class PembayaranController extends Controller
             ->whereBetween('updated_at', [$start, $end])
             ->get();
 
-        $totalPendapatan = $transactions->sum('total_price');
-        $totalTransaksi = $transactions->count();
-        $totalTunai = $transactions->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price');
-        $totalNonTunai = $totalPendapatan - $totalTunai;
+        $belumBayarTrx = Transaksi::where('payment_status', 'belum_bayar')
+            ->whereBetween('created_at', [$start, $end])
+            ->get();
+
+        $rekapMetode = calculate_payment_recap($transactions, $belumBayarTrx);
+        $totalPendapatan = $rekapMetode['total_pendapatan'];
+        $totalTransaksi = $rekapMetode['total_transaksi'];
+        $totalTunai = $rekapMetode['tunai_nominal'];
+        $totalQris = $rekapMetode['qris_nominal'];
+        $totalTransfer = $rekapMetode['transfer_nominal'];
+        $totalNonTunai = $rekapMetode['non_tunai_nominal'];
 
         $daysInMonth = $start->daysInMonth;
         $rataRataHarian = $daysInMonth > 0 ? (int) ($totalPendapatan / $daysInMonth) : 0;
@@ -372,14 +439,17 @@ class PembayaranController extends Controller
         for ($d = 1; $d <= $daysInMonth; $d++) {
             $currentDate = Carbon::create($tahun, $bulan, $d);
             $dayTrx = $transactions->filter(fn($t) => Carbon::parse($t->updated_at)->isSameDay($currentDate));
+            $dayRecap = calculate_payment_recap($dayTrx);
 
             $dailyBreakdown[] = [
                 'tanggal' => $currentDate->format('d/m/Y'),
                 'hari' => $currentDate->translatedFormat('l'),
-                'count' => $dayTrx->count(),
-                'tunai' => $dayTrx->whereIn('payment_method', ['tunai', 'cash'])->sum('total_price'),
-                'non_tunai' => $dayTrx->whereNotIn('payment_method', ['tunai', 'cash'])->sum('total_price'),
-                'total' => $dayTrx->sum('total_price'),
+                'count' => $dayRecap['total_transaksi'],
+                'tunai' => $dayRecap['tunai_nominal'],
+                'qris' => $dayRecap['qris_nominal'],
+                'transfer' => $dayRecap['transfer_nominal'],
+                'non_tunai' => $dayRecap['non_tunai_nominal'],
+                'total' => $dayRecap['total_pendapatan'],
             ];
         }
 
@@ -387,9 +457,12 @@ class PembayaranController extends Controller
 
         $pdf = Pdf::loadView('admin.pdf.rekap_pembayaran_bulanan', compact(
             'periodeLabel',
+            'rekapMetode',
             'totalPendapatan',
             'totalTransaksi',
             'totalTunai',
+            'totalQris',
+            'totalTransfer',
             'totalNonTunai',
             'rataRataHarian',
             'layananTerlaris',

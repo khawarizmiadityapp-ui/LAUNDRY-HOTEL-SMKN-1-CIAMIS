@@ -348,12 +348,28 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 align-top">
-                                        <form action="{{ route('pos.pickup', $trx->id) }}" method="POST">
+                                        <form action="{{ route('pos.pickup', $trx->id) }}" method="POST" x-data="{ pickupMethod: 'tunai', pickupBayar: {{ (int) $trx->total_price }} }">
                                             @csrf
                                             @if($trx->payment_status !== 'lunas')
+                                            <div class="mb-2">
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Metode Pelunasan</label>
+                                                <select name="payment_method" x-model="pickupMethod" @change="if(pickupMethod !== 'tunai') pickupBayar = {{ (int) $trx->total_price }}"
+                                                        class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-bold text-slate-800 cursor-pointer">
+                                                    <option value="tunai">💵 Tunai (Cash)</option>
+                                                    <option value="qris">📱 QRIS</option>
+                                                    <option value="transfer">🏦 Transfer Bank</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2" x-show="pickupMethod === 'qris'" x-cloak>
+                                                <button type="button" @click="openQrisModal({{ (int) $trx->total_price }}, '{{ $trx->transaksi_code }} - {{ addslashes($trx->customer_name) }}')"
+                                                        class="w-full px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                                                    <i class="fas fa-qrcode"></i> Scan Barcode QRIS
+                                                </button>
+                                            </div>
                                             <div class="mb-3">
                                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nominal Bayar (Rp)</label>
-                                                <input type="number" name="dibayar" placeholder="Contoh: {{ $trx->total_price }}" min="{{ $trx->total_price }}" required
+                                                <input type="number" name="dibayar" x-model.number="pickupBayar" :readonly="pickupMethod !== 'tunai'"
+                                                       placeholder="Contoh: {{ $trx->total_price }}" min="{{ $trx->total_price }}" required
                                                        class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-semibold text-slate-800 placeholder:text-slate-300">
                                             </div>
                                             @endif
@@ -514,6 +530,52 @@
                     <span>Kembalian</span>
                     <span class="text-sm font-bold text-emerald-600 font-sans" x-text="formatRupiah(changeAmount)"></span>
                 </div>
+            </div>
+
+            <!-- QRIS Payment Box (Connected) -->
+            <div x-show="paymentMethod === 'qris'" x-cloak class="p-3.5 bg-gradient-to-br from-indigo-50/80 to-blue-50/80 rounded-xl border border-indigo-200 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-extrabold rounded uppercase tracking-wider">QRIS</span>
+                        <span class="text-xs font-bold text-slate-800 truncate">{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY' }}</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-500">{{ $qrisConfig['nmid'] ?? '' }}</span>
+                </div>
+
+                <div class="bg-white rounded-xl p-3 border border-indigo-100 flex flex-col items-center text-center shadow-xs">
+                    <img :src="getQrisUrl(totalTagihan, selectedCustomer ? selectedCustomer.nama : 'POS')"
+                         alt="Barcode QRIS"
+                         @click="openQrisModal(totalTagihan, selectedCustomer ? selectedCustomer.nama : 'Pesanan POS')"
+                         class="w-36 h-36 object-contain cursor-pointer hover:scale-105 transition"
+                         title="Klik untuk memperbesar QRIS">
+                    <p class="text-[11px] font-bold text-slate-500 mt-2">Total Scan Bayar:</p>
+                    <p class="text-base font-extrabold text-brand-600 font-mono" x-text="formatRupiah(totalTagihan)"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button"
+                            @click="openQrisModal(totalTagihan, selectedCustomer ? selectedCustomer.nama : 'Pesanan POS')"
+                            class="py-1.5 px-2.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1">
+                        <i class="fas fa-expand"></i> Perbesar QR
+                    </button>
+                    <button type="button"
+                            @click="paymentStatus = 'lunas'"
+                            :class="paymentStatus === 'lunas' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
+                            class="py-1.5 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1">
+                        <i class="fas fa-check-circle"></i> <span x-text="paymentStatus === 'lunas' ? 'Sudah Lunas' : 'Set Lunas'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transfer Bank Info Box -->
+            <div x-show="paymentMethod === 'transfer'" x-cloak class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-university text-blue-600 mr-1"></i> Rekening Transfer</span>
+                    <button type="button" @click="paymentStatus = 'lunas'"
+                            :class="paymentStatus === 'lunas' ? 'text-emerald-600 font-bold' : 'text-blue-600 font-bold hover:underline'"
+                            class="text-[11px]" x-text="paymentStatus === 'lunas' ? '✓ Sudah Lunas' : 'Tandai Lunas'"></button>
+                </div>
+                <p class="text-xs font-bold text-slate-800 bg-white p-2.5 rounded-lg border border-slate-100">{{ $qrisConfig['bank_info'] ?? 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis' }}</p>
             </div>
 
             {{-- Petugas Kasir --}}
@@ -855,6 +917,53 @@
             </div>
         </div>
     </div>
+
+    {{-- ═══════════ MODAL SCAN QRIS LAYAR PENUH ═══════════ --}}
+    <div x-show="showQrisModal" x-cloak
+         class="fixed inset-0 z-[110] flex items-center justify-center modal-overlay"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div @click.outside="showQrisModal = false"
+             class="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden border border-slate-100 animate-fade-up">
+            <div class="bg-gradient-to-r from-rose-600 to-indigo-700 px-6 py-4 text-white flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">QRIS Pembayaran Digital</span>
+                    <h3 class="text-sm font-bold mt-1">{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS' }}</h3>
+                </div>
+                <button @click="showQrisModal = false" class="text-white/80 hover:text-white">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 flex flex-col items-center text-center">
+                <p class="text-xs font-semibold text-slate-500" x-text="qrisTitle"></p>
+                <p class="text-[11px] font-mono text-slate-400 mt-0.5">NMID: {{ $qrisConfig['nmid'] ?? 'ID1026000109281' }}</p>
+
+                <div class="my-4 p-4 bg-white border-2 border-dashed border-indigo-200 rounded-2xl shadow-inner">
+                    <img :src="getQrisUrl(qrisAmount, qrisTitle)" alt="Scan QRIS" class="w-56 h-56 object-contain mx-auto">
+                </div>
+
+                <div class="w-full bg-slate-50 rounded-xl p-3 border border-slate-200">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block">Nominal Pembayaran</span>
+                    <span class="text-xl font-extrabold text-slate-900 font-mono" x-text="formatRupiah(qrisAmount)"></span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-3">Scan menggunakan GoPay, OVO, DANA, ShopeePay, LinkAja, atau Mobile Banking (BCA, BRI, Mandiri, BJB, BSI).</p>
+            </div>
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex gap-2">
+                <button type="button" @click="paymentStatus = 'lunas'; showQrisModal = false"
+                        class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition">
+                    <i class="fas fa-check-circle mr-1"></i> Tandai Sudah Dibayar
+                </button>
+                <button type="button" @click="showQrisModal = false"
+                        class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -891,6 +1000,29 @@ function posApp() {
         showNotaModal: false,
         notaUrl: '',
         notaIframeRef: null,
+
+        // Modal QRIS state
+        showQrisModal: false,
+        qrisAmount: 0,
+        qrisTitle: '',
+        qrisStaticImage: @json($qrisConfig['qris_image'] ?? null),
+        qrisMerchant: @json($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'),
+        qrisNmid: @json($qrisConfig['nmid'] ?? 'ID1026000109281'),
+
+        openQrisModal(amount, title = 'Pembayaran Laundry') {
+            this.qrisAmount = Number(amount) || 0;
+            this.qrisTitle = title;
+            this.showQrisModal = true;
+        },
+
+        getQrisUrl(amount, ref = '') {
+            if (this.qrisStaticImage) {
+                return this.qrisStaticImage;
+            }
+            const amt = Math.round(Number(amount) || 0);
+            const payload = `QRIS:${this.qrisMerchant}|NMID:${this.qrisNmid}|AMOUNT:Rp${amt}|REF:${ref}`;
+            return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=${encodeURIComponent(payload)}`;
+        },
 
         // Modal Error/Notif state (Custom UI, non-javascript alert)
         showErrorModal: false,
