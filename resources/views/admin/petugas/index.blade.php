@@ -17,7 +17,7 @@
                     <p class="text-gray-500 text-sm">Total Petugas</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1" x-text="totalPetugas"></p>
                 </div>
-                <div class="bg-blue-100 p-3 rounded-xl"><i class="fas fa-users text-blue-600 text-xl"></i></div>
+                <div class="bg-blue-100 p-3 rounded-xl"><svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg></div>
             </div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
@@ -26,7 +26,7 @@
                     <p class="text-gray-500 text-sm">Tim Produksi</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1" x-text="timProduksi"></p>
                 </div>
-                <div class="bg-amber-100 p-3 rounded-xl"><i class="fas fa-tshirt text-amber-600 text-xl"></i></div>
+                <div class="bg-amber-100 p-3 rounded-xl"><svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 7l-2 3v10a1 1 0 001 1h12a1 1 0 001-1V10l-2-3M7 7a5 5 0 0110 0" /></svg></div>
             </div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
@@ -35,7 +35,7 @@
                     <p class="text-gray-500 text-sm">Kasir</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1" x-text="kasirKurir"></p>
                 </div>
-                <div class="bg-purple-100 p-3 rounded-xl"><i class="fas fa-user-cog text-purple-600 text-xl"></i></div>
+                <div class="bg-purple-100 p-3 rounded-xl"><svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
             </div>
         </div>
     </div>
@@ -43,7 +43,7 @@
     {{-- Search Bar --}}
     <div class="flex justify-end mb-6">
         <div class="relative w-full sm:w-64">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <svg class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input type="text" x-model="searchQuery" @input="currentPage = 1" placeholder="Cari nama petugas..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
     </div>
@@ -102,7 +102,7 @@
         {{-- Card Tambah Petugas --}}
         <div @click="openAddModal" class="bg-white rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all flex flex-col items-center justify-center p-6 cursor-pointer min-h-[220px] hover:shadow-md">
             <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-50">
-                <i class="fas fa-plus text-2xl text-gray-500"></i>
+                <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             </div>
             <p class="mt-3 font-medium text-gray-600">Tambah Petugas Baru</p>
             <p class="text-xs text-gray-400 mt-1">Klik untuk menambahkan</p>
@@ -113,11 +113,11 @@
     <div class="mt-8 flex flex-wrap justify-between items-center">
         <div class="text-sm text-gray-500" x-text="`Menampilkan ${startItem} - ${endItem} dari ${filteredData.length} petugas`"></div>
         <div class="flex space-x-2">
-            <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"><i class="fas fa-chevron-left"></i></button>
+            <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"><svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
             <template x-for="page in totalPages" :key="page">
                 <button @click="currentPage = page" :class="currentPage === page ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'" class="px-3 py-1 rounded-lg hover:bg-blue-50 transition" x-text="page"></button>
             </template>
-            <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"><i class="fas fa-chevron-right"></i></button>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"><svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg></button>
         </div>
     </div>
 

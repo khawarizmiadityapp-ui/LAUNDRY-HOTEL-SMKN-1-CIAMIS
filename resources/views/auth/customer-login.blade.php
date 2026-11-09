@@ -50,12 +50,12 @@
             
             <div class="relative z-10 grid grid-cols-2 gap-4 mt-12">
                 <div class="bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
-                    <div class="text-sky-400 mb-1"><i class="fa-solid fa-shirt"></i></div>
+                    <div class="text-sky-400 mb-1"><svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 7l-2 3v10a1 1 0 001 1h12a1 1 0 001-1V10l-2-3M7 7a5 5 0 0110 0" /></svg></div>
                     <div class="text-sm font-bold">Cuci & Lipat</div>
                     <div class="text-[10px] text-slate-400">Pakaian sehari-hari</div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
-                    <div class="text-sky-400 mb-1"><i class="fa-solid fa-hands-bubbles"></i></div>
+                    <div class="text-sky-400 mb-1"><svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg></div>
                     <div class="text-sm font-bold">Dry Clean</div>
                     <div class="text-[10px] text-slate-400">Perawatan premium</div>
                 </div>
@@ -81,20 +81,20 @@
                 <h2 class="text-3xl font-900 tracking-tight text-slate-900">Selamat Datang Kembali</h2>
                 <p class="text-slate-500 font-medium text-sm">Masuk untuk melanjutkan pesanan Anda dan melihat status pengerjaan.</p>
                 <div class="inline-block px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[11px] font-bold border border-amber-200 mt-2">
-                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Jika akun tidak terdaftar, wajib daftar terlebih dahulu.
+                    <svg class="w-3.5 h-3.5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Jika akun tidak terdaftar, wajib daftar terlebih dahulu.
                 </div>
             </div>
 
             @if(session('error'))
             <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-semibold">
-                <i class="fa-solid fa-circle-xmark"></i>
+                <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 {{ session('error') }}
             </div>
             @endif
 
             @if(session('success'))
             <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-sm font-semibold">
-                <i class="fa-solid fa-circle-check"></i>
+                <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 {{ session('success') }}
             </div>
             @endif
@@ -107,7 +107,7 @@
                     <label class="text-[11px] text-slate-500 font-bold uppercase tracking-widest ml-1">Alamat Email</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                             <i class="fa-solid fa-envelope text-slate-400"></i>
+                             <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                         </div>
                         <input type="email" name="email" value="{{ old('email') }}" required placeholder="Contoh: agus@mail.com" class="block w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all">
                     </div>
@@ -121,7 +121,7 @@
                     <label class="text-[11px] text-slate-500 font-bold uppercase tracking-widest ml-1">Kata Sandi</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                             <i class="fa-solid fa-lock text-slate-400"></i>
+                             <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                         </div>
                         <input type="password" name="password" required placeholder="••••••••" class="block w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all">
                     </div>

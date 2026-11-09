@@ -10,15 +10,15 @@
 <div class="flex items-center gap-2 border-b border-slate-200 mb-6">
     <a href="{{ route('admin.pengeluaran.index') }}"
        class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg transition flex items-center gap-2">
-        <i class="fas fa-receipt text-blue-600"></i> Pengeluaran Riil
+        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg> Pengeluaran Riil
     </a>
     <a href="{{ route('admin.pengajuan_belanja.index') }}"
-       class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-        <i class="fas fa-file-invoice-dollar mr-1.5 text-slate-400"></i> Pengajuan Belanja
+       class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+        <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Pengajuan Belanja
     </a>
     <a href="{{ route('admin.pengeluaran.bhp') }}"
-       class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-        <i class="fas fa-boxes mr-1.5 text-slate-400"></i> Laporan Barang Habis Pakai (BHP)
+       class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+        <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Laporan Barang Habis Pakai (BHP)
     </a>
 </div>
 

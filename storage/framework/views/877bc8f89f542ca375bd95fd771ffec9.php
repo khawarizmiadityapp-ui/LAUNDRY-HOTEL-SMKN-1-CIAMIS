@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk Customer - Bening Laundry</title>
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    fontWeight: { '800': '800', '900': '900' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full flex items-center justify-center p-4 antialiased text-slate-800">
+
+    <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden">
+        
+        
+        <div class="relative hidden md:flex flex-col justify-between p-12 bg-slate-900 text-white overflow-hidden">
+            
+            <div class="absolute top-0 right-0 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+            
+            <div class="relative z-10">
+                <a href="<?php echo e(url('/')); ?>" class="inline-flex items-center gap-3 mb-10">
+                    <img src="<?php echo e(asset('images/logo-bening.png')); ?>" alt="Logo Bening Laundry" class="w-10 h-10 object-contain rounded-xl drop-shadow-md">
+                    <span class="text-xl font-900 tracking-tight uppercase">Bening Laundry</span>
+                </a>
+                
+                <h1 class="text-4xl font-900 leading-tight tracking-tight mt-8">
+                    Kembali Segar.<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-400">Siap Dikenakan.</span>
+                </h1>
+                <p class="mt-4 text-slate-300 font-medium leading-relaxed max-w-sm">
+                    Layanan laundry premium kami menyajikan kebersihan maksimal dengan perlakuan eksklusif.
+                </p>
+            </div>
+            
+            <div class="relative z-10 grid grid-cols-2 gap-4 mt-12">
+                <div class="bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
+                    <div class="text-sky-400 mb-1"><svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 7l-2 3v10a1 1 0 001 1h12a1 1 0 001-1V10l-2-3M7 7a5 5 0 0110 0" /></svg></div>
+                    <div class="text-sm font-bold">Cuci & Lipat</div>
+                    <div class="text-[10px] text-slate-400">Pakaian sehari-hari</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
+                    <div class="text-sky-400 mb-1"><svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg></div>
+                    <div class="text-sm font-bold">Dry Clean</div>
+                    <div class="text-[10px] text-slate-400">Perawatan premium</div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white relative">
+            
+            
+            <div class="mb-10 block md:hidden">
+                <div class="inline-flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shadow-lg shadow-sky-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-900 tracking-tight uppercase text-slate-900">Bening</span>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-10">
+                <h2 class="text-3xl font-900 tracking-tight text-slate-900">Selamat Datang Kembali</h2>
+                <p class="text-slate-500 font-medium text-sm">Masuk untuk melanjutkan pesanan Anda dan melihat status pengerjaan.</p>
+                <div class="inline-block px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[11px] font-bold border border-amber-200 mt-2">
+                    <svg class="w-3.5 h-3.5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Jika akun tidak terdaftar, wajib daftar terlebih dahulu.
+                </div>
+            </div>
+
+            <?php if(session('error')): ?>
+            <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-semibold">
+                <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <?php echo e(session('error')); ?>
+
+            </div>
+            <?php endif; ?>
+
+            <?php if(session('success')): ?>
+            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-sm font-semibold">
+                <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <?php echo e(session('success')); ?>
+
+            </div>
+            <?php endif; ?>
+
+            <form action="<?php echo e(route('customer.login.post')); ?>" method="POST" class="space-y-6">
+                <?php echo csrf_field(); ?>
+                
+                
+                <div class="space-y-2">
+                    <label class="text-[11px] text-slate-500 font-bold uppercase tracking-widest ml-1">Alamat Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                             <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        </div>
+                        <input type="email" name="email" value="<?php echo e(old('email')); ?>" required placeholder="Contoh: agus@mail.com" class="block w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all">
+                    </div>
+                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="text-red-500 text-xs font-semibold mt-1 ml-1"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                
+                <div class="space-y-2">
+                    <label class="text-[11px] text-slate-500 font-bold uppercase tracking-widest ml-1">Kata Sandi</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                             <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                        <input type="password" name="password" required placeholder="••••••••" class="block w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-700 font-semibold placeholder-slate-300 focus:bg-white focus:border-sky-500/30 focus:ring-0 focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-xl shadow-slate-900/25 hover:bg-slate-800 hover:shadow-2xl hover:shadow-slate-900/40 hover:-translate-y-0.5 transition-all text-sm uppercase tracking-widest mt-2">
+                    Masuk Sekarang
+                </button>
+            </form>
+
+            <div class="mt-8 text-center bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <p class="text-sm font-medium text-slate-600">
+                    Belum punya akun? 
+                    <a href="<?php echo e(route('customer.register')); ?>" class="text-sky-500 font-bold hover:underline transition-all">Daftar Sekarang</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views\auth\customer-login.blade.php ENDPATH**/ ?>

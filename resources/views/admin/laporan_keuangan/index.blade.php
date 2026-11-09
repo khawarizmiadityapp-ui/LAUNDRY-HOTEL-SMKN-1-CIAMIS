@@ -81,10 +81,16 @@
 
                     <a href="{{ route('admin.laporan_keuangan.bku_pdf', request()->query()) }}" 
                        class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition text-sm">
-                        <i class="fas fa-book"></i> Cetak BKU (PDF)
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        <span>Cetak BKU (PDF)</span>
                     </a>
                     <button type="button" onclick="openExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition text-sm">
-                        <i class="fas fa-file-export"></i> Export Data
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <span>Export Data</span>
                     </button>
                 </div>
             </div>
@@ -122,7 +128,9 @@
 
                 </div>
                 <div class="bg-blue-100 p-3 rounded-xl">
-                    <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                    <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -135,7 +143,9 @@
 
                 </div>
                 <div class="bg-red-100 p-3 rounded-xl">
-                    <i class="fas fa-receipt text-red-600 text-xl"></i>
+                    <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -148,7 +158,10 @@
 
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                    <i class="fas fa-chart-pie text-white text-xl"></i>
+                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -160,7 +173,9 @@
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($piutang ?? 0, 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-orange-100 p-3 rounded-xl">
-                    <i class="fas fa-hand-holding-dollar text-orange-600 text-xl"></i>
+                    <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -172,7 +187,9 @@
                     <p class="text-3xl font-bold text-gray-800 mt-1">Rp {{ number_format($utang ?? 0, 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-purple-100 p-3 rounded-xl">
-                    <i class="fas fa-file-invoice-dollar text-purple-600 text-xl"></i>
+                    <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -184,14 +201,18 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
             <div>
                 <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-cash-register text-purple-600"></i>
-                    Rekapan Metode Pembayaran & Status Pelunasan
+                    <svg class="w-5 h-5 text-purple-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                    </svg>
+                    <span>Rekapan Metode Pembayaran & Status Pelunasan</span>
                 </h3>
                 <p class="text-xs text-gray-500 mt-0.5">Ringkasan penerimaan pembayaran berdasarkan metode (Tunai, QRIS, Transfer Bank) dan tagihan belum lunas pada periode terpilih.</p>
             </div>
             <a href="{{ route('admin.pembayaran.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
                 <span>Buka Manajemen Pembayaran</span>
-                <i class="fas fa-arrow-right"></i>
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
             </a>
         </div>
 
@@ -253,7 +274,9 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div class="flex items-center gap-3.5">
                 <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs shrink-0">
-                    <i class="fas fa-bullseye text-lg"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
+                    </svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2.5 flex-wrap">
@@ -275,12 +298,22 @@
             <div class="flex items-center gap-3 self-start md:self-auto">
                 <button onclick="document.getElementById('targetModal').classList.remove('hidden')" 
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 rounded-xl transition-all duration-200 shadow-2xs group">
-                    <i class="fas fa-edit text-blue-500 group-hover:scale-110 transition-transform"></i>
+                    <svg class="w-3.5 h-3.5 text-blue-500 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
                     <span>Edit Target</span>
                 </button>
 
                 <div class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-bold shadow-2xs {{ $persenTargetBulanIni >= 100 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200' }}">
-                    <i class="fas {{ $persenTargetBulanIni >= 100 ? 'fa-circle-check text-emerald-600' : 'fa-chart-line text-amber-600' }}"></i>
+                    @if($persenTargetBulanIni >= 100)
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    @else
+                        <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                        </svg>
+                    @endif
                     <span>{{ number_format($persenTargetBulanIni, 2) }}% Target</span>
                 </div>
             </div>
@@ -291,7 +324,9 @@
             <!-- Target Tahunan -->
             <div class="bg-gray-50/70 border border-gray-100 rounded-xl p-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
                 <div class="w-9 h-9 rounded-lg bg-white border border-gray-200/60 text-gray-600 flex items-center justify-center shadow-2xs shrink-0">
-                    <i class="fas fa-calendar-alt text-sm"></i>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Target Tahunan</p>
@@ -302,7 +337,9 @@
             <!-- Target Bulanan -->
             <div class="bg-indigo-50/40 border border-indigo-100/60 rounded-xl p-3.5 flex items-center gap-3 hover:bg-indigo-50/60 transition-colors">
                 <div class="w-9 h-9 rounded-lg bg-white border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-2xs shrink-0">
-                    <i class="fas fa-calendar-check text-sm"></i>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9 3.75h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                    </svg>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] uppercase tracking-wider font-semibold text-indigo-500">Target {{ $viewDate->translatedFormat('F') }}</p>
@@ -313,7 +350,9 @@
             <!-- Target Dasar Harian -->
             <div class="bg-blue-50/40 border border-blue-100/60 rounded-xl p-3.5 flex items-center gap-3 hover:bg-blue-50/60 transition-colors">
                 <div class="w-9 h-9 rounded-lg bg-white border border-blue-100 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
-                    <i class="fas fa-clock text-sm"></i>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] uppercase tracking-wider font-semibold text-blue-500">
@@ -349,8 +388,10 @@
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-5">
             <div>
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-calendar-day text-blue-600"></i>
-                    Laporan Keuangan & Target Harian (Bulan {{ $viewDate->translatedFormat('F Y') }})
+                    <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span>Laporan Keuangan & Target Harian (Bulan {{ $viewDate->translatedFormat('F Y') }})</span>
                 </h3>
                 <p class="text-sm text-gray-600 mt-1">Sistem pencatatan harian otomatis. Jika pemasukan minus/defisit, kekurangan target otomatis ditambahkan ke target hari berikutnya.</p>
             </div>
@@ -383,19 +424,23 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <span class="text-[11px] text-slate-400 block uppercase font-semibold">Skema Operasional</span>
-                        <span class="text-xs font-bold text-slate-700">
+                        <span class="text-xs font-bold text-slate-700 inline-flex items-center gap-1">
                             @if($workdaysMode === 'senin_jumat')
-                                <i class="fas fa-calendar-check text-blue-600 mr-1"></i> Senin - Jumat ({{ $activeWorkDaysCount }} Hari Kerja Aktif)
+                                <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>Senin - Jumat ({{ $activeWorkDaysCount }} Hari Kerja Aktif)</span>
                             @elseif($workdaysMode === 'senin_sabtu')
-                                <i class="fas fa-calendar-check text-indigo-600 mr-1"></i> Senin - Sabtu ({{ $activeWorkDaysCount }} Hari Kerja Aktif)
+                                <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>Senin - Sabtu ({{ $activeWorkDaysCount }} Hari Kerja Aktif)</span>
                             @elseif($workdaysMode === 'custom')
-                                <i class="fas fa-sliders-h text-amber-600 mr-1"></i> Custom ({{ $activeWorkDaysCount }} Hari Kerja)
+                                <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+                                <span>Custom ({{ $activeWorkDaysCount }} Hari Kerja)</span>
                             @else
-                                <i class="fas fa-calendar text-emerald-600 mr-1"></i> Setiap Hari ({{ $activeWorkDaysCount }} Hari Kalender)
+                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                                <span>Setiap Hari ({{ $activeWorkDaysCount }} Hari Kalender)</span>
                             @endif
                         </span>
                     </div>
-                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm
+                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm inline-flex items-center gap-1.5
                         @if(!$todayTarget->is_workday)
                             bg-slate-100 text-slate-600 border border-slate-200
                         @elseif($todayTarget->is_achieved)
@@ -406,11 +451,14 @@
                             bg-rose-100 text-rose-700 border border-rose-200
                         @endif">
                         @if(!$todayTarget->is_workday)
-                            <i class="fas fa-bed mr-1"></i> Non-Operasional
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                            <span>Non-Operasional</span>
                         @elseif($todayTarget->is_achieved)
-                            <i class="fas fa-check-circle mr-1"></i> Target Tercapai
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Target Tercapai</span>
                         @else
-                            <i class="fas fa-hourglass-half mr-1"></i> Belum Tercapai
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Belum Tercapai</span>
                         @endif
                     </span>
                 </div>
@@ -488,8 +536,10 @@
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3 no-print">
                 <div>
                     <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i class="fas fa-calendar-alt text-blue-600"></i>
-                        Rincian Target Harian 
+                        <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        <span>Rincian Target Harian</span>
                         <span class="text-blue-600 font-bold">
                             ({{ $targetRange === 'jan_to_now' ? 'Januari s/d ' . $viewDate->translatedFormat('F Y') : 'Bulan ' . $viewDate->translatedFormat('F Y') }})
                         </span>
@@ -505,22 +555,28 @@
 
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="text-xs font-bold text-slate-600 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-1.5">
-                        <i class="fas fa-briefcase text-slate-400"></i>
-                        {{ $totalHariKerjaAktif }} Hari Kerja ({{ $totalHariTercapai }} Tercapai)
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        <span>{{ $totalHariKerjaAktif }} Hari Kerja ({{ $totalHariTercapai }} Tercapai)</span>
                     </span>
 
                     {{-- Tombol Cetak Langsung (Print Dialog) --}}
                     <button type="button" onclick="window.print()" 
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-2xs transition hover:border-slate-300 cursor-pointer">
-                        <i class="fas fa-print text-blue-600"></i>
-                        Cetak Tabel
+                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656l10.5 0z" />
+                        </svg>
+                        <span>Cetak Tabel</span>
                     </button>
 
                     {{-- Tombol Export PDF Formal --}}
                     <a href="{{ route('admin.laporan_keuangan.target_harian_pdf', ['bulan' => $viewDate->format('Y-m'), 'target_range' => $targetRange, 'tahun' => $viewYear]) }}" 
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
-                        <i class="fas fa-file-pdf"></i>
-                        Export PDF
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <span>Export PDF</span>
                     </a>
                 </div>
             </div>
@@ -530,8 +586,11 @@
                 <div class="flex flex-wrap items-center gap-1.5">
                     {{-- Tab: Januari s/d Sekarang (Kumulatif) --}}
                     <a href="{{ route('admin.laporan_keuangan.index', ['filter' => 'bulanan', 'bulan' => $viewDate->format('Y-m'), 'target_range' => 'jan_to_now']) }}"
-                       class="px-3 py-1 text-xs font-bold rounded-lg border transition {{ $targetRange === 'jan_to_now' ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' }}">
-                        <i class="fas fa-layer-group mr-1"></i> Januari s/d {{ now()->translatedFormat('M Y') }} (Kumulatif)
+                       class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border transition {{ $targetRange === 'jan_to_now' ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' }}">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
+                        </svg>
+                        <span>Januari s/d {{ now()->translatedFormat('M Y') }} (Kumulatif)</span>
                     </a>
 
                     <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
@@ -734,9 +793,11 @@
         </div>
 
         <div class="mt-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-200/60 no-print">
-            <p class="text-xs text-slate-600 leading-relaxed">
-                <i class="fas fa-info-circle text-blue-600 mr-1.5"></i>
-                <strong>Sistem Carry-Forward Defisit & Hari Kerja Kustom:</strong> Target harian hanya dibebankan pada hari kerja aktif operasional (default: <strong>Senin s/d Jumat</strong>). Hari libur / akhir pekan berstatus non-operasional (Target Rp 0). Jika realisasi bersih harian mengalami defisit, defisit tersebut secara otomatis dialihkan dan ditambahkan ke target hari kerja aktif berikutnya.
+            <p class="text-xs text-slate-600 leading-relaxed flex items-start gap-1.5">
+                <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <span><strong>Sistem Carry-Forward Defisit & Hari Kerja Kustom:</strong> Target harian hanya dibebankan pada hari kerja aktif operasional (default: <strong>Senin s/d Jumat</strong>). Hari libur / akhir pekan berstatus non-operasional (Target Rp 0). Jika realisasi bersih harian mengalami defisit, defisit tersebut secara otomatis dialihkan dan ditambahkan ke target hari kerja aktif berikutnya.</span>
             </p>
         </div>
     </div>
@@ -752,7 +813,9 @@
                     <div class="bg-white px-6 pt-6 pb-4">
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                                <i class="fas fa-bullseye text-xl"></i>
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
+                                </svg>
                             </div>
                             <div class="w-full">
                                 <h3 class="text-base font-bold text-slate-900" id="modal-title">Konfigurasi Target & Jadwal Hari Kerja</h3>
@@ -848,8 +911,11 @@
                                         </div>
                                         <div class="flex items-center gap-1.5">
                                             <button type="button" onclick="distributeAnnualToMonths()" 
-                                                    class="text-[10px] font-bold text-blue-700 hover:text-blue-800 bg-white hover:bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs transition cursor-pointer">
-                                                <i class="fas fa-calculator mr-1"></i> Bagi Rata ke 12 Bulan
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800 bg-white hover:bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs transition cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25z" />
+                                                </svg>
+                                                <span>Bagi Rata ke 12 Bulan</span>
                                             </button>
                                         </div>
                                     </div>
@@ -974,8 +1040,11 @@
                                 {{-- Pengaturan Hari Libur / Tanggal Merah Tambahan --}}
                                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                                            <i class="fas fa-umbrella-beach text-amber-500 mr-1"></i> Jumlah Hari Libur Nasional / Cuti di Bulan Ini
+                                        <label class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                            </svg>
+                                            <span>Jumlah Hari Libur Nasional / Cuti di Bulan Ini</span>
                                         </label>
                                         <input type="number" name="holidays_count" id="holidaysCountInput" min="0" max="31" value="{{ $holidaysCount }}"
                                                onkeydown="preventNegative(event)" onpaste="preventPasteNegative(event)"
@@ -1022,7 +1091,10 @@
                         </button>
                         <button type="submit"
                                 class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
-                            <i class="fas fa-save"></i> Simpan Target & Jadwal
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                            <span>Simpan Target & Jadwal</span>
                         </button>
                     </div>
                 </form>
@@ -1409,7 +1481,12 @@
         <div class="space-y-6">
             <!-- Card Distribusi -->
             <div class="bg-white rounded-2xl shadow-md p-5">
-                <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-chart-simple text-blue-500"></i> Distribusi Pengeluaran</h3>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                    <span>Distribusi Pengeluaran</span>
+                </h3>
                 <div class="mt-4 space-y-4">
                     @forelse($distribusiPengeluaran as $item)
                     <div>
@@ -1430,7 +1507,11 @@
             <!-- Card Insight -->
             <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-100 rounded-2xl shadow-sm p-5">
                 <div class="flex gap-3">
-                    <div class="text-amber-600 text-xl"><i class="fas fa-lightbulb"></i></div>
+                    <div class="text-amber-600 shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.5a3 3 0 11-6 0 3 3 0 016 0zM12 2.25a6 6 0 00-6 6c0 1.944.928 3.673 2.368 4.776.452.347.882.904.882 1.474v.5h5.5v-.5c0-.57.43-1.127.882-1.474A6.002 6.002 0 0018 8.25a6 6 0 00-6-6z" />
+                        </svg>
+                    </div>
                     <div>
                         <h4 class="font-bold text-gray-800">Insight</h4>
                         <p class="text-sm text-gray-600 mt-1">Pengeluaran operasional meningkat 5% dari bulan lalu karena penambahan shift malam.</p>
@@ -1473,7 +1554,12 @@
     <div class="bg-white rounded-2xl shadow-md p-5">
         <div class="flex justify-between items-center flex-wrap mb-4">
             <h2 class="text-lg font-semibold text-gray-800">Detail Transaksi Terbaru</h2>
-            <a href="{{ route('admin.transactions.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">Lihat Semua Ledger <i class="fas fa-arrow-right text-xs"></i></a>
+            <a href="{{ route('admin.transactions.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
+                <span>Lihat Semua Ledger</span>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </a>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">

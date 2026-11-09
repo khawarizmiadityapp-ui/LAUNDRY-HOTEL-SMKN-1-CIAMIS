@@ -152,7 +152,7 @@
                         {{-- Tombol Detail --}}
                         <button type="button" @click="openDetail({{ $trx->id }})"
                                 class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
-                            <i class="fas fa-eye text-xs"></i> Detail
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Detail
                         </button>
 
                         {{-- Dropdown Actions --}}
@@ -168,7 +168,7 @@
                             <div id="dropdown-{{ $trx->id }}" class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 py-1.5">
                                 <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}'); toggleDropdown('dropdown-{{ $trx->id }}')"
                                    class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
-                                    <i class="fas fa-receipt text-slate-400"></i> Cek Nota / Struk
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg> Cek Nota / Struk
                                 </button>
 
                                 @if(auth()->user()->isAdmin())
@@ -179,7 +179,7 @@
                                     @csrf @method('DELETE')
                                     <button type="submit" 
                                             class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 w-full text-left transition">
-                                        <i class="fas fa-trash-alt text-rose-400"></i> Hapus Transaksi
+                                        <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg> Hapus Transaksi
                                     </button>
                                 </form>
                                 @endif
@@ -192,7 +192,7 @@
             @empty
             <tr>
                 <td colspan="8" class="text-center py-12 text-slate-400">
-                    <i class="fas fa-receipt text-3xl text-slate-300 block mb-2"></i>
+                    <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg>
                     Belum ada data transaksi ditemukan.
                 </td>
             </tr>
@@ -227,7 +227,7 @@
             <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
-                        <i class="fas fa-file-invoice text-lg"></i>
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
@@ -238,7 +238,7 @@
                     </div>
                 </div>
                 <button @click="showDetailModal = false" class="text-slate-400 hover:text-white transition">
-                    <i class="fas fa-times text-base"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
 
@@ -263,12 +263,12 @@
                 <div class="bg-white p-4 rounded-2xl border border-slate-200">
                     <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
                         <span class="font-bold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
-                            <i class="fas fa-user-circle text-blue-600"></i> Informasi Pelanggan
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Informasi Pelanggan
                         </span>
                         <template x-if="detailData?.wa_url">
                             <a :href="detailData?.wa_url" target="_blank"
                                class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-[11px] rounded-lg transition shadow-sm">
-                                <i class="fab fa-whatsapp"></i> Chat WhatsApp
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.993.582 1.942.872 2.796.872 3.181 0 5.768-2.586 5.768-5.766 0-3.181-2.587-5.759-5.768-5.759zm3.376 8.204c-.149.418-.752.766-1.042.812-.291.046-.66.082-2.18-.546-1.52-.628-2.502-2.179-2.576-2.278-.074-.099-.607-.808-.607-1.542 0-.734.385-1.096.522-1.245.137-.149.299-.186.398-.186.099 0 .199 0 .285.005.092.005.215-.035.337.257.123.292.42 1.026.457 1.101.037.075.062.162.012.261-.049.099-.074.161-.148.248-.075.087-.157.194-.224.26-.075.075-.153.156-.066.305.087.149.387.638.831 1.032.572.508 1.054.665 1.203.74.149.074.236.062.323-.037.087-.099.373-.434.472-.583.099-.149.199-.124.336-.074.137.05.869.41 1.018.484.149.074.248.112.285.174.037.062.037.36-.112.778zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.957-1.398A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> Chat WhatsApp
                             </a>
                         </template>
                     </div>
@@ -288,7 +288,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                     <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                         <span class="font-bold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
-                            <i class="fas fa-tshirt text-blue-600"></i> Rincian Layanan Laundry
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 7l-2 3v10a1 1 0 001 1h12a1 1 0 001-1V10l-2-3M7 7a5 5 0 0110 0" /></svg> Rincian Layanan Laundry
                         </span>
                         <span class="font-mono text-[11px] text-slate-500 font-semibold" x-text="'Total Berat: ' + detailData?.weight + ' kg'"></span>
                     </div>
@@ -320,7 +320,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-900 uppercase text-[11px] block pb-1 border-b border-slate-200">
-                            <i class="fas fa-credit-card text-blue-600 mr-1"></i> Rincian Pembayaran
+                            <svg class="w-4 h-4 text-blue-600 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg> Rincian Pembayaran
                         </span>
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-slate-500">Total Tagihan:</span>
@@ -342,7 +342,7 @@
 
                     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-900 uppercase text-[11px] block pb-1 border-b border-slate-200">
-                            <i class="fas fa-sticky-note text-amber-500 mr-1"></i> Catatan & Bukti Bayar
+                            <svg class="w-4 h-4 text-amber-500 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg> Catatan & Bukti Bayar
                         </span>
                         <div>
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold">Catatan Pesanan</span>
@@ -352,7 +352,7 @@
                             <div class="pt-2">
                                 <a :href="detailData?.bukti_pembayaran_url" target="_blank"
                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-sm text-xs">
-                                    <i class="fas fa-image"></i> Lihat Bukti Transfer
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> Lihat Bukti Transfer
                                 </a>
                             </div>
                         </template>
@@ -363,7 +363,7 @@
                 <template x-if="detailData?.tasks && detailData?.tasks.length > 0">
                     <div class="bg-white p-4 rounded-2xl border border-slate-200">
                         <span class="font-bold text-slate-900 uppercase text-[11px] block mb-3">
-                            <i class="fas fa-tasks text-blue-600 mr-1"></i> Tahapan Pengerjaan Petugas Piket
+                            <svg class="w-4 h-4 text-blue-600 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg> Tahapan Pengerjaan Petugas Piket
                         </span>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <template x-for="(task, tIdx) in detailData?.tasks" :key="tIdx">
@@ -392,13 +392,13 @@
                     <template x-if="detailData?.wa_url">
                         <a :href="detailData?.wa_url" target="_blank"
                            class="px-4 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl transition shadow-sm flex items-center gap-1.5 text-xs">
-                            <i class="fab fa-whatsapp"></i> Chat WhatsApp
+                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.993.582 1.942.872 2.796.872 3.181 0 5.768-2.586 5.768-5.766 0-3.181-2.587-5.759-5.768-5.759zm3.376 8.204c-.149.418-.752.766-1.042.812-.291.046-.66.082-2.18-.546-1.52-.628-2.502-2.179-2.576-2.278-.074-.099-.607-.808-.607-1.542 0-.734.385-1.096.522-1.245.137-.149.299-.186.398-.186.099 0 .199 0 .285.005.092.005.215-.035.337.257.123.292.42 1.026.457 1.101.037.075.062.162.012.261-.049.099-.074.161-.148.248-.075.087-.157.194-.224.26-.075.075-.153.156-.066.305.087.149.387.638.831 1.032.572.508 1.054.665 1.203.74.149.074.236.062.323-.037.087-.099.373-.434.472-.583.099-.149.199-.124.336-.074.137.05.869.41 1.018.484.149.074.248.112.285.174.037.062.037.36-.112.778zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.957-1.398A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> Chat WhatsApp
                         </a>
                     </template>
 
                     <button type="button" @click="openNota(detailData?.nota_url)"
                             class="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition shadow-sm flex items-center gap-1.5 text-xs">
-                        <i class="fas fa-print"></i> Cetak Struk / Nota
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Cetak Struk / Nota
                     </button>
                 </div>
             </div>
@@ -444,7 +444,7 @@
                 </button>
                 <button @click="printNota()"
                         class="px-5 py-2 bg-black text-white text-xs font-bold rounded-full hover:bg-slate-800 transition shadow-md flex items-center gap-1.5 active:scale-95">
-                    <i class="fas fa-print"></i> Cetak
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Cetak
                 </button>
                 <button @click="closeNotaModal()"
                         class="px-5 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition active:scale-95">

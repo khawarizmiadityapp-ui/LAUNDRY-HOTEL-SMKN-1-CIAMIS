@@ -11,7 +11,7 @@
         <p class="text-blue-100 text-sm font-medium mb-1">Pemasukan Hari Ini</p>
         <h2 class="text-3xl font-bold">Rp 1.250.000</h2>
         <div class="mt-4 flex items-center gap-2 text-sm text-blue-200">
-            <i class="fa-solid fa-arrow-trend-up"></i>
+            <svg class="w-4 h-4 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
             <span>+12% dari kemarin</span>
         </div>
     </div>
@@ -26,8 +26,8 @@
     <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-center items-center gap-3">
         <p class="text-slate-500 text-sm font-medium">Export Data</p>
         <div class="flex gap-2 w-full">
-            <button class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 text-sm font-medium"><i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> PDF</button>
-            <button class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 text-sm font-medium"><i class="fa-solid fa-file-excel text-green-600 mr-1"></i> Excel</button>
+            <button class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 text-sm font-medium inline-flex items-center justify-center gap-1"><svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> PDF</button>
+            <button class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 text-sm font-medium inline-flex items-center justify-center gap-1"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Excel</button>
         </div>
     </div>
 </div>

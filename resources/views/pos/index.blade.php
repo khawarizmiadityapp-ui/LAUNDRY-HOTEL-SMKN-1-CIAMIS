@@ -363,7 +363,7 @@
                                             <div class="mb-2" x-show="pickupMethod === 'qris'" x-cloak>
                                                 <button type="button" @click="openQrisModal({{ (int) $trx->total_price }}, '{{ $trx->transaksi_code }} - {{ addslashes($trx->customer_name) }}')"
                                                         class="w-full px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                                                    <i class="fas fa-qrcode"></i> Scan Barcode QRIS
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> Scan Barcode QRIS
                                                 </button>
                                             </div>
                                             <div class="mb-3">
@@ -556,13 +556,13 @@
                     <button type="button"
                             @click="openQrisModal(totalTagihan, selectedCustomer ? selectedCustomer.nama : 'Pesanan POS')"
                             class="py-1.5 px-2.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1">
-                        <i class="fas fa-expand"></i> Perbesar QR
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg> Perbesar QR
                     </button>
                     <button type="button"
                             @click="paymentStatus = 'lunas'"
                             :class="paymentStatus === 'lunas' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
                             class="py-1.5 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1">
-                        <i class="fas fa-check-circle"></i> <span x-text="paymentStatus === 'lunas' ? 'Sudah Lunas' : 'Set Lunas'"></span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> <span x-text="paymentStatus === 'lunas' ? 'Sudah Lunas' : 'Set Lunas'"></span>
                     </button>
                 </div>
             </div>
@@ -570,7 +570,7 @@
             <!-- Transfer Bank Info Box -->
             <div x-show="paymentMethod === 'transfer'" x-cloak class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-university text-blue-600 mr-1"></i> Rekening Transfer</span>
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> Rekening Transfer</span>
                     <button type="button" @click="paymentStatus = 'lunas'"
                             :class="paymentStatus === 'lunas' ? 'text-emerald-600 font-bold' : 'text-blue-600 font-bold hover:underline'"
                             class="text-[11px]" x-text="paymentStatus === 'lunas' ? '✓ Sudah Lunas' : 'Tandai Lunas'"></button>
@@ -935,7 +935,7 @@
                     <h3 class="text-sm font-bold mt-1">{{ $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS' }}</h3>
                 </div>
                 <button @click="showQrisModal = false" class="text-white/80 hover:text-white">
-                    <i class="fas fa-times text-lg"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             <div class="p-6 flex flex-col items-center text-center">
@@ -954,8 +954,8 @@
             </div>
             <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex gap-2">
                 <button type="button" @click="paymentStatus = 'lunas'; showQrisModal = false"
-                        class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition">
-                    <i class="fas fa-check-circle mr-1"></i> Tandai Sudah Dibayar
+                        class="inline-flex items-center justify-center flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition">
+                    <svg class="w-4 h-4 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Tandai Sudah Dibayar
                 </button>
                 <button type="button" @click="showQrisModal = false"
                         class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">

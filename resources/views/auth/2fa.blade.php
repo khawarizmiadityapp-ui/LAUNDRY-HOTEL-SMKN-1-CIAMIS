@@ -76,7 +76,7 @@
             <div class="mb-5">
                 <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">PILIH METODE VERIFIKASI:</p>
                 <div class="w-full py-3 px-4 rounded-2xl bg-white border-2 border-blue-600 shadow-xs flex items-center justify-center gap-2.5 text-blue-700 font-bold text-sm cursor-default">
-                    <i class="fa-solid fa-mobile-screen-button text-base text-blue-600"></i>
+                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                     <span>1. Authenticator (QR)</span>
                 </div>
             </div>
@@ -84,7 +84,7 @@
             <!-- Error / Alert Message -->
             @if(session('error'))
             <div class="mb-5 p-3.5 bg-rose-50 border-l-4 border-rose-500 rounded-r-xl text-rose-700 text-sm flex items-center gap-2.5">
-                <i class="fa-solid fa-circle-exclamation text-base shrink-0"></i>
+                <svg class="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <span class="font-medium text-xs sm:text-sm">{{ session('error') }}</span>
             </div>
             @endif
@@ -99,7 +99,7 @@
                             <img src="{{ $qrCodeUrl }}" alt="QR Code Google Authenticator" class="w-32 h-32 sm:w-36 sm:h-36 object-contain rounded-lg">
                         </div>
                         <span class="text-[11px] text-blue-600 font-semibold mt-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera text-[10px]"></i> Scan dari HP Anda
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg> Scan dari HP Anda
                         </span>
                     </div>
 
@@ -121,8 +121,8 @@
                                         {{ $formattedSecret }}
                                     </div>
                                     <button type="button" onclick="copySecretKey('{{ $rawSecret }}', this)" 
-                                            class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition shrink-0 active:scale-95">
-                                        <i class="fa-regular fa-copy mr-1"></i> Salin
+                                            class="inline-flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition shrink-0 active:scale-95">
+                                        <svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Salin
                                     </button>
                                 </div>
                             </div>
@@ -158,7 +158,7 @@
                 <!-- Footer Countdown & Info -->
                 <div class="flex items-center justify-between text-xs text-slate-500 pt-0.5">
                     <div class="flex items-center gap-1.5 font-medium">
-                        <i class="fa-regular fa-clock text-blue-600"></i>
+                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <span>Batas Sesi: <strong id="countdown" class="text-blue-700 font-mono font-bold">02:00</strong></span>
                     </div>
                     <span class="text-slate-400 italic text-[11px]">Verifikasi otomatis saat 6 digit terisi</span>
@@ -168,14 +168,14 @@
                 <div class="pt-2 flex items-center justify-between gap-3">
                     <a href="{{ route('login') }}" 
                        onclick="event.preventDefault(); document.getElementById('cancelForm').submit();"
-                       class="text-xs font-semibold text-slate-500 hover:text-slate-800 transition py-2 px-1">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Batal / Login Kembali
+                       class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-800 transition py-2 px-1">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Batal / Login Kembali
                     </a>
                     
                     <button type="submit" id="submitBtn"
                             class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold rounded-2xl transition shadow-md shadow-blue-600/25 text-xs sm:text-sm flex items-center gap-2">
                         <span>Verifikasi & Masuk</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     </button>
                 </div>
             </form>
@@ -270,7 +270,7 @@
         function copySecretKey(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> Tersalin!';
+                btn.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Tersalin!';
                 btn.classList.add('bg-emerald-50', 'text-emerald-700');
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;

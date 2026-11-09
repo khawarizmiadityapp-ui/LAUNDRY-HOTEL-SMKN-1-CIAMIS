@@ -10,16 +10,16 @@
     {{-- ===== SUB-NAVIGATION TABS ===== --}}
     <div class="flex items-center gap-2 border-b border-slate-200 mb-6">
         <a href="{{ route('admin.pengeluaran.index') }}"
-           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-            <i class="fas fa-receipt mr-1.5 text-slate-400"></i> Pengeluaran Riil
+           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+            <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg> Pengeluaran Riil
         </a>
         <a href="{{ route('admin.pengajuan_belanja.index') }}"
-           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-            <i class="fas fa-file-invoice-dollar mr-1.5 text-slate-400"></i> Pengajuan Belanja
+           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+            <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Pengajuan Belanja
         </a>
         <a href="{{ route('admin.pengeluaran.bhp') }}"
            class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg transition flex items-center gap-2">
-            <i class="fas fa-boxes text-blue-600"></i> Laporan Barang Habis Pakai (BHP)
+            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Laporan Barang Habis Pakai (BHP)
             @if($itemKritisCount > 0)
                 <span class="px-2 py-0.5 text-[10px] font-bold bg-rose-500 text-white rounded-full animate-pulse">{{ $itemKritisCount }} Kritis</span>
             @endif
@@ -36,7 +36,7 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">Deterjen, pewangi, plastik, dll</p>
             </div>
             <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
-                <i class="fas fa-pump-soap text-xl"></i>
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">Botol / Sachet / Pcs</p>
             </div>
             <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
-                <i class="fas fa-cubes text-xl"></i>
+                <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             </div>
         </div>
 
@@ -60,7 +60,7 @@
                 <p class="text-[11px] text-rose-500/80 mt-0.5">{{ $itemKritisCount }} habis, {{ $itemMenipisCount }} menipis</p>
             </div>
             <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 shadow-sm">
-                <i class="fas fa-exclamation-triangle text-xl"></i>
+                <svg class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">{{ now()->translatedFormat('F Y') }}</p>
             </div>
             <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
-                <i class="fas fa-shopping-cart text-xl"></i>
+                <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
             </div>
         </div>
     </div>
@@ -82,7 +82,7 @@
         <form action="{{ route('admin.pengeluaran.bhp') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div class="relative w-full sm:w-64">
                 <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fas fa-search text-xs"></i>
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </span>
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari nama barang habis pakai..."
@@ -113,12 +113,12 @@
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.pengeluaran.bhp.pdf', request()->query()) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl shadow-md transition-all active:scale-95">
-                <i class="fas fa-file-pdf text-rose-400"></i>
+                <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                 Cetak Laporan BHP (PDF)
             </a>
             <a href="{{ route('admin.pengajuan_belanja.create') }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md transition-all active:scale-95">
-                <i class="fas fa-cart-plus"></i>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0zm5-9V7m-3 3h6" /></svg>
                 Ajukan Belanja BHP
             </a>
         </div>
@@ -200,7 +200,7 @@
                             </div>
                             @if($item->unit_of_measurement !== 'pcs' && $item->stock_subunits > 0)
                                 <div class="text-[11px] text-blue-600 font-medium mt-0.5">
-                                    <i class="fas fa-tint text-[9px] mr-1"></i>+{{ $item->stock_subunits }} {{ $item->unit_of_measurement }} (kemasan terbuka)
+                                    <span class="inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-blue-500 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>+{{ $item->stock_subunits }} {{ $item->unit_of_measurement }} (kemasan terbuka)</span>
                                 </div>
                             @endif
                             <div class="w-28 bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
@@ -218,7 +218,7 @@
                     @empty
                     <tr>
                         <td colspan="7" class="px-6 py-12 text-center text-slate-400">
-                            <i class="fas fa-boxes text-3xl mb-3 text-slate-300 block"></i>
+                            <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                             Belum ada data barang habis pakai.
                         </td>
                     </tr>

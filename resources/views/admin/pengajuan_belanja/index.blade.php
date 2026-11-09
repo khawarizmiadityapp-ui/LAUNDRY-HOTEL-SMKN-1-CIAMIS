@@ -10,19 +10,19 @@
     {{-- ===== SUB-NAVIGATION TABS ===== --}}
     <div class="flex items-center gap-2 border-b border-slate-200 mb-6">
         <a href="{{ route('admin.pengeluaran.index') }}"
-           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-            <i class="fas fa-receipt mr-1.5 text-slate-400"></i> Pengeluaran Riil
+           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+            <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg> Pengeluaran Riil
         </a>
         <a href="{{ route('admin.pengajuan_belanja.index') }}"
            class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg transition flex items-center gap-2">
-            <i class="fas fa-file-invoice-dollar text-blue-600"></i> Pengajuan Belanja
+            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Pengajuan Belanja
             @if($menungguApproval > 0)
                 <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full animate-pulse">{{ $menungguApproval }}</span>
             @endif
         </a>
         <a href="{{ route('admin.pengeluaran.bhp') }}"
-           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
-            <i class="fas fa-boxes mr-1.5 text-slate-400"></i> Laporan Barang Habis Pakai (BHP)
+           class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition inline-flex items-center">
+            <svg class="w-4 h-4 mr-1.5 inline-block text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Laporan Barang Habis Pakai (BHP)
         </a>
     </div>
 
@@ -36,7 +36,7 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">Semua riwayat pengajuan</p>
             </div>
             <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
-                <i class="fas fa-clipboard-list text-xl"></i>
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
                 <p class="text-[11px] text-amber-500/80 mt-0.5">Perlu ditinjau admin</p>
             </div>
             <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm">
-                <i class="fas fa-clock text-xl"></i>
+                <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
         </div>
 
@@ -60,7 +60,7 @@
                 <p class="text-[11px] text-blue-400 mt-0.5">Siap direalisasikan</p>
             </div>
             <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
-                <i class="fas fa-check-circle text-xl"></i>
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">Periode {{ now()->translatedFormat('F Y') }}</p>
             </div>
             <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
-                <i class="fas fa-coins text-xl"></i>
+                <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
         </div>
     </div>
@@ -82,7 +82,7 @@
         <form action="{{ route('admin.pengajuan_belanja.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div class="relative w-full sm:w-64">
                 <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fas fa-search text-xs"></i>
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </span>
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari kode, nama pengajuan..."
@@ -113,7 +113,7 @@
 
         <a href="{{ route('admin.pengajuan_belanja.create') }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md transition-all active:scale-95">
-            <i class="fas fa-plus"></i>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Buat Formulir Pengajuan Belanja
         </a>
     </div>
@@ -141,7 +141,7 @@
                             <div class="font-mono font-bold text-blue-600 text-xs">{{ $item->kode_pengajuan }}</div>
                             <div class="text-xs text-slate-400 mt-0.5">{{ $item->tanggal_pengajuan->format('d M Y') }}</div>
                             <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                                <i class="fas fa-user text-[9px] text-slate-400"></i> {{ $item->user->name ?? 'Petugas' }}
+                                <svg class="w-3 h-3 text-slate-400 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> {{ $item->user->name ?? 'Petugas' }}
                             </div>
                         </td>
 
@@ -152,7 +152,7 @@
                             @if($item->lampiran)
                                 <a href="{{ asset('storage/' . $item->lampiran) }}" target="_blank"
                                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline mt-1">
-                                    <i class="fas fa-paperclip text-[10px]"></i> Lihat Lampiran
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg> Lihat Lampiran
                                 </a>
                             @endif
                         </td>
@@ -180,8 +180,8 @@
                                 {{ $item->status_badge['label'] }}
                             </span>
                             @if($item->status === 'selesai' && $item->pengeluaran)
-                                <div class="text-[10px] text-emerald-600 font-mono font-medium mt-1">
-                                    <i class="fas fa-link text-[9px]"></i> {{ $item->pengeluaran->id_transaksi }}
+                                <div class="text-[10px] text-emerald-600 font-mono font-medium mt-1 flex items-center gap-1">
+                                    <svg class="w-2.5 h-2.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg> {{ $item->pengeluaran->id_transaksi }}
                                 </div>
                             @endif
                         </td>
@@ -191,29 +191,29 @@
                             <div class="flex items-center justify-end gap-2">
                                 {{-- Tombol Detail --}}
                                 <button @click="openDetail({{ $item->id }})"
-                                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition"
+                                        class="inline-flex items-center px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition"
                                         title="Detail Pengajuan">
-                                    <i class="fas fa-eye mr-1"></i> Detail
+                                    <svg class="w-3.5 h-3.5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Detail
                                 </button>
 
                                 {{-- Export PDF --}}
                                 <a href="{{ route('admin.pengajuan_belanja.export_pdf', $item->id) }}" target="_blank"
-                                   class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-lg transition"
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-lg transition"
                                    title="Download PDF">
-                                    <i class="fas fa-file-pdf"></i>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                                 </a>
 
                                 {{-- Jika Status: diajukan -> Approval Buttons (Admin) --}}
                                 @if($item->status === 'diajukan' && auth()->user()->isAdmin())
                                     <button @click="openApproveModal({{ $item->id }}, '{{ $item->kode_pengajuan }}', '{{ $item->nama_pengajuan }}')"
-                                            class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+                                            class="inline-flex items-center px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
                                             title="Setujui Pengajuan">
-                                        <i class="fas fa-check mr-1"></i> Setujui
+                                        <svg class="w-3.5 h-3.5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Setujui
                                     </button>
                                     <button @click="openRejectModal({{ $item->id }}, '{{ $item->kode_pengajuan }}', '{{ $item->nama_pengajuan }}')"
-                                            class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-lg transition"
+                                            class="inline-flex items-center px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-lg transition"
                                             title="Tolak Pengajuan">
-                                        <i class="fas fa-times mr-1"></i> Tolak
+                                        <svg class="w-3.5 h-3.5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> Tolak
                                     </button>
                                 @endif
 
@@ -221,7 +221,7 @@
                                 @if($item->status === 'disetujui')
                                     <button @click="openConvertModal({{ $item->id }}, '{{ $item->kode_pengajuan }}', '{{ $item->nama_pengajuan }}', {{ $item->estimasi_biaya }})"
                                             class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
-                                        <i class="fas fa-wallet"></i> Realisasikan
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg> Realisasikan
                                     </button>
                                 @endif
 
@@ -232,7 +232,7 @@
                                           class="inline-block">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 transition" title="Hapus">
-                                            <i class="fas fa-trash-alt text-xs"></i>
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
                                     </form>
                                 @endif
@@ -242,7 +242,7 @@
                     @empty
                     <tr>
                         <td colspan="7" class="px-6 py-12 text-center text-slate-400">
-                            <i class="fas fa-clipboard-list text-3xl mb-3 text-slate-300 block"></i>
+                            <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                             Belum ada formulir pengajuan belanja ditemukan.
                         </td>
                     </tr>
@@ -272,11 +272,11 @@
              class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-slate-100 animate-fade-up">
             <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-file-invoice text-blue-400"></i>
+                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     <h3 class="text-sm font-bold tracking-wide uppercase">Rincian Pengajuan Belanja</h3>
                 </div>
                 <button @click="showDetailModal = false" class="text-slate-400 hover:text-white transition">
-                    <i class="fas fa-times"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
 
@@ -324,12 +324,12 @@
                 <template x-if="detailData?.lampiran_url">
                     <div class="p-3 bg-blue-50/60 border border-blue-100 rounded-xl flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-file-alt text-blue-600"></i>
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                             <span class="text-xs font-semibold text-blue-900">Lampiran Dokumen / Bon</span>
                         </div>
                         <a :href="detailData?.lampiran_url" target="_blank"
-                           class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm">
-                            <i class="fas fa-external-link-alt mr-1 text-[10px]"></i> Buka File
+                           class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm">
+                            <svg class="w-3 h-3 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg> Buka File
                         </a>
                     </div>
                 </template>
@@ -337,7 +337,7 @@
                 <template x-if="detailData?.catatan_approval">
                     <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl">
                         <span class="text-[11px] font-bold text-amber-800 uppercase flex items-center gap-1">
-                            <i class="fas fa-info-circle"></i> Catatan Penyetuju (<span x-text="detailData?.approver"></span>)
+                            <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Catatan Penyetuju (<span x-text="detailData?.approver"></span>)
                         </span>
                         <p class="text-xs text-amber-900 mt-1" x-text="detailData?.catatan_approval"></p>
                     </div>
@@ -348,7 +348,7 @@
                 <template x-if="detailData?.id">
                     <a :href="'/admin/pengajuan-belanja/' + detailData.id + '/export-pdf'" target="_blank"
                        class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
-                        <i class="fas fa-file-pdf"></i> Download PDF
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Download PDF
                     </a>
                 </template>
                 <button type="button" @click="showDetailModal = false"
@@ -370,7 +370,7 @@
                 <input type="hidden" name="status" value="disetujui">
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                        <i class="fas fa-check-circle text-2xl"></i>
+                        <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <h3 class="text-lg font-bold text-slate-900">Setujui Pengajuan Belanja</h3>
                     <p class="text-xs text-slate-500 mt-1">Anda akan menyetujui pengajuan <span class="font-bold text-blue-600" x-text="modalKode"></span> (<span x-text="modalNama"></span>).</p>
@@ -400,7 +400,7 @@
                 <input type="hidden" name="status" value="ditolak">
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
-                        <i class="fas fa-times-circle text-2xl"></i>
+                        <svg class="w-7 h-7 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <h3 class="text-lg font-bold text-slate-900">Tolak Pengajuan Belanja</h3>
                     <p class="text-xs text-slate-500 mt-1">Pengajuan <span class="font-bold text-slate-800" x-text="modalKode"></span> akan ditolak.</p>
@@ -429,7 +429,7 @@
                 <div class="p-6 space-y-4">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
-                            <i class="fas fa-cash-register text-xl"></i>
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-900">Realisasi ke Pengeluaran Riil</h3>
@@ -466,7 +466,7 @@
                 <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
                     <button type="button" @click="showConvertModal = false" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition">Batal</button>
                     <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition flex items-center gap-1.5">
-                        <i class="fas fa-check"></i> Simpan ke Pengeluaran
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Simpan ke Pengeluaran
                     </button>
                 </div>
             </form>

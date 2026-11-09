@@ -1,0 +1,591 @@
+<?php $__env->startSection('title', 'Inventory Management'); ?>
+
+<?php $__env->startPush('styles'); ?>
+<style>
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up   { animation: fadeSlideUp .5s ease both; }
+    .delay-1   { animation-delay: .08s; }
+    .delay-2   { animation-delay: .16s; }
+    .delay-3   { animation-delay: .24s; }
+    .delay-4   { animation-delay: .32s; }
+    .progress-bar { transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+</style>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
+    <!-- Header -->
+    <div class="mb-8 fade-up flex justify-between items-end">
+        <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-100 text-[10px] font-bold tracking-widest text-blue-500 uppercase mb-3">
+                Inventaris Kecil
+            </span>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Supply Management</h1>
+            <p class="mt-1.5 text-sm text-slate-400 max-w-lg leading-relaxed">
+                Curated list of essential laundry supplies. Monitor detergent levels and scent reserves with high-precision conductors.
+            </p>
+        </div>
+        <button onclick="document.getElementById('add-item-modal').classList.remove('hidden')" class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition font-bold text-sm h-full flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Barang
+        </button>
+    </div>
+
+    <?php if(isset($pendingRequests) && $pendingRequests->isNotEmpty()): ?>
+    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-amber-800 uppercase tracking-wider">Permintaan Konfirmasi Stok</h2>
+            <span class="text-xs font-semibold text-amber-700"><?php echo e($pendingRequests->count()); ?> pending</span>
+        </div>
+        <div class="space-y-3">
+            <?php $__currentLoopData = $pendingRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $requestItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="bg-white border border-amber-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold text-slate-800"><?php echo e($requestItem->inventory->name ?? 'Item'); ?>
+
+                        <span class="text-xs text-slate-500">(<?php echo e($requestItem->adjustment > 0 ? '+' : ''); ?><?php echo e($requestItem->adjustment); ?>)</span>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">Diminta oleh: <?php echo e($requestItem->requester->name ?? '-'); ?> • <?php echo e($requestItem->created_at->diffForHumans()); ?></p>
+                    <?php if($requestItem->reason): ?>
+                        <p class="text-xs text-slate-500">Alasan: <?php echo e($requestItem->reason); ?></p>
+                    <?php endif; ?>
+                </div>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="<?php echo e(route('admin.inventory.request.approve', $requestItem->id)); ?>">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Setujui</button>
+                    </form>
+                    <form method="POST" action="<?php echo e(route('admin.inventory.request.reject', $requestItem->id)); ?>">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 text-white text-xs font-semibold">Tolak</button>
+                    </form>
+                </div>
+            </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- 3-column grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+        <!-- ── 2-col content ── -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Premium Detergents -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 fade-up delay-1">
+                <div class="flex items-start justify-between mb-5">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg uppercase tracking-tight">Premium Detergents</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Active wash agents and surfactants</p>
+                    </div>
+                </div>
+
+                <!-- Product cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <?php $__currentLoopData = $detergents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative">
+                        <div class="relative bg-gradient-to-br <?php echo e($loop->index % 2 == 0 ? 'from-cyan-50 via-teal-50 to-sky-50' : 'from-blue-50 via-sky-50 to-indigo-50'); ?> h-44 flex items-center justify-center p-4">
+                            <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                                <button type="button" onclick="openEditModal(<?php echo e(json_encode($item)); ?>)" title="Edit Barang" class="w-8 h-8 rounded-full bg-white/80 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center shadow-sm transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <form method="POST" action="<?php echo e(route('admin.inventory.destroy', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
+                                    <button type="submit" title="Hapus Barang" class="w-8 h-8 rounded-full bg-white/80 hover:bg-red-100 text-slate-400 hover:text-red-500 flex items-center justify-center shadow-sm transition-colors">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                            <?php if($item->stock_units < $item->minimum_stock): ?>
+                            <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-red-50 border border-red-200 text-red-500 shadow-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                                Low Stock
+                            </span>
+                            <?php endif; ?>
+                            <!-- Bottle SVG -->
+                            <svg viewBox="0 0 80 130" class="h-32 drop-shadow-lg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="28" y="1" width="24" height="13" rx="5" fill="<?php echo e($loop->index % 2 == 0 ? '#67e8f9' : '#93c5fd'); ?>" opacity=".8"/>
+                                <rect x="22" y="12" width="36" height="7" rx="4" fill="<?php echo e($loop->index % 2 == 0 ? '#22d3ee' : '#60a5fa'); ?>"/>
+                                <rect x="12" y="17" width="56" height="92" rx="16" fill="url(#grad-<?php echo e($item->id); ?>)"/>
+                                <rect x="16" y="21" width="48" height="84" rx="12" fill="url(#grad-inner-<?php echo e($item->id); ?>)" opacity=".6"/>
+                                <ellipse cx="32" cy="46" rx="7" ry="7" fill="white" opacity=".25"/>
+                                <ellipse cx="50" cy="38" rx="4" ry="4" fill="white" opacity=".15"/>
+                                <defs>
+                                    <linearGradient id="grad-<?php echo e($item->id); ?>" x1="12" y1="17" x2="68" y2="109" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="<?php echo e($loop->index % 2 == 0 ? '#22d3ee' : '#3b82f6'); ?>"/>
+                                        <stop offset="1" stop-color="<?php echo e($loop->index % 2 == 0 ? '#0891b2' : '#1d4ed8'); ?>"/>
+                                    </linearGradient>
+                                    <linearGradient id="grad-inner-<?php echo e($item->id); ?>" x1="16" y1="21" x2="64" y2="105" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="<?php echo e($loop->index % 2 == 0 ? '#a5f3fc' : '#bfdbfe'); ?>"/>
+                                        <stop offset="1" stop-color="<?php echo e($loop->index % 2 == 0 ? '#06b6d4' : '#3b82f6'); ?>" stop-opacity=".5"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div class="px-4 pt-3 pb-4">
+                            <p class="text-[9px] font-bold tracking-widest text-blue-400 uppercase mb-0.5"><?php echo e($item->type ?? 'Liquid'); ?></p>
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-base leading-snug"><?php echo e($item->name); ?></h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">Industrial Grade Formula</p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <?php if($item->unit_of_measurement === 'pcs' || $item->capacity_per_unit <= 1): ?>
+                                        <span class="text-xl font-bold text-slate-800" id="qty<?php echo e($item->id); ?>"><?php echo e($item->stock_units); ?></span>
+                                        <span class="text-xs text-slate-400 ml-0.5"><?php echo e($item->unit_type); ?></span>
+                                    <?php else: ?>
+                                        <span class="text-xl font-bold text-slate-800" id="qty<?php echo e($item->id); ?>"><?php echo e($item->stock_units); ?></span>
+                                        <span class="text-xs text-slate-400 ml-0.5"><?php echo e($item->unit_type); ?></span>
+                                        <p class="text-[10px] text-slate-500 font-semibold mt-0.5">+<?php echo e(number_format($item->stock_subunits)); ?> <?php echo e($item->unit_of_measurement); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 mt-3">
+                                <button onclick="updateQty(<?php echo e($item->id); ?>, 'decrement')"
+                                        class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">−</button>
+                                <span class="min-w-[2rem] text-center font-semibold text-slate-700 text-sm" id="qty-disp-<?php echo e($item->id); ?>"><?php echo e($item->stock_units); ?></span>
+                                <button onclick="updateQty(<?php echo e($item->id); ?>, 'increment')"
+                                        class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+
+            <!-- Fragrance Library -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 fade-up delay-2">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg uppercase tracking-tight">Fragrance Library</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Signature olfactory profiles for finished loads</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <?php $__currentLoopData = $fragrances; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
+                        $colors = [
+                            ['bg' => 'bg-green-100',  'text' => 'text-green-500',  'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+                            ['bg' => 'bg-blue-100',   'text' => 'text-blue-500',   'icon' => 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z'],
+                            ['bg' => 'bg-orange-100', 'text' => 'text-orange-400', 'icon' => 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z'],
+                            ['bg' => 'bg-slate-100',  'text' => 'text-slate-400',  'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                        ];
+                        $style = $colors[$loop->index % 4];
+                    ?>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 relative">
+                        <div class="absolute top-3 right-3 z-10 flex items-center gap-1">
+                            <button type="button" onclick="openEditModal(<?php echo e(json_encode($item)); ?>)" title="Edit Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <form method="POST" action="<?php echo e(route('admin.inventory.destroy', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl <?php echo e($style['bg']); ?> flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 <?php echo e($style['text']); ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="<?php echo e($style['icon']); ?>"/>
+                            </svg>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm leading-snug"><?php echo e($item->name); ?></h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 leading-tight"><?php echo e($item->type ?? 'Concentrated Oil'); ?></p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <button onclick="updateQty(<?php echo e($item->id); ?>, 'decrement')" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-xs font-bold transition-colors">−</button>
+                            <span class="text-sm font-mono font-semibold text-slate-700 min-w-[1.75rem] text-center" id="qty<?php echo e($item->id); ?>"><?php echo e(str_pad($item->stock_units, 2, '0', STR_PAD_LEFT)); ?></span>
+                            <button onclick="updateQty(<?php echo e($item->id); ?>, 'increment')" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-xs font-bold transition-colors">+</button>
+                        </div>
+                        <?php if($item->unit_of_measurement !== 'pcs' && $item->capacity_per_unit > 1): ?>
+                            <p class="text-[9px] text-slate-400 mt-1 font-semibold">+<?php echo e(number_format($item->stock_subunits)); ?> <?php echo e($item->unit_of_measurement); ?> aktif</p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+
+            <?php if(isset($otherItems) && $otherItems->isNotEmpty()): ?>
+            <!-- Other Supplies & Packaging -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 fade-up delay-3">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg uppercase tracking-tight">Perlengkapan Lainnya & Packaging</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Plastik packing, label, dan perlengkapan operasional lainnya</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <?php $__currentLoopData = $otherItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 relative">
+                        <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                            <button type="button" onclick="openEditModal(<?php echo e(json_encode($item)); ?>)" title="Edit Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <form method="POST" action="<?php echo e(route('admin.inventory.destroy', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase mb-2">
+                            <?php echo e($item->category); ?>
+
+                        </span>
+                        <h4 class="font-bold text-slate-800 text-base leading-snug"><?php echo e($item->name); ?></h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Kemasan: <?php echo e($item->unit_type); ?> <?php if($item->unit_type !== 'pcs'): ?> (<?php echo e($item->capacity_per_unit); ?> <?php echo e($item->unit_of_measurement); ?>) <?php endif; ?></p>
+                        
+                        <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+                            <div>
+                                <span class="text-xl font-bold text-slate-800" id="qty<?php echo e($item->id); ?>"><?php echo e($item->stock_units); ?></span>
+                                <span class="text-xs text-slate-400 ml-0.5"><?php echo e($item->unit_type); ?></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateQty(<?php echo e($item->id); ?>, 'decrement')" class="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">−</button>
+                                <span class="min-w-[1.75rem] text-center font-semibold text-slate-700 text-sm" id="qty-disp-<?php echo e($item->id); ?>"><?php echo e($item->stock_units); ?></span>
+                                <button onclick="updateQty(<?php echo e($item->id); ?>, 'increment')" class="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-lg text-sm transition-colors">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- ── RIGHT PANEL ── -->
+        <div class="space-y-4 fade-up delay-3">
+
+            <!-- Inventory Health -->
+            <div class="bg-gradient-to-br from-brand-600 to-brand-400 rounded-2xl p-5 shadow-lg shadow-brand-200 relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full pointer-events-none"></div>
+                <div class="absolute -bottom-8 -left-4 w-24 h-24 bg-white/5 rounded-full pointer-events-none"></div>
+
+                <h2 class="text-white font-display text-base mb-4 relative z-10">Inventory Health</h2>
+
+                <div class="space-y-3.5 relative z-10">
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-medium text-brand-100">Total Stock Units</span>
+                            <span class="text-xs font-bold text-white"><?php echo e(number_format($totalItems)); ?></span>
+                        </div>
+                        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div class="h-full bg-white rounded-full progress-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-medium text-brand-100">Low Stock Markers</span>
+                            <span class="text-xs font-bold text-white"><?php echo e($lowStock); ?> Items</span>
+                        </div>
+                        <?php
+                            $health = $totalItems > 0 ? max(0, 100 - (($lowStock / max(1, count($detergents)+count($fragrances)+count($hangers))) * 100)) : 100;
+                        ?>
+                        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div class="h-full <?php echo e($health < 50 ? 'bg-rose-300' : ($health < 80 ? 'bg-amber-300' : 'bg-emerald-300')); ?> rounded-full progress-bar" style="width: <?php echo e($health); ?>%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="relative z-10 mt-5 w-full bg-white text-brand-600 font-semibold text-sm py-2.5 rounded-xl hover:bg-brand-50 transition-colors shadow-sm">
+                    Supply Report
+                </button>
+            </div>
+
+            <!-- Essential Hangers -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 fade-up delay-4">
+                <h3 class="text-[9.5px] font-bold tracking-widest text-slate-400 uppercase mb-4">Essential Hangers</h3>
+                <div class="space-y-3">
+                    <?php $__currentLoopData = $hangers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3a2 2 0 100 4m0-4a2 2 0 110 4m0 0v2m0 0L4 19h16L12 9z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-700 leading-tight"><?php echo e($item->name); ?></p>
+                                <p class="text-xs text-slate-400">Qty: <span id="qty<?php echo e($item->id); ?>"><?php echo e(number_format($item->stock_units)); ?></span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <button onclick="updateQty(<?php echo e($item->id); ?>, 'increment')" title="Tambah Stok" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-colors flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </button>
+                            <button type="button" onclick="openEditModal(<?php echo e(json_encode($item)); ?>)" title="Edit Barang" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <form method="POST" action="<?php echo e(route('admin.inventory.destroy', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menghapus hanger ini?');">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
+                                <button type="submit" title="Hapus Barang" class="w-7 h-7 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-colors flex-shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- Add Item Modal -->
+<div id="add-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Tambah Barang Baru</h3>
+            <button onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form action="<?php echo e(route('admin.inventory.store')); ?>" method="POST" class="p-6 space-y-4">
+            <?php echo csrf_field(); ?>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="detergent">Detergent</option>
+                        <option value="fragrance">Pewangi</option>
+                        <option value="hanger">Hanger</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="unit_type_select" onchange="toggleUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="capacity_input" required min="1" value="1000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="subunits_input" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Awal (Unit)</label>
+                    <input type="number" name="quantity" required min="0" value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
+                    <input type="number" name="minimum_stock" required min="0" value="5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">Simpan Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div id="edit-item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in mx-4">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800">Edit Data Barang</h3>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form id="edit-item-form" action="" method="POST" class="p-6 space-y-4">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Barang</label>
+                <input type="text" name="name" id="edit_name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kategori</label>
+                    <select name="category" id="edit_category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="detergent">Detergent</option>
+                        <option value="fragrance">Pewangi</option>
+                        <option value="hanger">Hanger</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jenis Kemasan</label>
+                    <select name="unit_type" id="edit_unit_type" onchange="toggleEditUnitFields(this.value)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                        <option value="botol">Botol (Cair/Liquid)</option>
+                        <option value="sachet">Sachet (Bubuk/Cair)</option>
+                        <option value="pcs">Pcs (Satuan Tunggal)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="edit_capacity_fields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kapasitas Per Unit (ml)</label>
+                    <input type="number" name="capacity_per_unit" id="edit_capacity_input" required min="1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Isi Aktif Kemasan 1 (ml)</label>
+                    <input type="number" name="stock_subunits" id="edit_subunits_input" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jumlah Stok (Unit)</label>
+                    <input type="number" name="quantity" id="edit_quantity" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Stok Minimum (Unit)</label>
+                    <input type="number" name="minimum_stock" id="edit_minimum_stock" required min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">Perbarui Barang</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+function toggleUnitFields(val) {
+    const capacityFields = document.getElementById('capacity_fields');
+    const capacityInput = document.getElementById('capacity_input');
+    const subunitsInput = document.getElementById('subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+        capacityInput.value = 1;
+        subunitsInput.value = 0;
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else {
+            capacityInput.value = 1000;
+        }
+    }
+}
+
+function openEditModal(item) {
+    const form = document.getElementById('edit-item-form');
+    let updateUrl = "<?php echo e(route('admin.inventory.update_item', ':id')); ?>";
+    form.action = updateUrl.replace(':id', item.id);
+
+    document.getElementById('edit_name').value = item.name || '';
+    document.getElementById('edit_category').value = (item.category || '').toLowerCase();
+    document.getElementById('edit_unit_type').value = item.unit_type || 'botol';
+    document.getElementById('edit_capacity_input').value = item.capacity_per_unit || 1000;
+    document.getElementById('edit_subunits_input').value = item.stock_subunits || 0;
+    document.getElementById('edit_quantity').value = item.stock_units ?? item.quantity ?? 0;
+    document.getElementById('edit_minimum_stock').value = item.minimum_stock ?? 5;
+
+    toggleEditUnitFields(item.unit_type || 'botol');
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+}
+
+function toggleEditUnitFields(val) {
+    const capacityFields = document.getElementById('edit_capacity_fields');
+    const capacityInput = document.getElementById('edit_capacity_input');
+    const subunitsInput = document.getElementById('edit_subunits_input');
+    
+    if (val === 'pcs') {
+        capacityFields.classList.add('hidden');
+        capacityInput.removeAttribute('required');
+        subunitsInput.removeAttribute('required');
+        capacityInput.value = 1;
+        subunitsInput.value = 0;
+    } else {
+        capacityFields.classList.remove('hidden');
+        capacityInput.setAttribute('required', '');
+        subunitsInput.setAttribute('required', '');
+        if (val === 'sachet') {
+            capacityInput.value = 20;
+        } else if (val === 'botol' && (!capacityInput.value || capacityInput.value == 1)) {
+            capacityInput.value = 1000;
+        }
+    }
+}
+
+function updateQty(id, type) {
+    let url = "<?php echo e(route('admin.inventory.update', ['id' => ':id'])); ?>";
+    url = url.replace(':id', id);
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "<?php echo e(csrf_token()); ?>"
+        },
+        body: JSON.stringify({ type: type })
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => {
+                throw new Error(err.message || 'Gagal memperbarui stok');
+            });
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const el = document.getElementById('qty' + id);
+            const elDisp = document.getElementById('qty-disp-' + id);
+
+            if (el) {
+                if (el.classList.contains('font-mono')) {
+                    el.innerText = String(data.qty).padStart(2, '0');
+                } else {
+                    el.innerText = data.qty;
+                }
+            }
+            if (elDisp) elDisp.innerText = data.qty;
+        } else {
+            alert(data.message || 'Gagal memperbarui stok');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'Terjadi kesalahan saat memperbarui stok');
+    });
+}
+</script>
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views\admin\inventory\index.blade.php ENDPATH**/ ?>

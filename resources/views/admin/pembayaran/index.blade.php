@@ -16,16 +16,25 @@
             {{-- Tab Switcher --}}
             <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto">
                 <a href="{{ route('admin.pembayaran.index', ['tab' => 'daftar']) }}"
-                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'daftar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                    <i class="fas fa-list mr-1"></i> Daftar Transaksi
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'daftar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm0 5.25h.007v.008H3.75V12zm0 5.25h.007v.008H3.75v-.008z" />
+                    </svg>
+                    <span>Daftar Transaksi</span>
                 </a>
                 <a href="{{ route('admin.pembayaran.index', ['tab' => 'harian']) }}"
-                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'harian' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                    <i class="fas fa-calendar-day mr-1"></i> Rekapan Harian
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'harian' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span>Rekapan Harian</span>
                 </a>
                 <a href="{{ route('admin.pembayaran.index', ['tab' => 'bulanan']) }}"
-                   class="px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'bulanan' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                    <i class="fas fa-calendar-alt mr-1"></i> Rekapan Bulanan
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition {{ $tab === 'bulanan' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9 3.75h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                    </svg>
+                    <span>Rekapan Bulanan</span>
                 </a>
             </div>
         </div>
@@ -44,7 +53,9 @@
                             <p class="text-xl font-bold text-slate-900 mt-1">Rp {{ number_format($totalPendapatanHariIni, 0, ',', '.') }}</p>
                         </div>
                         <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                            <i class="fas fa-wallet text-sm"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+                            </svg>
                         </span>
                     </div>
                     <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2 flex justify-between">
@@ -61,7 +72,9 @@
                             <p class="text-xl font-bold text-emerald-600 mt-1">Rp {{ number_format($rekapHariIni['tunai_nominal'] ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                            <i class="fas fa-money-bill-wave text-sm"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                            </svg>
                         </span>
                     </div>
                     <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
@@ -77,7 +90,10 @@
                             <p class="text-xl font-bold text-indigo-600 mt-1">Rp {{ number_format($rekapHariIni['qris_nominal'] ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                            <i class="fas fa-qrcode text-sm"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.008v.008H6.75V6.75zm0 9.75h.008v.008H6.75v-.008zm9.75-9.75h.008v.008H16.5V6.75zM13.5 13.5h3v3h-3v-3zm3 3h3v3h-3v-3zm-3 3h3v3h-3v-3zm3-6h3v3h-3v-3z" />
+                            </svg>
                         </span>
                     </div>
                     <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
@@ -93,7 +109,9 @@
                             <p class="text-xl font-bold text-purple-600 mt-1">Rp {{ number_format($rekapHariIni['transfer_nominal'] ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                            <i class="fas fa-university text-sm"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.5H4.5V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                            </svg>
                         </span>
                     </div>
                     <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2">
@@ -109,7 +127,9 @@
                             <p class="text-xl font-bold text-rose-600 mt-1">Rp {{ number_format($nominalBelumLunas ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                            <i class="fas fa-clock text-sm"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                         </span>
                     </div>
                     <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
@@ -163,7 +183,9 @@
                     @if(request('metode')) <input type="hidden" name="metode" value="{{ request('metode') }}"> @endif
                     <div class="relative w-64">
                         <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                            <i class="fas fa-search text-xs"></i>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
                         </span>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari pelanggan / kode..."
@@ -197,7 +219,7 @@
                                     <div class="font-bold text-slate-900">{{ $trx->customer_name }}</div>
                                     <div class="text-xs text-slate-500 mt-0.5">
                                         @if($trx->details && $trx->details->count() > 0)
-                                            {{ $trx->details->map(fn($d) => ($d->layanan->nama ?? 'Layanan') . ' (' . $d->qty . 'x)')->join(', ') }}
+                                             {{ $trx->details->map(fn($d) => ($d->layanan->nama ?? 'Layanan') . ' (' . $d->qty . 'x)')->join(', ') }}
                                         @else
                                             {{ ucfirst($trx->service_type) }} - {{ $trx->weight }} kg
                                         @endif
@@ -216,12 +238,18 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($trx->payment_status == 'lunas')
-                                        <span class="px-2.5 py-1 inline-flex text-xs font-bold rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            <i class="fas fa-check-circle mr-1 mt-0.5"></i> Lunas
+                                        <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs font-bold rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                            <span>Lunas</span>
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-1 inline-flex text-xs font-bold rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
-                                            <i class="fas fa-hourglass-half mr-1 mt-0.5"></i> Belum Lunas
+                                        <span class="px-2.5 py-1 inline-flex items-center gap-1 text-xs font-bold rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
+                                            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span>Belum Lunas</span>
                                         </span>
                                     @endif
                                 </td>
@@ -242,8 +270,10 @@
                                             <button type="button" 
                                                     onclick="openPaymentModal('{{ $trx->transaksi_code }}', {{ $trx->total_price }}); document.getElementById('dropdown-bayar-{{ $trx->id }}').classList.add('hidden')"
                                                     class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors">
-                                                <i class="fas fa-cash-register w-4 text-blue-500"></i>
-                                                Bayar Transaksi
+                                                <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                                                </svg>
+                                                <span>Bayar Transaksi</span>
                                             </button>
                                             <div class="h-px bg-slate-100 my-1"></div>
                                             @endif
@@ -251,8 +281,10 @@
                                             <button type="button" 
                                                     @click="openNota('{{ route('pos.nota', $trx->id) }}'); document.getElementById('dropdown-bayar-{{ $trx->id }}').classList.add('hidden')"
                                                     class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
-                                                <i class="fas fa-receipt w-4 text-slate-400"></i>
-                                                Cetak Struk / Nota
+                                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                                </svg>
+                                                <span>Cetak Struk / Nota</span>
                                             </button>
                                         </div>
                                     </div>
@@ -287,7 +319,10 @@
 
                 <a href="{{ route('admin.pembayaran.rekap_harian.pdf', ['tanggal' => $tanggalHarian]) }}"
                    class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl shadow-md transition active:scale-95">
-                    <i class="fas fa-file-pdf text-rose-400"></i> Cetak Rekapan Harian (PDF)
+                    <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span>Cetak Rekapan Harian (PDF)</span>
                 </a>
             </div>
 
@@ -324,7 +359,9 @@
             <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
                 <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-credit-card text-indigo-600"></i>
+                        <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
                         <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rekapan Metode Pembayaran &amp; Status Pelunasan ({{ \Carbon\Carbon::parse($tanggalHarian)->translatedFormat('d F Y') }})</h2>
                     </div>
                 </div>
@@ -381,7 +418,7 @@
             <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
                 <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-chart-pie text-blue-600"></i>
+                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                         <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rincian Performa Jenis Pelayanan (Hari Ini)</h2>
                     </div>
                 </div>
@@ -466,8 +503,8 @@
                                 </td>
                                 <td class="px-6 py-3 whitespace-nowrap text-right">
                                     <button type="button" @click="openNota('{{ route('pos.nota', $trx->id) }}')"
-                                            class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
-                                        <i class="fas fa-receipt mr-1 text-slate-400"></i> Nota
+                                            class="inline-flex items-center px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+                                        <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8h4a1 1 0 011 1v0a1 1 0 01-1 1h-4a1 1 0 01-1-1v0a1 1 0 011-1z" /></svg> Nota
                                     </button>
                                 </td>
                             </tr>
@@ -508,7 +545,7 @@
 
                 <a href="{{ route('admin.pembayaran.rekap_bulanan.pdf', ['bulan' => $bulanBulanan, 'tahun' => $tahunBulanan]) }}"
                    class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl shadow-md transition active:scale-95">
-                    <i class="fas fa-file-pdf text-rose-400"></i> Cetak Rekapan Bulanan (PDF)
+                    <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Cetak Rekapan Bulanan (PDF)
                 </a>
             </div>
 
@@ -545,7 +582,7 @@
             <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-8">
                 <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-wallet text-indigo-600"></i>
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                         <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Rekapan Metode Pembayaran Bulanan ({{ \Carbon\Carbon::create($tahunBulanan, $bulanBulanan, 1)->translatedFormat('F Y') }})</h2>
                     </div>
                 </div>
@@ -709,7 +746,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-base font-bold text-slate-900">Proses Pelunasan Pembayaran</h3>
                 <button onclick="closePaymentModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fas fa-times"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             <form id="paymentForm" action="{{ route('admin.pembayaran.store') }}" method="POST" enctype="multipart/form-data">
@@ -763,7 +800,7 @@
 
                 {{-- Info Rekening Saat Pilih Transfer --}}
                 <div id="modal_transfer_box" class="hidden mb-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
-                    <span class="font-bold text-slate-500 uppercase text-[10px] block mb-1"><i class="fas fa-university text-blue-600 mr-1"></i> Info Rekening Tujuan:</span>
+                    <span class="font-bold text-slate-500 uppercase text-[10px] flex items-center gap-1 mb-1"><svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> Info Rekening Tujuan:</span>
                     <span class="font-bold text-slate-900">{{ $qrisConfig['bank_info'] ?? 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis' }}</span>
                 </div>
 
@@ -776,7 +813,7 @@
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closePaymentModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-xs font-bold transition">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
-                        <i class="fas fa-check"></i> Proses Pelunasan
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Proses Pelunasan
                     </button>
                 </div>
             </form>
@@ -795,11 +832,11 @@
         <div @click.outside="closeNotaModal()" class="bg-white shadow-2xl w-full max-w-[400px] mx-4 animate-fade-up overflow-hidden rounded-2xl flex flex-col h-[85vh]">
             <div class="px-5 py-4 flex items-center justify-between bg-[#0b172a] text-white shrink-0">
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-receipt text-emerald-400"></i>
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg>
                     <h3 class="font-bold text-xs tracking-widest uppercase">STRUK NOTA / INVOICE TRANSAKSI</h3>
                 </div>
                 <button @click="closeNotaModal()" class="text-slate-400 hover:text-white transition">
-                    <i class="fas fa-times"></i>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             
@@ -812,11 +849,11 @@
             <div class="px-5 py-3.5 border-t border-slate-100 flex gap-2 justify-center bg-white shrink-0">
                 <button @click="kirimWa()"
                         class="px-4 py-2 bg-[#25D366] text-white text-xs font-bold rounded-full hover:bg-[#128C7E] transition shadow-sm flex items-center gap-1.5 active:scale-95">
-                    <i class="fab fa-whatsapp"></i> WA
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.993.582 1.942.872 2.796.872 3.181 0 5.768-2.586 5.768-5.766 0-3.181-2.587-5.759-5.768-5.759zm3.376 8.204c-.149.418-.752.766-1.042.812-.291.046-.66.082-2.18-.546-1.52-.628-2.502-2.179-2.576-2.278-.074-.099-.607-.808-.607-1.542 0-.734.385-1.096.522-1.245.137-.149.299-.186.398-.186.099 0 .199 0 .285.005.092.005.215-.035.337.257.123.292.42 1.026.457 1.101.037.075.062.162.012.261-.049.099-.074.161-.148.248-.075.087-.157.194-.224.26-.075.075-.153.156-.066.305.087.149.387.638.831 1.032.572.508 1.054.665 1.203.74.149.074.236.062.323-.037.087-.099.373-.434.472-.583.099-.149.199-.124.336-.074.137.05.869.41 1.018.484.149.074.248.112.285.174.037.062.037.36-.112.778zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.957-1.398A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> WA
                 </button>
                 <button @click="printNota()"
                         class="px-5 py-2 bg-black text-white text-xs font-bold rounded-full hover:bg-slate-800 transition shadow-sm flex items-center gap-1.5 active:scale-95">
-                    <i class="fas fa-print"></i> Cetak
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Cetak
                 </button>
                 <button @click="closeNotaModal()"
                         class="px-5 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition active:scale-95">

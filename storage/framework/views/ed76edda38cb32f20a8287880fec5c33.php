@@ -94,7 +94,7 @@
                 <!-- Divider Konfigurasi QRIS & Pembayaran Non-Tunai -->
                 <div class="pt-4 border-t border-slate-100">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fas fa-qrcode text-brand-600"></i> Konfigurasi Pembayaran QRIS & Transfer
+                        <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> Konfigurasi Pembayaran QRIS & Transfer
                     </h3>
 
                     <div class="space-y-4">
@@ -166,12 +166,12 @@
                     </div>
                     <div class="text-center sm:text-left min-w-0 flex-1">
                         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-extrabold uppercase tracking-wider border border-rose-200 mb-1">
-                            <i class="fas fa-qrcode"></i> QRIS CONNECTED
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> QRIS CONNECTED
                         </div>
                         <p class="text-sm font-extrabold text-slate-900 truncate"><?php echo e($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'); ?></p>
                         <p class="text-xs font-mono text-slate-500 mt-0.5">NMID: <?php echo e($qrisConfig['nmid'] ?? 'ID1026000109281'); ?></p>
-                        <p class="text-[11px] text-slate-500 mt-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
-                            <i class="fas fa-university text-blue-600 mr-1"></i> <?php echo e($qrisConfig['bank_info'] ?? '-'); ?>
+                        <p class="text-[11px] text-slate-500 mt-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> <?php echo e($qrisConfig['bank_info'] ?? '-'); ?>
 
                         </p>
                     </div>
@@ -362,15 +362,15 @@
             </div>
             <div class="flex items-center gap-2.5 flex-wrap">
                 <button type="button" onclick="openCreateUserModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition shadow-sm active:scale-95">
-                    <i class="fa-solid fa-user-plus text-white"></i>
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                     <span>Tambah Pengguna</span>
                 </button>
                 <button type="button" onclick="openQrModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition shadow-2xs">
-                    <i class="fa-solid fa-qrcode text-purple-600"></i>
+                    <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     <span>QR 2FA <?php echo e(auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin'); ?></span>
                 </button>
                 <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
-                    <i class="fa-solid fa-shield-halved text-amber-600"></i>
+                    <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     <span>2FA Aktif</span>
                 </span>
             </div>
@@ -416,7 +416,7 @@
                             <?php if($userItem->isSuperAdmin()): ?>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
-                                    <i class="fa-solid fa-crown text-[10px]"></i>
+                                    <svg class="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
                                     Super Admin
                                 </span>
                             <?php elseif($userItem->role === 'admin'): ?>
@@ -604,12 +604,12 @@
                             Kode OTP Authenticator <span class="text-rose-500">*</span>
                         </label>
                         <button type="button" onclick="openQrModal()" class="text-xs text-blue-700 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline">
-                            <i class="fa-solid fa-qrcode"></i> Lihat QR
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> Lihat QR
                         </button>
                     </div>
                     <div class="relative rounded-xl shadow-2xs">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-500">
-                            <i class="fa-solid fa-key text-xs"></i>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                         </div>
                         <input type="text" name="otp" id="otp" required maxlength="6" inputmode="numeric" pattern="[0-9]*"
                                class="w-full pl-9 pr-4 py-2.5 bg-white border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 font-mono font-bold tracking-widest text-base placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
@@ -641,7 +641,7 @@
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <i class="fa-solid fa-shield-halved text-base"></i>
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 leading-tight">Google Authenticator 2FA</h3>
@@ -661,7 +661,7 @@
                         <img src="<?php echo e($adminQrCodeUrl); ?>" alt="QR 2FA Admin" class="w-40 h-40 object-contain rounded-lg">
                     </div>
                     <span class="text-xs text-blue-700 font-semibold flex items-center gap-1.5 mt-1">
-                        <i class="fa-solid fa-camera"></i> Scan dengan Google Authenticator di HP
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg> Scan dengan Google Authenticator di HP
                     </span>
                 </div>
 
@@ -675,8 +675,8 @@
 
                         </div>
                         <button type="button" onclick="copyAdminSecret('<?php echo e($adminRawSecret); ?>', this)" 
-                                class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition shrink-0 active:scale-95">
-                            <i class="fa-regular fa-copy mr-1"></i> Salin
+                                class="inline-flex items-center px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition shrink-0 active:scale-95">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Salin
                         </button>
                     </div>
                     <p class="text-[11px] text-slate-400 mt-1.5">
@@ -699,7 +699,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-                        <i class="fa-solid fa-user-plus text-sm"></i>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-slate-800">Tambah Akun Pengguna</h3>
@@ -892,7 +892,7 @@
         function copyAdminSecret(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 const orig = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> Tersalin!';
+                btn.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Tersalin!';
                 btn.classList.add('bg-emerald-50', 'text-emerald-700');
                 setTimeout(() => {
                     btn.innerHTML = orig;
@@ -908,4 +908,4 @@
 
 
 
-<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views/admin/settings.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views\admin\settings.blade.php ENDPATH**/ ?>

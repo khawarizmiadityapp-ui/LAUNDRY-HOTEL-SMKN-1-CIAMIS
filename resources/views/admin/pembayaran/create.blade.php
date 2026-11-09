@@ -11,7 +11,10 @@
             <p class="text-gray-500 text-sm mt-1">Catat pembayaran dari pelanggan untuk transaksi laundry</p>
         </div>
         <a href="{{ route('admin.pembayaran.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 transition">
-            <i class="fas fa-arrow-left"></i> Kembali
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <span>Kembali</span>
         </a>
     </div>
 
@@ -35,7 +38,10 @@
                 <!-- SECTION 1: PILIH TRANSAKSI -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-receipt text-blue-600"></i> Pilih Transaksi
+                        <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <span>Pilih Transaksi</span>
                     </h3>
                     
                     <!-- Search Transaksi -->
@@ -46,7 +52,9 @@
                                    id="searchTransaksi" 
                                    placeholder="Cari berdasarkan ID Transaksi atau Nama Pelanggan..."
                                    class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <i class="fas fa-search absolute left-3 top-4 text-gray-400"></i>
+                            <svg class="w-4 h-4 absolute left-3 top-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
                         </div>
                     </div>
 
@@ -76,8 +84,10 @@
                             </div>
                         </label>
                         @empty
-                        <div class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">
-                            <i class="fas fa-inbox text-3xl mb-2"></i>
+                        <div class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg flex flex-col items-center">
+                            <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.375v-6.75a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v6.75m-19.5 0A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25m-19.5 0v.243a2.25 2.25 0 011.07 1.916l-1.07-2.159z" />
+                            </svg>
                             <p>Tidak ada transaksi yang belum lunas</p>
                         </div>
                         @endforelse
@@ -89,7 +99,10 @@
                 <!-- SECTION 2: DETAIL PEMBAYARAN -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-money-bill-wave text-green-600"></i> Detail Pembayaran
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                        </svg>
+                        <span>Detail Pembayaran</span>
                     </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -155,7 +168,12 @@
                         <!-- Info Rekening Transfer -->
                         <div class="md:col-span-2" x-show="metodePembayaran.startsWith('Transfer')" x-cloak>
                             <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900">
-                                <p class="font-bold uppercase tracking-wider mb-1"><i class="fas fa-university mr-1"></i> Rekening Tujuan Transfer:</p>
+                                <p class="font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.5H4.5V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                                    </svg>
+                                    <span>Rekening Tujuan Transfer:</span>
+                                </p>
                                 <p class="font-mono font-semibold">{{ $qrisConfig['bank_transfer_info'] }}</p>
                             </div>
                         </div>
@@ -191,7 +209,11 @@
                 <!-- SECTION 3: BUKTI PEMBAYARAN (OPTIONAL) -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-camera text-purple-600"></i> Bukti Pembayaran (Opsional)
+                        <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        <span>Bukti Pembayaran (Opsional)</span>
                     </h3>
 
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
@@ -200,8 +222,10 @@
                                id="buktiPembayaran" 
                                accept="image/*"
                                class="hidden">
-                        <label for="buktiPembayaran" class="cursor-pointer">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <label for="buktiPembayaran" class="cursor-pointer flex flex-col items-center">
+                            <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                            </svg>
                             <p class="text-sm text-gray-600">Klik untuk upload bukti pembayaran</p>
                             <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
                         </label>
@@ -215,8 +239,11 @@
                         Batal
                     </a>
                     <button type="submit" 
-                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md flex items-center gap-2 transition">
-                        <i class="fas fa-save"></i> Simpan Pembayaran
+                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md flex items-center gap-2 transition font-semibold">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span>Simpan Pembayaran</span>
                     </button>
                 </div>
             </form>
@@ -226,7 +253,10 @@
         <div class="lg:col-span-1">
             <div class="bg-white rounded-xl shadow-md p-6 sticky top-6">
                 <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-calculator text-blue-600"></i> Ringkasan Pembayaran
+                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25z" />
+                    </svg>
+                    <span>Ringkasan Pembayaran</span>
                 </h4>
                 
                 <div class="space-y-4">
@@ -256,12 +286,18 @@
                         </p>
                     </div>
 
-                    <div x-show="jumlahBayar < totalTagihan && jumlahBayar > 0" x-cloak class="p-3 bg-orange-50 text-orange-700 text-sm rounded-lg border border-orange-200 mt-4">
-                        <i class="fas fa-info-circle mr-1"></i> Pembayaran cicilan. Sisa: Rp <span x-text="formatRupiah(Math.abs(kembalian))"></span>
+                    <div x-show="jumlahBayar < totalTagihan && jumlahBayar > 0" x-cloak class="p-3 bg-orange-50 text-orange-700 text-sm rounded-lg border border-orange-200 mt-4 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-orange-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <span>Pembayaran cicilan. Sisa: Rp <span x-text="formatRupiah(Math.abs(kembalian))"></span></span>
                     </div>
                     
-                    <div x-show="kembalian < 0 && jumlahBayar == 0" x-cloak class="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 mt-4">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Belum ada pembayaran
+                    <div x-show="kembalian < 0 && jumlahBayar == 0" x-cloak class="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 mt-4 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <span>Belum ada pembayaran</span>
                     </div>
                 </div>
             </div>
