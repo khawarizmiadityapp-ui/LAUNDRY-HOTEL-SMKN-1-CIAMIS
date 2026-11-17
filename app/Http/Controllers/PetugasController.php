@@ -209,6 +209,7 @@ class PetugasController extends Controller
         $validator = Validator::make($request->all(), [
             'jadwal_id' => 'required|exists:jadwal_petugas,id',
             'station' => 'required|in:washing,setrika,packing,kasir,inventory',
+            'action_mode' => 'nullable|in:cover,move',
         ]);
 
         if ($validator->fails()) {
@@ -230,9 +231,11 @@ class PetugasController extends Controller
 
         $user = Auth::user();
         $canBypassLock = $user && ($user->isAdmin() || strtolower((string)$user->division) === 'all_roles');
+        $targetStation = $request->station;
+        $actionMode = $request->input('action_mode', 'move');
 
         // 🔒 CEK APAKAH STASIUN SUDAH DIKUNCI (Bypass jika Admin atau akun All-Roles)
-        if (!$canBypassLock && $jadwal->selected_station !== 'none' && $jadwal->selected_station !== $request->station) {
+        if (!$canBypassLock && $jadwal->selected_station !== 'none' && $jadwal->selected_station !== $targetStation) {
             $lockedLabel = $stationLabels[$jadwal->selected_station] ?? ucfirst($jadwal->selected_station);
             $errorMsg = "Stasiun tugas untuk {$jadwal->nama} sudah dikunci pada bagian {$lockedLabel}. Hubungi Admin atau Guru Piket jika ingin mengubah stasiun.";
 
@@ -246,18 +249,28 @@ class PetugasController extends Controller
         // Jika belum pernah check-in, set stasiun dan jam masuk
         if ($jadwal->selected_station === 'none') {
             $jadwal->update([
-                'selected_station' => $request->station,
+                'selected_station' => $targetStation,
                 'checked_in_at' => now(),
                 'status' => 'hadir',
             ]);
-            $flashMsg = "Selamat bertugas, {$jadwal->nama}! Stasiun Anda telah dikunci di bagian " . ($stationLabels[$request->station] ?? ucfirst($request->station)) . ".";
-        } elseif ($canBypassLock && $jadwal->selected_station !== $request->station) {
-            // Admin / All-Roles memindahkan stasiun
-            $jadwal->update([
-                'selected_station' => $request->station,
-                'status' => 'hadir',
-            ]);
-            $flashMsg = "Stasiun tugas untuk {$jadwal->nama} dialihkan ke bagian " . ($stationLabels[$request->station] ?? ucfirst($request->station)) . " (Mode All-Roles).";
+            $flashMsg = "Selamat bertugas, {$jadwal->nama}! Stasiun Anda telah dikunci di bagian " . ($stationLabels[$targetStation] ?? ucfirst($targetStation)) . ".";
+        } elseif ($canBypassLock && $jadwal->selected_station !== $targetStation) {
+            if ($actionMode === 'move') {
+                // Admin / All-Roles memindahkan stasiun utama siswa
+                $jadwal->update([
+                    'selected_station' => $targetStation,
+                    'status' => 'hadir',
+                ]);
+                $flashMsg = "Stasiun utama untuk {$jadwal->nama} dipindahkan ke bagian " . ($stationLabels[$targetStation] ?? ucfirst($targetStation)) . " (Mode All-Roles).";
+            } else {
+                // Mode Rangkap Tugas: pertahankan stasiun utama di jadwal, masuk ke stasiun tambahan
+                if ($jadwal->status !== 'hadir') {
+                    $jadwal->update(['status' => 'hadir']);
+                }
+                $primaryLabel = $stationLabels[$jadwal->selected_station] ?? ucfirst($jadwal->selected_station);
+                $targetLabel = $stationLabels[$targetStation] ?? ucfirst($targetStation);
+                $flashMsg = "Mode Rangkap Tugas: {$jadwal->nama} masuk ke bagian {$targetLabel} (stasiun utama tetap di {$primaryLabel}).";
+            }
         } else {
             // Sudah pernah check-in di stasiun ini, pastikan status hadir
             if ($jadwal->status !== 'hadir') {
@@ -270,7 +283,7 @@ class PetugasController extends Controller
         session([
             'active_piket_id' => $jadwal->id,
             'active_piket_nama' => $jadwal->nama,
-            'active_piket_station' => $jadwal->selected_station,
+            'active_piket_station' => $targetStation,
         ]);
 
         $stationRouteMap = [
@@ -281,7 +294,7 @@ class PetugasController extends Controller
             'inventory' => 'petugas_piket.inventory.index',
         ];
 
-        $redirectRoute = $stationRouteMap[$jadwal->selected_station] ?? 'petugas_piket.dashboard';
+        $redirectRoute = $stationRouteMap[$targetStation] ?? 'petugas_piket.dashboard';
 
         if ($request->wantsJson()) {
             return response()->json([

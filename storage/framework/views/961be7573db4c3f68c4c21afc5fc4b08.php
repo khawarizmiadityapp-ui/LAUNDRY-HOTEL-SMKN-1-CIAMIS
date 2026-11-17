@@ -31,9 +31,23 @@
             
             <div class="flex items-center gap-3">
                 <?php if($activePiket && $activePiket->selected_station !== 'none'): ?>
+                    <?php
+                        $sessionStation = session('active_piket_station');
+                        $primaryLabel = $activePiket->selected_station === 'setrika' ? 'Ironing' : ($activePiket->selected_station === 'kasir' ? 'Kasir' : ucfirst($activePiket->selected_station));
+                        $coveringLabel = ($sessionStation && $sessionStation !== $activePiket->selected_station)
+                            ? ($sessionStation === 'setrika' ? 'Ironing' : ($sessionStation === 'kasir' ? 'Kasir' : ucfirst($sessionStation)))
+                            : null;
+                    ?>
                     <div class="px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span>Stasiun Aktif: <?php echo e(ucfirst($activePiket->selected_station)); ?></span>
+                        <span>
+                            Stasiun Utama: <?php echo e($primaryLabel); ?>
+
+                            <?php if($coveringLabel): ?>
+                                • Rangkap: <?php echo e($coveringLabel); ?>
+
+                            <?php endif; ?>
+                        </span>
                     </div>
                 <?php else: ?>
                     <span class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 text-xs font-semibold rounded-xl border border-blue-100">
@@ -129,9 +143,9 @@
                     <div x-show="isLocked && canBypassLock" x-cloak class="mt-3 p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-center gap-3 text-blue-900 text-xs shadow-sm">
                         <span class="w-8 h-8 rounded-xl bg-blue-200 text-blue-800 flex items-center justify-center shrink-0 text-base">⚡</span>
                         <div class="leading-relaxed">
-                            <p class="font-bold text-xs sm:text-sm text-blue-950">Mode Akses Penuh (All-Roles / Admin)</p>
+                            <p class="font-bold text-xs sm:text-sm text-blue-950">Mode Akses Penuh — Rangkap Tugas (All-Roles / Admin)</p>
                             <p class="text-blue-800 text-[11px] mt-0.5">
-                                Stasiun saat ini: <span class="font-extrabold underline" x-text="lockedStationLabel"></span>. Sebagai akun All-Roles/Admin, Anda memiliki hak istimewa untuk langsung masuk atau bebas memindahkan stasiun tugas siswa ini ke bagian lain.
+                                Stasiun utama saat ini: <span class="font-extrabold underline" x-text="lockedStationLabel"></span>. Anda dapat memilih stasiun lain di bawah untuk <strong>merangkap tugas</strong> (membantu job lain jika ada petugas yang absen) atau memindahkan stasiun utama siswa ini.
                             </p>
                         </div>
                     </div>
@@ -155,7 +169,7 @@
                     </template>
                     <template x-if="isLocked && canBypassLock">
                         <span class="text-[11px] font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-lg flex items-center gap-1">
-                            <span>⚡</span> Akses All-Roles (Bisa Ganti Stasiun)
+                            <span>⚡</span> Akses All-Roles (Bisa Rangkap / Ganti Stasiun)
                         </span>
                     </template>
                 </div>
@@ -171,8 +185,8 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-3xl">🌊</span>
                                 <div class="flex items-center gap-1.5">
-                                    <template x-if="isLocked && selectedStation === 'washing'">
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Terkunci</span>
+                                    <template x-if="isLocked && currentSelectedPetugas?.station === 'washing'">
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Utama</span>
                                     </template>
                                     <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                                           :class="selectedStation === 'washing' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300'">
@@ -201,8 +215,8 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-3xl">♨️</span>
                                 <div class="flex items-center gap-1.5">
-                                    <template x-if="isLocked && selectedStation === 'setrika'">
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Terkunci</span>
+                                    <template x-if="isLocked && currentSelectedPetugas?.station === 'setrika'">
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Utama</span>
                                     </template>
                                     <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                                           :class="selectedStation === 'setrika' ? 'border-amber-600 bg-amber-600 text-white' : 'border-slate-300'">
@@ -231,8 +245,8 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-3xl">📦</span>
                                 <div class="flex items-center gap-1.5">
-                                    <template x-if="isLocked && selectedStation === 'packing'">
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Terkunci</span>
+                                    <template x-if="isLocked && currentSelectedPetugas?.station === 'packing'">
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Utama</span>
                                     </template>
                                     <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                                           :class="selectedStation === 'packing' ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300'">
@@ -261,8 +275,8 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-3xl">🏪</span>
                                 <div class="flex items-center gap-1.5">
-                                    <template x-if="isLocked && selectedStation === 'kasir'">
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Terkunci</span>
+                                    <template x-if="isLocked && currentSelectedPetugas?.station === 'kasir'">
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Utama</span>
                                     </template>
                                     <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                                           :class="selectedStation === 'kasir' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300'">
@@ -291,8 +305,8 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-3xl">📋</span>
                                 <div class="flex items-center gap-1.5">
-                                    <template x-if="isLocked && selectedStation === 'inventory'">
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Terkunci</span>
+                                    <template x-if="isLocked && currentSelectedPetugas?.station === 'inventory'">
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">🔒 Utama</span>
                                     </template>
                                     <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                                           :class="selectedStation === 'inventory' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300'">
@@ -314,6 +328,30 @@
             </div>
 
             
+            <div x-show="isLocked && canBypassLock && selectedStation !== currentSelectedPetugas?.station" x-cloak
+                 class="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-2.5">
+                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider">Pilih Mode Aksi All-Roles:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="cursor-pointer flex items-start gap-2.5 p-3 rounded-xl border-2 transition"
+                           :class="actionMode === 'cover' ? 'bg-white border-blue-600 shadow-sm' : 'bg-white/60 border-slate-200 hover:bg-white'">
+                        <input type="radio" name="action_mode" value="cover" x-model="actionMode" class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">Rangkap Tugas (Multi-Job)</span>
+                            <span class="text-[11px] text-slate-500">Masuk membantu stasiun ini tanpa menghapus stasiun utama siswa di jadwal piket.</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer flex items-start gap-2.5 p-3 rounded-xl border-2 transition"
+                           :class="actionMode === 'move' ? 'bg-white border-amber-500 shadow-sm' : 'bg-white/60 border-slate-200 hover:bg-white'">
+                        <input type="radio" name="action_mode" value="move" x-model="actionMode" class="mt-0.5 text-amber-600 focus:ring-amber-500">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">Pindahkan Stasiun Utama</span>
+                            <span class="text-[11px] text-slate-500">Ubah stasiun utama siswa pada Daftar Rekan Piket hari ini ke stasiun pilihan.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100">
                 <div class="text-xs text-slate-500 flex items-center gap-2">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -321,12 +359,12 @@
                     </svg>
                     <span x-show="!isLocked">Pilihan stasiun akan <strong>dikunci permanen</strong> untuk siswa setelah Anda klik Mulai Bertugas.</span>
                     <span x-show="isLocked && !canBypassLock" class="text-amber-800 font-semibold">Stasiun terkunci. Klik tombol untuk langsung menuju workspace stasiun Anda.</span>
-                    <span x-show="isLocked && canBypassLock" class="text-blue-800 font-semibold">Mode All-Roles aktif. Anda dapat langsung masuk atau bebas memindahkan stasiun tugas siswa ini.</span>
+                    <span x-show="isLocked && canBypassLock" class="text-blue-800 font-semibold">Mode All-Roles aktif. Anda dapat langsung merangkap job lain atau pindah lewat menu sidebar.</span>
                 </div>
                 <button type="submit" :disabled="!selectedJadwalId || !selectedStation"
                         class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-white text-sm font-bold rounded-2xl transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         :class="isLocked ? (canBypassLock ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20') : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'">
-                    <span x-text="isLocked ? (canBypassLock ? (selectedStation === currentSelectedPetugas?.station ? 'Masuk ke Stasiun Ini' : 'Pindahkan & Masuk Stasiun') : 'Masuk ke Stasiun Saya') : 'Mulai Bertugas & Kunci Stasiun'"></span>
+                    <span x-text="isLocked ? (canBypassLock ? (selectedStation === currentSelectedPetugas?.station ? 'Masuk ke Stasiun Ini' : (actionMode === 'cover' ? 'Masuk & Rangkap Tugas Ini' : 'Pindahkan & Masuk Stasiun')) : 'Masuk ke Stasiun Saya') : 'Mulai Bertugas & Kunci Stasiun'"></span>
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
@@ -475,15 +513,19 @@
 
         const initialJadwalId = '<?php echo e($activePiket ? (string) $activePiket->id : ""); ?>';
         const initialJadwal = roster.find(r => r.id === initialJadwalId);
-        const initialStation = (initialJadwal && initialJadwal.station !== 'none')
-            ? initialJadwal.station
-            : '<?php echo e(($activePiket && $activePiket->selected_station !== "none") ? $activePiket->selected_station : "washing"); ?>';
+        const sessionStation = <?php echo json_encode(session('active_piket_station') ?? '', 15, 512) ?>;
+        const initialStation = (initialJadwalId && sessionStation)
+            ? sessionStation
+            : ((initialJadwal && initialJadwal.station !== 'none')
+                ? initialJadwal.station
+                : '<?php echo e(($activePiket && $activePiket->selected_station !== "none") ? $activePiket->selected_station : "washing"); ?>');
 
         return {
             roster: roster,
             canBypassLock: <?php echo e(($canBypassLock ?? false) ? 'true' : 'false'); ?>,
             selectedJadwalId: initialJadwalId,
             selectedStation: initialStation,
+            actionMode: 'cover',
 
             get currentSelectedPetugas() {
                 if (!this.selectedJadwalId) return null;
@@ -507,6 +549,7 @@
             },
 
             onSelectJadwal() {
+                this.actionMode = 'cover';
                 const petugas = this.currentSelectedPetugas;
                 if (petugas && petugas.station && petugas.station !== 'none') {
                     this.selectedStation = petugas.station;

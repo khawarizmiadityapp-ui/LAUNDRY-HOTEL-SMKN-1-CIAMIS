@@ -22,6 +22,7 @@ return [
         'packing' => 'Packing',
         'customer_service' => 'Customer Service',
         'inventory' => 'Inventory',
+        'all_roles' => 'All Roles (Multi-Job)',
     ],
 
     // Admin menus

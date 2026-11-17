@@ -1051,15 +1051,25 @@ function posApp() {
             // Initialize cashier list
             this.filteredKasirList = this.petugasList;
             
-            // Load saved cashier name
-            let savedKasir = localStorage.getItem('petugas_kasir_name');
-            if (!savedKasir && "{{ auth()->check() }}") {
-                savedKasir = "{{ auth()->user()->name }}";
+            // Load saved cashier name (prioritize active check-in session)
+            const activePiketNama = @json($activePiketNama ?? '');
+            const authUserName = @json(auth()->check() ? auth()->user()->name : '');
+            let savedKasir = activePiketNama || localStorage.getItem('petugas_kasir_name') || '';
+
+            if (!savedKasir && authUserName) {
+                const authMatches = this.petugasList.some(p => p.nama.toLowerCase() === authUserName.toLowerCase().trim());
+                if (authMatches) {
+                    savedKasir = authUserName;
+                }
             }
+
             if (savedKasir) {
                 this.kasirSearch = savedKasir;
                 const exactMatch = this.petugasList.some(p => p.nama.toLowerCase() === savedKasir.toLowerCase().trim());
                 this.isKasirInvalid = !exactMatch;
+                if (exactMatch && activePiketNama) {
+                    localStorage.setItem('petugas_kasir_name', savedKasir);
+                }
             }
         },
 

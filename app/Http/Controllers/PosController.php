@@ -50,10 +50,35 @@ class PosController extends Controller
             ];
         });
 
-        $petugasList = \App\Models\Petugas::orderBy('nama')->get();
+        $todaySchedules = \App\Models\JadwalPetugas::hariIni()->get();
+        $masterPetugas = \App\Models\Petugas::orderBy('nama')->get();
+
+        // Gabungkan petugas piket hari ini (prioritaskan stasiun kasir) dengan master petugas tanpa duplikat
+        $petugasList = collect();
+        if ($todaySchedules->isNotEmpty()) {
+            $sortedToday = $todaySchedules->sortBy(function ($item) {
+                return $item->selected_station === 'kasir' ? 0 : 1;
+            });
+            foreach ($sortedToday as $schedule) {
+                $petugasList->push((object) [
+                    'nama' => $schedule->nama,
+                    'id_petugas' => $schedule->id_petugas ?? ('JP-' . $schedule->id),
+                ]);
+            }
+        }
+        foreach ($masterPetugas as $master) {
+            if (!$petugasList->contains(fn ($p) => strtolower(trim($p->nama)) === strtolower(trim($master->nama)))) {
+                $petugasList->push((object) [
+                    'nama' => $master->nama,
+                    'id_petugas' => $master->id_petugas ?? ('STF-' . $master->id),
+                ]);
+            }
+        }
+
+        $activePiketNama = session('active_piket_nama');
         $qrisConfig = get_qris_config();
 
-        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup', 'petugasList', 'qrisConfig'));
+        return view('pos.index', compact('layanans', 'kategoris', 'layanansJson', 'readyToPickup', 'petugasList', 'qrisConfig', 'activePiketNama'));
     }
 
     /**

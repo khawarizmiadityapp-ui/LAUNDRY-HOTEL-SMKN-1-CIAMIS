@@ -253,6 +253,7 @@ class JadwalPetugasTest extends TestCase
         $response = $this->actingAs($allrolesStaff)->post(route('petugas_piket.checkin.station'), [
             'jadwal_id' => $jadwal->id,
             'station' => 'kasir',
+            'action_mode' => 'move',
         ]);
 
         $response->assertRedirect(route('petugas.pos.index'));
@@ -260,6 +261,102 @@ class JadwalPetugasTest extends TestCase
             'id' => $jadwal->id,
             'selected_station' => 'kasir',
             'status' => 'hadir',
+        ]);
+    }
+
+    public function test_allroles_staff_can_cover_another_station_without_overwriting_primary_station(): void
+    {
+        $allrolesStaff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'all_roles',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $jadwal = JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => '32.RINDIANI ANINDIA',
+            'shift' => 'Pagi',
+            'selected_station' => 'kasir',
+            'status' => 'hadir',
+        ]);
+
+        // Akun all_roles merangkap tugas Washing tanpa menimpa stasiun utama Kasir
+        $response = $this->actingAs($allrolesStaff)->post(route('petugas_piket.checkin.station'), [
+            'jadwal_id' => $jadwal->id,
+            'station' => 'washing',
+            'action_mode' => 'cover',
+        ]);
+
+        $response->assertRedirect(route('petugas_piket.washing.index'));
+        $response->assertSessionHas('active_piket_nama', '32.RINDIANI ANINDIA');
+        $response->assertSessionHas('active_piket_station', 'washing');
+        $this->assertDatabaseHas('jadwal_petugas', [
+            'id' => $jadwal->id,
+            'selected_station' => 'kasir',
+            'status' => 'hadir',
+        ]);
+    }
+
+    public function test_allroles_pos_page_includes_jadwal_piket_and_active_piket_name(): void
+    {
+        $allrolesStaff = User::factory()->create([
+            'name' => 'Petugas All-In-One',
+            'role' => 'staff',
+            'division' => 'all_roles',
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        JadwalPetugas::create([
+            'tanggal' => $today,
+            'nama' => '32.RINDIANI ANINDIA',
+            'shift' => 'Pagi',
+            'selected_station' => 'kasir',
+            'status' => 'hadir',
+        ]);
+
+        $response = $this->actingAs($allrolesStaff)
+            ->withSession(['active_piket_nama' => '32.RINDIANI ANINDIA', 'active_piket_station' => 'kasir'])
+            ->get(route('petugas.pos.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('activePiketNama', '32.RINDIANI ANINDIA');
+        $response->assertSee('32.RINDIANI ANINDIA');
+        $response->assertSee('All Roles (Multi-Job)');
+    }
+
+    public function test_allroles_dashboard_shows_kasir_station_and_cover_option(): void
+    {
+        $allrolesStaff = User::factory()->create([
+            'role' => 'staff',
+            'division' => 'all_roles',
+        ]);
+
+        $response = $this->actingAs($allrolesStaff)->get(route('petugas_piket.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Kasir (POS)');
+        $response->assertSee('Rangkap Tugas (Multi-Job)');
+        $response->assertSee('All Roles (Multi-Job)');
+    }
+
+    public function test_admin_can_create_all_roles_staff_account(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'Petugas Rangkap 2',
+            'email' => 'allroles2@laundry.com',
+            'password' => 'secret123',
+            'role' => 'staff',
+            'division' => 'all_roles',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('users', [
+            'email' => 'allroles2@laundry.com',
+            'role' => 'staff',
+            'division' => 'all_roles',
         ]);
     }
 

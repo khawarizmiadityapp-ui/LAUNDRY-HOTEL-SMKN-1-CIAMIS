@@ -195,6 +195,7 @@ class MenuService
             'packing' => 'Packing',
             'customer_service' => 'Customer Service',
             'inventory' => 'Inventory',
+            'all_roles' => 'All Roles (Multi-Job)',
         ]);
 
         return $labels[$normalizedDivision] ?? ucfirst($normalizedDivision);

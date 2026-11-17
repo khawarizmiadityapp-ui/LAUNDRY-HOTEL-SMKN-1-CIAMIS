@@ -638,7 +638,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
             'role' => 'required|in:super_admin,admin,staff',
-            'division' => 'nullable|required_if:role,staff|in:washing,ironing,packing,customer_service,inventory',
+            'division' => 'nullable|required_if:role,staff|in:washing,ironing,packing,customer_service,inventory,all_roles',
         ]);
 
         try {

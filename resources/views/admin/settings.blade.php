@@ -751,6 +751,7 @@
                         <option value="packing">Packing (Pengemasan)</option>
                         <option value="customer_service">Customer Service (Kasir / POS)</option>
                         <option value="inventory">Inventory (Gudang)</option>
+                        <option value="all_roles">All Roles / Multi-Job (Semua Stasiun Petugas)</option>
                     </select>
                 </div>
 
