@@ -222,13 +222,13 @@ if (!function_exists('get_qris_config')) {
      */
     function get_qris_config(): array
     {
-        $merchantName = \App\Models\Setting::getValue('qris_merchant_name', 'BENING LAUNDRY - SMKN 1 CIAMIS');
-        $nmid = \App\Models\Setting::getValue('qris_nmid', 'ID1026000109281');
-        $qrisImage = \App\Models\Setting::getValue('qris_image', null);
-        $qrisPayload = \App\Models\Setting::getValue('qris_payload', '');
-        $bankInfo = \App\Models\Setting::getValue('bank_transfer_info', 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis');
+        $merchantName = trim((string) \App\Models\Setting::getValue('qris_merchant_name', 'BENING LAUNDRY - SMKN 1 CIAMIS')) ?: 'BENING LAUNDRY - SMKN 1 CIAMIS';
+        $nmid = trim((string) \App\Models\Setting::getValue('qris_nmid', 'ID1026000109281')) ?: 'ID1026000109281';
+        $qrisImage = trim((string) \App\Models\Setting::getValue('qris_image', '')) ?: null;
+        $qrisPayload = trim((string) \App\Models\Setting::getValue('qris_payload', ''));
+        $bankInfo = trim((string) \App\Models\Setting::getValue('bank_transfer_info', 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis')) ?: 'Bank BJB / BCA - Unit Produksi Perhotelan SMKN 1 Ciamis';
 
-        $defaultPayload = $qrisPayload ?: "QRIS:{$merchantName}|NMID:{$nmid}";
+        $defaultPayload = $qrisPayload !== '' ? $qrisPayload : "QRIS:{$merchantName}|NMID:{$nmid}";
         $fallbackQrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=' . urlencode($defaultPayload);
 
         return [

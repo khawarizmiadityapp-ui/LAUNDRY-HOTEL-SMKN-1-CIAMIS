@@ -64,8 +64,17 @@
             </div>
         </nav>
 
-        <!-- Logout -->
-        <div class="px-3 py-4 border-t border-slate-100">
+        <!-- Portal Petugas Switcher & Logout -->
+        <div class="px-3 py-4 border-t border-slate-100 space-y-1.5">
+            <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+                <a href="<?php echo e(route('petugas_piket.dashboard')); ?>"
+                   class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition-all duration-150">
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                    </svg>
+                    <span>Portal Petugas (Semua Stasiun)</span>
+                </a>
+            <?php endif; ?>
             <button type="button" onclick="confirmLogout(event)"
                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-500
                       hover:bg-rose-50 transition-all duration-150">

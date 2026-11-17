@@ -826,7 +826,13 @@ class AdminController extends Controller
             'qris_nmid' => 'nullable|string|max:50',
             'qris_payload' => 'nullable|string|max:1000',
             'bank_transfer_info' => 'nullable|string|max:255',
-            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'hero_image.max' => 'Ukuran Foto Home maksimal 2 MB.',
+            'logo_image.max' => 'Ukuran Logo Laundry maksimal 1 MB.',
+            'qris_image.image' => 'File QRIS harus berupa gambar yang valid.',
+            'qris_image.mimes' => 'Format gambar QRIS harus JPG, JPEG, PNG, atau WEBP.',
+            'qris_image.max' => 'Ukuran gambar QRIS maksimal 5 MB.',
         ]);
 
         try {
@@ -837,48 +843,106 @@ class AdminController extends Controller
             $servicePhone = format_whatsapp_number($request->service_wa);
             \App\Models\Setting::setValue('service_wa', $servicePhone);
 
-            if ($request->filled('qris_merchant_name')) {
-                \App\Models\Setting::setValue('qris_merchant_name', trim($request->qris_merchant_name));
-            }
-            if ($request->filled('qris_nmid')) {
-                \App\Models\Setting::setValue('qris_nmid', trim($request->qris_nmid));
-            }
-            if ($request->has('qris_payload')) {
-                \App\Models\Setting::setValue('qris_payload', trim((string) $request->qris_payload));
-            }
-            if ($request->filled('bank_transfer_info')) {
-                \App\Models\Setting::setValue('bank_transfer_info', trim($request->bank_transfer_info));
+            $this->saveQrisConfiguration($request);
+
+            $imagesDir = public_path('images');
+            if (!is_dir($imagesDir)) {
+                mkdir($imagesDir, 0755, true);
             }
 
             // Handle hero_image upload
             if ($request->hasFile('hero_image')) {
                 $file = $request->file('hero_image');
-                $filename = 'hero_' . time() . '.' . $file->extension();
-                $file->move(public_path('images'), $filename);
-                \App\Models\Setting::setValue('hero_image', asset('images/' . $filename));
+                $filename = 'hero_' . time() . '_' . uniqid() . '.' . $file->extension();
+                $file->move($imagesDir, $filename);
+                \App\Models\Setting::setValue('hero_image', '/images/' . $filename);
             }
 
             // Handle logo_image upload
             if ($request->hasFile('logo_image')) {
                 $file = $request->file('logo_image');
-                $filename = 'logo_' . time() . '.' . $file->extension();
-                $file->move(public_path('images'), $filename);
-                \App\Models\Setting::setValue('logo_image', asset('images/' . $filename));
+                $filename = 'logo_' . time() . '_' . uniqid() . '.' . $file->extension();
+                $file->move($imagesDir, $filename);
+                \App\Models\Setting::setValue('logo_image', '/images/' . $filename);
             }
 
-            // Handle qris_image upload
-            if ($request->hasFile('qris_image')) {
-                $file = $request->file('qris_image');
-                $filename = 'qris_' . time() . '.' . $file->extension();
-                $file->move(public_path('images'), $filename);
-                \App\Models\Setting::setValue('qris_image', asset('images/' . $filename));
-            } elseif ($request->boolean('reset_qris_image')) {
-                \App\Models\Setting::where('key', 'qris_image')->delete();
-            }
-
-            return back()->with('success', 'Pengaturan aplikasi & pembayaran QRIS berhasil diperbarui.');
+            return back()->with('success', 'Pengaturan aplikasi berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Pembaruan khusus Konfigurasi QRIS & Transfer Non-Tunai (Super Admin & Admin).
+     */
+    public function updateQris(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin atau Admin yang dapat mengubah konfigurasi QRIS.');
+        }
+
+        $request->validate([
+            'qris_merchant_name' => 'nullable|string|max:100',
+            'qris_nmid' => 'nullable|string|max:50',
+            'qris_payload' => 'nullable|string|max:1000',
+            'bank_transfer_info' => 'nullable|string|max:255',
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'qris_image.image' => 'File QRIS harus berupa gambar yang valid.',
+            'qris_image.mimes' => 'Format gambar QRIS harus JPG, JPEG, PNG, atau WEBP.',
+            'qris_image.max' => 'Ukuran gambar QRIS maksimal 5 MB.',
+        ]);
+
+        try {
+            $this->saveQrisConfiguration($request);
+
+            $currentAdmin = Auth::user();
+            $roleTitle = $currentAdmin->isSuperAdmin() ? 'Super Admin' : 'Admin';
+            ActivityLog::create([
+                'log_name' => 'qris_settings',
+                'description' => "{$roleTitle} {$currentAdmin->name} memperbarui konfigurasi pembayaran QRIS",
+                'causer_id' => $currentAdmin->id,
+                'causer_type' => User::class,
+                'properties' => [
+                    'qris_merchant_name' => trim((string) $request->input('qris_merchant_name', '')),
+                    'qris_nmid' => trim((string) $request->input('qris_nmid', '')),
+                    'has_new_image' => $request->hasFile('qris_image'),
+                    'reset_qris_image' => $request->boolean('reset_qris_image'),
+                ],
+            ]);
+
+            return back()->with('success', 'Konfigurasi QRIS & pembayaran non-tunai berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui konfigurasi QRIS: ' . $e->getMessage());
+        }
+    }
+
+    private function saveQrisConfiguration(Request $request): void
+    {
+        if ($request->filled('qris_merchant_name')) {
+            \App\Models\Setting::setValue('qris_merchant_name', trim((string) $request->qris_merchant_name));
+        }
+        if ($request->filled('qris_nmid')) {
+            \App\Models\Setting::setValue('qris_nmid', trim((string) $request->qris_nmid));
+        }
+        if ($request->has('qris_payload')) {
+            \App\Models\Setting::setValue('qris_payload', trim((string) $request->qris_payload));
+        }
+        if ($request->filled('bank_transfer_info')) {
+            \App\Models\Setting::setValue('bank_transfer_info', trim((string) $request->bank_transfer_info));
+        }
+
+        if ($request->hasFile('qris_image')) {
+            $imagesDir = public_path('images');
+            if (!is_dir($imagesDir)) {
+                mkdir($imagesDir, 0755, true);
+            }
+            $file = $request->file('qris_image');
+            $filename = 'qris_' . time() . '_' . uniqid() . '.' . $file->extension();
+            $file->move($imagesDir, $filename);
+            \App\Models\Setting::setValue('qris_image', '/images/' . $filename);
+        } elseif ($request->boolean('reset_qris_image')) {
+            \App\Models\Setting::where('key', 'qris_image')->delete();
         }
     }
 

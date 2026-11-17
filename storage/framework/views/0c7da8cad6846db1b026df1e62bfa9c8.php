@@ -12,7 +12,19 @@
             </div>
 
             
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto">
+            <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+                <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+                <button type="button" onclick="openQrisSettingModal()"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.008v.008H6.75V6.75zm0 9.75h.008v.008H6.75v-.008zm9.75-9.75h.008v.008H16.5V6.75zM13.5 13.5h3v3h-3v-3zm3 3h3v3h-3v-3zm-3 3h3v3h-3v-3zm3-6h3v3h-3v-3z" />
+                    </svg>
+                    <span>Atur / Ganti QRIS</span>
+                </button>
+                <?php endif; ?>
+
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
                 <a href="<?php echo e(route('admin.pembayaran.index', ['tab' => 'daftar'])); ?>"
                    class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition <?php echo e($tab === 'daftar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'); ?>">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -34,6 +46,7 @@
                     </svg>
                     <span>Rekapan Bulanan</span>
                 </a>
+            </div>
             </div>
         </div>
 
@@ -757,6 +770,80 @@
     </div>
 
     
+    <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+    <div id="qrisSettingModal" class="fixed inset-0 z-50 hidden bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center p-4">
+        <div class="relative mx-auto p-6 border w-full max-w-lg shadow-2xl rounded-2xl bg-white animate-fade-up">
+            <div class="flex justify-between items-center pb-3 mb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Pengaturan Barcode QRIS</h3>
+                        <p class="text-[11px] text-slate-500">Perubahan langsung aktif di Kasir (POS), Pembayaran, dan Nota.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeQrisSettingModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <form action="<?php echo e(route('admin.settings.qris')); ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <?php echo csrf_field(); ?>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Merchant QRIS</label>
+                        <input type="text" name="qris_merchant_name" value="<?php echo e($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'); ?>"
+                               class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">NMID / ID Merchant</label>
+                        <input type="text" name="qris_nmid" value="<?php echo e($qrisConfig['nmid'] ?? 'ID1026000109281'); ?>"
+                               class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Upload Gambar Barcode QRIS (JPG/PNG/WEBP, maks 5MB)</label>
+                    <input type="file" name="qris_image" accept="image/jpeg,image/png,image/jpg,image/webp"
+                           class="w-full border border-slate-200 rounded-xl p-2 text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <?php if(!empty($qrisConfig['qris_image'])): ?>
+                    <div class="mt-2 flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <img src="<?php echo e($qrisConfig['qris_image']); ?>" alt="QRIS Saat Ini" class="w-10 h-10 object-contain bg-white rounded border border-slate-200 p-0.5">
+                        <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-semibold cursor-pointer">
+                            <input type="checkbox" name="reset_qris_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                            Hapus gambar &amp; pakai QRIS otomatis
+                        </label>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Payload String QRIS Resmi (Opsional)</label>
+                    <textarea name="qris_payload" rows="2" maxlength="1000"
+                              class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                              placeholder="Opsional: string QRIS mentah jika tidak upload gambar"><?php echo e($qrisConfig['qris_payload'] ?? ''); ?></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Info Rekening Transfer Bank</label>
+                    <input type="text" name="bank_transfer_info" value="<?php echo e($qrisConfig['bank_info'] ?? ''); ?>"
+                           class="w-full border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <a href="<?php echo e(route('admin.settings')); ?>#qris-config" class="text-xs font-semibold text-indigo-600 hover:underline">Buka Halaman Pengaturan &rarr;</a>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeQrisSettingModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 text-xs font-bold transition">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-xs font-bold shadow-sm transition">Simpan QRIS</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    
     <div id="paymentModal" class="fixed inset-0 z-50 hidden bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center">
         <div class="relative mx-auto p-6 border w-full max-w-md shadow-2xl rounded-2xl bg-white animate-fade-up">
             <div class="flex justify-between items-center mb-4">
@@ -884,8 +971,23 @@
 <?php $__env->startPush('scripts'); ?>
 <script>
     const qrisStaticImgUrl = <?php echo json_encode($qrisConfig['qris_image'] ?? null, 15, 512) ?>;
+    const qrisCustomPayload = <?php echo json_encode($qrisConfig['qris_payload'] ?? '', 15, 512) ?>;
     const qrisMerchantName = <?php echo json_encode($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS', 15, 512) ?>;
     const qrisNmidCode = <?php echo json_encode($qrisConfig['nmid'] ?? 'ID1026000109281', 15, 512) ?>;
+
+    function openQrisSettingModal() {
+        document.getElementById('qrisSettingModal')?.classList.remove('hidden');
+    }
+
+    function closeQrisSettingModal() {
+        document.getElementById('qrisSettingModal')?.classList.add('hidden');
+    }
+
+    document.getElementById('qrisSettingModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeQrisSettingModal();
+        }
+    });
     let currentModalPrice = 0;
     let currentModalTrxCode = '';
 
@@ -924,7 +1026,9 @@
                 if (qrisStaticImgUrl) {
                     qrisImg.src = qrisStaticImgUrl;
                 } else {
-                    const payload = `QRIS:${qrisMerchantName}|NMID:${qrisNmidCode}|AMOUNT:Rp${Math.round(currentModalPrice)}|REF:${currentModalTrxCode}`;
+                    const payload = qrisCustomPayload
+                        ? qrisCustomPayload
+                        : `QRIS:${qrisMerchantName}|NMID:${qrisNmidCode}|AMOUNT:Rp${Math.round(currentModalPrice)}|REF:${currentModalTrxCode}`;
                     qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(payload)}`;
                 }
             }

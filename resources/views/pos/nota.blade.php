@@ -408,7 +408,10 @@
 
             @php
                 $qrisData = $qrisConfig ?? get_qris_config();
-                $qrPayload = "QRIS:" . ($qrisData['merchant_name'] ?? 'BENING LAUNDRY') . "|NMID:" . ($qrisData['nmid'] ?? '') . "|AMOUNT:Rp" . (int)$totalTagihan . "|REF:" . $transaksi->transaksi_code;
+                $customQrisPayload = trim((string) ($qrisData['qris_payload'] ?? ''));
+                $qrPayload = $customQrisPayload !== ''
+                    ? $customQrisPayload
+                    : ("QRIS:" . ($qrisData['merchant_name'] ?? 'BENING LAUNDRY') . "|NMID:" . ($qrisData['nmid'] ?? '') . "|AMOUNT:Rp" . (int)$totalTagihan . "|REF:" . $transaksi->transaksi_code);
                 $notaQrUrl = !empty($qrisData['qris_image'])
                     ? $qrisData['qris_image']
                     : ('https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=6&data=' . urlencode($qrPayload));

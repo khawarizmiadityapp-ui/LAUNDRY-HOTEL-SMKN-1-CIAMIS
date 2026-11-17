@@ -6,7 +6,161 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Pengaturan Aplikasi</h1>
-            <p class="text-gray-500 mt-1">Kelola konfigurasi sistem Bening Laundry secara sentral.</p>
+            <p class="text-gray-500 mt-1">Kelola QRIS pembayaran, kontak WhatsApp, maintenance, kategori, dan akun pengguna secara sentral.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="#qris-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                Ganti QRIS &amp; Transfer
+            </a>
+            <?php if(auth()->user()->isSuperAdmin()): ?>
+            <a href="#maintenance-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766" /></svg>
+                Maintenance
+            </a>
+            <?php endif; ?>
+            <a href="#general-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                Kontak &amp; Branding
+            </a>
+            <a href="#user-management-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
+                Manajemen Akun
+            </a>
+        </div>
+    </div>
+
+    <?php if($errors->any()): ?>
+    <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 shadow-xs">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div class="text-xs sm:text-sm space-y-1">
+                <p class="font-bold">Gagal menyimpan perubahan. Periksa input berikut:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-rose-700">
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Dedicated QRIS & Non-Cash Settings Grid (Super Admin & Admin) -->
+    <div id="qris-config" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-md border border-indigo-100 p-6">
+            <div class="flex items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    </span>
+                    Konfigurasi QRIS &amp; Pembayaran
+                </h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Super Admin &amp; Admin
+                </span>
+            </div>
+
+            <form action="<?php echo e(route('admin.settings.qris')); ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <?php echo csrf_field(); ?>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="qris_merchant_name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Merchant QRIS</label>
+                        <input type="text" name="qris_merchant_name" id="qris_merchant_name" value="<?php echo e(old('qris_merchant_name', $qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS')); ?>"
+                               class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                               placeholder="BENING LAUNDRY - SMKN 1 CIAMIS">
+                    </div>
+                    <div>
+                        <label for="qris_nmid" class="block text-xs font-semibold text-gray-700 mb-1">NMID / ID Merchant QRIS</label>
+                        <input type="text" name="qris_nmid" id="qris_nmid" value="<?php echo e(old('qris_nmid', $qrisConfig['nmid'] ?? 'ID1026000109281')); ?>"
+                               class="w-full px-3.5 py-2.5 text-sm font-mono border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                               placeholder="ID1026000109281">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="qris_image" class="block text-xs font-semibold text-gray-700 mb-1">Upload Gambar Barcode QRIS Resmi Toko (JPG/PNG/WEBP, maks 5MB)</label>
+                    <input type="file" name="qris_image" id="qris_image" accept="image/jpeg,image/png,image/jpg,image/webp" onchange="previewQrisFile(this)"
+                           class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <p class="text-[11px] text-slate-400 mt-1">Upload gambar barcode QRIS resmi toko (dari bank/QRIS merchant), atau biarkan kosong untuk generate QR otomatis dari Payload/NMID.</p>
+                    <?php if(!empty($qrisConfig['qris_image'])): ?>
+                        <div class="mt-2.5 flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="<?php echo e($qrisConfig['qris_image']); ?>" alt="QRIS Toko" class="h-12 w-12 object-contain bg-white rounded-lg border border-slate-200 p-1">
+                            <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-semibold cursor-pointer">
+                                <input type="checkbox" name="reset_qris_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                Hapus gambar kustom &amp; gunakan QRIS otomatis
+                            </label>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div>
+                    <label for="qris_payload" class="block text-xs font-semibold text-gray-700 mb-1">Payload String QRIS Resmi / EMVCo (Opsional)</label>
+                    <textarea name="qris_payload" id="qris_payload" rows="2" maxlength="1000"
+                              class="w-full px-3.5 py-2 text-xs font-mono border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800"
+                              placeholder="Tempel string QRIS mentah jika tidak mengupload gambar barcode (opsional)..."><?php echo e(old('qris_payload', $qrisConfig['qris_payload'] ?? '')); ?></textarea>
+                </div>
+
+                <div>
+                    <label for="bank_transfer_info" class="block text-xs font-semibold text-gray-700 mb-1">Info Rekening Transfer Bank / E-Wallet</label>
+                    <input type="text" name="bank_transfer_info" id="bank_transfer_info" value="<?php echo e(old('bank_transfer_info', $qrisConfig['bank_info'] ?? '')); ?>"
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
+                           placeholder="Contoh: BCA 1234567890 a.n. Bening Laundry SMKN 1 Ciamis">
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md shadow-indigo-600/25 transition inline-flex items-center gap-2 text-sm active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Simpan Konfigurasi QRIS
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- QRIS Live Preview Card -->
+        <div class="bg-gradient-to-br from-brand-600 to-indigo-900 rounded-2xl shadow-xl text-white p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">QRIS Pembayaran Aktif</span>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider <?php echo e(!empty($qrisConfig['qris_image']) ? 'bg-emerald-400/20 text-emerald-100 border border-emerald-300/30' : 'bg-white/15 text-blue-100'); ?>">
+                        <?php echo e(!empty($qrisConfig['qris_image']) ? 'Gambar QRIS Kustom' : (!empty($qrisConfig['qris_payload']) ? 'Payload QRIS Kustom' : 'Generator QRIS Otomatis')); ?>
+
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold leading-snug">Barcode Pembayaran QRIS Terintegrasi</h3>
+                <p class="text-brand-100 text-sm leading-relaxed">
+                    Perubahan QRIS langsung disinkronkan ke seluruh sistem: <strong>Kasir (POS)</strong>, <strong>Pengambilan Cucian</strong>, <strong>Manajemen Pembayaran</strong>, dan <strong>Struk / Invoice Pelanggan</strong>.
+                </p>
+
+                <!-- Preview Kartu QRIS -->
+                <div class="bg-white text-slate-800 rounded-2xl p-4 shadow-lg mt-4 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl shrink-0">
+                        <img id="settingsQrisPreviewImg" src="<?php echo e($qrisConfig['display_qr_url'] ?? ''); ?>" alt="QRIS Preview" class="w-28 h-28 object-contain">
+                    </div>
+                    <div class="text-center sm:text-left min-w-0 flex-1">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-extrabold uppercase tracking-wider border border-rose-200 mb-1">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> QRIS CONNECTED
+                        </div>
+                        <p class="text-sm font-extrabold text-slate-900 truncate"><?php echo e($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'); ?></p>
+                        <p class="text-xs font-mono text-slate-500 mt-0.5">NMID: <?php echo e($qrisConfig['nmid'] ?? 'ID1026000109281'); ?></p>
+                        <p class="text-[11px] text-slate-500 mt-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            <span class="truncate"><?php echo e($qrisConfig['bank_info'] ?? '-'); ?></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="text-brand-200">Cek langsung di modul transaksi:</span>
+                <div class="flex items-center gap-2">
+                    <a href="<?php echo e(route('admin.pembayaran.index')); ?>" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold transition">Menu Pembayaran</a>
+                    <a href="<?php echo e(route('admin.pos.index')); ?>" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold transition">Menu POS Kasir</a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -129,8 +283,8 @@
     </div>
     <?php endif; ?>
 
-    <!-- Settings Card Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Settings Card Grid (Kontak WA & Branding) -->
+    <div id="general-config" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Settings Form Card -->
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -138,7 +292,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                Konfigurasi Umum
+                Konfigurasi Umum (Kontak &amp; Tampilan)
             </h2>
             
             <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
@@ -210,53 +364,6 @@
                     <?php endif; ?>
                 </div>
 
-                <!-- Divider Konfigurasi QRIS & Pembayaran Non-Tunai -->
-                <div class="pt-4 border-t border-slate-100">
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> Konfigurasi Pembayaran QRIS & Transfer
-                    </h3>
-
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="qris_merchant_name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Merchant QRIS</label>
-                                <input type="text" name="qris_merchant_name" id="qris_merchant_name" value="<?php echo e($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'); ?>"
-                                       class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
-                                       placeholder="BENING LAUNDRY - SMKN 1 CIAMIS">
-                            </div>
-                            <div>
-                                <label for="qris_nmid" class="block text-xs font-semibold text-gray-700 mb-1">NMID / ID Merchant QRIS</label>
-                                <input type="text" name="qris_nmid" id="qris_nmid" value="<?php echo e($qrisConfig['nmid'] ?? 'ID1026000109281'); ?>"
-                                       class="w-full px-3.5 py-2.5 text-sm font-mono border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
-                                       placeholder="ID1026000109281">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="qris_image" class="block text-xs font-semibold text-gray-700 mb-1">Upload Gambar Barcode QRIS Resmi Toko (Opsional)</label>
-                            <input type="file" name="qris_image" id="qris_image" accept="image/*"
-                                   class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
-                            <p class="text-[11px] text-slate-400 mt-1">Jika belum diupload, sistem otomatis men-generate QR Code QRIS dinamis berdasarkan Nama Merchant &amp; Nominal Tagihan.</p>
-                            <?php if(!empty($qrisConfig['qris_image'])): ?>
-                                <div class="mt-2 flex items-center gap-3">
-                                    <img src="<?php echo e($qrisConfig['qris_image']); ?>" alt="QRIS Toko" class="h-14 w-14 object-contain bg-white rounded-lg border border-slate-200 p-1">
-                                    <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-semibold cursor-pointer">
-                                        <input type="checkbox" name="reset_qris_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
-                                        Hapus gambar &amp; gunakan QRIS otomatis
-                                    </label>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div>
-                            <label for="bank_transfer_info" class="block text-xs font-semibold text-gray-700 mb-1">Info Rekening Transfer Bank / E-Wallet</label>
-                            <input type="text" name="bank_transfer_info" id="bank_transfer_info" value="<?php echo e($qrisConfig['bank_info'] ?? ''); ?>"
-                                   class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 font-medium"
-                                   placeholder="Contoh: BCA 1234567890 a.n. Bening Laundry SMKN 1 Ciamis">
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Submit Button -->
                 <div class="pt-2 flex justify-end">
                     <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-brand-500/25 transition flex items-center gap-2">
@@ -269,35 +376,17 @@
             </form>
         </div>
 
-        <!-- Info Card + QRIS Preview -->
-        <div class="bg-gradient-to-br from-brand-600 to-indigo-900 rounded-2xl shadow-xl text-white p-6 flex flex-col justify-between">
+        <!-- WhatsApp Info Card -->
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl text-white p-6 flex flex-col justify-between">
             <div class="space-y-4">
-                <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Informasi Kontak &amp; QRIS Aktif</span>
-                <h3 class="text-xl font-bold leading-snug">Kontak &amp; Barcode Pembayaran QRIS Terintegrasi</h3>
-                <p class="text-brand-100 text-sm leading-relaxed">
-                    Sistem menyinkronkan nomor WhatsApp Admin &amp; Service ke halaman depan, serta menghubungkan <strong>Barcode QRIS</strong> secara otomatis ke halaman POS (Kasir), Pengambilan Cucian, Manajemen Pembayaran, dan Struk/Invoice.
+                <span class="bg-white/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Informasi Kontak Terintegrasi</span>
+                <h3 class="text-xl font-bold leading-snug">Sinkronisasi WhatsApp Layanan &amp; Branding</h3>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Nomor WhatsApp Admin &amp; Service otomatis tersambung ke tombol chat pelanggan pada halaman depan, halaman tracking pesanan, layar maintenance, dan invoice/nota digital.
                 </p>
-
-                <!-- Preview Kartu QRIS -->
-                <div class="bg-white text-slate-800 rounded-2xl p-4 shadow-lg mt-4 flex flex-col sm:flex-row items-center gap-4">
-                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl shrink-0">
-                        <img src="<?php echo e($qrisConfig['display_qr_url'] ?? ''); ?>" alt="QRIS Preview" class="w-28 h-28 object-contain">
-                    </div>
-                    <div class="text-center sm:text-left min-w-0 flex-1">
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-extrabold uppercase tracking-wider border border-rose-200 mb-1">
-                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg> QRIS CONNECTED
-                        </div>
-                        <p class="text-sm font-extrabold text-slate-900 truncate"><?php echo e($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'); ?></p>
-                        <p class="text-xs font-mono text-slate-500 mt-0.5">NMID: <?php echo e($qrisConfig['nmid'] ?? 'ID1026000109281'); ?></p>
-                        <p class="text-[11px] text-slate-500 mt-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> <?php echo e($qrisConfig['bank_info'] ?? '-'); ?>
-
-                        </p>
-                    </div>
-                </div>
             </div>
             
-            <div class="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
+            <div class="mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -305,7 +394,7 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-brand-200">WhatsApp Link Preview</p>
+                        <p class="text-xs text-slate-400">WhatsApp Admin Preview</p>
                         <a href="https://wa.me/<?php echo e($adminWA); ?>" target="_blank" class="text-sm font-bold text-white hover:underline flex items-center gap-1">
                             wa.me/<?php echo e($adminWA); ?>
 
@@ -315,12 +404,16 @@
                         </a>
                     </div>
                 </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400">WhatsApp Service</p>
+                    <a href="https://wa.me/<?php echo e($serviceWA); ?>" target="_blank" class="text-sm font-bold text-emerald-400 hover:underline">wa.me/<?php echo e($serviceWA); ?></a>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Kategori Pengeluaran Section -->
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+    <div id="kategori-panel" class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -459,7 +552,7 @@
 
     <?php if(auth()->user()->isAdmin()): ?>
     <!-- Manajemen Akun & Ganti Password Section -->
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+    <div id="user-management-panel" class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
                 <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -1008,6 +1101,18 @@
                 closeQrModal();
             }
         });
+
+        function previewQrisFile(input) {
+            const previewImg = document.getElementById('settingsQrisPreviewImg');
+            if (!previewImg || !input.files || !input.files[0]) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
 
         function copyAdminSecret(text, btn) {
             navigator.clipboard.writeText(text).then(() => {

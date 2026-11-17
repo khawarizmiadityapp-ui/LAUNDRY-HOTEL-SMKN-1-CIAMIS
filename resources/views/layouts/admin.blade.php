@@ -448,6 +448,11 @@
     @if(session('info'))
         showToast('{{ session('info') }}', 'info');
     @endif
+    @if($errors->any())
+        @foreach($errors->all() as $errMsg)
+            showToast(@json($errMsg), 'error');
+        @endforeach
+    @endif
 </script>
 
 @include('components.logout-confirm')

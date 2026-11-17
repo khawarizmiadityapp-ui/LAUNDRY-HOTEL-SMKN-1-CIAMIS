@@ -1006,6 +1006,7 @@ function posApp() {
         qrisAmount: 0,
         qrisTitle: '',
         qrisStaticImage: @json($qrisConfig['qris_image'] ?? null),
+        qrisCustomPayload: @json($qrisConfig['qris_payload'] ?? ''),
         qrisMerchant: @json($qrisConfig['merchant_name'] ?? 'BENING LAUNDRY - SMKN 1 CIAMIS'),
         qrisNmid: @json($qrisConfig['nmid'] ?? 'ID1026000109281'),
 
@@ -1020,7 +1021,9 @@ function posApp() {
                 return this.qrisStaticImage;
             }
             const amt = Math.round(Number(amount) || 0);
-            const payload = `QRIS:${this.qrisMerchant}|NMID:${this.qrisNmid}|AMOUNT:Rp${amt}|REF:${ref}`;
+            const payload = this.qrisCustomPayload
+                ? this.qrisCustomPayload
+                : `QRIS:${this.qrisMerchant}|NMID:${this.qrisNmid}|AMOUNT:Rp${amt}|REF:${ref}`;
             return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=${encodeURIComponent(payload)}`;
         },
 

@@ -469,6 +469,11 @@
     <?php if(session('info')): ?>
         showToast('<?php echo e(session('info')); ?>', 'info');
     <?php endif; ?>
+    <?php if($errors->any()): ?>
+        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $errMsg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            showToast(<?php echo json_encode($errMsg, 15, 512) ?>, 'error');
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php endif; ?>
 </script>
 
 <?php echo $__env->make('components.logout-confirm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

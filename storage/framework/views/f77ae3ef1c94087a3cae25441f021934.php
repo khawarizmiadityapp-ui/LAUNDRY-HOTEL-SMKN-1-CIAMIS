@@ -142,7 +142,16 @@
     </nav>
 
     
-    <div class="px-3 py-4 border-t border-slate-100">
+    <div class="px-3 py-4 border-t border-slate-100 space-y-1.5">
+        <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+            <a href="<?php echo e(route('admin.dashboard')); ?>"
+               class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition-all duration-150">
+                <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+                <span>Kembali ke Portal Admin</span>
+            </a>
+        <?php endif; ?>
         <button type="button" onclick="confirmLogout(event)"
                 class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-500 hover:bg-rose-50 transition-all duration-150">
             <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
