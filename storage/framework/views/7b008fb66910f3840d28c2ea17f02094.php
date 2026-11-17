@@ -68,6 +68,29 @@
         </div>
     </div>
 
+    <div class="w-full max-w-[530px]">
+        <?php if (isset($component)) { $__componentOriginal50ee456cb3619140a1e872f9ab9a9185 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.maintenance-banner','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('maintenance-banner'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $attributes = $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $component = $__componentOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
+    </div>
+
     <!-- 2FA Main Card -->
     <div class="w-full max-w-[530px]">
         <div class="glass-card rounded-[28px] shadow-2xl p-6 sm:p-8 border border-white/80">

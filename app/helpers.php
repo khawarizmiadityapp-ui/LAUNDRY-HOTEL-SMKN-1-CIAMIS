@@ -350,3 +350,41 @@ if (!function_exists('calculate_payment_recap')) {
         ];
     }
 }
+
+if (!function_exists('get_maintenance_config')) {
+    /**
+     * Get system maintenance notice configuration managed by Super Admin.
+     */
+    function get_maintenance_config(): array
+    {
+        $defaults = [
+            'enabled' => false,
+            'mode' => 'banner',
+            'title' => 'Pemberitahuan Perbaikan Sistem (Maintenance)',
+            'message' => 'Sistem sedang dalam tahap perbaikan dan pemeliharaan. Mohon maaf atas ketidaknyamanannya, layanan akan segera kembali normal.',
+            'eta' => '',
+            'updated_at' => null,
+            'updated_by' => null,
+        ];
+
+        try {
+            $enabled = \App\Models\Setting::getValue('maintenance_notice_enabled', '0') === '1';
+            $mode = \App\Models\Setting::getValue('maintenance_notice_mode', 'banner');
+            if (!in_array($mode, ['banner', 'full'], true)) {
+                $mode = 'banner';
+            }
+
+            return [
+                'enabled' => $enabled,
+                'mode' => $mode,
+                'title' => \App\Models\Setting::getValue('maintenance_notice_title', $defaults['title']) ?: $defaults['title'],
+                'message' => \App\Models\Setting::getValue('maintenance_notice_message', $defaults['message']) ?: $defaults['message'],
+                'eta' => (string) (\App\Models\Setting::getValue('maintenance_notice_eta', '') ?? ''),
+                'updated_at' => \App\Models\Setting::getValue('maintenance_notice_updated_at'),
+                'updated_by' => \App\Models\Setting::getValue('maintenance_notice_updated_by'),
+            ];
+        } catch (\Throwable $e) {
+            return $defaults;
+        }
+    }
+}

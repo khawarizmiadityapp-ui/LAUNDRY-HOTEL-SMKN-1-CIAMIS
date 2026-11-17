@@ -38,6 +38,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'staffOrAdmin' => \App\Http\Middleware\EnsureUserIsStaffOrAdmin::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\MaintenanceNoticeMiddleware::class,
+        ]);
     })
     ->withSchedule(function ($schedule): void {
         // Automated Backups - Daily at 2 AM

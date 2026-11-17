@@ -10,6 +10,125 @@
         </div>
     </div>
 
+    <?php if(auth()->user()->isSuperAdmin()): ?>
+    <?php
+        $maint = $maintenanceConfig ?? get_maintenance_config();
+    ?>
+    <!-- Maintenance Notice Control (Khusus Super Admin) -->
+    <div id="maintenance-panel" class="bg-white rounded-2xl shadow-md border <?php echo e($maint['enabled'] ? 'border-amber-300 ring-2 ring-amber-400/30' : 'border-purple-100'); ?> p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-5">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl <?php echo e($maint['enabled'] ? 'bg-amber-100 text-amber-700' : 'bg-purple-50 text-purple-600'); ?> flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-lg font-bold text-slate-800">Pemberitahuan Maintenance</h2>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                            Khusus Super Admin
+                        </span>
+                        <?php if($maint['enabled']): ?>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-white uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                Sedang Aktif
+                            </span>
+                        <?php else: ?>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 uppercase">
+                                Nonaktif
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">Nyalakan pemberitahuan agar pelanggan, petugas, dan admin mengetahui saat sistem sedang ada perbaikan.</p>
+                </div>
+            </div>
+            <?php if(!empty($maint['updated_at'])): ?>
+                <div class="text-[11px] text-slate-400 text-left sm:text-right shrink-0">
+                    Terakhir diubah: <span class="font-semibold text-slate-600"><?php echo e($maint['updated_at']); ?></span>
+                    <?php if(!empty($maint['updated_by'])): ?>
+                        <br>oleh <span class="font-semibold text-slate-600"><?php echo e($maint['updated_by']); ?></span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <form action="<?php echo e(route('admin.settings.maintenance')); ?>" method="POST" class="space-y-4">
+            <?php echo csrf_field(); ?>
+
+            <div x-data="{ maintEnabled: <?php echo e($maint['enabled'] ? 'true' : 'false'); ?> }" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <div>
+                    <p class="text-sm font-bold text-slate-800">Status Pemberitahuan Maintenance</p>
+                    <p class="text-xs text-slate-500">Aktifkan untuk menampilkan pemberitahuan sedang ada perbaikan kepada seluruh pengguna.</p>
+                </div>
+                <label class="inline-flex items-center gap-3 cursor-pointer shrink-0 select-none">
+                    <input type="hidden" name="enabled" value="0">
+                    <input type="checkbox" name="enabled" value="1" id="maintenance_enabled" x-model="maintEnabled" class="sr-only peer" <?php echo e($maint['enabled'] ? 'checked' : ''); ?>>
+                    <div class="relative w-12 h-6 bg-slate-300 rounded-full peer peer-checked:bg-amber-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6 shadow-inner"></div>
+                    <span class="text-xs font-bold uppercase tracking-wider"
+                          :class="maintEnabled ? 'text-amber-700' : 'text-slate-600'"
+                          x-text="maintEnabled ? 'Nyala (ON)' : 'Mati (OFF)'">
+                        <?php echo e($maint['enabled'] ? 'Nyala (ON)' : 'Mati (OFF)'); ?>
+
+                    </span>
+                </label>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="maintenance_title" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Judul Pemberitahuan</label>
+                    <input type="text" name="title" id="maintenance_title" value="<?php echo e($maint['title']); ?>" maxlength="120"
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-800 font-medium"
+                           placeholder="Pemberitahuan Perbaikan Sistem (Maintenance)">
+                </div>
+
+                <div>
+                    <label for="maintenance_eta" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Estimasi Selesai (Opsional)</label>
+                    <input type="text" name="eta" id="maintenance_eta" value="<?php echo e($maint['eta']); ?>" maxlength="100"
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-800 font-medium"
+                           placeholder="Contoh: 17 Nov 2026, 10:00 WIB atau Sekitar 30 menit">
+                </div>
+            </div>
+
+            <div>
+                <label for="maintenance_message" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Pesan Pemberitahuan</label>
+                <textarea name="message" id="maintenance_message" rows="2" maxlength="600"
+                          class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-800"
+                          placeholder="Jelaskan kepada pengguna bahwa sistem sedang ada perbaikan..."><?php echo e($maint['message']); ?></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Mode Tampilan</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="cursor-pointer flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition">
+                        <input type="radio" name="mode" value="banner" <?php echo e(($maint['mode'] ?? 'banner') === 'banner' ? 'checked' : ''); ?> class="mt-0.5 text-amber-600 focus:ring-amber-500">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">Banner Pemberitahuan (Direkomendasikan)</span>
+                            <span class="text-[11px] text-slate-500">Menampilkan banner perbaikan di semua halaman, aplikasi tetap bisa digunakan normal.</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition">
+                        <input type="radio" name="mode" value="full" <?php echo e(($maint['mode'] ?? 'banner') === 'full' ? 'checked' : ''); ?> class="mt-0.5 text-rose-600 focus:ring-rose-500">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">Maintenance Penuh (Kunci Akses)</span>
+                            <span class="text-[11px] text-slate-500">Tampilkan layar maintenance ke semua pengunjung/petugas/admin. Hanya Super Admin yang bisa akses.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button type="submit" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-600/20 transition inline-flex items-center gap-2 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Simpan Pengaturan Maintenance
+                </button>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+
     <!-- Settings Card Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Settings Form Card -->

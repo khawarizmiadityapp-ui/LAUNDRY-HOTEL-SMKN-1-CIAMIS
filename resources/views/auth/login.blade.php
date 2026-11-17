@@ -55,6 +55,10 @@
         </div>
     </div>
 
+    <div class="w-full max-w-[400px]">
+        <x-maintenance-banner />
+    </div>
+
     <!-- Login Card Container -->
     <div class="w-full max-w-[400px]">
         <div class="glass-card rounded-[20px] shadow-2xl p-10 md:p-12">

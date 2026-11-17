@@ -68,6 +68,10 @@
         </div>
     </div>
 
+    <div class="w-full max-w-[530px]">
+        <x-maintenance-banner />
+    </div>
+
     <!-- 2FA Main Card -->
     <div class="w-full max-w-[530px]">
         <div class="glass-card rounded-[28px] shadow-2xl p-6 sm:p-8 border border-white/80">

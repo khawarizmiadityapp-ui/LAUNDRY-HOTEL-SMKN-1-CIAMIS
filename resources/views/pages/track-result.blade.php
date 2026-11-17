@@ -36,6 +36,7 @@
 <body class="h-full bg-slate-50 text-slate-900 antialiased p-6 md:p-12">
 
     <div class="max-w-3xl mx-auto">
+        <x-maintenance-banner />
         {{-- Back Button --}}
         <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-sky-500 font-bold mb-8 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

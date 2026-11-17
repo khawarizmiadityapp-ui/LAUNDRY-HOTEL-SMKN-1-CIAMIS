@@ -77,6 +77,10 @@
     {{-- ===================== HERO SECTION ===================== --}}
     <section class="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-gradient-to-b from-sky-50/50 via-white to-white">
 
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-40">
+            <x-maintenance-banner />
+        </div>
+
         @if(Session::has('success'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50 mb-8 mt-4">
                 <div class="bg-emerald-500 text-white rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center gap-4">

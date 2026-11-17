@@ -205,6 +205,7 @@
 
         <div class="p-4 md:p-8 space-y-6 max-w-screen-xl mx-auto">
             <div class="p-6">
+                <x-maintenance-banner />
                 {{-- INI YANG DIGANTI-GANTI --}}
                 @yield('content')
             </div>

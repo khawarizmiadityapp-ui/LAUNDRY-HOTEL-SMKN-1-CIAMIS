@@ -810,8 +810,9 @@ class AdminController extends Controller
         $adminQrCodeUrl = $currentAdmin ? Google2FAService::getQrCodeImageUrl('Bening Laundry', $currentAdmin->email, $currentAdmin->google2fa_secret) : '';
         $adminFormattedSecret = $currentAdmin ? Google2FAService::formatSecretKey($currentAdmin->google2fa_secret) : '';
         $adminRawSecret = $currentAdmin ? $currentAdmin->google2fa_secret : '';
+        $maintenanceConfig = get_maintenance_config();
         
-        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret'));
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret', 'maintenanceConfig'));
     }
 
     public function updateSettings(Request $request)
@@ -878,6 +879,53 @@ class AdminController extends Controller
             return back()->with('success', 'Pengaturan aplikasi & pembayaran QRIS berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
+        }
+    }
+
+    public function updateMaintenanceNotice(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengelola pemberitahuan maintenance.');
+        }
+
+        $request->validate([
+            'enabled' => 'nullable|boolean',
+            'mode' => 'nullable|in:banner,full',
+            'title' => 'nullable|string|max:120',
+            'message' => 'nullable|string|max:600',
+            'eta' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $enabled = $request->boolean('enabled');
+            $mode = $request->input('mode', 'banner');
+            if (!in_array($mode, ['banner', 'full'], true)) {
+                $mode = 'banner';
+            }
+
+            $title = trim((string) $request->input('title', ''));
+            $message = trim((string) $request->input('message', ''));
+            $eta = trim((string) $request->input('eta', ''));
+
+            \App\Models\Setting::setValue('maintenance_notice_enabled', $enabled ? '1' : '0');
+            \App\Models\Setting::setValue('maintenance_notice_mode', $mode);
+            if ($title !== '') {
+                \App\Models\Setting::setValue('maintenance_notice_title', $title);
+            }
+            if ($message !== '') {
+                \App\Models\Setting::setValue('maintenance_notice_message', $message);
+            }
+            \App\Models\Setting::setValue('maintenance_notice_eta', $eta);
+            \App\Models\Setting::setValue('maintenance_notice_updated_at', now()->format('d M Y H:i') . ' WIB');
+            \App\Models\Setting::setValue('maintenance_notice_updated_by', Auth::user()->name ?? 'Super Admin');
+
+            $statusText = $enabled
+                ? 'Pemberitahuan maintenance berhasil DINYALAKAN (' . ($mode === 'full' ? 'Mode Maintenance Penuh' : 'Mode Banner Pemberitahuan') . ').'
+                : 'Pemberitahuan maintenance berhasil DIMATIKAN.';
+
+            return back()->with('success', $statusText);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui status maintenance: ' . $e->getMessage());
         }
     }
 

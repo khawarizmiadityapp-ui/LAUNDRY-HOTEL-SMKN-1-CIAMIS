@@ -36,6 +36,26 @@
 <body class="h-full bg-slate-50 text-slate-900 antialiased p-6 md:p-12">
 
     <div class="max-w-3xl mx-auto">
+        <?php if (isset($component)) { $__componentOriginal50ee456cb3619140a1e872f9ab9a9185 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.maintenance-banner','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('maintenance-banner'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $attributes = $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $component = $__componentOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
         
         <a href="<?php echo e(url('/')); ?>" class="inline-flex items-center gap-2 text-slate-400 hover:text-sky-500 font-bold mb-8 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

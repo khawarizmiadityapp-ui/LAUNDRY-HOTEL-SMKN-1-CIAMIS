@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth']], function () {
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/settings/maintenance', [AdminController::class, 'updateMaintenanceNotice'])->name('settings.maintenance');
         
         // POS (Pesanan Baru)
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');

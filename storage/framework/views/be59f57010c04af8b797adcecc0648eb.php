@@ -218,6 +218,17 @@
             </form>
 
             <div class="flex items-center gap-3 ml-auto">
+                <?php $topbarMaint = get_maintenance_config(); ?>
+                <?php if(($topbarMaint['enabled'] ?? false) && Auth::check() && Auth::user()->isSuperAdmin()): ?>
+                    <a href="<?php echo e(route('admin.settings')); ?>#maintenance-panel"
+                       class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 text-xs font-bold transition-colors"
+                       title="Pemberitahuan Maintenance Aktif — Klik untuk atur">
+                        <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                        </svg>
+                        <span>Maintenance <?php echo e(($topbarMaint['mode'] ?? 'banner') === 'full' ? '(Tutup)' : '(Banner)'); ?></span>
+                    </a>
+                <?php endif; ?>
                 <!-- Notification Bell -->
                 <div class="relative">
                     <button onclick="toggleNotifications()" class="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition">
@@ -297,6 +308,26 @@
 
         <!-- PAGE CONTENT -->
         <main class="flex-1 overflow-y-auto p-5 lg:p-7 animate-fade-in">
+            <?php if (isset($component)) { $__componentOriginal50ee456cb3619140a1e872f9ab9a9185 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.maintenance-banner','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('maintenance-banner'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $attributes = $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__attributesOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185)): ?>
+<?php $component = $__componentOriginal50ee456cb3619140a1e872f9ab9a9185; ?>
+<?php unset($__componentOriginal50ee456cb3619140a1e872f9ab9a9185); ?>
+<?php endif; ?>
             <?php echo $__env->yieldContent('content'); ?>
         </main>
 
