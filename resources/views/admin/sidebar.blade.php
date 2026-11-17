@@ -10,11 +10,11 @@ Usage: @include('components.stat_card', [
         'progress'=> null,     // int 0–100 or null
     ])  --}}
 <aside id="sidebar"
-           class="fixed lg:relative z-30 w-64 h-full bg-white flex flex-col border-r border-slate-100 shadow-card
+           class="fixed inset-y-0 left-0 lg:static z-30 w-64 h-full shrink-0 bg-white flex flex-col border-r border-slate-100 shadow-card overflow-hidden
                   transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
 
         <!-- Logo -->
-        <div class="px-6 py-5 border-b border-slate-100">
+        <div class="px-5 py-4 border-b border-slate-100 shrink-0">
             <div class="flex items-center gap-3">
                 <img src="{{ asset('images/logo-bening.png') }}" alt="Logo Bening Laundry" class="w-9 h-9 object-contain rounded-xl drop-shadow-sm">
                 <div>
@@ -25,67 +25,73 @@ Usage: @include('components.stat_card', [
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+        <nav class="flex-1 min-h-0 px-3 py-3 overflow-y-auto">
             @php
                 $sidebarMenus = $sidebarMenus ?? collect();
                 $sidebarOnDutyCount = $sidebarOnDutyCount ?? 0;
                 $sidebarOnDutyPetugas = $sidebarOnDutyPetugas ?? collect();
             @endphp
 
-            @foreach ($sidebarMenus as $menu)
-                <a href="{{ $menu['url'] }}"
-                   class="sidebar-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium
-                          {{ !empty($menu['active']) ? 'active text-white' : 'text-slate-500' }}">
-                    <svg class="w-5 h-5 shrink-0 {{ !empty($menu['active']) ? 'stroke-white' : 'stroke-slate-400' }}"
-                         fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
-                    </svg>
-                    <span class="flex-1">{{ $menu['label'] }}</span>
-                    @if(!empty($menu['badge']))
-                        <span class="inline-flex min-w-6 h-6 items-center justify-center px-1.5 rounded-full text-[11px] font-semibold {{ !empty($menu['active']) ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700' }}">
-                            {{ $menu['badge'] }}
-                        </span>
+            <div class="space-y-0.5">
+                @foreach ($sidebarMenus as $menu)
+                    <a href="{{ $menu['url'] }}"
+                       class="sidebar-link flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-medium
+                              {{ !empty($menu['active']) ? 'active text-white' : 'text-slate-500' }}">
+                        <svg class="w-5 h-5 shrink-0 {{ !empty($menu['active']) ? 'stroke-white' : 'stroke-slate-400' }}"
+                             fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
+                        </svg>
+                        <span class="flex-1">{{ $menu['label'] }}</span>
+                        @if(!empty($menu['badge']))
+                            <span class="inline-flex min-w-6 h-6 items-center justify-center px-1.5 rounded-full text-[11px] font-semibold {{ !empty($menu['active']) ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700' }}">
+                                {{ $menu['badge'] }}
+                            </span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100">
+                <div class="mx-1 p-3 rounded-xl border border-emerald-100 bg-emerald-50/70">
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Sedang Bertugas</p>
+                        <span class="text-[11px] font-semibold text-emerald-700">{{ $sidebarOnDutyCount }}</span>
+                    </div>
+
+                    @if($sidebarOnDutyPetugas->isEmpty())
+                        <p class="mt-1.5 text-xs text-slate-500">Belum ada petugas aktif saat ini.</p>
+                    @else
+                        <ul class="mt-2 space-y-1.5">
+                            @foreach($sidebarOnDutyPetugas as $petugas)
+                                <li class="flex items-start gap-2 text-xs text-slate-700">
+                                    <span class="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span class="leading-tight">
+                                        <span class="font-medium">{{ $petugas->nama }}</span>
+                                        <span class="text-slate-500">({{ $petugas->shift }})</span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
-                </a>
-            @endforeach
-
-            <div class="mt-5 mx-1 p-3 rounded-xl border border-emerald-100 bg-emerald-50/70">
-                <div class="flex items-center justify-between">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Sedang Bertugas</p>
-                    <span class="text-[11px] font-semibold text-emerald-700">{{ $sidebarOnDutyCount }}</span>
                 </div>
-
-                @if($sidebarOnDutyPetugas->isEmpty())
-                    <p class="mt-2 text-xs text-slate-500">Belum ada petugas aktif saat ini.</p>
-                @else
-                    <ul class="mt-2 space-y-1.5">
-                        @foreach($sidebarOnDutyPetugas as $petugas)
-                            <li class="flex items-start gap-2 text-xs text-slate-700">
-                                <span class="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span class="leading-tight">
-                                    <span class="font-medium">{{ $petugas->nama }}</span>
-                                    <span class="text-slate-500">({{ $petugas->shift }})</span>
-                                </span>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
             </div>
         </nav>
 
         <!-- Portal Petugas Switcher & Logout -->
-        <div class="px-3 py-4 border-t border-slate-100 space-y-1.5">
+        <div class="shrink-0 bg-white px-3 py-3 border-t border-slate-100 space-y-1.5">
             @if(auth()->check() && auth()->user()->isAdmin())
                 <a href="{{ route('petugas_piket.dashboard') }}"
-                   class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition-all duration-150">
+                   title="Portal Petugas (Semua Stasiun)"
+                   class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50/80 hover:bg-indigo-100 transition-all duration-150 whitespace-nowrap">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                     </svg>
-                    <span>Portal Petugas (Semua Stasiun)</span>
+                    <span class="truncate">Portal Petugas</span>
+                    <span class="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 shrink-0">Semua Role</span>
                 </a>
             @endif
             <button type="button" onclick="confirmLogout(event)"
-               class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-500
+               class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-medium text-rose-500
                       hover:bg-rose-50 transition-all duration-150">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"

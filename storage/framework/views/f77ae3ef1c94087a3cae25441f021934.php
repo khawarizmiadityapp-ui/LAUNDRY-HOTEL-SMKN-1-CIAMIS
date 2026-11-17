@@ -97,7 +97,7 @@
     <?php endif; ?>
 
     
-    <nav class="flex-1 px-2 space-y-1 overflow-y-auto">
+    <nav class="flex-1 min-h-0 px-2 space-y-1 overflow-y-auto">
         <?php $__empty_1 = true; $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <a href="<?php echo e($menu['url'] ?? '#'); ?>"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(($menu['is_active'] ?? false) ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'); ?>">
@@ -142,7 +142,7 @@
     </nav>
 
     
-    <div class="px-3 py-4 border-t border-slate-100 space-y-1.5">
+    <div class="shrink-0 px-2 pt-3 border-t border-slate-100 space-y-1.5">
         <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
             <a href="<?php echo e(route('admin.dashboard')); ?>"
                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50/70 hover:bg-indigo-100 transition-all duration-150">

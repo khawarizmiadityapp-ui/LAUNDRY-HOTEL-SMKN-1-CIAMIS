@@ -169,11 +169,25 @@
         .toast.removing {
             animation: slideOut 0.3s ease forwards;
         }
+        @media screen {
+            html, body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+        }
+        @media print {
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+            }
+        }
     </style>
 
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="h-full overflow-hidden bg-slate-50 text-slate-800 antialiased">
 
 <!-- Toast Container -->
 <div id="toast-container" class="toast-container"></div>
@@ -181,14 +195,14 @@
 <!-- Mobile overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 lg:hidden" onclick="toggleSidebar()"></div>
 
-<div class="flex h-screen overflow-hidden">
+<div class="fixed inset-0 flex h-full w-full overflow-hidden">
 
     <!-- ===================== SIDEBAR ===================== -->
     <?php echo $__env->make('admin.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <!-- =================== END SIDEBAR =================== -->
 
     <!-- ===================== MAIN AREA ===================== -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
 
         <!-- TOPBAR -->
         <header class="h-16 bg-white border-b border-slate-100 flex items-center gap-4 px-5 lg:px-7 shrink-0 shadow-sm z-10">
@@ -307,7 +321,7 @@
         <!-- END TOPBAR -->
 
         <!-- PAGE CONTENT -->
-        <main class="flex-1 overflow-y-auto p-5 lg:p-7 animate-fade-in">
+        <main class="flex-1 min-h-0 overflow-y-auto p-5 lg:p-7 animate-fade-in">
             <?php if (isset($component)) { $__componentOriginal50ee456cb3619140a1e872f9ab9a9185 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal50ee456cb3619140a1e872f9ab9a9185 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.maintenance-banner','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>

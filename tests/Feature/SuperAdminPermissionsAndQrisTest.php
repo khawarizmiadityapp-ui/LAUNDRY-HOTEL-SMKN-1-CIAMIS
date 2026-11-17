@@ -36,7 +36,7 @@ class SuperAdminPermissionsAndQrisTest extends TestCase
             $settingsRes->assertStatus(200);
             $settingsRes->assertSee('id="qris-config"', false);
             $settingsRes->assertSee(route('admin.settings.qris'));
-            $settingsRes->assertSee('Portal Petugas (Semua Stasiun)');
+            $settingsRes->assertSee('Portal Petugas');
 
             $pembayaranRes = $this->actingAs($user)->get(route('admin.pembayaran.index'));
             $pembayaranRes->assertStatus(200);
@@ -164,7 +164,7 @@ class SuperAdminPermissionsAndQrisTest extends TestCase
         foreach (['petugas.pos.index', 'petugas_piket.transaksi.index'] as $sharedRouteName) {
             $sharedRes = $this->actingAs($superAdmin)->get(route($sharedRouteName));
             $sharedRes->assertStatus(200);
-            $sharedRes->assertSee('Portal Petugas (Semua Stasiun)');
+            $sharedRes->assertSee('Portal Petugas');
         }
 
         $petugasRoutes = [
