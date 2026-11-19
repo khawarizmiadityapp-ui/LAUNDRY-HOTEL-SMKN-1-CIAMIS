@@ -55,6 +55,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/settings/qris', [AdminController::class, 'updateQris'])->name('settings.qris');
         Route::post('/settings/maintenance', [AdminController::class, 'updateMaintenanceNotice'])->name('settings.maintenance');
+        Route::post('/settings/system-cache', [AdminController::class, 'runSystemCache'])->name('settings.cache');
         
         // POS (Pesanan Baru)
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');

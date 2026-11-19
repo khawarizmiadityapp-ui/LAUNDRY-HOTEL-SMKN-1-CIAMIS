@@ -18,6 +18,10 @@
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766" /></svg>
                 Maintenance
             </a>
+            <a href="#system-cache-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                Cache &amp; Optimasi
+            </a>
             <?php endif; ?>
             <a href="#general-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
                 Kontak &amp; Branding
@@ -280,6 +284,146 @@
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- System Cache & Optimization Panel (Khusus Super Admin) -->
+    <?php
+        $cacheInfo = $cacheStatus ?? [
+            'config_cached' => app()->configurationIsCached(),
+            'routes_cached' => app()->routesAreCached(),
+            'compiled_views_count' => count(glob(storage_path('framework/views/*.php')) ?: []),
+        ];
+    ?>
+    <div id="system-cache-panel" class="bg-white rounded-2xl shadow-md border border-emerald-100 p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-5">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-lg font-bold text-slate-800">Cache &amp; Optimasi Sistem (Artisan)</h2>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                            Khusus Super Admin
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">Jalankan pembersihan dan caching Laravel langsung dari dashboard tanpa perlu membuka terminal SSH.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold shrink-0">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border <?php echo e($cacheInfo['config_cached'] ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200'); ?>">
+                    <span class="w-1.5 h-1.5 rounded-full <?php echo e($cacheInfo['config_cached'] ? 'bg-emerald-500' : 'bg-slate-400'); ?>"></span>
+                    Config: <?php echo e($cacheInfo['config_cached'] ? 'Cached' : 'Dinamis'); ?>
+
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border <?php echo e($cacheInfo['routes_cached'] ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200'); ?>">
+                    <span class="w-1.5 h-1.5 rounded-full <?php echo e($cacheInfo['routes_cached'] ? 'bg-emerald-500' : 'bg-slate-400'); ?>"></span>
+                    Route: <?php echo e($cacheInfo['routes_cached'] ? 'Cached' : 'Dinamis'); ?>
+
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200">
+                    Views: <?php echo e($cacheInfo['compiled_views_count']); ?> file
+                </span>
+            </div>
+        </div>
+
+        <!-- Jalankan Semua Sekaligus -->
+        <div class="mb-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <p class="text-sm font-extrabold text-emerald-950">Optimasi Penuh Sekali Klik (Setelah Deploy / Update)</p>
+                <p class="text-xs text-emerald-800/80 mt-0.5">Menjalankan berurutan: <code class="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-emerald-200">optimize:clear</code> &rarr; <code class="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-emerald-200">config:cache</code> &rarr; <code class="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-emerald-200">route:cache</code> &rarr; <code class="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-emerald-200">view:cache</code>.</p>
+            </div>
+            <form action="<?php echo e(route('admin.settings.cache')); ?>" method="POST" class="shrink-0">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="action" value="optimize_all">
+                <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition inline-flex items-center justify-center gap-2 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    Jalankan Semua (4 Perintah)
+                </button>
+            </form>
+        </div>
+
+        <!-- Tombol Satuan -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+            <div class="p-4 rounded-xl border border-rose-200/80 bg-rose-50/40 flex flex-col justify-between gap-3">
+                <div>
+                    <code class="text-[11px] font-mono font-bold text-rose-700 bg-white px-2 py-0.5 rounded-md border border-rose-200">php artisan optimize:clear</code>
+                    <h3 class="text-sm font-bold text-slate-800 mt-2">Bersihkan Semua Cache</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Hapus seluruh cache config, route, compiled view, dan cache aplikasi.</p>
+                </div>
+                <form action="<?php echo e(route('admin.settings.cache')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="action" value="optimize_clear">
+                    <button type="submit" class="w-full px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Optimize Clear
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-200/80 bg-indigo-50/40 flex flex-col justify-between gap-3">
+                <div>
+                    <code class="text-[11px] font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200">php artisan config:cache</code>
+                    <h3 class="text-sm font-bold text-slate-800 mt-2">Cache Konfigurasi</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Gabungkan dan cache file <span class="font-mono">config/*</span> &amp; <span class="font-mono">.env</span> agar lebih cepat.</p>
+                </div>
+                <form action="<?php echo e(route('admin.settings.cache')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="action" value="config_cache">
+                    <button type="submit" class="w-full px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Config Cache
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-4 rounded-xl border border-sky-200/80 bg-sky-50/40 flex flex-col justify-between gap-3">
+                <div>
+                    <code class="text-[11px] font-mono font-bold text-sky-700 bg-white px-2 py-0.5 rounded-md border border-sky-200">php artisan route:cache</code>
+                    <h3 class="text-sm font-bold text-slate-800 mt-2">Cache Routing</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Compile seluruh rute URL agar resolusi route jauh lebih ringan.</p>
+                </div>
+                <form action="<?php echo e(route('admin.settings.cache')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="action" value="route_cache">
+                    <button type="submit" class="w-full px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                        Route Cache
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 flex flex-col justify-between gap-3">
+                <div>
+                    <code class="text-[11px] font-mono font-bold text-amber-800 bg-white px-2 py-0.5 rounded-md border border-amber-200">php artisan view:cache</code>
+                    <h3 class="text-sm font-bold text-slate-800 mt-2">Cache Template Blade</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Pre-compile seluruh file Blade di <span class="font-mono">resources/views</span>.</p>
+                </div>
+                <form action="<?php echo e(route('admin.settings.cache')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="action" value="view_cache">
+                    <button type="submit" class="w-full px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+                        View Cache
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <?php if(session('cache_output')): ?>
+            <div class="mt-4 rounded-xl bg-slate-900 border border-slate-800 p-4 text-left">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Output Terminal Artisan</span>
+                    <span class="text-[10px] font-mono text-emerald-400">OK</span>
+                </div>
+                <pre class="text-xs font-mono text-emerald-300 whitespace-pre-wrap break-words leading-relaxed"><?php echo e(session('cache_output')); ?></pre>
+            </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 

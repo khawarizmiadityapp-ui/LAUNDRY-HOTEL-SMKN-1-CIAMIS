@@ -7,9 +7,14 @@ use App\Models\User;
 use App\Models\ServicePrice;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
 use App\Models\ActivityLog;
@@ -811,8 +816,13 @@ class AdminController extends Controller
         $adminFormattedSecret = $currentAdmin ? Google2FAService::formatSecretKey($currentAdmin->google2fa_secret) : '';
         $adminRawSecret = $currentAdmin ? $currentAdmin->google2fa_secret : '';
         $maintenanceConfig = get_maintenance_config();
+        $cacheStatus = [
+            'config_cached' => app()->configurationIsCached(),
+            'routes_cached' => app()->routesAreCached(),
+            'compiled_views_count' => count(glob(storage_path('framework/views/*.php')) ?: []),
+        ];
         
-        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret', 'maintenanceConfig'));
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret', 'maintenanceConfig', 'cacheStatus'));
     }
 
     public function updateSettings(Request $request)
@@ -1061,6 +1071,121 @@ class AdminController extends Controller
             ]);
 
             return back()->with('error', 'Gagal memperbarui password: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Eksekusi perintah Artisan cache & optimasi sistem (Khusus Super Admin).
+     */
+    public function runSystemCache(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengelola cache & optimasi sistem.');
+        }
+
+        $validated = $request->validate([
+            'action' => 'required|in:optimize_clear,config_cache,route_cache,view_cache,optimize_all',
+        ]);
+
+        $commandMap = [
+            'optimize_clear' => ['optimize:clear'],
+            'config_cache' => ['config:cache'],
+            'route_cache' => ['route:cache'],
+            'view_cache' => ['view:cache'],
+            'optimize_all' => ['optimize:clear', 'config:cache', 'route:cache', 'view:cache'],
+        ];
+
+        $labelMap = [
+            'optimize_clear' => 'php artisan optimize:clear',
+            'config_cache' => 'php artisan config:cache',
+            'route_cache' => 'php artisan route:cache',
+            'view_cache' => 'php artisan view:cache',
+            'optimize_all' => 'Semua Perintah Cache & Optimasi (optimize:clear, config:cache, route:cache, view:cache)',
+        ];
+
+        $action = $validated['action'];
+        $currentUser = Auth::user();
+        $redirectTarget = route('admin.settings') . '#system-cache-panel';
+
+        try {
+            $outputs = [];
+            foreach ($commandMap[$action] as $command) {
+                $cmdOutput = $this->executeArtisanCacheCommand($command);
+                $outputs[] = '$ php artisan ' . $command . ($cmdOutput !== '' ? "\n" . $cmdOutput : "\nDONE");
+            }
+
+            try {
+                ActivityLog::create([
+                    'log_name' => 'system_cache',
+                    'description' => "Super Admin {$currentUser->name} menjalankan {$labelMap[$action]}",
+                    'causer_type' => User::class,
+                    'causer_id' => $currentUser->id,
+                    'event' => 'system_cache_' . $action,
+                    'properties' => [
+                        'action' => $action,
+                        'commands' => $commandMap[$action],
+                    ],
+                ]);
+            } catch (\Throwable $logError) {
+                Log::warning('Failed to log system cache action', ['error' => $logError->getMessage()]);
+            }
+
+            return redirect($redirectTarget)
+                ->with('success', 'Berhasil menjalankan ' . $labelMap[$action] . '.')
+                ->with('cache_output', implode("\n\n", $outputs));
+        } catch (\Throwable $e) {
+            Log::error('System Cache Command Failed', [
+                'action' => $action,
+                'user_id' => $currentUser->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect($redirectTarget)
+                ->with('error', 'Gagal menjalankan perintah cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Execute an Artisan cache command cleanly without corrupting the active HTTP request container.
+     */
+    private function executeArtisanCacheCommand(string $command): string
+    {
+        if (function_exists('proc_open')) {
+            $phpBinary = (new PhpExecutableFinder())->find(false);
+            if ($phpBinary && str_contains(strtolower(basename($phpBinary)), 'php') && !str_contains(strtolower(basename($phpBinary)), 'cgi')) {
+                $process = new Process([$phpBinary, base_path('artisan'), $command, '--no-interaction'], base_path(), null, null, 60);
+                $process->run();
+
+                $output = trim($process->getOutput() . "\n" . $process->getErrorOutput());
+                if (!$process->isSuccessful()) {
+                    throw new \RuntimeException("Perintah php artisan {$command} gagal dijalankan: " . ($output ?: 'kode keluar ' . $process->getExitCode()));
+                }
+
+                return trim($process->getOutput());
+            }
+        }
+
+        // Fallback saat proc_open tidak tersedia (shared hosting): pulihkan instance container & facade setelah Artisan::call
+        $originalApp = Container::getInstance();
+        $originalFacadeApp = Facade::getFacadeApplication();
+
+        try {
+            $exitCode = Artisan::call($command);
+            $output = trim((string) Artisan::output());
+
+            if ($exitCode !== 0) {
+                throw new \RuntimeException("Perintah php artisan {$command} gagal dijalankan (kode keluar: {$exitCode}).");
+            }
+
+            return $output;
+        } finally {
+            if ($originalApp) {
+                Container::setInstance($originalApp);
+            }
+            if ($originalFacadeApp) {
+                Facade::setFacadeApplication($originalFacadeApp);
+            }
+            Facade::clearResolvedInstances();
         }
     }
 }
