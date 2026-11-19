@@ -1,0 +1,1 @@
+<?php /**PATH C:\laragon\www\LAUNDRY-HOTEL-SMKN-1-CIAMIS\resources\views\admin\inventory\create.blade.php ENDPATH**/ ?>

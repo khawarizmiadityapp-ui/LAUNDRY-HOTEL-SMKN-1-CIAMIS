@@ -31,6 +31,8 @@ use App\Http\Controllers\LandingController;
 // Public UI Routes
 Route::get('/', [LandingController::class, 'index'])->name('home');
 Route::get('/track', [LandingController::class, 'trackStatus'])->middleware('throttle:15,1')->name('track.status');
+Route::get('/sitemap.xml', [LandingController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/robots.txt', [LandingController::class, 'robots'])->name('seo.robots');
 
 // Public Routes
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
@@ -54,6 +56,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/settings/qris', [AdminController::class, 'updateQris'])->name('settings.qris');
+        Route::post('/settings/seo', [AdminController::class, 'updateSeoSettings'])->name('settings.seo');
         Route::post('/settings/maintenance', [AdminController::class, 'updateMaintenanceNotice'])->name('settings.maintenance');
         Route::post('/settings/system-cache', [AdminController::class, 'runSystemCache'])->name('settings.cache');
         

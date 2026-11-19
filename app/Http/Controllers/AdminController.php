@@ -18,6 +18,7 @@ use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Pengeluaran;
 use App\Models\ActivityLog;
+use App\Models\Setting;
 use App\Services\Google2FAService;
 use Illuminate\Support\Facades\Hash;
 use App\Services\TransactionService;
@@ -816,13 +817,14 @@ class AdminController extends Controller
         $adminFormattedSecret = $currentAdmin ? Google2FAService::formatSecretKey($currentAdmin->google2fa_secret) : '';
         $adminRawSecret = $currentAdmin ? $currentAdmin->google2fa_secret : '';
         $maintenanceConfig = get_maintenance_config();
+        $seoConfig = get_seo_config();
         $cacheStatus = [
             'config_cached' => app()->configurationIsCached(),
             'routes_cached' => app()->routesAreCached(),
             'compiled_views_count' => count(glob(storage_path('framework/views/*.php')) ?: []),
         ];
         
-        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret', 'maintenanceConfig', 'cacheStatus'));
+        return view('admin.settings', compact('adminWA', 'serviceWA', 'heroImage', 'logoImage', 'qrisConfig', 'kategoriList', 'userList', 'adminQrCodeUrl', 'adminFormattedSecret', 'adminRawSecret', 'maintenanceConfig', 'seoConfig', 'cacheStatus'));
     }
 
     public function updateSettings(Request $request)
@@ -1142,6 +1144,71 @@ class AdminController extends Controller
 
             return redirect($redirectTarget)
                 ->with('error', 'Gagal menjalankan perintah cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Simpan konfigurasi SEO & verifikasi Google Search Console (Super Admin & Admin).
+     */
+    public function updateSeoSettings(Request $request)
+    {
+        $currentUser = Auth::user();
+        if (!$currentUser || !$currentUser->isAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Admin atau Super Admin yang dapat mengelola pengaturan SEO.');
+        }
+
+        $validated = $request->validate([
+            'seo_title' => 'required|string|max:120',
+            'seo_description' => 'required|string|max:300',
+            'seo_keywords' => 'nullable|string|max:300',
+            'seo_google_verification' => 'nullable|string|max:255',
+        ]);
+
+        $redirectTarget = route('admin.settings') . '#seo-config';
+
+        try {
+            $cleanTitle = trim(strip_tags($validated['seo_title']));
+            $cleanDescription = trim(strip_tags($validated['seo_description']));
+            $cleanKeywords = trim(strip_tags((string) ($validated['seo_keywords'] ?? '')));
+
+            $rawVerification = trim((string) ($validated['seo_google_verification'] ?? ''));
+            if ($rawVerification !== '' && preg_match('/content\s*=\s*["\']([^"\']+)["\']/i', $rawVerification, $matches)) {
+                $rawVerification = $matches[1];
+            }
+            $cleanVerification = trim(strip_tags($rawVerification));
+
+            Setting::setValue('seo_title', $cleanTitle);
+            Setting::setValue('seo_description', $cleanDescription);
+            Setting::setValue('seo_keywords', $cleanKeywords);
+            Setting::setValue('seo_google_verification', $cleanVerification);
+
+            try {
+                $roleTitle = $currentUser->isSuperAdmin() ? 'Super Admin' : 'Admin';
+                ActivityLog::create([
+                    'log_name' => 'seo_settings',
+                    'description' => "{$roleTitle} {$currentUser->name} memperbarui konfigurasi SEO & Google Search Console",
+                    'event' => 'seo_settings_updated',
+                    'causer_type' => User::class,
+                    'causer_id' => $currentUser->id,
+                    'properties' => [
+                        'seo_title' => $cleanTitle,
+                        'has_google_verification' => $cleanVerification !== '',
+                    ],
+                ]);
+            } catch (\Throwable $logError) {
+                Log::warning('Failed to log SEO settings update', ['error' => $logError->getMessage()]);
+            }
+
+            return redirect($redirectTarget)
+                ->with('success', 'Konfigurasi SEO & Google Search Console berhasil disimpan.');
+        } catch (\Throwable $e) {
+            Log::error('Update SEO Settings Failed', [
+                'user_id' => $currentUser->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect($redirectTarget)
+                ->with('error', 'Gagal menyimpan pengaturan SEO: ' . $e->getMessage());
         }
     }
 
