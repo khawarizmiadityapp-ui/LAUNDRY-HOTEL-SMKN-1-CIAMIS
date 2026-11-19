@@ -2,13 +2,78 @@
     $adminWA = \App\Models\Setting::getValue('admin_wa', '6282116035029');
     $serviceWA = \App\Models\Setting::getValue('service_wa', '6282116035029');
     $formattedWA = '+' . substr($adminWA, 0, 2) . ' ' . substr($adminWA, 2, 3) . '-' . substr($adminWA, 5, 4) . '-' . substr($adminWA, 9);
+    $seo = $seo ?? get_seo_config();
+
+    $schemaOffers = $layanans->map(function ($svc) {
+        return [
+            '@type' => 'Offer',
+            'priceCurrency' => 'IDR',
+            'price' => (float) $svc->harga,
+            'itemOffered' => [
+                '@type' => 'Service',
+                'name' => $svc->nama,
+                'category' => ucfirst((string) $svc->kategori),
+            ],
+        ];
+    })->values()->all();
+
+    $schemaData = [
+        '@context' => 'https://schema.org',
+        '@type' => 'DryCleaningOrLaundry',
+        'name' => 'Bening Laundry SMKN 1 Ciamis',
+        'description' => $seo['description'],
+        'url' => url('/'),
+        'image' => $seo['og_image'],
+        'telephone' => '+' . ltrim((string) $adminWA, '+'),
+        'priceRange' => 'Rp',
+        'address' => [
+            '@type' => 'PostalAddress',
+            'streetAddress' => 'Jl. K.H. Ahmad Dahlan No.14, Gedung Hotel SMKN 1 Ciamis',
+            'addressLocality' => 'Ciamis',
+            'addressRegion' => 'Jawa Barat',
+            'addressCountry' => 'ID',
+        ],
+        'areaServed' => [
+            '@type' => 'City',
+            'name' => 'Ciamis',
+        ],
+        'makesOffer' => $schemaOffers,
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="id" class="h-full scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMKN 1 Ciamis Laundry — Jasa Laundry Profesional & Terpercaya</title>
+    <title>{{ $seo['title'] }}</title>
+    <meta name="description" content="{{ $seo['description'] }}">
+    <meta name="keywords" content="{{ $seo['keywords'] }}">
+    <meta name="author" content="{{ $seo['author'] }}">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="{{ url('/') }}">
+    <link rel="icon" href="{{ $seo['favicon'] }}" type="image/jpeg">
+    <link rel="apple-touch-icon" href="{{ $seo['favicon'] }}">
+    @if(!empty($seo['google_verification']))
+    <meta name="google-site-verification" content="{{ $seo['google_verification'] }}">
+    @endif
+
+    {{-- Open Graph / WhatsApp Preview --}}
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Bening Laundry SMKN 1 Ciamis">
+    <meta property="og:title" content="{{ $seo['title'] }}">
+    <meta property="og:description" content="{{ $seo['description'] }}">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:image" content="{{ $seo['og_image'] }}">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seo['title'] }}">
+    <meta name="twitter:description" content="{{ $seo['description'] }}">
+    <meta name="twitter:image" content="{{ $seo['og_image'] }}">
+
+    {{-- LocalBusiness / Laundry JSON-LD Schema --}}
+    <script type="application/ld+json">{!! json_encode($schemaData, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     
     {{-- Google Fonts: Plus Jakarta Sans --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,12 +172,15 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center md:text-left md:flex items-center gap-12">
                 <div class="flex-1 space-y-6">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100/80 text-sky-700 text-xs font-bold tracking-wide">
+                        Unit Produksi Perhotelan • SMKN 1 Ciamis
+                    </span>
                     <h1 class="text-4xl md:text-6xl font-800 text-slate-900 font-extrabold tracking-tight leading-[1.1]">
-                        Pakaian Bersih, <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400 uppercase">Cepat & Rapih.</span>
+                        Laundry Bersih di Ciamis, <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400 uppercase">Cepat &amp; Rapih.</span>
                     </h1>
                     <p class="text-base text-slate-500 max-w-lg leading-relaxed">
-                        Nikmati layanan laundry premium dengan standar kebersihan tertinggi. Kami pastikan setiap helai pakaian Anda kembali bersih, rapi, dan sejuk dipandang.
+                        Nikmati layanan laundry kiloan dan satuan premium dari Bening Laundry SMKN 1 Ciamis dengan standar kebersihan tertinggi. Setiap helai pakaian kembali bersih, wangi, rapi, dan dapat dilacak secara real-time.
                     </p>
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-4">
                         <a href="https://wa.me/{{ $serviceWA }}?text=Halo%20Bening%20Laundry,%20saya%20ingin%20memesan%20layanan%20laundry." target="_blank" class="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-sky-500/30 hover:bg-sky-600 hover:-translate-y-1 transition-all flex items-center gap-2">
@@ -129,7 +197,7 @@
                     {{-- Mockup or Image --}}
                     <div class="relative w-full aspect-square rounded-[3rem] bg-slate-100 overflow-hidden shadow-2xl rotate-3 transition-transform hover:rotate-0 duration-500 group">
                          <div class="absolute inset-0 bg-gradient-to-br from-sky-500/20 to-transparent z-10 group-hover:opacity-50 transition-opacity"></div>
-                         <img src="{{ $heroImage }}" alt="Laundry Services" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                         <img src="{{ $heroImage }}" alt="Bening Laundry SMKN 1 Ciamis — Jasa Cuci dan Setrika Ciamis" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                     </div>
                     {{-- Floating Checkmark --}}
                     <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 flex items-center justify-center">
@@ -278,10 +346,10 @@
             </div>
 
             <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="text-xs text-slate-500">© {{ date('Y') }} SMKN 1 Ciamis Laundry. Semua hak dilindungi.</p>
+                <p class="text-xs text-slate-500">© {{ date('Y') }} Bening Laundry SMKN 1 Ciamis. Semua hak dilindungi.</p>
                 <div class="flex gap-6 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                    <a href="#" class="hover:text-white">Syarat & Ketentuan</a>
-                    <a href="#" class="hover:text-white">Kebijakan Privasi</a>
+                    <a href="#services" class="hover:text-white transition-colors">Daftar Layanan</a>
+                    <a href="#tracking" class="hover:text-white transition-colors">Lacak Cucian</a>
                 </div>
             </div>
         </div>

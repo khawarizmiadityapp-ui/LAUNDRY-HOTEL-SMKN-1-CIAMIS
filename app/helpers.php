@@ -388,3 +388,56 @@ if (!function_exists('get_maintenance_config')) {
         }
     }
 }
+
+if (!function_exists('get_seo_config')) {
+    /**
+     * Get public SEO metadata configuration with safe defaults.
+     */
+    function get_seo_config(): array
+    {
+        $defaults = [
+            'title' => 'Bening Laundry SMKN 1 Ciamis — Jasa Laundry Profesional & Terpercaya di Ciamis',
+            'description' => 'Layanan laundry kiloan & satuan cepat, bersih, wangi, dan rapi di Ciamis oleh Unit Produksi Perhotelan SMKN 1 Ciamis. Cek status cucian real-time & pesan via WhatsApp.',
+            'keywords' => 'laundry ciamis, jasa laundry ciamis, bening laundry, laundry smkn 1 ciamis, laundry kiloan ciamis, laundry express ciamis, cuci setrika ciamis',
+            'google_verification' => '',
+            'author' => 'Bening Laundry SMKN 1 Ciamis',
+        ];
+
+        $toAbsoluteUrl = static function (?string $path, string $fallback): string {
+            $value = trim((string) $path);
+            if ($value === '') {
+                return $fallback;
+            }
+            if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+                return $value;
+            }
+
+            return url('/' . ltrim($value, '/'));
+        };
+
+        try {
+            $title = trim((string) \App\Models\Setting::getValue('seo_title', $defaults['title'])) ?: $defaults['title'];
+            $description = trim((string) \App\Models\Setting::getValue('seo_description', $defaults['description'])) ?: $defaults['description'];
+            $keywords = trim((string) \App\Models\Setting::getValue('seo_keywords', $defaults['keywords'])) ?: $defaults['keywords'];
+            $googleVerification = trim((string) \App\Models\Setting::getValue('seo_google_verification', ''));
+            $heroRaw = \App\Models\Setting::getValue('hero_image', '');
+            $logoRaw = \App\Models\Setting::getValue('logo_image', '');
+            $fallbackLogo = url('/images/logobening.jpeg');
+
+            return [
+                'title' => $title,
+                'description' => $description,
+                'keywords' => $keywords,
+                'google_verification' => $googleVerification,
+                'author' => $defaults['author'],
+                'og_image' => $toAbsoluteUrl($heroRaw ?: $logoRaw, $fallbackLogo),
+                'favicon' => $toAbsoluteUrl($logoRaw, $fallbackLogo),
+            ];
+        } catch (\Throwable $e) {
+            return array_merge($defaults, [
+                'og_image' => url('/images/logobening.jpeg'),
+                'favicon' => url('/images/logobening.jpeg'),
+            ]);
+        }
+    }
+}

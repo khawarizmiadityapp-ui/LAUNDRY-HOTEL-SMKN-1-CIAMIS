@@ -29,6 +29,9 @@
             <a href="#general-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
                 Kontak &amp; Branding
             </a>
+            <a href="#seo-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                SEO &amp; Google
+            </a>
             <a href="#user-management-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
                 Manajemen Akun
             </a>
@@ -549,6 +552,171 @@
                 <div class="text-right">
                     <p class="text-xs text-slate-400">WhatsApp Service</p>
                     <a href="https://wa.me/{{ $serviceWA }}" target="_blank" class="text-sm font-bold text-emerald-400 hover:underline">wa.me/{{ $serviceWA }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEO & Google Search Console Configuration -->
+    @php
+        $seoTitleValue = old('seo_title', $seoConfig['title'] ?? '');
+        $seoDescValue = old('seo_description', $seoConfig['description'] ?? '');
+        $seoKeywordsValue = old('seo_keywords', $seoConfig['keywords'] ?? '');
+        $seoVerificationValue = old('seo_google_verification', $seoConfig['google_verification'] ?? '');
+    @endphp
+    <div id="seo-config"
+         x-data="{
+             title: @js($seoTitleValue),
+             description: @js($seoDescValue),
+             verification: @js($seoVerificationValue)
+         }"
+         class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+            <div class="flex items-start justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                        </svg>
+                        Pengaturan SEO &amp; Google Search Console
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Atur tampilan website di hasil pencarian Google, kata kunci lokal Ciamis, dan kode verifikasi kepemilikan situs.</p>
+                </div>
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Super Admin &amp; Admin
+                </span>
+            </div>
+
+            <form action="{{ route('admin.settings.seo') }}" method="POST" class="space-y-4">
+                @csrf
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="seo_title" class="block text-sm font-semibold text-gray-700">Judul SEO (Meta Title)</label>
+                        <span class="text-[11px] text-slate-400 font-medium"><span x-text="title.length">{{ mb_strlen($seoTitleValue) }}</span>/120 karakter (ideal 50-65)</span>
+                    </div>
+                    <input type="text"
+                           name="seo_title"
+                           id="seo_title"
+                           maxlength="120"
+                           required
+                           x-model="title"
+                           value="{{ $seoTitleValue }}"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm font-medium"
+                           placeholder="Contoh: Bening Laundry SMKN 1 Ciamis — Jasa Laundry Profesional di Ciamis">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="seo_description" class="block text-sm font-semibold text-gray-700">Deskripsi SEO (Meta Description)</label>
+                        <span class="text-[11px] text-slate-400 font-medium"><span x-text="description.length">{{ mb_strlen($seoDescValue) }}</span>/300 karakter (ideal 120-160)</span>
+                    </div>
+                    <textarea name="seo_description"
+                              id="seo_description"
+                              rows="3"
+                              maxlength="300"
+                              required
+                              x-model="description"
+                              class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm leading-relaxed"
+                              placeholder="Jelaskan keunggulan layanan laundry di Ciamis agar menarik diklik di Google...">{{ $seoDescValue }}</textarea>
+                </div>
+
+                <div>
+                    <label for="seo_keywords" class="block text-sm font-semibold text-gray-700 mb-1">Kata Kunci / Keywords (Opsional)</label>
+                    <input type="text"
+                           name="seo_keywords"
+                           id="seo_keywords"
+                           maxlength="300"
+                           value="{{ $seoKeywordsValue }}"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm"
+                           placeholder="laundry ciamis, jasa laundry ciamis, bening laundry smkn 1 ciamis">
+                    <p class="text-xs text-slate-400 mt-1">Pisahkan dengan tanda koma. Utamakan kata kunci lokal seperti nama layanan dan kota Ciamis.</p>
+                </div>
+
+                <div>
+                    <label for="seo_google_verification" class="block text-sm font-semibold text-gray-700 mb-1">Kode Verifikasi Google Search Console</label>
+                    <input type="text"
+                           name="seo_google_verification"
+                           id="seo_google_verification"
+                           maxlength="255"
+                           x-model="verification"
+                           value="{{ $seoVerificationValue }}"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm font-mono"
+                           placeholder="Tempel token verifikasi atau tag <meta name=&quot;google-site-verification&quot; ...>">
+                    <p class="text-xs text-slate-400 mt-1">Isi dari menu Google Search Console &rarr; HTML Tag verification. Boleh menempelkan tokennya saja atau satu baris tag meta lengkap.</p>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Simpan Konfigurasi SEO
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Live Google Search Preview & Technical SEO Diagnostics -->
+        <div class="bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-2xl shadow-md p-6 text-white flex flex-col justify-between gap-5">
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-4">
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-bold tracking-wide uppercase text-emerald-300">Preview Hasil Pencarian Google</span>
+                    <span x-show="verification && verification.trim() !== ''" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        Google Verification Terpasang
+                    </span>
+                    <span x-show="!verification || verification.trim() === ''" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                        Belum Diverifikasi GSC
+                    </span>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 sm:p-5 text-slate-800 shadow-lg border border-slate-200/80 space-y-2">
+                    <div class="flex items-center gap-2.5">
+                        <img src="{{ $seoConfig['favicon'] ?? url('/images/logobening.jpeg') }}" alt="Favicon Preview" class="w-6 h-6 rounded-full object-cover border border-slate-200">
+                        <div class="min-w-0 leading-tight">
+                            <p class="text-xs font-semibold text-slate-800 truncate">Bening Laundry SMKN 1 Ciamis</p>
+                            <p class="text-[11px] text-slate-500 truncate">{{ url('/') }}</p>
+                        </div>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-semibold text-blue-700 leading-snug line-clamp-2" x-text="title || 'Bening Laundry SMKN 1 Ciamis'">
+                        {{ $seoTitleValue }}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3" x-text="description || 'Layanan laundry kiloan & satuan cepat, bersih, wangi, dan rapi di Ciamis.'">
+                        {{ $seoDescValue }}
+                    </p>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+                        <p class="font-bold text-emerald-300 mb-0.5">Schema JSON-LD Aktif</p>
+                        <p class="text-slate-300 leading-relaxed">Halaman depan otomatis mengirim data terstruktur <code class="text-white">DryCleaningOrLaundry</code> beserta daftar layanan aktif ke Google.</p>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+                        <p class="font-bold text-sky-300 mb-0.5">Privasi Halaman Internal</p>
+                        <p class="text-slate-300 leading-relaxed">Halaman admin, petugas, login, dan struk tracking ditandai <code class="text-white">noindex, nofollow</code> agar data pelanggan aman.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/15 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="text-xs text-slate-300">
+                    <p class="font-semibold text-white">Endpoint Sitemap &amp; Crawler</p>
+                    <p>Submit URL <code class="text-emerald-300">sitemap.xml</code> ke Google Search Console setelah domain HTTPS aktif.</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ route('seo.sitemap') }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
+                        </svg>
+                        sitemap.xml
+                    </a>
+                    <a href="{{ route('seo.robots') }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
+                        </svg>
+                        robots.txt
+                    </a>
                 </div>
             </div>
         </div>
