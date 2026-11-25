@@ -173,9 +173,11 @@
         @media screen {
             html, body {
                 height: 100%;
+                height: 100dvh;
                 width: 100%;
                 margin: 0;
                 overflow: hidden;
+                overflow: clip;
             }
         }
         @media print {
@@ -196,14 +198,14 @@
 <!-- Mobile overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 lg:hidden" onclick="toggleSidebar()"></div>
 
-<div class="fixed inset-0 flex h-full w-full overflow-hidden">
+<div id="admin-app-shell" class="fixed inset-0 flex h-full w-full overflow-hidden" style="height: 100dvh; overflow: clip;">
 
     <!-- ===================== SIDEBAR ===================== -->
     @include('admin.sidebar')
     <!-- =================== END SIDEBAR =================== -->
 
     <!-- ===================== MAIN AREA ===================== -->
-    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden" style="overflow: clip;">
 
         <!-- TOPBAR -->
         <header class="h-16 bg-white border-b border-slate-100 flex items-center gap-4 px-5 lg:px-7 shrink-0 shadow-sm z-10">
@@ -320,7 +322,7 @@
         <!-- END TOPBAR -->
 
         <!-- PAGE CONTENT -->
-        <main class="flex-1 min-h-0 overflow-y-auto p-5 lg:p-7 animate-fade-in">
+        <main id="admin-main-scroll" class="flex-1 min-h-0 overflow-y-auto p-5 lg:p-7 pb-10 animate-fade-in">
             <x-maintenance-banner />
             @yield('content')
         </main>

@@ -11,7 +11,8 @@ Usage: @include('components.stat_card', [
     ])  --}}
 <aside id="sidebar"
            class="fixed inset-y-0 left-0 lg:static z-30 w-64 h-full shrink-0 bg-white flex flex-col border-r border-slate-100 shadow-card overflow-hidden
-                  transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+                  transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out"
+           style="overflow: clip;">
 
         <!-- Logo -->
         <div class="px-5 py-4 border-b border-slate-100 shrink-0">

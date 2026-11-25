@@ -4,7 +4,7 @@
 @section('title', 'Pengaturan - Bening Laundry')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 pb-8">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-up">
         <div>
@@ -1478,7 +1478,16 @@
             const target = document.getElementById(sectionId);
             if (!target) return;
 
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const scrollContainer = document.getElementById('admin-main-scroll') || target.closest('main');
+            if (scrollContainer) {
+                const containerRect = scrollContainer.getBoundingClientRect();
+                const targetRect = target.getBoundingClientRect();
+                const offsetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - 16;
+                scrollContainer.scrollTo({ top: Math.max(0, offsetTop), behavior: 'smooth' });
+            } else {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
             target.classList.add('ring-4', 'ring-teal-400/50', 'ring-offset-4', 'ring-offset-slate-50');
             setTimeout(() => {
                 target.classList.remove('ring-4', 'ring-teal-400/50', 'ring-offset-4', 'ring-offset-slate-50');
