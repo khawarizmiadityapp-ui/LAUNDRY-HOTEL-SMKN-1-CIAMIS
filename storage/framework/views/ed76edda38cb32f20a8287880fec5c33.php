@@ -3,33 +3,44 @@
 <?php $__env->startSection('content'); ?>
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-up">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Pengaturan Aplikasi</h1>
-            <p class="text-gray-500 mt-1">Kelola QRIS pembayaran, kontak WhatsApp, maintenance, kategori, dan akun pengguna secara sentral.</p>
+            <p class="text-gray-500 mt-1">Kelola QRIS pembayaran, kontak WhatsApp, SEO &amp; Google, maintenance, kategori, dan akun pengguna secara sentral.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="#qris-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+            <a href="#qris-config" data-settings-jump="qris-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                 Ganti QRIS &amp; Transfer
             </a>
             <?php if(auth()->user()->isSuperAdmin()): ?>
-            <a href="#maintenance-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition">
+            <a href="#maintenance-panel" data-settings-jump="maintenance-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766" /></svg>
                 Maintenance
             </a>
-            <a href="#system-cache-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
+            <a href="#system-cache-panel" data-settings-jump="system-cache-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
                 Cache &amp; Optimasi
             </a>
             <?php endif; ?>
-            <a href="#general-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            <a href="#general-config" data-settings-jump="general-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 Kontak &amp; Branding
             </a>
-            <a href="#seo-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
-                SEO &amp; Google
+            <a href="#seo-config" data-settings-jump="seo-config" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 shadow-xs">
+                <svg class="w-3.5 h-3.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <span>SEO &amp; Google</span>
+                <span class="relative flex h-2 w-2" title="<?php echo e(!empty($seoConfig['google_verification']) ? 'Google Verification Aktif' : 'Belum Diverifikasi GSC'); ?>">
+                    <?php if(!empty($seoConfig['google_verification'])): ?>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <?php else: ?>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    <?php endif; ?>
+                </span>
             </a>
-            <a href="#user-management-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
+            <a href="#user-management-panel" data-settings-jump="user-management-panel" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
                 Manajemen Akun
             </a>
         </div>
@@ -570,21 +581,31 @@
          x-data="{
              title: <?php echo \Illuminate\Support\Js::from($seoTitleValue)->toHtml() ?>,
              description: <?php echo \Illuminate\Support\Js::from($seoDescValue)->toHtml() ?>,
-             verification: <?php echo \Illuminate\Support\Js::from($seoVerificationValue)->toHtml() ?>
+             verification: <?php echo \Illuminate\Support\Js::from($seoVerificationValue)->toHtml() ?>,
+             extractedVerification() {
+                 const raw = (this.verification || '').trim();
+                 if (!raw) return '';
+                 const match = raw.match(/content\s*=\s*['\x22]([^'\x22]+)['\x22]/i);
+                 return match ? match[1].trim() : raw;
+             }
          }"
-         class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+         class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up scroll-mt-6 rounded-2xl transition-all duration-500">
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 p-6">
             <div class="flex items-start justify-between gap-3 mb-4">
-                <div>
-                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
                         </svg>
-                        Pengaturan SEO &amp; Google Search Console
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">Atur tampilan website di hasil pencarian Google, kata kunci lokal Ciamis, dan kode verifikasi kepemilikan situs.</p>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">
+                            Pengaturan SEO &amp; Google Search Console
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Atur tampilan website di hasil pencarian Google, kata kunci lokal Ciamis, dan kode verifikasi kepemilikan situs.</p>
+                    </div>
                 </div>
-                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
                     Super Admin &amp; Admin
                 </span>
             </div>
@@ -595,7 +616,10 @@
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label for="seo_title" class="block text-sm font-semibold text-gray-700">Judul SEO (Meta Title)</label>
-                        <span class="text-[11px] text-slate-400 font-medium"><span x-text="title.length"><?php echo e(mb_strlen($seoTitleValue)); ?></span>/120 karakter (ideal 50-65)</span>
+                        <span class="text-[11px] transition-colors"
+                              :class="title.length >= 35 && title.length <= 65 ? 'text-emerald-600 font-semibold' : (title.length > 65 ? 'text-amber-600 font-semibold' : 'text-slate-400 font-medium')">
+                            <span x-text="title.length"><?php echo e(mb_strlen($seoTitleValue)); ?></span>/120 karakter (ideal 50-65)
+                        </span>
                     </div>
                     <input type="text"
                            name="seo_title"
@@ -604,14 +628,17 @@
                            required
                            x-model="title"
                            value="<?php echo e($seoTitleValue); ?>"
-                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm font-medium"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 text-sm font-medium transition-all"
                            placeholder="Contoh: Bening Laundry SMKN 1 Ciamis — Jasa Laundry Profesional di Ciamis">
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label for="seo_description" class="block text-sm font-semibold text-gray-700">Deskripsi SEO (Meta Description)</label>
-                        <span class="text-[11px] text-slate-400 font-medium"><span x-text="description.length"><?php echo e(mb_strlen($seoDescValue)); ?></span>/300 karakter (ideal 120-160)</span>
+                        <span class="text-[11px] transition-colors"
+                              :class="description.length >= 90 && description.length <= 165 ? 'text-emerald-600 font-semibold' : (description.length > 165 ? 'text-amber-600 font-semibold' : 'text-slate-400 font-medium')">
+                            <span x-text="description.length"><?php echo e(mb_strlen($seoDescValue)); ?></span>/300 karakter (ideal 120-160)
+                        </span>
                     </div>
                     <textarea name="seo_description"
                               id="seo_description"
@@ -619,7 +646,7 @@
                               maxlength="300"
                               required
                               x-model="description"
-                              class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm leading-relaxed"
+                              class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 text-sm leading-relaxed transition-all"
                               placeholder="Jelaskan keunggulan layanan laundry di Ciamis agar menarik diklik di Google..."><?php echo e($seoDescValue); ?></textarea>
                 </div>
 
@@ -630,7 +657,7 @@
                            id="seo_keywords"
                            maxlength="300"
                            value="<?php echo e($seoKeywordsValue); ?>"
-                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 text-sm transition-all"
                            placeholder="laundry ciamis, jasa laundry ciamis, bening laundry smkn 1 ciamis">
                     <p class="text-xs text-slate-400 mt-1">Pisahkan dengan tanda koma. Utamakan kata kunci lokal seperti nama layanan dan kota Ciamis.</p>
                 </div>
@@ -643,13 +670,21 @@
                            maxlength="255"
                            x-model="verification"
                            value="<?php echo e($seoVerificationValue); ?>"
-                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 text-sm font-mono"
+                           class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 text-sm font-mono transition-all"
                            placeholder="Tempel token verifikasi atau tag <meta name=&quot;google-site-verification&quot; ...>">
+                    <div x-show="extractedVerification() !== ''"
+                         x-transition.opacity.duration.200ms
+                         class="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-700">
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Token aktif: <code class="font-bold" x-text="extractedVerification()"></code></span>
+                    </div>
                     <p class="text-xs text-slate-400 mt-1">Isi dari menu Google Search Console &rarr; HTML Tag verification. Boleh menempelkan tokennya saja atau satu baris tag meta lengkap.</p>
                 </div>
 
                 <div class="pt-2 flex justify-end">
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center gap-2">
+                    <button type="submit" class="bg-teal-600 hover:bg-teal-700 hover:-translate-y-0.5 active:scale-[0.98] text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-teal-600/20 transition-all duration-200 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -660,20 +695,25 @@
         </div>
 
         <!-- Live Google Search Preview & Technical SEO Diagnostics -->
-        <div class="bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-2xl shadow-md p-6 text-white flex flex-col justify-between gap-5">
+        <div class="bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6 text-white flex flex-col justify-between gap-5">
             <div>
-                <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-bold tracking-wide uppercase text-emerald-300">Preview Hasil Pencarian Google</span>
-                    <span x-show="verification && verification.trim() !== ''" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span x-show="extractedVerification() !== ''"
+                          x-transition.opacity.duration.250ms
+                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                         Google Verification Terpasang
                     </span>
-                    <span x-show="!verification || verification.trim() === ''" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                    <span x-show="extractedVerification() === ''"
+                          x-transition.opacity.duration.250ms
+                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
                         Belum Diverifikasi GSC
                     </span>
                 </div>
 
-                <div class="bg-white rounded-xl p-4 sm:p-5 text-slate-800 shadow-lg border border-slate-200/80 space-y-2">
+                <div class="bg-white rounded-xl p-4 sm:p-5 text-slate-800 shadow-lg border border-slate-200/80 space-y-2 transition-transform duration-300 hover:-translate-y-0.5">
                     <div class="flex items-center gap-2.5">
                         <img src="<?php echo e($seoConfig['favicon'] ?? url('/images/logobening.jpeg')); ?>" alt="Favicon Preview" class="w-6 h-6 rounded-full object-cover border border-slate-200">
                         <div class="min-w-0 leading-tight">
@@ -692,11 +732,11 @@
                 </div>
 
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+                    <div class="bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-xl p-3">
                         <p class="font-bold text-emerald-300 mb-0.5">Schema JSON-LD Aktif</p>
                         <p class="text-slate-300 leading-relaxed">Halaman depan otomatis mengirim data terstruktur <code class="text-white">DryCleaningOrLaundry</code> beserta daftar layanan aktif ke Google.</p>
                     </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+                    <div class="bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-xl p-3">
                         <p class="font-bold text-sky-300 mb-0.5">Privasi Halaman Internal</p>
                         <p class="text-slate-300 leading-relaxed">Halaman admin, petugas, login, dan struk tracking ditandai <code class="text-white">noindex, nofollow</code> agar data pelanggan aman.</p>
                     </div>
@@ -709,14 +749,14 @@
                     <p>Submit URL <code class="text-emerald-300">sitemap.xml</code> ke Google Search Console setelah domain HTTPS aktif.</p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <a href="<?php echo e(route('seo.sitemap')); ?>" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition inline-flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <a href="<?php echo e(route('seo.sitemap')); ?>" target="_blank" class="group px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 hover:-translate-y-0.5 text-xs font-bold text-white transition-all duration-200 inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-300 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
                         </svg>
                         sitemap.xml
                     </a>
-                    <a href="<?php echo e(route('seo.robots')); ?>" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition inline-flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <a href="<?php echo e(route('seo.robots')); ?>" target="_blank" class="group px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 hover:-translate-y-0.5 text-xs font-bold text-white transition-all duration-200 inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-sky-300 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
                         </svg>
                         robots.txt
@@ -1441,6 +1481,33 @@
                 alert('Kunci: ' + text);
             });
         }
+
+        function focusSettingsSection(sectionId) {
+            const target = document.getElementById(sectionId);
+            if (!target) return;
+
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            target.classList.add('ring-4', 'ring-teal-400/50', 'ring-offset-4', 'ring-offset-slate-50');
+            setTimeout(() => {
+                target.classList.remove('ring-4', 'ring-teal-400/50', 'ring-offset-4', 'ring-offset-slate-50');
+            }, 1400);
+        }
+
+        document.querySelectorAll('[data-settings-jump]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                const sectionId = link.getAttribute('data-settings-jump');
+                if (!sectionId || !document.getElementById(sectionId)) return;
+                event.preventDefault();
+                history.replaceState(null, '', '#' + sectionId);
+                focusSettingsSection(sectionId);
+            });
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash && window.location.hash.length > 1) {
+                focusSettingsSection(window.location.hash.slice(1));
+            }
+        });
     </script>
 </div>
 <?php $__env->stopSection(); ?>
